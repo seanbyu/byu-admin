@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@supabase/supabase-js';
-import { StaffRepository } from '@salon-admin/api-core';
+import { StaffRepository } from '@/lib/api-core';
 
 interface CreateStaffParams {
   salonId: string;

@@ -1,4 +1,4 @@
-import { AuthService } from '@salon-admin/api-core';
+import { AuthService } from '@/lib/api-core';
 import { SupabaseClient } from '@supabase/supabase-js';
 import {
   signInWithEmail,

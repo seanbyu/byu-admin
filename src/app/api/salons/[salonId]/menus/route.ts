@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server'; // Updated import
-import { SalonMenuService } from '@salon-admin/api-core';
+import { SalonMenuService } from '@/lib/api-core';
 
 export async function GET(
   req: NextRequest,
