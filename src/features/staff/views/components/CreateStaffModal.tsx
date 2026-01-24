@@ -24,16 +24,65 @@ export default function CreateStaffModal({
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState('STAFF');
-  const [password, setPassword] = useState('salon1234!');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const MAX_FREE_STAFF = 5;
   const isLimitReached = currentStaffCount >= MAX_FREE_STAFF;
 
+  // 이메일 형식 검증
+  const validateEmail = (value: string): boolean => {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    if (!value) {
+      setEmailError('이메일을 입력해주세요.');
+      return false;
+    }
+    if (!emailRegex.test(value)) {
+      setEmailError('올바른 이메일 형식을 입력해주세요.');
+      return false;
+    }
+    setEmailError(null);
+    return true;
+  };
+
+  // 비밀번호 형식 검증 (영문+숫자+특수문자 8~20자)
+  const validatePassword = (value: string): boolean => {
+    const hasLetter = /[a-zA-Z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+    const isValidLength = value.length >= 8 && value.length <= 20;
+
+    if (!value) {
+      setPasswordError('비밀번호를 입력해주세요.');
+      return false;
+    }
+    if (!isValidLength) {
+      setPasswordError('비밀번호는 8~20자여야 합니다.');
+      return false;
+    }
+    if (!hasLetter || !hasNumber || !hasSpecial) {
+      setPasswordError('영문, 숫자, 특수문자를 모두 포함해야 합니다.');
+      return false;
+    }
+    setPasswordError(null);
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 유효성 검사
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    if (!isEmailValid || !isPasswordValid) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -65,7 +114,9 @@ export default function CreateStaffModal({
       setName('');
       setEmail('');
       setRole('STAFF');
-      setPassword('salon1234!');
+      setPassword('');
+      setEmailError(null);
+      setPasswordError(null);
     } catch (err: any) {
       if (
         err.message?.includes('User from sub claim') ||
@@ -116,26 +167,26 @@ export default function CreateStaffModal({
             htmlFor="email"
             className="block text-sm font-medium text-gray-700"
           >
-            직원 아이디 (4~20자 영문 소문자, 숫자)
+            직원 이메일
           </label>
           <input
             id="email"
-            type="text"
+            type="email"
             required
             value={email}
             onChange={(e) => {
-              // Allow lower case alphanumeric only
-              const val = e.target.value
-                .toLowerCase()
-                .replace(/[^a-z0-9]/g, '');
-              setEmail(val);
+              setEmail(e.target.value);
+              if (emailError) validateEmail(e.target.value);
             }}
-            pattern="^[a-z0-9]{4,20}$"
-            title="4~20자의 영문 소문자와 숫자만 사용 가능합니다."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="staff01"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+              emailError ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="example@email.com"
             disabled={isLimitReached}
           />
+          {emailError && (
+            <p className="text-sm text-red-500">{emailError}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -151,8 +202,13 @@ export default function CreateStaffModal({
               type={showPassword ? 'text' : 'password'}
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10"
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (passwordError) validatePassword(e.target.value);
+              }}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
+                passwordError ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="비밀번호 설정"
               disabled={isLimitReached}
             />
@@ -164,7 +220,13 @@ export default function CreateStaffModal({
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          <p className="text-xs text-gray-500">기본 비밀번호: salon1234!</p>
+          {passwordError ? (
+            <p className="text-sm text-red-500">{passwordError}</p>
+          ) : (
+            <p className="text-xs text-gray-500">
+              8~20자, 영문 + 숫자 + 특수문자 포함
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
