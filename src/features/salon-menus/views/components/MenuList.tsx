@@ -189,7 +189,13 @@ export default function MenuList({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsCreating(true)}
+              onClick={() => {
+                // 첫 번째 업종을 기본값으로 설정
+                if (orderedIndustries.length > 0) {
+                  setSelectedIndustryForCreate(orderedIndustries[0].id);
+                }
+                setIsCreating(true);
+              }}
             >
               <Plus className="w-4 h-4 mr-2" /> 카테고리 추가
             </Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { SalonIndustry, MenuCategory } from '../../types';
@@ -27,6 +27,13 @@ export default function CreateCategoryForm({
   onCancel,
 }: CreateCategoryFormProps) {
   const [newCategoryName, setNewCategoryName] = useState('');
+
+  // 업종이 선택되지 않았고, 업종 목록이 있으면 첫 번째 업종을 기본 선택
+  React.useEffect(() => {
+    if (!selectedIndustryForCreate && orderedIndustries.length > 0) {
+      onSelectIndustryForCreate(orderedIndustries[0].id);
+    }
+  }, [selectedIndustryForCreate, orderedIndustries, onSelectIndustryForCreate]);
 
   const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) return;
