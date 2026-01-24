@@ -9,13 +9,14 @@ import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
 import { useLogin } from '../hooks/useAuth';
 import { Scissors } from 'lucide-react';
-import { ApiResponse, User } from '@/types';
+import { User } from '@/types';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 
-interface LoginResponse {
-  user: User;
-  token: string;
+interface AuthResponse {
+  user: User | null;
+  token: string | null;
+  error?: string;
 }
 
 interface LoginForm {
@@ -37,9 +38,9 @@ export default function LoginPageView() {
   } = useForm<LoginForm>();
 
   const loginMutation = useLogin({
-    onSuccess: (response: ApiResponse<LoginResponse>) => {
-      if (response.success && response.data) {
-        login(response.data.user, response.data.token);
+    onSuccess: (response: AuthResponse) => {
+      if (response.user && response.token) {
+        login(response.user, response.token);
         router.push('/dashboard');
       } else {
         setError(response.error || '로그인에 실패했습니다');
