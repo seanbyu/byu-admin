@@ -12,7 +12,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@salon-admin/supabase": "workspace:*",
+    "@salon-admin/supabase": "file:../../supabase",
     "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
