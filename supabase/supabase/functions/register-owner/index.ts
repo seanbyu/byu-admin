@@ -203,13 +203,19 @@ serve(async (req) => {
     }
 
     // 5. Upsert User with Salon ID
+    // 휴대폰 인증으로 생성된 경우 users 테이블에 행이 없을 수 있으므로 upsert 사용
     const { error: userError } = await supabaseAdmin.from("users").upsert({
       id: targetUserId,
+      email: email,
+      name: name,
       salon_id: salonId,
       is_active: true,
       is_approved: false,
       phone: phone,
       user_type: "ADMIN_USER",
+      role: "ADMIN",
+    }, {
+      onConflict: "id",
     });
 
     if (userError) {
