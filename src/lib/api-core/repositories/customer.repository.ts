@@ -1,17 +1,22 @@
 import { BaseRepository } from "./base.repository";
+import {
+  DBCustomer,
+  CreateCustomerDto,
+  UpdateCustomerDto,
+} from "../types";
 
 export class CustomerRepository extends BaseRepository {
-  async getCustomers(salonId: string) {
+  async getCustomers(salonId: string): Promise<DBCustomer[]> {
     const { data, error } = await this.supabase
       .from("customers")
       .select("*")
       .eq("salon_id", salonId);
 
     if (error) throw error;
-    return data;
+    return (data || []) as DBCustomer[];
   }
 
-  async getCustomer(id: string) {
+  async getCustomer(id: string): Promise<DBCustomer> {
     const { data, error } = await this.supabase
       .from("customers")
       .select("*")
@@ -19,10 +24,10 @@ export class CustomerRepository extends BaseRepository {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as DBCustomer;
   }
 
-  async createCustomer(customer: any) {
+  async createCustomer(customer: CreateCustomerDto): Promise<DBCustomer> {
     const { data, error } = await this.supabase
       .from("customers")
       .insert(customer)
@@ -30,23 +35,22 @@ export class CustomerRepository extends BaseRepository {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as DBCustomer;
   }
 
-  async updateCustomer(id: string, updates: any) {
+  async updateCustomer(id: string, updates: UpdateCustomerDto): Promise<DBCustomer> {
     const { data, error } = await this.supabase
       .from("customers")
-      // @ts-ignore
-      .update(updates as any)
+      .update(updates as Record<string, unknown>)
       .eq("id", id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as DBCustomer;
   }
 
-  async deleteCustomer(id: string) {
+  async deleteCustomer(id: string): Promise<boolean> {
     const { error } = await this.supabase
       .from("customers")
       .delete()

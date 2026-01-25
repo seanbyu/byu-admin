@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
-import { ApiResponse } from '@/types';
+import { ApiResponse, BusinessHours, Holiday } from '@/types';
 
 export const salonsApi = {
   getSalons: async (params?: any) => {
@@ -29,5 +29,22 @@ export const salonsApi = {
 
   getSales: async (salonId: string, params: any) => {
     return apiClient.get(endpoints.salons.sales.path(salonId), params);
+  },
+
+  // Settings API
+  getSettings: async (salonId: string): Promise<ApiResponse<{
+    businessHours: BusinessHours[];
+    holidays: Holiday[];
+    settings: any;
+  }>> => {
+    return apiClient.get(endpoints.salons.settings.path(salonId));
+  },
+
+  updateSettings: async (salonId: string, data: {
+    businessHours?: BusinessHours[];
+    holidays?: Holiday[];
+    settings?: any;
+  }): Promise<ApiResponse> => {
+    return apiClient.patch(endpoints.salons.settings.path(salonId), data);
   },
 };

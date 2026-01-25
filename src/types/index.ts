@@ -50,6 +50,7 @@ export interface Salon {
   phone: string;
   email: string;
   businessHours: BusinessHours[];
+  holidays: Holiday[];
   images: string[];
   instagramUrl?: string;
   isWifiAvailable: boolean;
@@ -67,6 +68,15 @@ export interface BusinessHours {
   openTime: string; // "09:00"
   closeTime: string; // "20:00"
   isOpen: boolean;
+}
+
+// 휴무일/휴가
+export interface Holiday {
+  id: string;
+  startDate: string; // "2024-01-01"
+  endDate: string; // "2024-01-03"
+  reason: string;
+  createdAt?: Date;
 }
 
 // 직원(Staff) 인터페이스

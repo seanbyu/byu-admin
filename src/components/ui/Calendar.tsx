@@ -10,6 +10,12 @@ interface CalendarEvent {
   title: string;
   time: string;
   color?: string;
+  resourceId?: string;
+}
+
+interface Resource {
+  id: string;
+  label: string;
 }
 
 interface CalendarProps {
@@ -17,12 +23,13 @@ interface CalendarProps {
   onDateSelect: (date: Date) => void;
   events?: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
-  onTimeSlotClick?: (date: Date, time: string) => void;
+  onTimeSlotClick?: (date: Date, time: string, resourceId?: string) => void;
+  resources?: Resource[];
 }
 
 type ViewType = 'month' | 'day';
 
-export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick, onTimeSlotClick }: CalendarProps) {
+export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick, onTimeSlotClick, resources = [] }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState(selectedDate);
   const [viewType, setViewType] = React.useState<ViewType>('month');
   const [currentDate, setCurrentDate] = React.useState(selectedDate);
@@ -71,6 +78,87 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
   const renderDayView = () => {
     const dayEvents = getDayEvents();
 
+    // 리소스(직원)가 있을 경우 직원별 타임라인 뷰 렌더링
+    if (resources.length > 0) {
+      return (
+        <div className="p-4">
+          {/* 헤더: 날짜 + 직원 컬럼 */}
+          <div className="flex border-b border-secondary-200">
+            <div className="w-20 flex-shrink-0 py-3 px-2 text-center font-semibold text-secondary-900 border-r border-secondary-200">
+              {format(currentDate, 'M/d (E)', { locale: ko })}
+            </div>
+            <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${resources.length}, minmax(120px, 1fr))` }}>
+              {resources.map((resource) => (
+                <div
+                  key={resource.id}
+                  className="py-3 px-2 text-center font-semibold text-secondary-900 border-r border-secondary-200 last:border-r-0"
+                >
+                  {resource.label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 바디: 시간축 + 직원별 격자 */}
+          <div className="overflow-y-auto max-h-[600px] overflow-x-auto">
+            {timeSlots.map((time) => {
+              const hour = parseInt(time.split(':')[0]);
+
+              return (
+                <div key={time} className="flex border-b border-secondary-100">
+                  {/* 시간축 */}
+                  <div className="w-20 flex-shrink-0 py-3 px-2 text-sm text-secondary-600 text-right border-r border-secondary-200">
+                    {time}
+                  </div>
+                  {/* 직원별 셀 */}
+                  <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${resources.length}, minmax(120px, 1fr))` }}>
+                    {resources.map((resource) => {
+                      const resourceEvents = dayEvents.filter(event => {
+                        const eventHour = parseInt(event.time.split(':')[0]);
+                        return eventHour === hour && event.resourceId === resource.id;
+                      });
+
+                      return (
+                        <div
+                          key={resource.id}
+                          className="py-2 px-2 min-h-[60px] relative cursor-pointer transition-colors hover:bg-blue-50 border-r border-secondary-100 last:border-r-0"
+                          onClick={() => {
+                            if (resourceEvents.length === 0) {
+                              onTimeSlotClick?.(currentDate, time, resource.id);
+                            }
+                          }}
+                        >
+                          {resourceEvents.length === 0 && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                              <span className="text-xs text-secondary-400">+</span>
+                            </div>
+                          )}
+                          {resourceEvents.map((event) => (
+                            <div
+                              key={event.id}
+                              className={`mb-1 p-2 rounded cursor-pointer text-xs ${event.color || 'bg-primary-100 text-primary-700'}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEventClick?.(event);
+                              }}
+                            >
+                              <div className="font-medium">{event.time}</div>
+                              <div className="truncate">{event.title}</div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // 기존 단일 컬럼 뷰
     return (
       <div className="p-4">
         <div className="flex border-b border-secondary-200">

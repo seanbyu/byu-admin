@@ -81,6 +81,13 @@ export const endpoints = {
       queryKey: (salonId: string, params: any) =>
         ['salons', salonId, 'sales', params] as const,
     },
+
+    // 살롱 설정 (Settings in Salon)
+    settings: {
+      path: (salonId: string) => `/salons/${salonId}/settings`,
+      queryKey: (salonId: string) =>
+        ['salons', salonId, 'settings'] as const,
+    },
   },
 
   // 직원 (Staff)

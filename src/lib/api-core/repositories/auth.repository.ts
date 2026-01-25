@@ -1,50 +1,55 @@
 import { BaseRepository } from "./base.repository";
+import {
+  RegisterOwnerDto,
+  DuplicateCheckResult,
+  RegisterOwnerResult,
+} from "../types";
+
+// Type for Edge Function error with context
+interface EdgeFunctionError extends Error {
+  context?: Response;
+}
 
 export class AuthRepository extends BaseRepository {
   async checkDuplicate(
     type: "email" | "shop_name" | "salonName" | "phone",
-    value: string,
-  ) {
+    value: string
+  ): Promise<DuplicateCheckResult> {
     const { data, error } = await this.supabase.functions.invoke(
       "check-duplicate",
       {
         body: { type, value },
-      },
+      }
     );
 
     if (error) throw error;
-    return data;
+    return data as DuplicateCheckResult;
   }
 
-  async registerOwner(params: any) {
-    // Note: Edge Functions usually accessed via functions.invoke
-    // But if original code used direct fetch, we can wrap it or use invoke
-    // Assuming invoke is preferred for consistency within Supabase library
+  async registerOwner(params: RegisterOwnerDto): Promise<RegisterOwnerResult> {
     const { data, error } = await this.supabase.functions.invoke(
       "register-owner",
       {
         body: params,
-      },
+      }
     );
 
     if (error) {
       // Try to extract readable message if context is available
-      if (error instanceof Error && "context" in error) {
-        const context = (error as any).context;
+      const edgeFnError = error as EdgeFunctionError;
+      if (edgeFnError.context) {
         try {
-          // Clone response if possible to avoid body used error, or just read text
-          // Note: context is a Response object
-          const text = await context.text();
+          const text = await edgeFnError.context.text();
           console.log("Edge Function Error Body:", text);
 
-          const json = JSON.parse(text);
-          if (json && json.error) throw new Error(json.error);
+          const json = JSON.parse(text) as { error?: string };
+          if (json?.error) throw new Error(json.error);
         } catch (e) {
           console.warn("Failed to parse error context:", e);
         }
       }
       throw error;
     }
-    return data;
+    return data as RegisterOwnerResult;
   }
 }

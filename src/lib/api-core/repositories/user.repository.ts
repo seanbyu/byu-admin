@@ -1,7 +1,14 @@
 import { BaseRepository } from "./base.repository";
+import { DBUser } from "../types";
+
+// Update profile DTO
+interface UpdateProfileDto {
+  name?: string;
+  phone?: string;
+}
 
 export class UserRepository extends BaseRepository {
-  async getProfile(userId: string) {
+  async getProfile(userId: string): Promise<DBUser> {
     const { data, error } = await this.supabase
       .from("users")
       .select("*")
@@ -9,21 +16,22 @@ export class UserRepository extends BaseRepository {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as DBUser;
   }
 
   async updateProfile(
     userId: string,
-    updates: { name?: string; phone?: string }
-  ) {
-    // Explicitly casting to avoid 'never' inference issue with Supabase types
-    const { data, error } = await (this.supabase.from("users") as any)
-      .update(updates)
+    updates: UpdateProfileDto
+  ): Promise<DBUser> {
+    // Type assertion needed due to Supabase generated types mismatch
+    const { data, error } = await this.supabase
+      .from("users")
+      .update(updates as never)
       .eq("id", userId)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as DBUser;
   }
 }

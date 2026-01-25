@@ -1,4 +1,4 @@
-import { UserRole } from '@/types';
+import { UserRole, BusinessHours, Holiday } from '@/types';
 
 export interface StaffPermission {
   module: string;
@@ -30,6 +30,8 @@ export interface Staff {
   isActive: boolean;
   isBookingEnabled: boolean;
   permissions: StaffPermission[];
+  workHours?: BusinessHours[];
+  holidays?: Holiday[];
   createdAt: Date;
   updatedAt: Date;
   phone?: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -17,7 +17,9 @@ import { useBookings } from '../hooks/useBookings';
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { formatDate, formatPrice } from '@/lib/utils';
-import { Plus, Calendar as CalendarIcon, Filter, List } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, Filter, List, Settings, Users } from 'lucide-react';
+import { ShopSettingsModal } from '../components/ShopSettingsModal';
+import { StaffScheduleModal } from '../components/StaffScheduleModal';
 
 export default function BookingsPageView() {
   const t = useTranslations();
@@ -44,10 +46,21 @@ export default function BookingsPageView() {
   const bookings = response || [];
 
   const [showNewBookingModal, setShowNewBookingModal] = useState(false);
+  const [showShopSettingsModal, setShowShopSettingsModal] = useState(false);
+  const [showStaffScheduleModal, setShowStaffScheduleModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [viewMode, setViewMode] = useState<'calendar' | 'table'>('calendar');
   const [selectedTime, setSelectedTime] = useState<string>('');
+  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
+
+  // 직원 리소스 (예약 차트용)
+  const calendarResources = staffMembers
+    .filter((staff) => staff.isBookingEnabled)
+    .map((staff) => ({
+      id: staff.id,
+      label: staff.name,
+    }));
 
   const getStatusBadge = (status: BookingStatus) => {
     const statusConfig = {
@@ -94,6 +107,7 @@ export default function BookingsPageView() {
     title: `${booking.customerName} - ${booking.serviceName}`,
     time: booking.startTime,
     color: getStatusColor(booking.status),
+    resourceId: booking.staffId,
   }));
 
   const columns = [
@@ -169,6 +183,20 @@ export default function BookingsPageView() {
             </p>
           </div>
           <div className="flex space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowShopSettingsModal(true)}
+            >
+              <Settings size={18} className="mr-2" />
+              샵 설정
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowStaffScheduleModal(true)}
+            >
+              <Users size={18} className="mr-2" />
+              직원 스케줄
+            </Button>
             <div className="flex border border-secondary-200 rounded-lg overflow-hidden">
               <button
                 className={`px-4 py-2 flex items-center space-x-2 transition-colors ${
@@ -252,15 +280,19 @@ export default function BookingsPageView() {
             selectedDate={selectedDate}
             onDateSelect={setSelectedDate}
             events={calendarEvents}
+            resources={calendarResources}
             onEventClick={(event) => {
               const booking = bookings.find((b: Booking) => b.id === event.id);
               if (booking) {
                 console.log('View booking:', booking);
               }
             }}
-            onTimeSlotClick={(date, time) => {
+            onTimeSlotClick={(date, time, resourceId) => {
               setSelectedDate(date);
               setSelectedTime(time);
+              if (resourceId) {
+                setSelectedStaffId(resourceId);
+              }
               setShowNewBookingModal(true);
             }}
           />
@@ -281,6 +313,7 @@ export default function BookingsPageView() {
         onClose={() => {
           setShowNewBookingModal(false);
           setSelectedTime('');
+          setSelectedStaffId('');
         }}
         title={t('booking.new')}
         size="lg"
@@ -299,7 +332,13 @@ export default function BookingsPageView() {
             />
           </div>
 
-          <Select label={t('booking.designer')} required options={designers} />
+          <Select
+            label={t('booking.designer')}
+            required
+            options={designers}
+            value={selectedStaffId}
+            onChange={(e) => setSelectedStaffId(e.target.value)}
+          />
 
           <Select
             label={t('booking.service')}
@@ -345,6 +384,21 @@ export default function BookingsPageView() {
           </div>
         </form>
       </Modal>
+
+      {/* Shop Settings Modal */}
+      <ShopSettingsModal
+        isOpen={showShopSettingsModal}
+        onClose={() => setShowShopSettingsModal(false)}
+        salonId={salonId}
+      />
+
+      {/* Staff Schedule Modal */}
+      <StaffScheduleModal
+        isOpen={showStaffScheduleModal}
+        onClose={() => setShowStaffScheduleModal(false)}
+        salonId={salonId}
+        staffList={staffMembers}
+      />
     </Layout>
   );
 }

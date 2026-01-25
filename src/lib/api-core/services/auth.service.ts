@@ -1,25 +1,34 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { AuthApiError } from "@supabase/supabase-js";
 import { AuthRepository } from "../repositories/auth.repository";
+import {
+  Client,
+  RegisterOwnerDto,
+  DuplicateCheckResult,
+  RegisterOwnerResult,
+} from "../types";
 
 export class AuthService {
   private repository: AuthRepository;
 
-  constructor(private client: SupabaseClient<any>) {
+  constructor(private client: Client) {
     this.repository = new AuthRepository(this.client);
   }
 
   async checkDuplicate(
     type: "email" | "shop_name" | "salonName" | "phone",
-    value: string,
-  ) {
+    value: string
+  ): Promise<DuplicateCheckResult> {
     return this.repository.checkDuplicate(type, value);
   }
 
-  async registerOwner(params: any) {
+  async registerOwner(params: RegisterOwnerDto): Promise<RegisterOwnerResult> {
     return this.repository.registerOwner(params);
   }
 
-  async sendOtp(phone: string) {
+  async sendOtp(phone: string): Promise<{
+    data: { user: null; session: null };
+    error: AuthApiError | null;
+  }> {
     return this.client.auth.signInWithOtp({
       phone,
     });
