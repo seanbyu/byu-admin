@@ -10,5 +10,59 @@
   "perm": "ดัดผม",
   "clinic": "คลินิก",
   "treatment": "ทรีทเมนต์",
-  "addMenu": "เพิ่มบริการ"
+  "addMenu": "เพิ่มบริการ",
+  "orderSettings": "ตั้งค่าลำดับ",
+  "allMenus": "เมนูทั้งหมด",
+  "addGroup": "เพิ่มกลุ่ม",
+  "addCategory": "เพิ่มหมวดหมู่",
+  "loading": "กำลังโหลด...",
+  "noCategories": "ไม่มีหมวดหมู่ที่ลงทะเบียน",
+  "other": "อื่นๆ",
+  "confirm": "ยืนยัน",
+  "cancel": "ยกเลิก",
+  "addIndustry": "เพิ่มประเภทธุรกิจ",
+  "industryOrder": "ลำดับการแสดงประเภทธุรกิจ",
+  "industryOrderHint": "ใช้ปุ่มขึ้น/ลงเพื่อเปลี่ยนลำดับการแสดงผลบนเมนู",
+  "industrySettings": "ตั้งค่าประเภทธุรกิจ",
+  "industryInfo": "เมื่อเพิ่มประเภทธุรกิจใหม่ ตำแหน่งเริ่มต้น (เช่น ช่างตัดผม ศิลปิน) จะถูกสร้างอัตโนมัติ",
+  "industryInfoSub": "ตำแหน่งที่ซ้ำกันจะไม่ถูกสร้าง",
+  "menuNamePlaceholder": "ชื่อเมนู (เช่น ดัดผมเกาหลี)",
+  "pricePlaceholder": "ราคา",
+  "categoryPlaceholder": "เช่น ตัดผม, ดัดผม, ย้อมสี",
+  "category": {
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "deleteConfirm": "คุณต้องการลบหมวดหมู่นี้หรือไม่?"
+  },
+  "reorder": {
+    "moveUp": "เลื่อนขึ้น",
+    "moveDown": "เลื่อนลง"
+  },
+  "errors": {
+    "industryChangeError": "เกิดข้อผิดพลาดในการเปลี่ยนประเภทธุรกิจ",
+    "orderChangeFailed": "เปลี่ยนลำดับล้มเหลว",
+    "categoryExists": "ชื่อหมวดหมู่นี้มีอยู่แล้ว",
+    "migrationRequired": "ต้องอัปเดตฐานข้อมูล (ยังไม่ได้ใช้ migration)",
+    "categoryCreateFailed": "สร้างหมวดหมู่ล้มเหลว",
+    "categoryEditFailed": "แก้ไขหมวดหมู่ล้มเหลว",
+    "menuEditFailed": "แก้ไขเมนูล้มเหลว",
+    "deleteFailed": "ลบล้มเหลว",
+    "menuNameRequired": "กรุณากรอกชื่อเมนู",
+    "priceRequired": "กรุณากรอกราคา",
+    "menuAddFailed": "เพิ่มเมนูล้มเหลว"
+  },
+  "success": {
+    "industryAdded": "เพิ่มประเภทธุรกิจแล้ว กรุณาตรวจสอบว่าตำแหน่งเริ่มต้นถูกสร้างในการจัดการพนักงาน"
+  },
+  "unit": {
+    "minutes": "นาที",
+    "currency": "บาท"
+  },
+  "durations": {
+    "15min": "15 นาที",
+    "30min": "30 นาที",
+    "60min": "60 นาที",
+    "90min": "90 นาที",
+    "120min": "120 นาที"
+  }
 }

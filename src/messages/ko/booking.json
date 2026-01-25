@@ -17,5 +17,24 @@
   "source": "예약 경로",
   "online": "온라인",
   "phone": "전화",
-  "walkIn": "직접 방문"
+  "walkIn": "직접 방문",
+  "pageDescription": "예약을 관리하고 새로운 예약을 추가하세요",
+  "shopSettings": "샵 설정",
+  "staffSchedule": "직원 스케줄",
+  "shopSettingsModal": {
+    "title": "샵 영업 설정",
+    "businessHours": "영업 시간 설정",
+    "closedDays": "휴무일 설정",
+    "closedDaysList": "휴무일 설정 내역",
+    "noClosedDays": "등록된 휴무일이 없습니다",
+    "reasonPlaceholder": "예: 설 연휴"
+  },
+  "placeholders": {
+    "customerName": "고객 이름을 입력하세요",
+    "notesPlaceholder": "특이사항이 있다면 입력하세요"
+  },
+  "sampleServices": {
+    "cut": "커트 - 35,000원",
+    "color": "염색 - 120,000원"
+  }
 }

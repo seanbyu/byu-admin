@@ -10,5 +10,59 @@
   "perm": "Perm",
   "clinic": "Clinic",
   "treatment": "Treatment",
-  "addMenu": "Add Service"
+  "addMenu": "Add Service",
+  "orderSettings": "Order Settings",
+  "allMenus": "All Menus",
+  "addGroup": "Add Group",
+  "addCategory": "Add Category",
+  "loading": "Loading...",
+  "noCategories": "No categories registered.",
+  "other": "Other",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "addIndustry": "Add Industry",
+  "industryOrder": "Industry Display Order",
+  "industryOrderHint": "Use up/down buttons to change the display order on the menu board.",
+  "industrySettings": "Industry Settings",
+  "industryInfo": "When adding a new industry, default positions (e.g., Designer, Artist) will be automatically created.",
+  "industryInfoSub": "Duplicate positions will not be created.",
+  "menuNamePlaceholder": "Menu name (e.g., Down Perm)",
+  "pricePlaceholder": "Price",
+  "categoryPlaceholder": "e.g., Cut, Perm, Color",
+  "category": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this category?"
+  },
+  "reorder": {
+    "moveUp": "Move Up",
+    "moveDown": "Move Down"
+  },
+  "errors": {
+    "industryChangeError": "Error changing industry.",
+    "orderChangeFailed": "Failed to change order",
+    "categoryExists": "Category name already exists.",
+    "migrationRequired": "Database update required. (migration not applied)",
+    "categoryCreateFailed": "Failed to create category",
+    "categoryEditFailed": "Failed to edit category",
+    "menuEditFailed": "Failed to edit menu",
+    "deleteFailed": "Delete failed",
+    "menuNameRequired": "Please enter menu name.",
+    "priceRequired": "Please enter price.",
+    "menuAddFailed": "Failed to add menu"
+  },
+  "success": {
+    "industryAdded": "Industry added. Please check if default positions were created in Staff Management."
+  },
+  "unit": {
+    "minutes": "min",
+    "currency": "KRW"
+  },
+  "durations": {
+    "15min": "15 min",
+    "30min": "30 min",
+    "60min": "60 min",
+    "90min": "90 min",
+    "120min": "120 min"
+  }
 }

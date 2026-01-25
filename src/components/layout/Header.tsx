@@ -93,26 +93,26 @@ export const Header: React.FC = () => {
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-secondary-200 z-50">
               <div className="px-4 py-3 border-b border-secondary-200">
-                <h3 className="font-semibold text-secondary-900">알림</h3>
+                <h3 className="font-semibold text-secondary-900">{t('common.notifications.title')}</h3>
               </div>
               <div className="max-h-96 overflow-y-auto">
                 <div className="px-4 py-3 hover:bg-secondary-50 cursor-pointer border-b border-secondary-100">
                   <p className="text-sm text-secondary-900 font-medium">
-                    새로운 예약이 있습니다
+                    {t('common.notifications.newBooking')}
                   </p>
-                  <p className="text-xs text-secondary-500 mt-1">5분 전</p>
+                  <p className="text-xs text-secondary-500 mt-1">5 {t('common.time.minutes')} {t('common.time.ago')}</p>
                 </div>
                 <div className="px-4 py-3 hover:bg-secondary-50 cursor-pointer border-b border-secondary-100">
                   <p className="text-sm text-secondary-900 font-medium">
-                    고객 리뷰가 등록되었습니다
+                    {t('common.notifications.newReview')}
                   </p>
-                  <p className="text-xs text-secondary-500 mt-1">1시간 전</p>
+                  <p className="text-xs text-secondary-500 mt-1">1 {t('common.time.hours')} {t('common.time.ago')}</p>
                 </div>
                 <div className="px-4 py-3 hover:bg-secondary-50 cursor-pointer">
                   <p className="text-sm text-secondary-900 font-medium">
-                    예약이 취소되었습니다
+                    {t('common.notifications.cancelledBooking')}
                   </p>
-                  <p className="text-xs text-secondary-500 mt-1">2시간 전</p>
+                  <p className="text-xs text-secondary-500 mt-1">2 {t('common.time.hours')} {t('common.time.ago')}</p>
                 </div>
               </div>
             </div>

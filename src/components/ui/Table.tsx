@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface Column<T> {
@@ -21,8 +24,10 @@ export function Table<T extends { id: string }>({
   columns,
   onRowClick,
   loading = false,
-  emptyMessage = '데이터가 없습니다',
+  emptyMessage,
 }: TableProps<T>) {
+  const t = useTranslations('common');
+  const emptyText = emptyMessage ?? t('noData');
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -34,7 +39,7 @@ export function Table<T extends { id: string }>({
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-secondary-500">
-        {emptyMessage}
+        {emptyText}
       </div>
     );
   }

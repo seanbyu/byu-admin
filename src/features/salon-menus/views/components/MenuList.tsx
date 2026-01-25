@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Plus } from 'lucide-react';
 import { useCategories, useMenus } from '../../hooks/useSalonMenus';
@@ -22,6 +23,7 @@ export default function MenuList({
   orderedIndustries = [],
   selectedTab,
 }: MenuListProps) {
+  const t = useTranslations('menu');
   const {
     data: categoriesData,
     isLoading,
@@ -48,11 +50,11 @@ export default function MenuList({
     } catch (e: any) {
       console.error(e);
       if (e.message?.includes('duplicate key') || e.code === '23505') {
-        alert('이미 존재하는 카테고리 이름입니다.');
+        alert(t('errors.categoryExists'));
       } else if (e.message?.includes('industry_id')) {
-        alert('데이터베이스 업데이트가 필요합니다. (migration 미적용)');
+        alert(t('errors.migrationRequired'));
       } else {
-        alert('카테고리 생성 실패: ' + (e.message || '알 수 없는 오류'));
+        alert(t('errors.categoryCreateFailed') + ': ' + (e.message || ''));
       }
     }
   };
@@ -84,7 +86,7 @@ export default function MenuList({
       setEditingCategoryId(null);
     } catch (e) {
       console.error(e);
-      alert('카테고리 수정 실패');
+      alert(t('errors.categoryEditFailed'));
     }
   };
 
@@ -111,20 +113,17 @@ export default function MenuList({
       setEditingMenuId(null);
     } catch (e) {
       console.error(e);
-      alert('메뉴 정보 수정 실패');
+      alert(t('errors.menuEditFailed'));
     }
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (
-      !confirm('정말 삭제하시겠습니까? 포함된 메뉴도 영향을 받을 수 있습니다.')
-    )
-      return;
+    if (!confirm(t('category.deleteConfirm'))) return;
     try {
       await deleteCategory(id);
     } catch (e) {
       console.error(e);
-      alert('삭제 실패');
+      alert(t('errors.deleteFailed'));
     }
   };
 
@@ -182,10 +181,10 @@ export default function MenuList({
         )}
 
         {isLoading ? (
-          <div className="text-center py-4 text-gray-500">로딩 중...</div>
+          <div className="text-center py-4 text-gray-500">{t('loading')}</div>
         ) : categories.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border border-dashed border-gray-200">
-            <p className="text-gray-500 mb-2">등록된 카테고리가 없습니다.</p>
+            <p className="text-gray-500 mb-2">{t('noCategories')}</p>
             <Button
               variant="outline"
               size="sm"
@@ -197,7 +196,7 @@ export default function MenuList({
                 setIsCreating(true);
               }}
             >
-              <Plus className="w-4 h-4 mr-2" /> 카테고리 추가
+              <Plus className="w-4 h-4 mr-2" /> {t('addCategory')}
             </Button>
           </div>
         ) : (
@@ -274,7 +273,7 @@ export default function MenuList({
                 return (
                   <div className="space-y-4">
                     <div className="text-sm font-semibold text-gray-500">
-                      기타
+                      {t('other')}
                     </div>
                     {otherCategories.map((category) => (
                       <CategoryItem

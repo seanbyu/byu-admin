@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
@@ -6,10 +9,15 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   helperText?: string;
   options: { value: string; label: string }[];
+  placeholder?: string;
+  showPlaceholder?: boolean;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, helperText, options, className, ...props }, ref) => {
+  ({ label, error, helperText, options, className, placeholder, showPlaceholder = true, ...props }, ref) => {
+    const t = useTranslations('common');
+    const placeholderText = placeholder ?? t('select');
+
     return (
       <div className="w-full">
         {label && (
@@ -31,7 +39,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           )}
           {...props}
         >
-          <option value="">선택하세요</option>
+          {showPlaceholder && <option value="">{placeholderText}</option>}
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

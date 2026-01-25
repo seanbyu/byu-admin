@@ -11,17 +11,17 @@ interface StaffPermissionModalProps {
   onSave: (staffId: string, permissions: StaffPermission[]) => Promise<void>;
 }
 
-const MODULES = [
-  { key: 'dashboard', label: '대시보드' },
-  { key: 'bookings', label: '예약 관리' },
-  { key: 'customers', label: '고객 관리' },
-  { key: 'staff', label: '직원 관리' },
-  { key: 'services', label: '서비스 관리' },
-  { key: 'reviews', label: '리뷰 관리' },
-  { key: 'sales', label: '매출 관리' },
-  { key: 'chat', label: '채팅' },
-  { key: 'settings', label: '설정' },
-];
+const MODULE_KEYS = [
+  'dashboard',
+  'bookings',
+  'customers',
+  'staff',
+  'services',
+  'reviews',
+  'sales',
+  'chat',
+  'settings',
+] as const;
 
 export default function StaffPermissionModal({
   isOpen,
@@ -36,13 +36,13 @@ export default function StaffPermissionModal({
   useEffect(() => {
     if (staff) {
       // Initialize permissions from staff or defaults
-      const initialPermissions = MODULES.map((module) => {
+      const initialPermissions = MODULE_KEYS.map((moduleKey) => {
         const existing = staff.permissions?.find(
-          (p) => p.module === module.key
+          (p) => p.module === moduleKey
         );
         return (
           existing || {
-            module: module.key,
+            module: moduleKey,
             canRead: false,
             canWrite: false,
             canDelete: false,
@@ -72,7 +72,7 @@ export default function StaffPermissionModal({
       onClose();
     } catch (error) {
       console.error('Failed to save permissions', error);
-      alert('권한 저장에 실패했습니다');
+      alert(t('staff.permissionModal.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -84,21 +84,21 @@ export default function StaffPermissionModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="권한 설정"
-      size="lg" // Adjust size as needed, table works well with lg or xl
+      title={t('staff.permissionModal.title')}
+      size="lg"
       footer={
         <div className="flex justify-end space-x-3">
           <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            취소
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? '저장 중...' : '저장'}
+            {isSaving ? t('common.saving') : t('common.save')}
           </Button>
         </div>
       }
     >
       <div className="mb-4 text-sm text-gray-500">
-        {staff.name}님의 관리자 권한을 설정합니다.
+        {t('staff.permissionModal.description', { name: staff.name })}
       </div>
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
@@ -107,41 +107,41 @@ export default function StaffPermissionModal({
               scope="col"
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              기능
+              {t('staff.permissionModal.feature')}
             </th>
             <th
               scope="col"
               className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              조회
+              {t('staff.permissionModal.view')}
             </th>
             <th
               scope="col"
               className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              수정/등록
+              {t('staff.permissionModal.edit')}
             </th>
             <th
               scope="col"
               className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              삭제
+              {t('staff.permissionModal.delete')}
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {MODULES.map((module) => {
-            const permission = permissions.find((p) => p.module === module.key);
+          {MODULE_KEYS.map((moduleKey) => {
+            const permission = permissions.find((p) => p.module === moduleKey);
             return (
-              <tr key={module.key}>
+              <tr key={moduleKey}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {module.label}
+                  {t(`staff.permissionLabels.${moduleKey}`)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center">
                   <input
                     type="checkbox"
                     checked={permission?.canRead || false}
-                    onChange={() => handleToggle(module.key, 'canRead')}
+                    onChange={() => handleToggle(moduleKey, 'canRead')}
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                   />
                 </td>
@@ -149,7 +149,7 @@ export default function StaffPermissionModal({
                   <input
                     type="checkbox"
                     checked={permission?.canWrite || false}
-                    onChange={() => handleToggle(module.key, 'canWrite')}
+                    onChange={() => handleToggle(moduleKey, 'canWrite')}
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                   />
                 </td>
@@ -157,7 +157,7 @@ export default function StaffPermissionModal({
                   <input
                     type="checkbox"
                     checked={permission?.canDelete || false}
-                    onChange={() => handleToggle(module.key, 'canDelete')}
+                    onChange={() => handleToggle(moduleKey, 'canDelete')}
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                   />
                 </td>

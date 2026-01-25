@@ -12,5 +12,81 @@
   "loading": "로딩 중...",
   "error": "오류가 발생했습니다",
   "success": "성공",
-  "noData": "데이터가 없습니다"
+  "noData": "데이터가 없습니다",
+  "saving": "저장 중...",
+  "creating": "생성 중...",
+  "all": "전체",
+  "select": "선택하세요",
+  "close": "닫기",
+  "complete": "완료",
+  "dayNames": {
+    "sunday": "일요일",
+    "monday": "월요일",
+    "tuesday": "화요일",
+    "wednesday": "수요일",
+    "thursday": "목요일",
+    "friday": "금요일",
+    "saturday": "토요일"
+  },
+  "shortDayNames": {
+    "sun": "일",
+    "mon": "월",
+    "tue": "화",
+    "wed": "수",
+    "thu": "목",
+    "fri": "금",
+    "sat": "토"
+  },
+  "time": {
+    "minutes": "분",
+    "hours": "시간",
+    "ago": "전"
+  },
+  "currency": {
+    "won": "원",
+    "variable": "변동"
+  },
+  "notifications": {
+    "title": "알림",
+    "newBooking": "새로운 예약이 있습니다",
+    "newReview": "고객 리뷰가 등록되었습니다",
+    "cancelledBooking": "예약이 취소되었습니다"
+  },
+  "calendar": {
+    "view": "캘린더",
+    "list": "목록",
+    "month": "월",
+    "day": "일",
+    "addBooking": "예약 추가하기",
+    "more": "더보기"
+  },
+  "form": {
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "reason": "사유"
+  },
+  "actions": {
+    "applyFilter": "필터 적용"
+  },
+  "comingSoon": "준비 중입니다",
+  "dashboard": {
+    "welcome": "환영합니다, {name}님!",
+    "todayBookings": "오늘 예약",
+    "todayRevenue": "오늘 매출",
+    "totalCustomers": "총 고객",
+    "monthlyRevenue": "월 매출",
+    "pending": "대기 중",
+    "completed": "완료",
+    "cancelled": "취소",
+    "cases": "건",
+    "recentBookings": "최근 예약",
+    "topStaffThisMonth": "이번 달 TOP 직원",
+    "customer": "고객",
+    "today": "오늘"
+  },
+  "pages": {
+    "sales": "매출 관리",
+    "reviews": "리뷰 관리",
+    "customers": "고객 관리"
+  }
 }

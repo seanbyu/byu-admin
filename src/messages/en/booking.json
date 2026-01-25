@@ -17,5 +17,24 @@
   "source": "Source",
   "online": "Online",
   "phone": "Phone",
-  "walkIn": "Walk-in"
+  "walkIn": "Walk-in",
+  "pageDescription": "Manage bookings and add new reservations",
+  "shopSettings": "Shop Settings",
+  "staffSchedule": "Staff Schedule",
+  "shopSettingsModal": {
+    "title": "Shop Business Settings",
+    "businessHours": "Business Hours Settings",
+    "closedDays": "Closed Days Settings",
+    "closedDaysList": "Closed Days List",
+    "noClosedDays": "No registered closed days",
+    "reasonPlaceholder": "e.g., Holiday"
+  },
+  "placeholders": {
+    "customerName": "Enter customer name",
+    "notesPlaceholder": "Enter any special notes"
+  },
+  "sampleServices": {
+    "cut": "Haircut - 35,000 KRW",
+    "color": "Hair Color - 120,000 KRW"
+  }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -17,7 +18,16 @@ interface ShopSettingsModalProps {
   onSave?: () => void;
 }
 
-const DAY_NAMES = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+// 요일 키 매핑
+const DAY_KEYS = [
+  'common.dayNames.sunday',
+  'common.dayNames.monday',
+  'common.dayNames.tuesday',
+  'common.dayNames.wednesday',
+  'common.dayNames.thursday',
+  'common.dayNames.friday',
+  'common.dayNames.saturday',
+] as const;
 
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => {
   const hour = i.toString().padStart(2, '0');
@@ -29,7 +39,7 @@ const getDefaultBusinessHours = (): BusinessHours[] => {
     dayOfWeek: i,
     openTime: '10:00',
     closeTime: '20:00',
-    isOpen: i !== 0, // 일요일은 기본 휴무
+    isOpen: i !== 0,
   }));
 };
 
@@ -39,6 +49,7 @@ export function ShopSettingsModal({
   salonId,
   onSave,
 }: ShopSettingsModalProps) {
+  const t = useTranslations();
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>(getDefaultBusinessHours());
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -136,10 +147,10 @@ export function ShopSettingsModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="샵 영업 설정" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('booking.shopSettingsModal.title')} size="lg">
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="text-secondary-500">로딩 중...</div>
+          <div className="text-secondary-500">{t('common.loading')}</div>
         </div>
       ) : (
         <>
@@ -147,7 +158,7 @@ export function ShopSettingsModal({
             {/* 영업 시간 설정 */}
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 mb-4">
-                영업 시간 설정
+                {t('booking.shopSettingsModal.businessHours')}
               </h3>
               <Card className="p-4">
                 <div className="space-y-3">
@@ -159,7 +170,7 @@ export function ShopSettingsModal({
                         className="flex items-center gap-4 py-2 border-b border-secondary-100 last:border-b-0"
                       >
                         {/* 요일 및 토글 */}
-                        <div className="w-24 flex items-center gap-2">
+                        <div className="min-w-[120px] flex items-center gap-2 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleToggleDay(bh.dayOfWeek)}
@@ -182,20 +193,21 @@ export function ShopSettingsModal({
                                   : 'text-secondary-700'
                             }`}
                           >
-                            {DAY_NAMES[bh.dayOfWeek]}
+                            {t(DAY_KEYS[bh.dayOfWeek])}
                           </span>
                         </div>
 
                         {/* 시간 선택 */}
                         {bh.isOpen ? (
-                          <div className="flex items-center gap-2 flex-1">
+                          <div className="flex items-center gap-2 flex-1 flex-wrap sm:flex-nowrap">
                             <Select
                               options={TIME_OPTIONS}
                               value={bh.openTime}
                               onChange={(e) =>
                                 handleTimeChange(bh.dayOfWeek, 'openTime', e.target.value)
                               }
-                              className="w-28"
+                              className="w-24 sm:w-28"
+                              showPlaceholder={false}
                             />
                             <span className="text-secondary-500">~</span>
                             <Select
@@ -204,11 +216,12 @@ export function ShopSettingsModal({
                               onChange={(e) =>
                                 handleTimeChange(bh.dayOfWeek, 'closeTime', e.target.value)
                               }
-                              className="w-28"
+                              className="w-24 sm:w-28"
+                              showPlaceholder={false}
                             />
                           </div>
                         ) : (
-                          <span className="text-secondary-400 text-sm">휴무</span>
+                          <span className="text-secondary-400 text-sm flex-1">{t('staff.schedule.closed')}</span>
                         )}
                       </div>
                     ))}
@@ -219,14 +232,14 @@ export function ShopSettingsModal({
             {/* 휴무일 설정 */}
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 mb-4">
-                휴무일 설정
+                {t('booking.shopSettingsModal.closedDays')}
               </h3>
               <Card className="p-4">
                 {/* 새 휴무일 입력 */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
                   <Input
                     type="date"
-                    label="시작일"
+                    label={t('common.form.startDate')}
                     value={newHoliday.startDate}
                     onChange={(e) =>
                       setNewHoliday((prev) => ({ ...prev, startDate: e.target.value }))
@@ -234,15 +247,15 @@ export function ShopSettingsModal({
                   />
                   <Input
                     type="date"
-                    label="종료일"
+                    label={t('common.form.endDate')}
                     value={newHoliday.endDate}
                     onChange={(e) =>
                       setNewHoliday((prev) => ({ ...prev, endDate: e.target.value }))
                     }
                   />
                   <Input
-                    label="사유"
-                    placeholder="예: 설 연휴"
+                    label={t('common.form.reason')}
+                    placeholder={t('booking.shopSettingsModal.reasonPlaceholder')}
                     value={newHoliday.reason}
                     onChange={(e) =>
                       setNewHoliday((prev) => ({ ...prev, reason: e.target.value }))
@@ -260,7 +273,7 @@ export function ShopSettingsModal({
                       }
                     >
                       <Plus size={16} className="mr-1" />
-                      추가
+                      {t('common.add')}
                     </Button>
                   </div>
                 </div>
@@ -269,7 +282,7 @@ export function ShopSettingsModal({
                 {holidays.length > 0 ? (
                   <div className="border-t border-secondary-200 pt-4">
                     <h4 className="text-sm font-medium text-secondary-700 mb-3">
-                      휴무일 설정 내역
+                      {t('booking.shopSettingsModal.closedDaysList')}
                     </h4>
                     <div className="space-y-2">
                       {holidays.map((holiday) => (
@@ -298,7 +311,7 @@ export function ShopSettingsModal({
                   </div>
                 ) : (
                   <p className="text-sm text-secondary-500 text-center py-4">
-                    등록된 휴무일이 없습니다
+                    {t('booking.shopSettingsModal.noClosedDays')}
                   </p>
                 )}
               </Card>
@@ -308,10 +321,10 @@ export function ShopSettingsModal({
           {/* 하단 버튼 */}
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-secondary-200">
             <Button variant="outline" onClick={onClose}>
-              취소
+              {t('common.cancel')}
             </Button>
             <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? '저장 중...' : '저장'}
+              {isSaving ? t('common.saving') : t('common.save')}
             </Button>
           </div>
         </>

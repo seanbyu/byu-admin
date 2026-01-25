@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
@@ -32,6 +33,7 @@ export default function SortableMenuRow({
   onCancelEditMenu,
   onDeleteMenu,
 }: SortableMenuRowProps) {
+  const t = useTranslations();
   const {
     attributes,
     listeners,
@@ -65,7 +67,7 @@ export default function SortableMenuRow({
             <input
               type="text"
               className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
-              placeholder="메뉴명"
+              placeholder={t('menu.name')}
               value={editMenuData.name}
               onChange={(e) =>
                 onEditMenuDataChange({
@@ -89,11 +91,11 @@ export default function SortableMenuRow({
                 })
               }
             >
-              <option value="15">15분</option>
-              <option value="30">30분</option>
-              <option value="60">60분</option>
-              <option value="90">90분</option>
-              <option value="120">120분</option>
+              <option value="15">{t('menu.durations.15min')}</option>
+              <option value="30">{t('menu.durations.30min')}</option>
+              <option value="60">{t('menu.durations.60min')}</option>
+              <option value="90">{t('menu.durations.90min')}</option>
+              <option value="120">{t('menu.durations.120min')}</option>
             </select>
           </div>
 
@@ -103,7 +105,7 @@ export default function SortableMenuRow({
               <input
                 type="number"
                 className="w-20 px-2 py-1.5 border border-gray-300 rounded text-sm text-right"
-                placeholder="가격"
+                placeholder={t('menu.price')}
                 value={editMenuData.price}
                 onChange={(e) =>
                   onEditMenuDataChange({
@@ -112,17 +114,17 @@ export default function SortableMenuRow({
                   })
                 }
               />
-              <span className="text-sm">원</span>
+              <span className="text-sm">{t('menu.unit.currency')}</span>
             </div>
           </div>
 
           {/* Actions */}
           <div className="w-16 flex justify-end gap-1">
             <Button size="sm" onClick={onSaveMenu}>
-              저장
+              {t('common.save')}
             </Button>
             <Button size="sm" variant="ghost" onClick={onCancelEditMenu}>
-              취소
+              {t('common.cancel')}
             </Button>
           </div>
         </div>
@@ -136,13 +138,13 @@ export default function SortableMenuRow({
             <div className="flex-1 text-h4">{menu.name}</div>
 
             <div className="w-24 text-center text-body">
-              {menu.duration_minutes}분
+              {menu.duration_minutes}{t('menu.unit.minutes')}
             </div>
 
             <div className="w-32 text-right text-price">
               {menu.pricing_type === 'FIXED'
-                ? `${(menu.base_price || menu.price || 0).toLocaleString()}원`
-                : '변동'}
+                ? `${(menu.base_price || menu.price || 0).toLocaleString()}${t('menu.unit.currency')}`
+                : t('common.currency.variable')}
             </div>
           </div>
 

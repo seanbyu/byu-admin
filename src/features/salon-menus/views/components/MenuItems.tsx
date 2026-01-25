@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Plus } from 'lucide-react';
 import { useMenus } from '../../hooks/useSalonMenus';
@@ -47,6 +48,7 @@ export default function MenuItems({
   onSaveMenu,
   onCancelEditMenu,
 }: MenuItemsProps) {
+  const t = useTranslations('menu');
   const {
     data: menusData,
     createMenu,
@@ -104,11 +106,11 @@ export default function MenuItems({
 
   const handleAddMenu = async () => {
     if (!newMenu.name.trim()) {
-      alert('메뉴명을 입력해주세요.');
+      alert(t('errors.menuNameRequired'));
       return;
     }
     if (!newMenu.price) {
-      alert('금액을 입력해주세요.');
+      alert(t('errors.priceRequired'));
       return;
     }
     try {
@@ -121,17 +123,17 @@ export default function MenuItems({
       setIsAdding(false);
     } catch (e) {
       console.error(e);
-      alert('메뉴 추가 실패');
+      alert(t('errors.menuAddFailed'));
     }
   };
 
   const handleDeleteMenu = async (id: string) => {
-    if (!confirm('삭제하시겠습니까?')) return;
+    if (!confirm(t('category.deleteConfirm'))) return;
     try {
       await deleteMenu(id);
     } catch (e) {
       console.error(e);
-      alert('삭제 실패');
+      alert(t('errors.deleteFailed'));
     }
   };
 
@@ -167,13 +169,13 @@ export default function MenuItems({
         <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-100 mt-2">
           <input
             className="flex-1 px-3 py-2 text-sm border rounded-md"
-            placeholder="메뉴명 (예: 다운펌)"
+            placeholder={t('menuNamePlaceholder')}
             value={newMenu.name}
             onChange={(e) => setNewMenu({ ...newMenu, name: e.target.value })}
             autoFocus
           />
           <select
-            className="w-20 px-2 py-2 text-sm border rounded-md"
+            className="w-24 px-2 py-2 text-sm border rounded-md"
             value={newMenu.duration}
             onChange={(e) =>
               setNewMenu({
@@ -182,11 +184,11 @@ export default function MenuItems({
               })
             }
           >
-            <option value={15}>15분</option>
-            <option value={30}>30분</option>
-            <option value={60}>60분</option>
-            <option value={90}>90분</option>
-            <option value={120}>120분</option>
+            <option value={15}>{t('durations.15min')}</option>
+            <option value={30}>{t('durations.30min')}</option>
+            <option value={60}>{t('durations.60min')}</option>
+            <option value={90}>{t('durations.90min')}</option>
+            <option value={120}>{t('durations.120min')}</option>
           </select>
           <div className="flex items-center gap-1 w-24">
             <input
@@ -198,10 +200,10 @@ export default function MenuItems({
                 setNewMenu({ ...newMenu, price: e.target.value })
               }
             />
-            <span className="text-sm text-gray-500 whitespace-nowrap">원</span>
+            <span className="text-sm text-gray-500 whitespace-nowrap">{t('unit.currency')}</span>
           </div>
           <Button size="sm" onClick={handleAddMenu}>
-            확인
+            {t('confirm')}
           </Button>
           <Button
             size="sm"
@@ -211,7 +213,7 @@ export default function MenuItems({
               setNewMenu({ name: '', price: '', duration: 30 });
             }}
           >
-            취소
+            {t('cancel')}
           </Button>
         </div>
       ) : (
@@ -219,7 +221,7 @@ export default function MenuItems({
           onClick={() => setIsAdding(true)}
           className="w-full flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors"
         >
-          <Plus className="w-4 h-4" /> 메뉴 추가
+          <Plus className="w-4 h-4" /> {t('addMenu')}
         </button>
       )}
     </div>

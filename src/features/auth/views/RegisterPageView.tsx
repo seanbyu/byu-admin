@@ -127,7 +127,7 @@ export default function RegisterPageView() {
       alert(t('success.otpSent'));
     } catch (err: any) {
       console.error(err);
-      setError(err.message || '인증번호 발송 실패');
+      setError(err.message || t('errors.otpSendFailed'));
     } finally {
       setOtpLoading(false);
     }
@@ -135,7 +135,7 @@ export default function RegisterPageView() {
 
   const handleVerifyOtp = async () => {
     if (!otp) {
-      setError('인증번호를 입력해주세요');
+      setError(t('errors.otpRequired'));
       return;
     }
 
@@ -150,14 +150,14 @@ export default function RegisterPageView() {
       });
 
       if (error) throw error;
-      if (!data.user) throw new Error('인증 실패');
+      if (!data.user) throw new Error(t('errors.authFailed'));
 
       setOtpVerified(true);
       setVerifiedUser(data.user);
       alert(t('success.otpVerified'));
     } catch (err: any) {
       console.error(err);
-      setError(err.message || '인증번호 확인 실패');
+      setError(err.message || t('errors.otpVerifyFailed'));
     } finally {
       setOtpLoading(false);
     }
@@ -168,7 +168,7 @@ export default function RegisterPageView() {
 
     // Pre-checks
     if (!otpVerified || !verifiedUser) {
-      setError('휴대폰 인증을 완료해주세요.');
+      setError(t('errors.verifyPhone'));
       return;
     }
 
@@ -187,7 +187,7 @@ export default function RegisterPageView() {
     }
 
     if (!data.industryNames || data.industryNames.length === 0) {
-      setError('최소 하나의 업종을 선택해주세요.');
+      setError(t('errors.selectIndustry'));
       return;
     }
 
@@ -208,7 +208,7 @@ export default function RegisterPageView() {
       alert(t('success.registerComplete'));
       router.push('/login');
     } catch (err: any) {
-      setError(err.message || '오류가 발생했습니다');
+      setError(err.message || t('errors.genericError'));
       console.error('Registration error:', err);
     } finally {
       setIsLoading(false);

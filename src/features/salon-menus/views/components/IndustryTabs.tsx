@@ -1,0 +1,83 @@
+'use client';
+
+import { memo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
+import { Plus } from 'lucide-react';
+import { SalonIndustry } from '../../types';
+
+interface IndustryTabsProps {
+  selectedTab: string;
+  selectedIndustries: SalonIndustry[];
+  onSelectTab: (tab: string) => void;
+  onAddIndustryClick: () => void;
+}
+
+// rendering-hoist-jsx: 정적 클래스명 상수 호이스팅
+const BASE_TAB_CLASS = 'px-4 py-2 rounded-full text-sm font-medium transition-colors';
+const ACTIVE_TAB_CLASS = 'bg-blue-500 text-white';
+const INACTIVE_TAB_CLASS = 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50';
+
+// 개별 탭 버튼 컴포넌트 (rerender-memo)
+interface TabButtonProps {
+  id: string;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+const TabButton = memo(function TabButton({ id, label, isActive, onClick }: TabButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${BASE_TAB_CLASS} ${isActive ? ACTIVE_TAB_CLASS : INACTIVE_TAB_CLASS}`}
+    >
+      {label}
+    </button>
+  );
+});
+
+// rerender-memo: 탭 컴포넌트 메모이제이션
+export const IndustryTabs = memo(function IndustryTabs({
+  selectedTab,
+  selectedIndustries,
+  onSelectTab,
+  onAddIndustryClick,
+}: IndustryTabsProps) {
+  const t = useTranslations();
+
+  // 각 탭 클릭 핸들러를 상위에서 생성하지 않고 직접 전달
+  const handleAllTabClick = useCallback(() => {
+    onSelectTab('all');
+  }, [onSelectTab]);
+
+  return (
+    <div className="flex items-center gap-2 mb-8">
+      <TabButton
+        id="all"
+        label={t('common.all')}
+        isActive={selectedTab === 'all'}
+        onClick={handleAllTabClick}
+      />
+      {selectedIndustries.map((ind) => (
+        <TabButton
+          key={ind.id}
+          id={ind.id}
+          label={ind.name || ''}
+          isActive={selectedTab === ind.id}
+          onClick={() => onSelectTab(ind.id)}
+        />
+      ))}
+      <button
+        type="button"
+        onClick={onAddIndustryClick}
+        className={`${BASE_TAB_CLASS} ${INACTIVE_TAB_CLASS} flex items-center gap-1`}
+      >
+        <Plus className="w-3 h-3" />
+        {t('menu.addIndustry')}
+      </button>
+    </div>
+  );
+});
+
+export default IndustryTabs;

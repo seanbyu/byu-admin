@@ -10,5 +10,59 @@
   "perm": "펌",
   "clinic": "클리닉",
   "treatment": "트리트먼트",
-  "addMenu": "메뉴 추가"
+  "addMenu": "메뉴 추가",
+  "orderSettings": "순서 설정",
+  "allMenus": "전체 메뉴",
+  "addGroup": "그룹 추가",
+  "addCategory": "카테고리 추가",
+  "loading": "로딩 중...",
+  "noCategories": "등록된 카테고리가 없습니다.",
+  "other": "기타",
+  "confirm": "확인",
+  "cancel": "취소",
+  "addIndustry": "업종 추가",
+  "industryOrder": "업종 노출 순서 설정",
+  "industryOrderHint": "위/아래 버튼을 눌러 메뉴판에 보여질 순서를 변경할 수 있습니다.",
+  "industrySettings": "업종 설정",
+  "industryInfo": "새로운 업종을 추가하면, 해당 업종에 필요한 기본 직급(예: 디자이너, 아티스트 등)이 자동으로 생성됩니다.",
+  "industryInfoSub": "이미 직급이 존재하는 경우 중복해서 생성되지 않습니다.",
+  "menuNamePlaceholder": "메뉴명 (예: 다운펌)",
+  "pricePlaceholder": "가격",
+  "categoryPlaceholder": "예: 커트, 펌, 컬러",
+  "category": {
+    "edit": "수정",
+    "delete": "삭제",
+    "deleteConfirm": "카테고리를 삭제하시겠습니까?"
+  },
+  "reorder": {
+    "moveUp": "위로 이동",
+    "moveDown": "아래로 이동"
+  },
+  "errors": {
+    "industryChangeError": "업종 변경 중 오류가 발생했습니다.",
+    "orderChangeFailed": "순서 변경 실패",
+    "categoryExists": "이미 존재하는 카테고리 이름입니다.",
+    "migrationRequired": "데이터베이스 업데이트가 필요합니다. (migration 미적용)",
+    "categoryCreateFailed": "카테고리 생성 실패",
+    "categoryEditFailed": "카테고리 수정 실패",
+    "menuEditFailed": "메뉴 정보 수정 실패",
+    "deleteFailed": "삭제 실패",
+    "menuNameRequired": "메뉴명을 입력해주세요.",
+    "priceRequired": "금액을 입력해주세요.",
+    "menuAddFailed": "메뉴 추가 실패"
+  },
+  "success": {
+    "industryAdded": "업종이 추가되었습니다. 직원 관리 메뉴에서 해당 업종의 기본 직급이 자동으로 생성되었는지 확인해보세요."
+  },
+  "unit": {
+    "minutes": "분",
+    "currency": "원"
+  },
+  "durations": {
+    "15min": "15분",
+    "30min": "30분",
+    "60min": "60분",
+    "90min": "90분",
+    "120min": "120분"
+  }
 }

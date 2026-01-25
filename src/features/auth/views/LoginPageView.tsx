@@ -43,11 +43,11 @@ export default function LoginPageView() {
         login(response.user, response.token);
         router.push('/dashboard');
       } else {
-        setError(response.error || '로그인에 실패했습니다');
+        setError(response.error || t('errors.loginFailed'));
       }
     },
     onError: (err: Error) => {
-      setError('로그인 중 오류가 발생했습니다');
+      setError(t('errors.loginError'));
       console.error('Login error:', err);
     },
   });

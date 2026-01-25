@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Trash2 } from 'lucide-react';
 import { MenuCategory } from '../../types';
@@ -28,6 +29,7 @@ export default function CategoryItem({
   onCancelEdit,
   children,
 }: CategoryItemProps) {
+  const t = useTranslations();
   return (
     <div className="mb-6">
       <div className="flex items-end justify-between mb-3 pb-2 border-b border-gray-200">
@@ -43,10 +45,10 @@ export default function CategoryItem({
                   autoFocus
                 />
                 <Button size="sm" onClick={onSaveEdit}>
-                  저장
+                  {t('common.save')}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={onCancelEdit}>
-                  취소
+                  {t('common.cancel')}
                 </Button>
               </div>
             ) : (
@@ -62,12 +64,12 @@ export default function CategoryItem({
               onClick={() => onEdit(category)}
               className="h-8 text-xs font-normal text-gray-400 hover:text-gray-900 border-gray-200"
             >
-              수정
+              {t('common.edit')}
             </Button>
           )}
           <button
             onClick={() => {
-              if (confirm('카테고리를 삭제하시겠습니까?'))
+              if (confirm(t('menu.category.deleteConfirm')))
                 onDelete(category.id);
             }}
             className="text-gray-300 hover:text-red-500 p-1"

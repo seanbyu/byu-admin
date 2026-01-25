@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Modal } from './Modal';
 import { Button } from './Button';
 
@@ -22,11 +23,14 @@ export function ConfirmModal({
   onConfirm,
   title,
   description,
-  confirmText = '확인',
-  cancelText = '취소',
+  confirmText,
+  cancelText,
   variant = 'default',
   isLoading = false,
 }: ConfirmModalProps) {
+  const t = useTranslations('common');
+  const confirmLabel = confirmText ?? t('confirm');
+  const cancelLabel = cancelText ?? t('cancel');
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <div className="space-y-4">
@@ -37,14 +41,14 @@ export function ConfirmModal({
         )}
         <div className="flex justify-end space-x-3 pt-2">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            {cancelText}
+            {cancelLabel}
           </Button>
           <Button
             variant={variant === 'destructive' ? 'danger' : 'primary'}
             onClick={onConfirm}
             isLoading={isLoading}
           >
-            {confirmText}
+            {confirmLabel}
           </Button>
         </div>
       </div>

@@ -10,5 +10,123 @@
   "inactive": "Inactive",
   "permissions": "Permissions",
   "addStaff": "Add Employee",
-  "profile": "Edit Profile"
+  "profile": "Edit Profile",
+  "register": "Register Employee",
+  "table": {
+    "number": "No.",
+    "nameNickname": "Name/Nickname",
+    "email": "Email",
+    "phone": "Phone",
+    "joinDate": "Join Date",
+    "joinResign": "Join/Resign",
+    "adminPermission": "Admin Permission",
+    "profile": "Profile",
+    "position": "Position",
+    "bookingAllowed": "Booking Allowed"
+  },
+  "actions": {
+    "resign": "Process Resignation",
+    "allPermissions": "All Permissions",
+    "setPermissions": "Set Permissions",
+    "editInfo": "Edit Info"
+  },
+  "guide": {
+    "line1": "Employees can be registered after signing up for salon store and applying to join the shop, followed by admin approval.",
+    "line2": "Name/Nickname can be changed in each account's [My Page].",
+    "line3": "Employee resignation can only be processed by administrators. (Previous data will be deleted upon re-joining after resignation.)"
+  },
+  "roles": {
+    "admin": "Admin",
+    "manager": "Manager",
+    "staff": "Staff"
+  },
+  "confirm": {
+    "resign": "Are you sure you want to process resignation?"
+  },
+  "createModal": {
+    "title": "Register Employee (Direct Creation)",
+    "currentCount": "Current Staff Count",
+    "limitReached": "Free plan limit reached.",
+    "description": "Admin creates ID and password directly to share with the employee.",
+    "email": "Employee Email",
+    "password": "Password",
+    "passwordPlaceholder": "Set password",
+    "passwordHint": "8-20 characters, letters + numbers + special chars",
+    "name": "Name",
+    "namePlaceholder": "John Doe",
+    "role": "Role",
+    "roleStaff": "Staff",
+    "roleManager": "Manager",
+    "roleAdmin": "Admin",
+    "createAccount": "Create Account"
+  },
+  "validation": {
+    "emailRequired": "Please enter email.",
+    "emailInvalid": "Please enter a valid email format.",
+    "passwordRequired": "Please enter password.",
+    "passwordLength": "Password must be 8-20 characters.",
+    "passwordPattern": "Must include letters, numbers, and special characters.",
+    "loginRequired": "You must be logged in to register an employee."
+  },
+  "permissionModal": {
+    "title": "Set Permissions",
+    "description": "Set admin permissions for {name}.",
+    "feature": "Feature",
+    "view": "View",
+    "edit": "Edit/Register",
+    "delete": "Delete",
+    "saveFailed": "Failed to save permissions"
+  },
+  "permissionLabels": {
+    "dashboard": "Dashboard",
+    "bookings": "Booking Management",
+    "customers": "Customer Management",
+    "staff": "Employee Management",
+    "services": "Service Management",
+    "reviews": "Review Management",
+    "sales": "Sales Management",
+    "chat": "Chat",
+    "settings": "Settings"
+  },
+  "profileModal": {
+    "name": "Name",
+    "nameRequired": "Name is required.",
+    "phone": "Phone",
+    "passwordChange": "Change Password (Optional)",
+    "passwordPlaceholder": "Enter new password (leave blank to keep current)",
+    "passwordHint": "Password will be changed if entered.",
+    "profileImage": "Profile Image",
+    "deleteImage": "Delete Image",
+    "uploading": "Uploading...",
+    "imageHint": "JPG, PNG, GIF (Max 5MB)",
+    "experienceYears": "Experience (Years)",
+    "specialtiesHint": "Specialties (comma separated)",
+    "specialtiesPlaceholder": "Cut, Perm, Color",
+    "introduction": "Introduction",
+    "introPlaceholder": "Enter staff introduction",
+    "socialMedia": "Social Media",
+    "updateFailed": "Failed to update profile.",
+    "uploadFailed": "Failed to upload image.",
+    "deleteImageTitle": "Delete Profile Image",
+    "deleteImageDesc": "Are you sure you want to delete the profile image? This cannot be undone after saving.",
+    "deleteConfirm": "Delete"
+  },
+  "schedule": {
+    "title": "Staff Schedule Settings",
+    "selectStaff": "Select Staff",
+    "selectStaffPlaceholder": "Select a staff member",
+    "workHours": "Work Hours Settings",
+    "holiday": "Holiday/Leave Settings",
+    "holidayList": "Holiday/Leave List",
+    "noHolidays": "No registered holidays/leaves",
+    "selectToSetSchedule": "Select a staff member to set schedule",
+    "closed": "Closed",
+    "reasonPlaceholder": "e.g., Annual leave"
+  },
+  "errors": {
+    "updateFailed": "Update failed"
+  },
+  "success": {
+    "registered": "Employee has been registered!"
+  }
 }

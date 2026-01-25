@@ -12,5 +12,81 @@
   "loading": "Loading...",
   "error": "An error occurred",
   "success": "Success",
-  "noData": "No data available"
+  "noData": "No data available",
+  "saving": "Saving...",
+  "creating": "Creating...",
+  "all": "All",
+  "select": "Select",
+  "close": "Close",
+  "complete": "Complete",
+  "dayNames": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
+  },
+  "shortDayNames": {
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
+  },
+  "time": {
+    "minutes": "min",
+    "hours": "hours",
+    "ago": "ago"
+  },
+  "currency": {
+    "won": "KRW",
+    "variable": "Variable"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "newBooking": "New booking received",
+    "newReview": "New customer review",
+    "cancelledBooking": "Booking cancelled"
+  },
+  "calendar": {
+    "view": "Calendar",
+    "list": "List",
+    "month": "Month",
+    "day": "Day",
+    "addBooking": "Add Booking",
+    "more": "more"
+  },
+  "form": {
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "reason": "Reason"
+  },
+  "actions": {
+    "applyFilter": "Apply Filter"
+  },
+  "comingSoon": "Coming Soon",
+  "dashboard": {
+    "welcome": "Welcome, {name}!",
+    "todayBookings": "Today's Bookings",
+    "todayRevenue": "Today's Revenue",
+    "totalCustomers": "Total Customers",
+    "monthlyRevenue": "Monthly Revenue",
+    "pending": "Pending",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "cases": "cases",
+    "recentBookings": "Recent Bookings",
+    "topStaffThisMonth": "Top Staff This Month",
+    "customer": "Customer",
+    "today": "Today"
+  },
+  "pages": {
+    "sales": "Sales Management",
+    "reviews": "Reviews Management",
+    "customers": "Customers Management"
+  }
 }

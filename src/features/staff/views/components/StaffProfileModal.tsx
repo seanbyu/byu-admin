@@ -100,7 +100,7 @@ export default function StaffProfileModal({
       onClose();
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert('프로필 업데이트에 실패했습니다.');
+      alert(t('staff.profileModal.updateFailed'));
     }
   };
 
@@ -127,7 +127,7 @@ export default function StaffProfileModal({
       setValue('profileImage', data.publicUrl);
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      alert('이미지 업로드에 실패했습니다.');
+      alert(t('staff.profileModal.uploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -173,18 +173,18 @@ export default function StaffProfileModal({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={`${staff.name} ${t('staff.profile') || '프로필 수정'}`}
+        title={`${staff.name} ${t('staff.profile')}`}
         size="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="이름"
-              {...register('name', { required: '이름은 필수입니다.' })}
+              label={t('staff.profileModal.name')}
+              {...register('name', { required: t('staff.profileModal.nameRequired') })}
               error={errors.name?.message}
             />
             <Input
-              label="연락처"
+              label={t('staff.profileModal.phone')}
               {...register('phone')}
               placeholder="010-0000-0000"
             />
@@ -193,22 +193,22 @@ export default function StaffProfileModal({
           {/* Password Change Section */}
           <div className="space-y-2 border-t border-secondary-200 pt-4 mt-2">
             <label className="block text-sm font-medium text-secondary-700">
-              비밀번호 변경 (선택사항)
+              {t('staff.profileModal.passwordChange')}
             </label>
             <Input
               type="password"
-              placeholder="새 비밀번호를 입력하세요 (변경하지 않으려면 공란)"
+              placeholder={t('staff.profileModal.passwordPlaceholder')}
               {...register('password')}
             />
             <p className="text-xs text-secondary-500">
-              비밀번호를 입력하면 해당 값으로 변경됩니다.
+              {t('staff.profileModal.passwordHint')}
             </p>
           </div>
           <div className="border-b border-secondary-200 mb-4"></div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-secondary-700">
-              프로필 이미지
+              {t('staff.profileModal.profileImage')}
             </label>
             <div className="flex items-center space-x-4">
               {profileImage ? (
@@ -222,7 +222,7 @@ export default function StaffProfileModal({
                     type="button"
                     onClick={handleRemoveClick}
                     className="absolute -top-1 -right-1 bg-white rounded-full p-1 border border-secondary-200 shadow-sm text-secondary-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                    title="이미지 삭제"
+                    title={t('staff.profileModal.deleteImage')}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -247,7 +247,7 @@ export default function StaffProfileModal({
                   disabled={uploading}
                 />
                 <p className="mt-1 text-xs text-secondary-400">
-                  {uploading ? '업로드 중...' : 'JPG, PNG, GIF (최대 5MB)'}
+                  {uploading ? t('staff.profileModal.uploading') : t('staff.profileModal.imageHint')}
                 </p>
               </div>
               <input type="hidden" {...register('profileImage')} />
@@ -257,30 +257,30 @@ export default function StaffProfileModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               type="number"
-              label="경력 (년)"
+              label={t('staff.profileModal.experienceYears')}
               {...register('experience', { min: 0 })}
             />
             <Input
-              label="전문 분야 (쉼표로 구분)"
+              label={t('staff.profileModal.specialtiesHint')}
               {...register('specialties')}
-              placeholder="커트, 펌, 염색"
+              placeholder={t('staff.profileModal.specialtiesPlaceholder')}
             />
           </div>
 
           <div className="space-y-1">
             <label className="block text-sm font-medium text-secondary-700">
-              소개
+              {t('staff.profileModal.introduction')}
             </label>
             <textarea
               className="w-full min-h-[100px] px-3 py-2 border border-secondary-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               {...register('description')}
-              placeholder="직원 소개를 입력하세요"
+              placeholder={t('staff.profileModal.introPlaceholder')}
             />
           </div>
 
           <div className="space-y-4 pt-4 border-t border-secondary-200">
             <label className="block text-sm font-medium text-secondary-700 mb-2">
-              소셜 미디어
+              {t('staff.profileModal.socialMedia')}
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
@@ -341,9 +341,9 @@ export default function StaffProfileModal({
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleConfirmDelete}
-        title="프로필 이미지 삭제"
-        description="프로필 이미지를 삭제하시겠습니까? 삭제 후 저장하면 복구할 수 없습니다."
-        confirmText="삭제"
+        title={t('staff.profileModal.deleteImageTitle')}
+        description={t('staff.profileModal.deleteImageDesc')}
+        confirmText={t('staff.profileModal.deleteConfirm')}
         variant="destructive"
       />
     </>

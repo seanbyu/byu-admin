@@ -43,28 +43,28 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: '오늘 예약',
+      title: t('common.dashboard.todayBookings'),
       value: stats.todayBookings,
       icon: Calendar,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
-      title: '오늘 매출',
+      title: t('common.dashboard.todayRevenue'),
       value: formatPrice(stats.todayRevenue),
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
-      title: '총 고객',
+      title: t('common.dashboard.totalCustomers'),
       value: stats.totalCustomers,
       icon: Users,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
     {
-      title: '월 매출',
+      title: t('common.dashboard.monthlyRevenue'),
       value: formatPrice(stats.monthlyRevenue),
       icon: TrendingUp,
       color: 'text-primary-600',
@@ -74,19 +74,19 @@ export default function DashboardPage() {
 
   const bookingStats = [
     {
-      title: '대기 중',
+      title: t('common.dashboard.pending'),
       value: stats.pendingBookings,
       icon: Clock,
       color: 'text-yellow-600',
     },
     {
-      title: '완료',
+      title: t('common.dashboard.completed'),
       value: stats.completedBookings,
       icon: CheckCircle,
       color: 'text-green-600',
     },
     {
-      title: '취소',
+      title: t('common.dashboard.cancelled'),
       value: stats.cancelledBookings,
       icon: XCircle,
       color: 'text-red-600',
@@ -101,7 +101,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold text-secondary-900">
             {t('nav.dashboard')}
           </h1>
-          <p className="text-secondary-600 mt-1">환영합니다, {user?.name}님!</p>
+          <p className="text-secondary-600 mt-1">{t('common.dashboard.welcome', { name: user?.name || '' })}</p>
         </div>
 
         {/* Stats Grid */}
@@ -139,7 +139,7 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-sm text-secondary-600">{stat.title}</p>
                     <p className="text-xl font-bold text-secondary-900">
-                      {stat.value}건
+                      {stat.value} {t('common.dashboard.cases')}
                     </p>
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export default function DashboardPage() {
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Bookings */}
-          <Card title="최근 예약" className="h-full">
+          <Card title={t('common.dashboard.recentBookings')} className="h-full">
             <div className="space-y-4">
               {[1, 2, 3, 4, 5].map((_, index) => (
                 <div
@@ -160,17 +160,17 @@ export default function DashboardPage() {
                 >
                   <div>
                     <p className="font-medium text-secondary-900">
-                      홍길동 고객
+                      Sample {t('common.dashboard.customer')}
                     </p>
                     <p className="text-sm text-secondary-600">
-                      커트 · 김철수 직원
+                      Haircut · Staff
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-secondary-900">
                       14:00
                     </p>
-                    <p className="text-xs text-secondary-600">오늘</p>
+                    <p className="text-xs text-secondary-600">{t('common.dashboard.today')}</p>
                   </div>
                 </div>
               ))}
@@ -178,14 +178,14 @@ export default function DashboardPage() {
           </Card>
 
           {/* Top Staff */}
-          <Card title="이번 달 TOP 직원" className="h-full">
+          <Card title={t('common.dashboard.topStaffThisMonth')} className="h-full">
             <div className="space-y-4">
               {[
-                { name: '김철수', bookings: 45, revenue: 3500000 },
-                { name: '이영희', bookings: 42, revenue: 3200000 },
-                { name: '박민수', bookings: 38, revenue: 2900000 },
-                { name: '정수진', bookings: 35, revenue: 2700000 },
-                { name: '최지훈', bookings: 32, revenue: 2500000 },
+                { name: 'Staff A', bookings: 45, revenue: 3500000 },
+                { name: 'Staff B', bookings: 42, revenue: 3200000 },
+                { name: 'Staff C', bookings: 38, revenue: 2900000 },
+                { name: 'Staff D', bookings: 35, revenue: 2700000 },
+                { name: 'Staff E', bookings: 32, revenue: 2500000 },
               ].map((designer, index) => (
                 <div
                   key={index}
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                         {designer.name}
                       </p>
                       <p className="text-sm text-secondary-600">
-                        {designer.bookings}건
+                        {designer.bookings} {t('common.dashboard.cases')}
                       </p>
                     </div>
                   </div>

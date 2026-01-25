@@ -1,5 +1,5 @@
 {
-  "title": "จัดการพนักงาน",
+  "title": "การจัดการพนักงาน",
   "name": "ชื่อ",
   "experience": "ประสบการณ์",
   "specialties": "ความเชี่ยวชาญ",
@@ -8,7 +8,125 @@
   "status": "สถานะ",
   "active": "ใช้งาน",
   "inactive": "ไม่ใช้งาน",
-  "permissions": "สิทธิ์การเข้าถึง",
+  "permissions": "สิทธิ์",
   "addStaff": "เพิ่มพนักงาน",
-  "profile": "แก้ไขโปรไฟล์"
+  "profile": "แก้ไขโปรไฟล์",
+  "register": "ลงทะเบียนพนักงาน",
+  "table": {
+    "number": "ลำดับ",
+    "nameNickname": "ชื่อ/ชื่อเล่น",
+    "email": "อีเมล",
+    "phone": "โทรศัพท์",
+    "joinDate": "วันที่เข้างาน",
+    "joinResign": "เข้า/ออก",
+    "adminPermission": "สิทธิ์ผู้ดูแล",
+    "profile": "โปรไฟล์",
+    "position": "ตำแหน่ง",
+    "bookingAllowed": "อนุญาตจอง"
+  },
+  "actions": {
+    "resign": "ดำเนินการลาออก",
+    "allPermissions": "สิทธิ์ทั้งหมด",
+    "setPermissions": "ตั้งค่าสิทธิ์",
+    "editInfo": "แก้ไขข้อมูล"
+  },
+  "guide": {
+    "line1": "พนักงานสามารถลงทะเบียนได้หลังจากสมัครสมาชิกและสมัครเข้าร่วมร้าน โดยต้องได้รับการอนุมัติจากผู้ดูแล",
+    "line2": "สามารถเปลี่ยนชื่อ/ชื่อเล่นได้ที่ [หน้าของฉัน]",
+    "line3": "การลาออกสามารถดำเนินการได้โดยผู้ดูแลเท่านั้น (ข้อมูลก่อนหน้าจะถูกลบเมื่อกลับมาทำงานใหม่)"
+  },
+  "roles": {
+    "admin": "ผู้ดูแล",
+    "manager": "ผู้จัดการ",
+    "staff": "พนักงาน"
+  },
+  "confirm": {
+    "resign": "คุณต้องการดำเนินการลาออกหรือไม่?"
+  },
+  "createModal": {
+    "title": "ลงทะเบียนพนักงาน (สร้างโดยตรง)",
+    "currentCount": "จำนวนพนักงานปัจจุบัน",
+    "limitReached": "ถึงขีดจำกัดแผนฟรีแล้ว",
+    "description": "ผู้ดูแลสร้าง ID และรหัสผ่านโดยตรงเพื่อแชร์กับพนักงาน",
+    "email": "อีเมลพนักงาน",
+    "password": "รหัสผ่าน",
+    "passwordPlaceholder": "ตั้งรหัสผ่าน",
+    "passwordHint": "8-20 ตัวอักษร ตัวอักษร + ตัวเลข + อักขระพิเศษ",
+    "name": "ชื่อ",
+    "namePlaceholder": "John Doe",
+    "role": "บทบาท",
+    "roleStaff": "พนักงาน",
+    "roleManager": "ผู้จัดการ",
+    "roleAdmin": "ผู้ดูแล",
+    "createAccount": "สร้างบัญชี"
+  },
+  "validation": {
+    "emailRequired": "กรุณากรอกอีเมล",
+    "emailInvalid": "กรุณากรอกรูปแบบอีเมลที่ถูกต้อง",
+    "passwordRequired": "กรุณากรอกรหัสผ่าน",
+    "passwordLength": "รหัสผ่านต้องมี 8-20 ตัวอักษร",
+    "passwordPattern": "ต้องมีตัวอักษร ตัวเลข และอักขระพิเศษ",
+    "loginRequired": "คุณต้องเข้าสู่ระบบเพื่อลงทะเบียนพนักงาน"
+  },
+  "permissionModal": {
+    "title": "ตั้งค่าสิทธิ์",
+    "description": "ตั้งค่าสิทธิ์ผู้ดูแลสำหรับ {name}",
+    "feature": "ฟีเจอร์",
+    "view": "ดู",
+    "edit": "แก้ไข/ลงทะเบียน",
+    "delete": "ลบ",
+    "saveFailed": "ไม่สามารถบันทึกสิทธิ์ได้"
+  },
+  "permissionLabels": {
+    "dashboard": "แดชบอร์ด",
+    "bookings": "จัดการการจอง",
+    "customers": "จัดการลูกค้า",
+    "staff": "จัดการพนักงาน",
+    "services": "จัดการบริการ",
+    "reviews": "จัดการรีวิว",
+    "sales": "จัดการยอดขาย",
+    "chat": "แชท",
+    "settings": "ตั้งค่า"
+  },
+  "profileModal": {
+    "name": "ชื่อ",
+    "nameRequired": "จำเป็นต้องกรอกชื่อ",
+    "phone": "โทรศัพท์",
+    "passwordChange": "เปลี่ยนรหัสผ่าน (ไม่บังคับ)",
+    "passwordPlaceholder": "ใส่รหัสผ่านใหม่ (เว้นว่างไว้เพื่อคงเดิม)",
+    "passwordHint": "รหัสผ่านจะเปลี่ยนถ้ากรอก",
+    "profileImage": "รูปโปรไฟล์",
+    "deleteImage": "ลบรูป",
+    "uploading": "กำลังอัปโหลด...",
+    "imageHint": "JPG, PNG, GIF (สูงสุด 5MB)",
+    "experienceYears": "ประสบการณ์ (ปี)",
+    "specialtiesHint": "ความเชี่ยวชาญ (คั่นด้วยเครื่องหมายจุลภาค)",
+    "specialtiesPlaceholder": "ตัด, ดัด, ย้อม",
+    "introduction": "แนะนำตัว",
+    "introPlaceholder": "กรอกข้อมูลแนะนำพนักงาน",
+    "socialMedia": "โซเชียลมีเดีย",
+    "updateFailed": "ไม่สามารถอัปเดตโปรไฟล์",
+    "uploadFailed": "ไม่สามารถอัปโหลดรูปภาพ",
+    "deleteImageTitle": "ลบรูปโปรไฟล์",
+    "deleteImageDesc": "คุณต้องการลบรูปโปรไฟล์หรือไม่? จะไม่สามารถกู้คืนได้หลังบันทึก",
+    "deleteConfirm": "ลบ"
+  },
+  "schedule": {
+    "title": "ตั้งค่าตารางพนักงาน",
+    "selectStaff": "เลือกพนักงาน",
+    "selectStaffPlaceholder": "เลือกพนักงาน",
+    "workHours": "ตั้งค่าเวลาทำงาน",
+    "holiday": "ตั้งค่าวันหยุด/ลา",
+    "holidayList": "รายการวันหยุด/ลา",
+    "noHolidays": "ไม่มีวันหยุด/ลาที่ลงทะเบียน",
+    "selectToSetSchedule": "เลือกพนักงานเพื่อตั้งค่าตาราง",
+    "closed": "ปิด",
+    "reasonPlaceholder": "เช่น ลาพักร้อน"
+  },
+  "errors": {
+    "updateFailed": "การอัปเดตล้มเหลว"
+  },
+  "success": {
+    "registered": "ลงทะเบียนพนักงานเรียบร้อย!"
+  }
 }

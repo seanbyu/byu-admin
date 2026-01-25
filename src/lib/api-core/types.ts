@@ -115,7 +115,7 @@ export interface DBBooking {
 export interface DBBookingWithRelations extends DBBooking {
   customer: { id: string; name: string; phone: string | null } | null;
   designer: { id: string; name: string } | null;
-  service: { id: string; name: string; price: number } | null;
+  service: { id: string; name: string; base_price: number } | null;
 }
 
 // ============================================

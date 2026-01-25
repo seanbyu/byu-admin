@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
 import { supabase } from '@/lib/supabase/client';
 import { createStaff } from '@/actions/staff';
@@ -21,6 +22,7 @@ export default function CreateStaffModal({
   salonId,
   currentStaffCount,
 }: CreateStaffModalProps) {
+  const t = useTranslations();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState('STAFF');
@@ -38,11 +40,11 @@ export default function CreateStaffModal({
   const validateEmail = (value: string): boolean => {
     const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
     if (!value) {
-      setEmailError('이메일을 입력해주세요.');
+      setEmailError(t('staff.validation.emailRequired'));
       return false;
     }
     if (!emailRegex.test(value)) {
-      setEmailError('올바른 이메일 형식을 입력해주세요.');
+      setEmailError(t('staff.validation.emailInvalid'));
       return false;
     }
     setEmailError(null);
@@ -57,15 +59,15 @@ export default function CreateStaffModal({
     const isValidLength = value.length >= 8 && value.length <= 20;
 
     if (!value) {
-      setPasswordError('비밀번호를 입력해주세요.');
+      setPasswordError(t('staff.validation.passwordRequired'));
       return false;
     }
     if (!isValidLength) {
-      setPasswordError('비밀번호는 8~20자여야 합니다.');
+      setPasswordError(t('staff.validation.passwordLength'));
       return false;
     }
     if (!hasLetter || !hasNumber || !hasSpecial) {
-      setPasswordError('영문, 숫자, 특수문자를 모두 포함해야 합니다.');
+      setPasswordError(t('staff.validation.passwordPattern'));
       return false;
     }
     setPasswordError(null);
@@ -92,7 +94,7 @@ export default function CreateStaffModal({
       } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error('직원을 등록하려면 로그인해야 합니다.');
+        throw new Error(t('staff.validation.loginRequired'));
       }
 
       const result = await createStaff({
@@ -136,7 +138,7 @@ export default function CreateStaffModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="직원 등록 (직접 생성)"
+      title={t('staff.createModal.title')}
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -148,16 +150,15 @@ export default function CreateStaffModal({
 
         <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700 mb-4">
           <p className="font-semibold">
-            현재 직원 수: {currentStaffCount} / {MAX_FREE_STAFF}
+            {t('staff.createModal.currentCount')}: {currentStaffCount} / {MAX_FREE_STAFF}
           </p>
           {isLimitReached ? (
             <p className="text-red-600 mt-1">
-              무료 플랜의 제한 인원에 도달했습니다.
+              {t('staff.createModal.limitReached')}
             </p>
           ) : (
             <p className="mt-1">
-              관리자가 아이디와 비밀번호를 직접 생성하여 직원에게 전달하는
-              방식입니다.
+              {t('staff.createModal.description')}
             </p>
           )}
         </div>
@@ -167,7 +168,7 @@ export default function CreateStaffModal({
             htmlFor="email"
             className="block text-sm font-medium text-gray-700"
           >
-            직원 이메일
+            {t('staff.createModal.email')}
           </label>
           <input
             id="email"
@@ -194,7 +195,7 @@ export default function CreateStaffModal({
             htmlFor="password"
             className="block text-sm font-medium text-gray-700"
           >
-            비밀번호
+            {t('staff.createModal.password')}
           </label>
           <div className="relative">
             <input
@@ -209,7 +210,7 @@ export default function CreateStaffModal({
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
                 passwordError ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="비밀번호 설정"
+              placeholder={t('staff.createModal.passwordPlaceholder')}
               disabled={isLimitReached}
             />
             <button
@@ -224,7 +225,7 @@ export default function CreateStaffModal({
             <p className="text-sm text-red-500">{passwordError}</p>
           ) : (
             <p className="text-xs text-gray-500">
-              8~20자, 영문 + 숫자 + 특수문자 포함
+              {t('staff.createModal.passwordHint')}
             </p>
           )}
         </div>
@@ -234,7 +235,7 @@ export default function CreateStaffModal({
             htmlFor="name"
             className="block text-sm font-medium text-gray-700"
           >
-            이름
+            {t('staff.createModal.name')}
           </label>
           <input
             id="name"
@@ -243,7 +244,7 @@ export default function CreateStaffModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="홍길동"
+            placeholder={t('staff.createModal.namePlaceholder')}
             disabled={isLimitReached}
           />
         </div>
@@ -253,7 +254,7 @@ export default function CreateStaffModal({
             htmlFor="role"
             className="block text-sm font-medium text-gray-700"
           >
-            역할
+            {t('staff.createModal.role')}
           </label>
           <select
             id="role"
@@ -262,9 +263,9 @@ export default function CreateStaffModal({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             disabled={isLimitReached}
           >
-            <option value="STAFF">직원 (Staff)</option>
-            <option value="MANAGER">매니저 (Manager)</option>
-            <option value="ADMIN">관리자 (Admin)</option>
+            <option value="STAFF">{t('staff.createModal.roleStaff')}</option>
+            <option value="MANAGER">{t('staff.createModal.roleManager')}</option>
+            <option value="ADMIN">{t('staff.createModal.roleAdmin')}</option>
           </select>
         </div>
 
@@ -275,14 +276,14 @@ export default function CreateStaffModal({
             className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
             disabled={loading}
           >
-            취소
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
             disabled={loading || isLimitReached}
             className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
-            {loading ? '생성 중...' : '계정 생성'}
+            {loading ? t('common.creating') : t('staff.createModal.createAccount')}
           </button>
         </div>
       </form>

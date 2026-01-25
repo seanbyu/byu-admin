@@ -12,5 +12,81 @@
   "loading": "กำลังโหลด...",
   "error": "เกิดข้อผิดพลาด",
   "success": "สำเร็จ",
-  "noData": "ไม่มีข้อมูล"
+  "noData": "ไม่มีข้อมูล",
+  "saving": "กำลังบันทึก...",
+  "creating": "กำลังสร้าง...",
+  "all": "ทั้งหมด",
+  "select": "เลือก",
+  "close": "ปิด",
+  "complete": "เสร็จสิ้น",
+  "dayNames": {
+    "sunday": "วันอาทิตย์",
+    "monday": "วันจันทร์",
+    "tuesday": "วันอังคาร",
+    "wednesday": "วันพุธ",
+    "thursday": "วันพฤหัสบดี",
+    "friday": "วันศุกร์",
+    "saturday": "วันเสาร์"
+  },
+  "shortDayNames": {
+    "sun": "อา",
+    "mon": "จ",
+    "tue": "อ",
+    "wed": "พ",
+    "thu": "พฤ",
+    "fri": "ศ",
+    "sat": "ส"
+  },
+  "time": {
+    "minutes": "นาที",
+    "hours": "ชั่วโมง",
+    "ago": "ที่แล้ว"
+  },
+  "currency": {
+    "won": "วอน",
+    "variable": "ผันแปร"
+  },
+  "notifications": {
+    "title": "การแจ้งเตือน",
+    "newBooking": "มีการจองใหม่",
+    "newReview": "มีรีวิวจากลูกค้า",
+    "cancelledBooking": "การจองถูกยกเลิก"
+  },
+  "calendar": {
+    "view": "ปฏิทิน",
+    "list": "รายการ",
+    "month": "เดือน",
+    "day": "วัน",
+    "addBooking": "เพิ่มการจอง",
+    "more": "เพิ่มเติม"
+  },
+  "form": {
+    "startDate": "วันเริ่มต้น",
+    "endDate": "วันสิ้นสุด",
+    "reason": "เหตุผล"
+  },
+  "actions": {
+    "applyFilter": "กรอง"
+  },
+  "comingSoon": "เร็วๆ นี้",
+  "dashboard": {
+    "welcome": "ยินดีต้อนรับ, {name}!",
+    "todayBookings": "การจองวันนี้",
+    "todayRevenue": "รายได้วันนี้",
+    "totalCustomers": "ลูกค้าทั้งหมด",
+    "monthlyRevenue": "รายได้รายเดือน",
+    "pending": "รอดำเนินการ",
+    "completed": "เสร็จสิ้น",
+    "cancelled": "ยกเลิก",
+    "cases": "รายการ",
+    "recentBookings": "การจองล่าสุด",
+    "topStaffThisMonth": "พนักงานยอดเยี่ยมเดือนนี้",
+    "customer": "ลูกค้า",
+    "today": "วันนี้"
+  },
+  "pages": {
+    "sales": "การจัดการยอดขาย",
+    "reviews": "การจัดการรีวิว",
+    "customers": "การจัดการลูกค้า"
+  }
 }

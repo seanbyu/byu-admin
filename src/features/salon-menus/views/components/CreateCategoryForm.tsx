@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { SalonIndustry, MenuCategory } from '../../types';
@@ -26,6 +27,7 @@ export default function CreateCategoryForm({
   onCreateCategory,
   onCancel,
 }: CreateCategoryFormProps) {
+  const t = useTranslations();
   const [newCategoryName, setNewCategoryName] = useState('');
 
   // 업종이 선택되지 않았고, 업종 목록이 있으면 첫 번째 업종을 기본 선택
@@ -47,10 +49,10 @@ export default function CreateCategoryForm({
 
   return (
     <div className="mb-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-      <h3 className="font-semibold mb-4">새 카테고리 추가</h3>
+      <h3 className="font-semibold mb-4">{t('menu.addGroup')}</h3>
       <div className="flex items-center gap-2">
         <Input
-          placeholder="예: 커트, 펌, 컬러"
+          placeholder={t('menu.categoryPlaceholder')}
           value={newCategoryName}
           onChange={(e) => setNewCategoryName(e.target.value)}
           className="max-w-xs"
@@ -62,7 +64,7 @@ export default function CreateCategoryForm({
             value={selectedIndustryForCreate}
             onChange={(e) => onSelectIndustryForCreate(e.target.value)}
           >
-            <option value="">업종 선택</option>
+            <option value="">{t('common.select')}</option>
             {orderedIndustries.map((ind) => (
               <option key={ind.id} value={ind.id}>
                 {ind.name}
@@ -71,10 +73,10 @@ export default function CreateCategoryForm({
           </select>
         )}
         <Button size="sm" onClick={handleCreateCategory}>
-          저장
+          {t('common.save')}
         </Button>
         <Button size="sm" variant="ghost" onClick={onCancel}>
-          취소
+          {t('common.cancel')}
         </Button>
       </div>
     </div>

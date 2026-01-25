@@ -15,7 +15,7 @@ export class BookingRepository extends BaseRepository {
         *,
         customer:users!bookings_customer_id_customer_user_type_fkey(id, name, phone),
         designer:users!bookings_designer_id_designer_user_type_fkey(id, name),
-        service:services(id, name, price)
+        service:services(id, name, base_price)
       `)
       .eq("salon_id", salonId)
       .order("booking_date", { ascending: false });

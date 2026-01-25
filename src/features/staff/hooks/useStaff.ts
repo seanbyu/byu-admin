@@ -29,6 +29,7 @@ export const useStaff = (salonId: string, options?: { enabled?: boolean }) => {
 
   return {
     ...staffQuery,
+    refetch: staffQuery.refetch,
     updateStaff: updateStaffMutation.mutateAsync,
     isUpdating: updateStaffMutation.isPending,
   };

@@ -1,8 +1,17 @@
+'use client';
+
 import React from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { ko, enUS, th } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from './Button';
+
+const DATE_LOCALES = {
+  ko,
+  en: enUS,
+  th,
+} as const;
 
 interface CalendarEvent {
   id: string;
@@ -30,6 +39,10 @@ interface CalendarProps {
 type ViewType = 'month' | 'day';
 
 export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick, onTimeSlotClick, resources = [] }: CalendarProps) {
+  const t = useTranslations('common');
+  const locale = useLocale();
+  const dateLocale = DATE_LOCALES[locale as keyof typeof DATE_LOCALES] || enUS;
+
   const [currentMonth, setCurrentMonth] = React.useState(selectedDate);
   const [viewType, setViewType] = React.useState<ViewType>('month');
   const [currentDate, setCurrentDate] = React.useState(selectedDate);
@@ -40,7 +53,15 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
   const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
-  const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+  const weekDays = [
+    t('shortDayNames.sun'),
+    t('shortDayNames.mon'),
+    t('shortDayNames.tue'),
+    t('shortDayNames.wed'),
+    t('shortDayNames.thu'),
+    t('shortDayNames.fri'),
+    t('shortDayNames.sat'),
+  ];
 
   const getEventsForDay = (day: Date) => {
     return events.filter(event => isSameDay(event.date, day));
@@ -85,7 +106,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
           {/* 헤더: 날짜 + 직원 컬럼 */}
           <div className="flex border-b border-secondary-200">
             <div className="w-20 flex-shrink-0 py-3 px-2 text-center font-semibold text-secondary-900 border-r border-secondary-200">
-              {format(currentDate, 'M/d (E)', { locale: ko })}
+              {format(currentDate, 'M/d (E)', { locale: dateLocale })}
             </div>
             <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${resources.length}, minmax(120px, 1fr))` }}>
               {resources.map((resource) => (
@@ -164,7 +185,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
         <div className="flex border-b border-secondary-200">
           <div className="w-20 flex-shrink-0"></div>
           <div className="flex-1 text-center py-3 font-semibold text-secondary-900">
-            {format(currentDate, 'M월 d일 (E)', { locale: ko })}
+            {format(currentDate, 'PPP', { locale: dateLocale })}
           </div>
         </div>
 
@@ -191,7 +212,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
                 >
                   {timeEvents.length === 0 && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <span className="text-xs text-secondary-400">예약 추가하기</span>
+                      <span className="text-xs text-secondary-400">{t('calendar.addBooking')}</span>
                     </div>
                   )}
                   {timeEvents.map((event) => (
@@ -283,7 +304,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
                   ))}
                   {dayEvents.length > 3 && (
                     <div className="text-xs text-secondary-500 pl-1">
-                      +{dayEvents.length - 3} 더보기
+                      +{dayEvents.length - 3} {t('calendar.more')}
                     </div>
                   )}
                 </div>
@@ -302,8 +323,8 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
         <div className="flex items-center space-x-4">
           <h2 className="text-lg font-semibold text-secondary-900">
             {viewType === 'month'
-              ? format(currentMonth, 'yyyy년 M월', { locale: ko })
-              : format(currentDate, 'yyyy년 M월 d일', { locale: ko })
+              ? format(currentMonth, 'LLLL yyyy', { locale: dateLocale })
+              : format(currentDate, 'PPP', { locale: dateLocale })
             }
           </h2>
           <div className="flex border border-secondary-200 rounded-lg overflow-hidden">
@@ -316,7 +337,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
               onClick={() => setViewType('month')}
             >
               <CalendarRange size={16} />
-              <span>월</span>
+              <span>{t('calendar.month')}</span>
             </button>
             <button
               className={`px-3 py-1.5 flex items-center space-x-1 text-sm transition-colors ${
@@ -327,7 +348,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
               onClick={() => setViewType('day')}
             >
               <CalendarDays size={16} />
-              <span>일</span>
+              <span>{t('calendar.day')}</span>
             </button>
           </div>
         </div>

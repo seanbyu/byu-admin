@@ -11,8 +11,8 @@ import { routing } from '@/i18n/routing';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Salon Admin - 살롱 예약 관리 시스템',
-  description: '헤어살롱을 위한 포괄적인 예약 및 관리 플랫폼',
+  title: 'Salon Admin - Salon Booking Management System',
+  description: 'Comprehensive booking and management platform for hair salons',
 };
 
 export default async function RootLayout({

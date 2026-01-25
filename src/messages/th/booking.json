@@ -17,5 +17,24 @@
   "source": "ช่องทาง",
   "online": "ออนไลน์",
   "phone": "โทรศัพท์",
-  "walkIn": "เดินเข้ามา"
+  "walkIn": "เดินเข้ามา",
+  "pageDescription": "จัดการการจองและเพิ่มการจองใหม่",
+  "shopSettings": "ตั้งค่าร้าน",
+  "staffSchedule": "ตารางพนักงาน",
+  "shopSettingsModal": {
+    "title": "ตั้งค่าธุรกิจร้าน",
+    "businessHours": "ตั้งค่าเวลาทำการ",
+    "closedDays": "ตั้งค่าวันปิดทำการ",
+    "closedDaysList": "รายการวันปิดทำการ",
+    "noClosedDays": "ไม่มีวันปิดทำการที่ลงทะเบียน",
+    "reasonPlaceholder": "เช่น วันหยุดนักขัตฤกษ์"
+  },
+  "placeholders": {
+    "customerName": "กรอกชื่อลูกค้า",
+    "notesPlaceholder": "กรอกหมายเหตุพิเศษ"
+  },
+  "sampleServices": {
+    "cut": "ตัดผม - 35,000 วอน",
+    "color": "ย้อมสี - 120,000 วอน"
+  }
 }
