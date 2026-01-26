@@ -13,10 +13,18 @@ import { User } from '@/types';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 
+type AuthErrorCode =
+  | 'INVALID_CREDENTIALS'
+  | 'LOGIN_FAILED'
+  | 'LOGIN_ERROR'
+  | 'SIGNUP_FAILED'
+  | 'SIGNUP_ERROR';
+
 interface AuthResponse {
   user: User | null;
   token: string | null;
   error?: string;
+  errorCode?: AuthErrorCode;
 }
 
 interface LoginForm {
@@ -37,13 +45,26 @@ export default function LoginPageView() {
     formState: { errors },
   } = useForm<LoginForm>();
 
+  // 에러 코드에 따른 번역 메시지 반환
+  const getErrorMessage = (errorCode?: AuthErrorCode): string => {
+    switch (errorCode) {
+      case 'INVALID_CREDENTIALS':
+        return t('errors.invalidCredentials');
+      case 'LOGIN_FAILED':
+        return t('errors.loginFailed');
+      case 'LOGIN_ERROR':
+      default:
+        return t('errors.loginError');
+    }
+  };
+
   const loginMutation = useLogin({
     onSuccess: (response: AuthResponse) => {
       if (response.user && response.token) {
         login(response.user, response.token);
         router.push('/dashboard');
       } else {
-        setError(response.error || t('errors.loginFailed'));
+        setError(getErrorMessage(response.errorCode));
       }
     },
     onError: (err: Error) => {

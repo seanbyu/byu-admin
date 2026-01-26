@@ -7,10 +7,22 @@ import { User, UserRole } from '@/types';
 
 const supabase = _supabase as any;
 
+// 에러 코드 정의
+export type AuthErrorCode =
+  | 'INVALID_CREDENTIALS'
+  | 'LOGIN_FAILED'
+  | 'LOGIN_ERROR'
+  | 'SIGNUP_FAILED'
+  | 'SIGNUP_ERROR'
+  | 'SIGNOUT_ERROR'
+  | 'PASSWORD_RESET_ERROR'
+  | 'PASSWORD_UPDATE_ERROR';
+
 interface AuthResponse {
   user: User | null;
   token: string | null;
   error?: string;
+  errorCode?: AuthErrorCode;
 }
 
 /**
@@ -33,6 +45,7 @@ export async function signInWithEmail(
         user: null,
         token: null,
         error: authError.message,
+        errorCode: 'INVALID_CREDENTIALS',
       };
     }
 
@@ -40,7 +53,8 @@ export async function signInWithEmail(
       return {
         user: null,
         token: null,
-        error: '로그인에 실패했습니다',
+        error: 'Login failed',
+        errorCode: 'LOGIN_FAILED',
       };
     }
 
@@ -149,7 +163,8 @@ export async function signInWithEmail(
     return {
       user: null,
       token: null,
-      error: '로그인 중 오류가 발생했습니다',
+      error: 'Login error',
+      errorCode: 'LOGIN_ERROR',
     };
   }
 }
@@ -184,6 +199,7 @@ export async function signUpWithEmail(
         user: null,
         token: null,
         error: authError.message,
+        errorCode: 'SIGNUP_FAILED',
       };
     }
 
@@ -191,7 +207,8 @@ export async function signUpWithEmail(
       return {
         user: null,
         token: null,
-        error: '회원가입에 실패했습니다',
+        error: 'Signup failed',
+        errorCode: 'SIGNUP_FAILED',
       };
     }
 
@@ -230,7 +247,8 @@ export async function signUpWithEmail(
     return {
       user: null,
       token: null,
-      error: '회원가입 중 오류가 발생했습니다',
+      error: 'Signup error',
+      errorCode: 'SIGNUP_ERROR',
     };
   }
 }
@@ -238,16 +256,16 @@ export async function signUpWithEmail(
 /**
  * 로그아웃
  */
-export async function signOut(): Promise<{ error?: string }> {
+export async function signOut(): Promise<{ error?: string; errorCode?: AuthErrorCode }> {
   try {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      return { error: error.message };
+      return { error: error.message, errorCode: 'SIGNOUT_ERROR' };
     }
     return {};
   } catch (error) {
     console.error('Signout error:', error);
-    return { error: '로그아웃 중 오류가 발생했습니다' };
+    return { error: 'Signout error', errorCode: 'SIGNOUT_ERROR' };
   }
 }
 
@@ -273,20 +291,20 @@ export async function getSession() {
  */
 export async function sendPasswordResetEmail(
   email: string
-): Promise<{ error?: string }> {
+): Promise<{ error?: string; errorCode?: AuthErrorCode }> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
     });
 
     if (error) {
-      return { error: error.message };
+      return { error: error.message, errorCode: 'PASSWORD_RESET_ERROR' };
     }
 
     return {};
   } catch (error) {
     console.error('Password reset error:', error);
-    return { error: '비밀번호 재설정 이메일 전송 중 오류가 발생했습니다' };
+    return { error: 'Password reset error', errorCode: 'PASSWORD_RESET_ERROR' };
   }
 }
 
@@ -295,20 +313,20 @@ export async function sendPasswordResetEmail(
  */
 export async function updatePassword(
   newPassword: string
-): Promise<{ error?: string }> {
+): Promise<{ error?: string; errorCode?: AuthErrorCode }> {
   try {
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
 
     if (error) {
-      return { error: error.message };
+      return { error: error.message, errorCode: 'PASSWORD_UPDATE_ERROR' };
     }
 
     return {};
   } catch (error) {
     console.error('Update password error:', error);
-    return { error: '비밀번호 업데이트 중 오류가 발생했습니다' };
+    return { error: 'Password update error', errorCode: 'PASSWORD_UPDATE_ERROR' };
   }
 }
 
