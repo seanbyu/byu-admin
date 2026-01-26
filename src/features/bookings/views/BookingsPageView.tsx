@@ -104,16 +104,20 @@ const ViewModeToggle = memo(function ViewModeToggle({
 const BookingFilters = memo(function BookingFilters({
   selectedDate,
   statusFilter,
+  selectedStaffId,
   designers,
   onDateChange,
   onStatusChange,
+  onStaffChange,
   t,
 }: {
   selectedDate: Date;
   statusFilter: string;
+  selectedStaffId: string;
   designers: Array<{ value: string; label: string }>;
   onDateChange: (date: Date) => void;
   onStatusChange: (status: string) => void;
+  onStaffChange: (id: string) => void;
   t: (key: string) => string;
 }) {
   // useMemo로 상태 옵션 번역 (js-cache-function-results)
@@ -133,6 +137,10 @@ const BookingFilters = memo(function BookingFilters({
     onStatusChange(e.target.value);
   }, [onStatusChange]);
 
+  const handleStaffChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    onStaffChange(e.target.value);
+  }, [onStaffChange]);
+
   return (
     <Card>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -147,10 +155,14 @@ const BookingFilters = memo(function BookingFilters({
           options={translatedStatusOptions}
           value={statusFilter}
           onChange={handleStatusChange}
+          showPlaceholder={false}
         />
         <Select
           label={t('booking.designer')}
           options={[{ value: '', label: t('common.all') }, ...designers]}
+          value={selectedStaffId}
+          onChange={handleStaffChange}
+          showPlaceholder={false}
         />
         <div className="flex items-end">
           <Button variant="outline" className="w-full">
@@ -176,7 +188,7 @@ export default function BookingsPageView() {
     enabled: !!salonId,
   });
 
-  const { data: staffResponse } = useStaff(salonId, {
+  const { data: staffResponse, refetch: refetchStaff } = useStaff(salonId, {
     enabled: !!salonId,
   });
 
@@ -325,9 +337,11 @@ export default function BookingsPageView() {
         <BookingFilters
           selectedDate={pageState.selectedDate}
           statusFilter={pageState.statusFilter}
+          selectedStaffId={pageState.selectedStaffId}
           designers={designers}
           onDateChange={pageState.setSelectedDate}
           onStatusChange={pageState.setStatusFilter}
+          onStaffChange={pageState.setSelectedStaffId}
           t={t}
         />
 
@@ -381,6 +395,7 @@ export default function BookingsPageView() {
           onClose={pageState.closeStaffScheduleModal}
           salonId={salonId}
           staffList={staffMembers}
+          onSave={refetchStaff}
         />
       )}
     </Layout>

@@ -70,21 +70,24 @@ export const useLogin = (options?: any) => {
   });
 };
 
-export const useLogout = (options?: any) => {
+export const useLogout = (options?: { onLogout?: () => void }) => {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => authApi.logout(),
-    ...options,
-    onSuccess: (...args) => {
-      // Clear all queries on logout
-      queryClient.clear();
-      // Update store
-      useAuthStore.getState().logout();
-      if (options?.onSuccess) {
-        options.onSuccess(...args);
-      }
-    },
-  });
+
+  const logout = () => {
+    // 1. 로컬 상태 즉시 초기화 (즉각적인 사용자 반응)
+    queryClient.clear();
+    useAuthStore.getState().logout();
+
+    // 2. 콜백 즉시 호출 (리다이렉트 등)
+    options?.onLogout?.();
+
+    // 3. 백그라운드에서 Supabase signOut (응답을 기다리지 않음)
+    authApi.logout().catch((error) => {
+      console.error('Background signOut error:', error);
+    });
+  };
+
+  return { logout };
 };
 
 export const useRegister = () => {

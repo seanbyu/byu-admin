@@ -31,9 +31,17 @@ export interface CalendarEvent {
   resourceId: string;
 }
 
+export interface CalendarResourceWorkHours {
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
+  isOpen: boolean;
+}
+
 export interface CalendarResource {
   id: string;
   label: string;
+  workHours?: CalendarResourceWorkHours[];
 }
 
 export interface DesignerOption {
@@ -175,13 +183,19 @@ export function useBookingsData(
       }));
   }, [staffMembers]);
 
-  // 캘린더 리소스 (직원 목록)
+  // 캘린더 리소스 (직원 목록 + 업무 시간)
   const calendarResources = useMemo<CalendarResource[]>(() => {
     return staffMembers
       .filter((staff) => staff.isBookingEnabled)
       .map((staff) => ({
         id: staff.id,
         label: staff.name,
+        workHours: staff.workHours?.map(wh => ({
+          dayOfWeek: wh.dayOfWeek,
+          openTime: wh.openTime,
+          closeTime: wh.closeTime,
+          isOpen: wh.isOpen,
+        })),
       }));
   }, [staffMembers]);
 

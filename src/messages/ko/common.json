@@ -58,7 +58,10 @@
     "month": "월",
     "day": "일",
     "addBooking": "예약 추가하기",
-    "more": "더보기"
+    "more": "더보기",
+    "closed": "휴무",
+    "dayOff": "휴무",
+    "unavailable": "예약불가"
   },
   "form": {
     "startDate": "시작일",

@@ -22,9 +22,17 @@ interface CalendarEvent {
   resourceId?: string;
 }
 
+interface ResourceWorkHours {
+  dayOfWeek: number; // 0: 일요일, 1: 월요일, ..., 6: 토요일
+  openTime: string;  // "09:00"
+  closeTime: string; // "20:00"
+  isOpen: boolean;
+}
+
 interface Resource {
   id: string;
   label: string;
+  workHours?: ResourceWorkHours[];
 }
 
 interface CalendarProps {
@@ -46,6 +54,12 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
   const [currentMonth, setCurrentMonth] = React.useState(selectedDate);
   const [viewType, setViewType] = React.useState<ViewType>('month');
   const [currentDate, setCurrentDate] = React.useState(selectedDate);
+
+  // 외부 selectedDate prop 변경 시 내부 상태 동기화
+  React.useEffect(() => {
+    setCurrentDate(selectedDate);
+    setCurrentMonth(selectedDate);
+  }, [selectedDate]);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -87,13 +101,38 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
     onDateSelect(newDate);
   };
 
-  const timeSlots = Array.from({ length: 24 }, (_, i) => {
-    const hour = i.toString().padStart(2, '0');
+  // 08:00 ~ 22:00 시간 슬롯 (15시간)
+  const timeSlots = Array.from({ length: 15 }, (_, i) => {
+    const hour = (i + 8).toString().padStart(2, '0');
     return `${hour}:00`;
   });
 
   const getDayEvents = () => {
     return events.filter(event => isSameDay(event.date, currentDate));
+  };
+
+  // 특정 직원의 특정 시간 슬롯 상태 확인
+  // 반환값: 'available' | 'unavailable' | 'dayOff'
+  const getSlotStatus = (resource: Resource, date: Date, time: string): 'available' | 'unavailable' | 'dayOff' => {
+    if (!resource.workHours || resource.workHours.length === 0) {
+      return 'available'; // workHours가 없으면 기본적으로 예약 가능
+    }
+
+    const dayOfWeek = date.getDay(); // 0: 일요일, 1: 월요일, ...
+    const workHoursForDay = resource.workHours.find(wh => wh.dayOfWeek === dayOfWeek);
+
+    if (!workHoursForDay || !workHoursForDay.isOpen) {
+      return 'dayOff'; // 해당 요일 휴무
+    }
+
+    const hour = parseInt(time.split(':')[0]);
+    const openHour = parseInt(workHoursForDay.openTime.split(':')[0]);
+    const closeHour = parseInt(workHoursForDay.closeTime.split(':')[0]);
+
+    if (hour >= openHour && hour < closeHour) {
+      return 'available';
+    }
+    return 'unavailable'; // 근무일이지만 업무 시간 외
   };
 
   const renderDayView = () => {
@@ -139,34 +178,51 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
                         return eventHour === hour && event.resourceId === resource.id;
                       });
 
+                      const slotStatus = getSlotStatus(resource, currentDate, time);
+                      const isAvailable = slotStatus === 'available';
+
                       return (
                         <div
                           key={resource.id}
-                          className="py-2 px-2 min-h-[60px] relative cursor-pointer transition-colors hover:bg-blue-50 border-r border-secondary-100 last:border-r-0"
+                          className={`py-2 px-2 min-h-[60px] relative border-r border-secondary-100 last:border-r-0 ${
+                            isAvailable
+                              ? 'cursor-pointer transition-colors hover:bg-blue-50'
+                              : 'bg-secondary-100 cursor-not-allowed'
+                          }`}
                           onClick={() => {
-                            if (resourceEvents.length === 0) {
+                            if (isAvailable && resourceEvents.length === 0) {
                               onTimeSlotClick?.(currentDate, time, resource.id);
                             }
                           }}
                         >
-                          {resourceEvents.length === 0 && (
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                              <span className="text-xs text-secondary-400">+</span>
+                          {isAvailable ? (
+                            <>
+                              {resourceEvents.length === 0 && (
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                  <span className="text-xs text-secondary-400">+</span>
+                                </div>
+                              )}
+                              {resourceEvents.map((event) => (
+                                <div
+                                  key={event.id}
+                                  className={`mb-1 p-2 rounded cursor-pointer text-xs ${event.color || 'bg-primary-100 text-primary-700'}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEventClick?.(event);
+                                  }}
+                                >
+                                  <div className="font-medium">{event.time}</div>
+                                  <div className="truncate">{event.title}</div>
+                                </div>
+                              ))}
+                            </>
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-xs text-secondary-400">
+                                {slotStatus === 'dayOff' ? t('calendar.dayOff') : t('calendar.unavailable')}
+                              </span>
                             </div>
                           )}
-                          {resourceEvents.map((event) => (
-                            <div
-                              key={event.id}
-                              className={`mb-1 p-2 rounded cursor-pointer text-xs ${event.color || 'bg-primary-100 text-primary-700'}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onEventClick?.(event);
-                              }}
-                            >
-                              <div className="font-medium">{event.time}</div>
-                              <div className="truncate">{event.title}</div>
-                            </div>
-                          ))}
                         </div>
                       );
                     })}

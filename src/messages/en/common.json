@@ -58,7 +58,10 @@
     "month": "Month",
     "day": "Day",
     "addBooking": "Add Booking",
-    "more": "more"
+    "more": "more",
+    "closed": "Closed",
+    "dayOff": "Day Off",
+    "unavailable": "Unavailable"
   },
   "form": {
     "startDate": "Start Date",

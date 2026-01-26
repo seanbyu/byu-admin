@@ -23,15 +23,11 @@ export const Header: React.FC = () => {
     { code: 'th', name: 'ภาษาไทย' },
   ];
 
-  const logoutMutation = useLogout({
-    onSuccess: () => {
+  const { logout } = useLogout({
+    onLogout: () => {
       router.push('/login');
     },
   });
-
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
 
   return (
     <header className="bg-white border-b border-secondary-200 h-16 flex items-center justify-between px-6">
@@ -121,7 +117,7 @@ export const Header: React.FC = () => {
 
         {/* Logout */}
         <button
-          onClick={handleLogout}
+          onClick={logout}
           className="flex items-center space-x-2 text-secondary-700 hover:text-red-600 transition-colors"
         >
           <LogOut size={20} />

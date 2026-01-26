@@ -31,16 +31,17 @@ const DAY_KEYS = [
   'common.dayNames.saturday',
 ] as const;
 
-const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => {
-  const hour = i.toString().padStart(2, '0');
+// 08:00 ~ 22:00 시간 옵션 (15개)
+const TIME_OPTIONS = Array.from({ length: 15 }, (_, i) => {
+  const hour = (i + 8).toString().padStart(2, '0');
   return { value: `${hour}:00`, label: `${hour}:00` };
 });
 
 const getDefaultWorkHours = (): BusinessHours[] => {
   return Array.from({ length: 7 }, (_, i) => ({
     dayOfWeek: i,
-    openTime: '10:00',
-    closeTime: '20:00',
+    openTime: '08:00',
+    closeTime: '22:00',
     isOpen: i !== 0,
   }));
 };
