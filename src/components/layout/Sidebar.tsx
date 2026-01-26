@@ -4,6 +4,8 @@ import React from 'react';
 import {
   LayoutDashboard,
   Calendar,
+  CalendarDays,
+  Settings2,
   Users,
   Scissors,
   ShoppingBag,
@@ -34,6 +36,7 @@ export const Sidebar: React.FC = () => {
 
   const [openSubmenus, setOpenSubmenus] = React.useState<string[]>([
     'salon-management',
+    'booking-management',
   ]);
 
   const toggleSubmenu = (name: string) => {
@@ -63,11 +66,26 @@ export const Sidebar: React.FC = () => {
       permissionKey: 'dashboard',
     },
     {
+      id: 'booking-management',
       name: t('nav.bookings'),
       icon: Calendar,
-      href: '/bookings',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
-      permissionKey: 'bookings',
+      subItems: [
+        {
+          name: t('nav.bookingCalendar'),
+          icon: CalendarDays,
+          href: '/bookings/calendar',
+          roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+          permissionKey: 'bookings',
+        },
+        {
+          name: t('nav.onlineBookingSettings'),
+          icon: Settings2,
+          href: '/bookings/settings',
+          roles: [UserRole.MANAGER, UserRole.ADMIN],
+          permissionKey: 'bookings',
+        },
+      ],
     },
     {
       name: t('nav.customers'),

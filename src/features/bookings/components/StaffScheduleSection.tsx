@@ -1,0 +1,367 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Card } from '@/components/ui/Card';
+import { BusinessHours, Holiday } from '@/types';
+import { Staff } from '@/features/staff/types';
+import { Trash2, Plus, Check } from 'lucide-react';
+import { createStaffApi } from '@/features/staff/api';
+import { useStaff } from '@/features/staff/hooks/useStaff';
+
+interface StaffScheduleSectionProps {
+  salonId: string;
+}
+
+// 요일 키 매핑
+const DAY_KEYS = [
+  'common.dayNames.sunday',
+  'common.dayNames.monday',
+  'common.dayNames.tuesday',
+  'common.dayNames.wednesday',
+  'common.dayNames.thursday',
+  'common.dayNames.friday',
+  'common.dayNames.saturday',
+] as const;
+
+// 08:00 ~ 22:00 시간 옵션 (15개)
+const TIME_OPTIONS = Array.from({ length: 15 }, (_, i) => {
+  const hour = (i + 8).toString().padStart(2, '0');
+  return { value: `${hour}:00`, label: `${hour}:00` };
+});
+
+const getDefaultWorkHours = (): BusinessHours[] => {
+  return Array.from({ length: 7 }, (_, i) => ({
+    dayOfWeek: i,
+    openTime: '08:00',
+    closeTime: '22:00',
+    isOpen: i !== 0,
+  }));
+};
+
+export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
+  const t = useTranslations();
+  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
+  const [workHours, setWorkHours] = useState<BusinessHours[]>(getDefaultWorkHours());
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // 직원 목록 가져오기
+  const { data: staffResponse, isLoading: isLoadingStaff } = useStaff(salonId, {
+    enabled: !!salonId,
+  });
+  const staffList = staffResponse?.data || [];
+
+  // 새 휴가 입력 상태
+  const [newHoliday, setNewHoliday] = useState({
+    startDate: '',
+    endDate: '',
+    reason: '',
+  });
+
+  const selectedStaff = staffList.find((s) => s.id === selectedStaffId);
+
+  // 직원 선택 시 데이터 로드
+  useEffect(() => {
+    if (selectedStaff) {
+      if (selectedStaff.workHours && selectedStaff.workHours.length > 0) {
+        setWorkHours(selectedStaff.workHours);
+      } else {
+        setWorkHours(getDefaultWorkHours());
+      }
+      setHolidays(selectedStaff.holidays || []);
+    } else {
+      setWorkHours(getDefaultWorkHours());
+      setHolidays([]);
+    }
+  }, [selectedStaff]);
+
+  const handleToggleDay = (dayOfWeek: number) => {
+    setWorkHours((prev) =>
+      prev.map((wh) =>
+        wh.dayOfWeek === dayOfWeek ? { ...wh, isOpen: !wh.isOpen } : wh
+      )
+    );
+  };
+
+  const handleTimeChange = (
+    dayOfWeek: number,
+    field: 'openTime' | 'closeTime',
+    value: string
+  ) => {
+    setWorkHours((prev) =>
+      prev.map((wh) =>
+        wh.dayOfWeek === dayOfWeek ? { ...wh, [field]: value } : wh
+      )
+    );
+  };
+
+  const handleAddHoliday = () => {
+    if (!newHoliday.startDate || !newHoliday.endDate || !newHoliday.reason) {
+      return;
+    }
+
+    const holiday: Holiday = {
+      id: `holiday-${Date.now()}`,
+      startDate: newHoliday.startDate,
+      endDate: newHoliday.endDate,
+      reason: newHoliday.reason,
+    };
+
+    setHolidays((prev) => [...prev, holiday]);
+    setNewHoliday({ startDate: '', endDate: '', reason: '' });
+  };
+
+  const handleRemoveHoliday = (id: string) => {
+    setHolidays((prev) => prev.filter((h) => h.id !== id));
+  };
+
+  const handleSave = async () => {
+    if (!selectedStaffId || !salonId) return;
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+    try {
+      const staffApi = createStaffApi();
+      await staffApi.updateStaff(salonId, selectedStaffId, {
+        workHours,
+        holidays,
+      });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      console.error('Failed to save staff schedule:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const staffOptions = staffList.map((staff) => ({
+    value: staff.id,
+    label: staff.name,
+  }));
+
+  if (isLoadingStaff) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="text-secondary-500">{t('common.loading')}</div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold text-secondary-900">
+          {t('staff.schedule.title')}
+        </h2>
+        <div className="flex items-center gap-3">
+          {saveSuccess && (
+            <span className="flex items-center gap-1 text-sm text-green-600">
+              <Check size={16} />
+              {t('common.saved')}
+            </span>
+          )}
+          <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={!selectedStaffId || isSaving}
+          >
+            {isSaving ? t('common.saving') : t('common.save')}
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* 직원 선택 */}
+        <div>
+          <Select
+            label={t('staff.schedule.selectStaff')}
+            placeholder={t('staff.schedule.selectStaffPlaceholder')}
+            options={staffOptions}
+            value={selectedStaffId}
+            onChange={(e) => setSelectedStaffId(e.target.value)}
+          />
+        </div>
+
+        {selectedStaffId ? (
+          <>
+            {/* 업무 시간 설정 */}
+            <div>
+              <h3 className="text-sm font-medium text-secondary-700 mb-3">
+                {t('staff.schedule.workHours')}
+              </h3>
+              <div className="bg-secondary-50 rounded-lg p-4">
+                <div className="space-y-3">
+                  {workHours
+                    .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
+                    .map((wh) => (
+                      <div
+                        key={wh.dayOfWeek}
+                        className="flex items-center gap-4 py-2 border-b border-secondary-200 last:border-b-0"
+                      >
+                        {/* 요일 및 토글 */}
+                        <div className="min-w-[120px] flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleDay(wh.dayOfWeek)}
+                            className={`w-12 h-6 rounded-full transition-colors relative ${
+                              wh.isOpen ? 'bg-primary-500' : 'bg-secondary-300'
+                            }`}
+                          >
+                            <span
+                              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                                wh.isOpen ? 'right-1' : 'left-1'
+                              }`}
+                            />
+                          </button>
+                          <span
+                            className={`text-sm font-medium ${
+                              wh.dayOfWeek === 0
+                                ? 'text-red-500'
+                                : wh.dayOfWeek === 6
+                                  ? 'text-blue-500'
+                                  : 'text-secondary-700'
+                            }`}
+                          >
+                            {t(DAY_KEYS[wh.dayOfWeek])}
+                          </span>
+                        </div>
+
+                        {/* 시간 선택 */}
+                        {wh.isOpen ? (
+                          <div className="flex items-center gap-2 flex-1 flex-wrap sm:flex-nowrap">
+                            <Select
+                              options={TIME_OPTIONS}
+                              value={wh.openTime}
+                              onChange={(e) =>
+                                handleTimeChange(wh.dayOfWeek, 'openTime', e.target.value)
+                              }
+                              className="w-24 sm:w-28"
+                              showPlaceholder={false}
+                            />
+                            <span className="text-secondary-500">~</span>
+                            <Select
+                              options={TIME_OPTIONS}
+                              value={wh.closeTime}
+                              onChange={(e) =>
+                                handleTimeChange(wh.dayOfWeek, 'closeTime', e.target.value)
+                              }
+                              className="w-24 sm:w-28"
+                              showPlaceholder={false}
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-secondary-400 text-sm flex-1">
+                            {t('staff.schedule.closed')}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 휴가/휴무 설정 */}
+            <div>
+              <h3 className="text-sm font-medium text-secondary-700 mb-3">
+                {t('staff.schedule.holiday')}
+              </h3>
+              <div className="bg-secondary-50 rounded-lg p-4">
+                {/* 새 휴가 입력 */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                  <Input
+                    type="date"
+                    label={t('common.form.startDate')}
+                    value={newHoliday.startDate}
+                    onChange={(e) =>
+                      setNewHoliday((prev) => ({ ...prev, startDate: e.target.value }))
+                    }
+                  />
+                  <Input
+                    type="date"
+                    label={t('common.form.endDate')}
+                    value={newHoliday.endDate}
+                    onChange={(e) =>
+                      setNewHoliday((prev) => ({ ...prev, endDate: e.target.value }))
+                    }
+                  />
+                  <Input
+                    label={t('common.form.reason')}
+                    placeholder={t('staff.schedule.reasonPlaceholder')}
+                    value={newHoliday.reason}
+                    onChange={(e) =>
+                      setNewHoliday((prev) => ({ ...prev, reason: e.target.value }))
+                    }
+                  />
+                  <div className="flex items-end">
+                    <Button
+                      variant="outline"
+                      onClick={handleAddHoliday}
+                      className="w-full"
+                      disabled={
+                        !newHoliday.startDate ||
+                        !newHoliday.endDate ||
+                        !newHoliday.reason
+                      }
+                    >
+                      <Plus size={16} className="mr-1" />
+                      {t('common.add')}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* 휴가 목록 */}
+                {holidays.length > 0 ? (
+                  <div className="border-t border-secondary-200 pt-4">
+                    <h4 className="text-sm font-medium text-secondary-700 mb-3">
+                      {t('staff.schedule.holidayList')}
+                    </h4>
+                    <div className="space-y-2">
+                      {holidays.map((holiday) => (
+                        <div
+                          key={holiday.id}
+                          className="flex items-center justify-between p-3 bg-white rounded-lg border border-secondary-200"
+                        >
+                          <div>
+                            <span className="font-medium text-secondary-900">
+                              {holiday.startDate} ~ {holiday.endDate}
+                            </span>
+                            <span className="ml-3 text-secondary-600">
+                              {holiday.reason}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveHoliday(holiday.id)}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-secondary-500 text-center py-4">
+                    {t('staff.schedule.noHolidays')}
+                  </p>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-8 text-secondary-500 bg-secondary-50 rounded-lg">
+            {t('staff.schedule.selectToSetSchedule')}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}

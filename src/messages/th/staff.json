@@ -104,6 +104,8 @@
     "specialtiesPlaceholder": "ตัด, ดัด, ย้อม",
     "introduction": "แนะนำตัว",
     "introPlaceholder": "กรอกข้อมูลแนะนำพนักงาน",
+    "positionTitle": "ตำแหน่ง/ชื่อเรียก",
+    "positionTitlePlaceholder": "เช่น ผู้อำนวยการ ผู้จัดการ ช่าง",
     "socialMedia": "โซเชียลมีเดีย",
     "updateFailed": "ไม่สามารถอัปเดตโปรไฟล์",
     "uploadFailed": "ไม่สามารถอัปโหลดรูปภาพ",

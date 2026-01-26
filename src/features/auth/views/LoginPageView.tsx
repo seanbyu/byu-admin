@@ -18,7 +18,9 @@ type AuthErrorCode =
   | 'LOGIN_FAILED'
   | 'LOGIN_ERROR'
   | 'SIGNUP_FAILED'
-  | 'SIGNUP_ERROR';
+  | 'SIGNUP_ERROR'
+  | 'SALON_PENDING_APPROVAL'
+  | 'SALON_REJECTED';
 
 interface AuthResponse {
   user: User | null;
@@ -52,6 +54,10 @@ export default function LoginPageView() {
         return t('errors.invalidCredentials');
       case 'LOGIN_FAILED':
         return t('errors.loginFailed');
+      case 'SALON_PENDING_APPROVAL':
+        return t('errors.salonPendingApproval');
+      case 'SALON_REJECTED':
+        return t('errors.salonRejected');
       case 'LOGIN_ERROR':
       default:
         return t('errors.loginError');

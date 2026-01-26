@@ -25,8 +25,9 @@ CREATE TABLE users (
   -- Hierarchy tracking
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
 
-  -- Approval workflow (for admin users)
-  is_approved BOOLEAN NOT NULL DEFAULT false,
+  -- Approval workflow
+  -- 참고: is_approved는 기본 true (살롱 승인 salons.approval_status가 실제 승인 체크 담당)
+  is_approved BOOLEAN NOT NULL DEFAULT true,
   approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
   approved_at TIMESTAMP WITH TIME ZONE,
 
@@ -57,12 +58,11 @@ CREATE INDEX idx_users_user_type ON users(user_type) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_role ON users(role) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_created_by ON users(created_by);
 CREATE INDEX idx_users_provider ON users(auth_provider, provider_user_id);
-CREATE INDEX idx_users_approval ON users(is_approved, user_type) WHERE user_type = 'ADMIN_USER';
 
 -- Comments
 COMMENT ON TABLE users IS 'Unified users table for both admin users and customers';
 COMMENT ON COLUMN users.user_type IS 'Discriminator: ADMIN_USER or CUSTOMER';
 COMMENT ON COLUMN users.role IS 'System-level role for permissions (SUPER_ADMIN, ADMIN, MANAGER, STAFF, CUSTOMER)';
-COMMENT ON COLUMN users.is_approved IS 'Approval status for admin users (customers auto-approved)';
+COMMENT ON COLUMN users.is_approved IS 'Default true for all users. Salon approval (salons.approval_status) is the gating factor.';
 COMMENT ON COLUMN users.auth_provider IS 'Authentication method used';
 COMMENT ON COLUMN users.created_by IS 'User ID who created this account (for hierarchy tracking)';

@@ -219,6 +219,7 @@ serve(async (req) => {
 
     // 5. Upsert User with Salon ID and user_type
     // 휴대폰 인증으로 생성된 경우 users 테이블에 행이 없을 수 있으므로 upsert 사용
+    // 참고: 사용자 승인(is_approved)은 기본 true, 살롱 승인(salons.approval_status)만 체크
     const { error: userError } = await supabaseAdmin
       .from("users")
       .upsert({
@@ -227,7 +228,7 @@ serve(async (req) => {
         name: name,
         salon_id: salonId,
         is_active: true,
-        is_approved: false,
+        is_approved: true,
         phone: phone,
         user_type: "ADMIN_USER",
         role: "ADMIN",

@@ -35,8 +35,12 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
+  isApproved?: boolean; // 기본 true, 개별 사용자 승인은 사용하지 않음
   permissions?: StaffPermission[];
 }
+
+// 살롱 승인 상태
+export type SalonApprovalStatus = 'pending' | 'approved' | 'rejected';
 
 // 살롱 인터페이스
 export interface Salon {
@@ -55,7 +59,10 @@ export interface Salon {
   instagramUrl?: string;
   isWifiAvailable: boolean;
   isParkingAvailable: boolean;
-  isApproved: boolean;
+  isApproved: boolean; // legacy field, use approvalStatus instead
+  approvalStatus?: SalonApprovalStatus;
+  rejectedReason?: string;
+  trialEndsAt?: Date;
   rating: number;
   reviewCount: number;
   createdAt: Date;

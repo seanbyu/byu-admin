@@ -37,4 +37,5 @@ export interface Staff {
   phone?: string;
   email?: string;
   role?: UserRole;
+  positionTitle?: string; // 직급/호칭 (simple text)
 }

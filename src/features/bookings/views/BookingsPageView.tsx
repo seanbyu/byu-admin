@@ -18,19 +18,9 @@ import { useBookingsPageState, useBookingsData } from '../hooks/useBookingsPageS
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { formatDate, formatPrice } from '@/lib/utils';
-import { Plus, Calendar as CalendarIcon, Filter, List, Settings, Users } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, Filter, List } from 'lucide-react';
 
 // bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
-const ShopSettingsModal = dynamic(
-  () => import('../components/ShopSettingsModal').then((mod) => mod.ShopSettingsModal),
-  { ssr: false }
-);
-
-const StaffScheduleModal = dynamic(
-  () => import('../components/StaffScheduleModal').then((mod) => mod.StaffScheduleModal),
-  { ssr: false }
-);
-
 const NewBookingModal = dynamic(
   () => import('../components/NewBookingModal'),
   { ssr: false }
@@ -188,7 +178,7 @@ export default function BookingsPageView() {
     enabled: !!salonId,
   });
 
-  const { data: staffResponse, refetch: refetchStaff } = useStaff(salonId, {
+  const { data: staffResponse } = useStaff(salonId, {
     enabled: !!salonId,
   });
 
@@ -302,20 +292,6 @@ export default function BookingsPageView() {
             </p>
           </div>
           <div className="flex space-x-3">
-            <Button
-              variant="outline"
-              onClick={pageState.openShopSettingsModal}
-            >
-              <Settings size={18} className="mr-2" />
-              {t('booking.shopSettings')}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={pageState.openStaffScheduleModal}
-            >
-              <Users size={18} className="mr-2" />
-              {t('booking.staffSchedule')}
-            </Button>
             <ViewModeToggle
               viewMode={pageState.viewMode}
               onCalendarClick={handleViewModeCalendar}
@@ -378,24 +354,6 @@ export default function BookingsPageView() {
           onDateChange={pageState.setSelectedDate}
           onTimeChange={pageState.setSelectedTime}
           onStaffChange={pageState.setSelectedStaffId}
-        />
-      )}
-
-      {pageState.showShopSettingsModal && (
-        <ShopSettingsModal
-          isOpen={pageState.showShopSettingsModal}
-          onClose={pageState.closeShopSettingsModal}
-          salonId={salonId}
-        />
-      )}
-
-      {pageState.showStaffScheduleModal && (
-        <StaffScheduleModal
-          isOpen={pageState.showStaffScheduleModal}
-          onClose={pageState.closeStaffScheduleModal}
-          salonId={salonId}
-          staffList={staffMembers}
-          onSave={refetchStaff}
         />
       )}
     </Layout>

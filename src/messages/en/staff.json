@@ -104,6 +104,8 @@
     "specialtiesPlaceholder": "Cut, Perm, Color",
     "introduction": "Introduction",
     "introPlaceholder": "Enter staff introduction",
+    "positionTitle": "Position/Title",
+    "positionTitlePlaceholder": "e.g., Director, Manager, Designer",
     "socialMedia": "Social Media",
     "updateFailed": "Failed to update profile.",
     "uploadFailed": "Failed to upload image.",

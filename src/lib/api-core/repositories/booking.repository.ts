@@ -7,9 +7,10 @@ import {
   BookingResponse,
 } from "../types";
 
+// Note: bookings table may not be in generated types yet, so we use 'any' cast
 export class BookingRepository extends BaseRepository {
   async getBookings(salonId: string): Promise<BookingResponse[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from("bookings")
       .select(`
         *,
@@ -23,13 +24,13 @@ export class BookingRepository extends BaseRepository {
     if (error) throw error;
 
     // Transform to frontend format
-    return (data || []).map((booking) =>
-      this.transformBooking(booking as DBBookingWithRelations)
+    return (data || []).map((booking: DBBookingWithRelations) =>
+      this.transformBooking(booking)
     );
   }
 
   async createBooking(booking: CreateBookingDto): Promise<DBBooking> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from("bookings")
       .insert(booking)
       .select()
@@ -40,7 +41,7 @@ export class BookingRepository extends BaseRepository {
   }
 
   async updateBooking(id: string, updates: UpdateBookingDto): Promise<DBBooking> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from("bookings")
       .update(updates)
       .eq("id", id)

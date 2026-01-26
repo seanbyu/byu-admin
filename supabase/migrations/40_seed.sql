@@ -1,7 +1,8 @@
 -- ============================================
--- Seed Industries
+-- Seed Data
 -- ============================================
 
+-- Seed Industries
 INSERT INTO industries (name) VALUES
   ('HAIR'),
   ('NAIL'),

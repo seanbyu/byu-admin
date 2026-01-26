@@ -1,4 +1,3 @@
-import { AuthApiError } from "@supabase/supabase-js";
 import { AuthRepository } from "../repositories/auth.repository";
 import {
   Client,
@@ -25,10 +24,7 @@ export class AuthService {
     return this.repository.registerOwner(params);
   }
 
-  async sendOtp(phone: string): Promise<{
-    data: { user: null; session: null };
-    error: AuthApiError | null;
-  }> {
+  async sendOtp(phone: string) {
     return this.client.auth.signInWithOtp({
       phone,
     });

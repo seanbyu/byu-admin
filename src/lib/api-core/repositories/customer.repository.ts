@@ -5,9 +5,10 @@ import {
   UpdateCustomerDto,
 } from "../types";
 
+// Note: customers table schema in generated types is outdated, so we use 'any' cast
 export class CustomerRepository extends BaseRepository {
   async getCustomers(salonId: string): Promise<DBCustomer[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from("customers")
       .select("*")
       .eq("salon_id", salonId);
@@ -17,7 +18,7 @@ export class CustomerRepository extends BaseRepository {
   }
 
   async getCustomer(id: string): Promise<DBCustomer> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from("customers")
       .select("*")
       .eq("id", id)
@@ -28,7 +29,7 @@ export class CustomerRepository extends BaseRepository {
   }
 
   async createCustomer(customer: CreateCustomerDto): Promise<DBCustomer> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from("customers")
       .insert(customer)
       .select()
@@ -39,9 +40,9 @@ export class CustomerRepository extends BaseRepository {
   }
 
   async updateCustomer(id: string, updates: UpdateCustomerDto): Promise<DBCustomer> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from("customers")
-      .update(updates as Record<string, unknown>)
+      .update(updates)
       .eq("id", id)
       .select()
       .single();
@@ -51,7 +52,7 @@ export class CustomerRepository extends BaseRepository {
   }
 
   async deleteCustomer(id: string): Promise<boolean> {
-    const { error } = await this.supabase
+    const { error } = await (this.supabase as any)
       .from("customers")
       .delete()
       .eq("id", id);

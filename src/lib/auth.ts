@@ -16,7 +16,9 @@ export type AuthErrorCode =
   | 'SIGNUP_ERROR'
   | 'SIGNOUT_ERROR'
   | 'PASSWORD_RESET_ERROR'
-  | 'PASSWORD_UPDATE_ERROR';
+  | 'PASSWORD_UPDATE_ERROR'
+  | 'SALON_PENDING_APPROVAL'
+  | 'SALON_REJECTED';
 
 interface AuthResponse {
   user: User | null;
@@ -65,9 +67,62 @@ export async function signInWithEmail(
       .eq('id', authData.user.id)
       .single();
 
+    // ========================================
+    // 살롱 승인 상태 체크 함수
+    // ADMIN, MANAGER 역할 모두 살롱 승인 체크 필요
+    // ========================================
+    const checkSalonApproval = async (salonId: string, role: string): Promise<AuthResponse | null> => {
+      // ADMIN 또는 MANAGER 역할만 살롱 승인 체크
+      if (role !== 'ADMIN' && role !== 'MANAGER') return null;
+
+      const { data: salonData, error: salonError } = await supabase
+        .from('salons')
+        .select('id, approval_status, rejected_reason')
+        .eq('id', salonId)
+        .single();
+
+      if (salonError || !salonData) {
+        console.warn('Salon not found:', salonId);
+        return null;
+      }
+
+      // 살롱 승인 상태 체크
+      if (salonData.approval_status === 'pending') {
+        await supabase.auth.signOut();
+        return {
+          user: null,
+          token: null,
+          error: 'Salon is pending approval',
+          errorCode: 'SALON_PENDING_APPROVAL',
+        };
+      }
+
+      if (salonData.approval_status === 'rejected') {
+        await supabase.auth.signOut();
+        return {
+          user: null,
+          token: null,
+          error: salonData.rejected_reason || 'Salon has been rejected',
+          errorCode: 'SALON_REJECTED',
+        };
+      }
+
+      return null; // approved - 로그인 허용
+    };
+
+    // ========================================
+    // users 테이블에 데이터가 없는 경우 (Fallback)
+    // ========================================
     if (userError || !userData) {
-      // users 테이블에 데이터가 없는 경우, auth.users의 기본 정보로 User 객체 생성
-      // 기본 role을 SALON_MANAGER로 설정 (임시)
+      const metaRole = (authData.user.user_metadata?.role?.toUpperCase() as string) || 'MANAGER';
+      const metaSalonId = authData.user.user_metadata?.salon_id;
+
+      // ADMIN 또는 MANAGER 역할이고 salon_id가 있으면 살롱 승인 상태 체크
+      if (metaSalonId && (metaRole === 'ADMIN' || metaRole === 'MANAGER')) {
+        const approvalError = await checkSalonApproval(metaSalonId, metaRole);
+        if (approvalError) return approvalError;
+      }
+
       const user: User = {
         id: authData.user.id,
         email: authData.user.email!,
@@ -75,9 +130,8 @@ export async function signInWithEmail(
           authData.user.user_metadata?.name ||
           authData.user.email!.split('@')[0],
         phone: authData.user.user_metadata?.phone || '',
-        role:
-          (authData.user.user_metadata?.role as UserRole) || UserRole.MANAGER,
-        salonId: authData.user.user_metadata?.salon_id,
+        role: metaRole as UserRole,
+        salonId: metaSalonId,
         profileImage: authData.user.user_metadata?.avatar_url,
         createdAt: new Date(authData.user.created_at),
         updatedAt: new Date(
@@ -92,10 +146,20 @@ export async function signInWithEmail(
       };
     }
 
-    // salon_id 확인 및 검증
+    // ========================================
+    // users 테이블에 데이터가 있는 경우
+    // ========================================
+    const role = userData.role?.toUpperCase() || 'MANAGER';
     let salonId = userData.salon_id;
-    let permissions: any[] = []; // StaffPermission[] but import might be circular or messy, using any[] and casting for now or strict type if possible
+    let permissions: any[] = [];
 
+    // ADMIN 또는 MANAGER 역할이고 salon_id가 있으면 살롱 승인 상태 체크
+    if (salonId && (role === 'ADMIN' || role === 'MANAGER')) {
+      const approvalError = await checkSalonApproval(salonId, role);
+      if (approvalError) return approvalError;
+    }
+
+    // salon_id 검증 및 권한 조회
     if (salonId) {
       const { data: salonData, error: salonError } = await supabase
         .from('salons')
@@ -107,14 +171,6 @@ export async function signInWithEmail(
         console.warn('Salon not found for user:', userData.id);
         salonId = undefined;
       } else {
-        const role = userData.role?.toUpperCase();
-        if (role !== 'ADMIN' && role !== 'MANAGER' && role !== 'STAFF') {
-          console.warn(
-            'User has salon_id but invalid role for salon access:',
-            role
-          );
-        }
-
         // 직원 권한 조회 (staff_profiles 테이블)
         if (role === 'MANAGER' || role === 'STAFF' || role === 'ADMIN') {
           const { data: profileData } = await supabase
@@ -124,7 +180,6 @@ export async function signInWithEmail(
             .single();
 
           if (profileData && profileData.permissions) {
-            // Transform JSON permissions to Array format
             permissions = Object.entries(profileData.permissions || {}).map(
               ([key, val]: [string, any]) => ({
                 module: key,
@@ -144,8 +199,7 @@ export async function signInWithEmail(
       email: userData.email,
       name: userData.name,
       phone: userData.phone || '',
-      // Normalize role to uppercase and fallback to SALON_MANAGER if missing
-      role: (userData.role?.toUpperCase() as UserRole) || UserRole.MANAGER,
+      role: role as UserRole,
       salonId: salonId,
       profileImage: userData.profile_image,
       createdAt: new Date(userData.created_at),

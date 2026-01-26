@@ -28,6 +28,7 @@ interface StaffProfileModalProps {
 interface ProfileFormData {
   name: string;
   phone: string;
+  positionTitle: string; // 직급/호칭
   description: string;
   experience: number;
   specialties: string; // Comma separated for input
@@ -66,6 +67,7 @@ export default function StaffProfileModal({
       reset({
         name: staff.name,
         phone: staff.phone || '',
+        positionTitle: staff.positionTitle || '',
         description: staff.description,
         experience: staff.experience,
         specialties: staff.specialties.join(', '),
@@ -91,6 +93,7 @@ export default function StaffProfileModal({
         name: data.name,
         password: data.password || undefined,
         phone: data.phone,
+        positionTitle: data.positionTitle,
         description: data.description,
         experience: Number(data.experience),
         specialties: specialtiesArray,
@@ -252,6 +255,17 @@ export default function StaffProfileModal({
               </div>
               <input type="hidden" {...register('profileImage')} />
             </div>
+          </div>
+
+          {/* 직급/호칭 */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-secondary-700">
+              {t('staff.profileModal.positionTitle')}
+            </label>
+            <Input
+              {...register('positionTitle')}
+              placeholder={t('staff.profileModal.positionTitlePlaceholder')}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

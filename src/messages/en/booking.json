@@ -36,5 +36,8 @@
   "sampleServices": {
     "cut": "Haircut - 35,000 KRW",
     "color": "Hair Color - 120,000 KRW"
+  },
+  "settings": {
+    "description": "Manage online booking settings"
   }
 }
