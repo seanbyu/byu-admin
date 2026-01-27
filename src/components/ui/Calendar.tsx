@@ -42,11 +42,12 @@ interface CalendarProps {
   onEventClick?: (event: CalendarEvent) => void;
   onTimeSlotClick?: (date: Date, time: string, resourceId?: string) => void;
   resources?: Resource[];
+  slotDuration?: number;
 }
 
 type ViewType = 'month' | 'day';
 
-export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick, onTimeSlotClick, resources = [] }: CalendarProps) {
+export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick, onTimeSlotClick, resources = [], slotDuration = 60 }: CalendarProps) {
   const t = useTranslations('common');
   const locale = useLocale();
   const dateLocale = DATE_LOCALES[locale as keyof typeof DATE_LOCALES] || enUS;
@@ -101,11 +102,18 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
     onDateSelect(newDate);
   };
 
-  // 08:00 ~ 22:00 시간 슬롯 (15시간)
-  const timeSlots = Array.from({ length: 15 }, (_, i) => {
-    const hour = (i + 8).toString().padStart(2, '0');
-    return `${hour}:00`;
-  });
+  // 08:00 ~ 22:00 시간 슬롯 (slotDuration에 따라 동적 생성)
+  const timeSlots = React.useMemo(() => {
+    const slots: string[] = [];
+    const startMinutes = 8 * 60; // 08:00
+    const endMinutes = 22 * 60;  // 22:00
+    for (let m = startMinutes; m < endMinutes; m += slotDuration) {
+      const hour = Math.floor(m / 60).toString().padStart(2, '0');
+      const min = (m % 60).toString().padStart(2, '0');
+      slots.push(`${hour}:${min}`);
+    }
+    return slots;
+  }, [slotDuration]);
 
   const getDayEvents = () => {
     return events.filter(event => isSameDay(event.date, currentDate));
@@ -125,11 +133,14 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
       return 'dayOff'; // 해당 요일 휴무
     }
 
-    const hour = parseInt(time.split(':')[0]);
-    const openHour = parseInt(workHoursForDay.openTime.split(':')[0]);
-    const closeHour = parseInt(workHoursForDay.closeTime.split(':')[0]);
+    const [h, m] = time.split(':').map(Number);
+    const slotMinutes = h * 60 + m;
+    const [oh, om] = workHoursForDay.openTime.split(':').map(Number);
+    const openMinutes = oh * 60 + om;
+    const [ch, cm] = workHoursForDay.closeTime.split(':').map(Number);
+    const closeMinutes = ch * 60 + cm;
 
-    if (hour >= openHour && hour < closeHour) {
+    if (slotMinutes >= openMinutes && slotMinutes < closeMinutes) {
       return 'available';
     }
     return 'unavailable'; // 근무일이지만 업무 시간 외
@@ -162,8 +173,6 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
           {/* 바디: 시간축 + 직원별 격자 */}
           <div className="overflow-y-auto max-h-[600px] overflow-x-auto">
             {timeSlots.map((time) => {
-              const hour = parseInt(time.split(':')[0]);
-
               return (
                 <div key={time} className="flex border-b border-secondary-100">
                   {/* 시간축 */}
@@ -174,8 +183,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
                   <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${resources.length}, minmax(120px, 1fr))` }}>
                     {resources.map((resource) => {
                       const resourceEvents = dayEvents.filter(event => {
-                        const eventHour = parseInt(event.time.split(':')[0]);
-                        return eventHour === hour && event.resourceId === resource.id;
+                        return event.time === time && event.resourceId === resource.id;
                       });
 
                       const slotStatus = getSlotStatus(resource, currentDate, time);
@@ -247,11 +255,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
 
         <div className="overflow-y-auto max-h-[600px]">
           {timeSlots.map((time) => {
-            const hour = parseInt(time.split(':')[0]);
-            const timeEvents = dayEvents.filter(event => {
-              const eventHour = parseInt(event.time.split(':')[0]);
-              return eventHour === hour;
-            });
+            const timeEvents = dayEvents.filter(event => event.time === time);
 
             return (
               <div key={time} className="flex border-b border-secondary-100">

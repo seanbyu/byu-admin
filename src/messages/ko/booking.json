@@ -27,7 +27,10 @@
     "closedDays": "휴무일 설정",
     "closedDaysList": "휴무일 설정 내역",
     "noClosedDays": "등록된 휴무일이 없습니다",
-    "reasonPlaceholder": "예: 설 연휴"
+    "reasonPlaceholder": "예: 설 연휴",
+    "slotDuration": "예약 시간 단위",
+    "slotDuration30": "30분",
+    "slotDuration60": "60분"
   },
   "placeholders": {
     "customerName": "고객 이름을 입력하세요",

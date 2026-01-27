@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Card } from '@/components/ui/Card';
 import { BusinessHours, Holiday } from '@/types';
 import { Staff } from '@/features/staff/types';
@@ -42,6 +43,15 @@ const getDefaultWorkHours = (): BusinessHours[] => {
   }));
 };
 
+// 오늘 날짜를 yyyy-MM-dd 형식으로 반환
+const getTodayString = (): string => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
   const t = useTranslations();
   const [selectedStaffId, setSelectedStaffId] = useState<string>('');
@@ -56,9 +66,9 @@ export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
   });
   const staffList = staffResponse?.data || [];
 
-  // 새 휴가 입력 상태
+  // 새 휴가 입력 상태 (시작일은 오늘로 기본값)
   const [newHoliday, setNewHoliday] = useState({
-    startDate: '',
+    startDate: getTodayString(),
     endDate: '',
     reason: '',
   });
@@ -113,7 +123,7 @@ export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
     };
 
     setHolidays((prev) => [...prev, holiday]);
-    setNewHoliday({ startDate: '', endDate: '', reason: '' });
+    setNewHoliday({ startDate: getTodayString(), endDate: '', reason: '' });
   };
 
   const handleRemoveHoliday = (id: string) => {
@@ -275,45 +285,50 @@ export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
               </h3>
               <div className="bg-secondary-50 rounded-lg p-4">
                 {/* 새 휴가 입력 */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                  <Input
-                    type="date"
-                    label={t('common.form.startDate')}
-                    value={newHoliday.startDate}
-                    onChange={(e) =>
-                      setNewHoliday((prev) => ({ ...prev, startDate: e.target.value }))
-                    }
-                  />
-                  <Input
-                    type="date"
-                    label={t('common.form.endDate')}
-                    value={newHoliday.endDate}
-                    onChange={(e) =>
-                      setNewHoliday((prev) => ({ ...prev, endDate: e.target.value }))
-                    }
-                  />
-                  <Input
-                    label={t('common.form.reason')}
-                    placeholder={t('staff.schedule.reasonPlaceholder')}
-                    value={newHoliday.reason}
-                    onChange={(e) =>
-                      setNewHoliday((prev) => ({ ...prev, reason: e.target.value }))
-                    }
-                  />
-                  <div className="flex items-end">
-                    <Button
-                      variant="outline"
-                      onClick={handleAddHoliday}
-                      className="w-full"
-                      disabled={
-                        !newHoliday.startDate ||
-                        !newHoliday.endDate ||
-                        !newHoliday.reason
+                <div className="space-y-3 mb-4">
+                  {/* 첫번째 줄: 시작일, 종료일 */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <DatePicker
+                      label={t('common.form.startDate')}
+                      value={newHoliday.startDate}
+                      onChange={(date) =>
+                        setNewHoliday((prev) => ({ ...prev, startDate: date }))
                       }
-                    >
-                      <Plus size={16} className="mr-1" />
-                      {t('common.add')}
-                    </Button>
+                    />
+                    <DatePicker
+                      label={t('common.form.endDate')}
+                      value={newHoliday.endDate}
+                      onChange={(date) =>
+                        setNewHoliday((prev) => ({ ...prev, endDate: date }))
+                      }
+                      minDate={newHoliday.startDate ? new Date(newHoliday.startDate) : undefined}
+                    />
+                  </div>
+                  {/* 두번째 줄: 사유, 추가 버튼 */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label={t('common.form.reason')}
+                      placeholder={t('staff.schedule.reasonPlaceholder')}
+                      value={newHoliday.reason}
+                      onChange={(e) =>
+                        setNewHoliday((prev) => ({ ...prev, reason: e.target.value }))
+                      }
+                    />
+                    <div className="flex items-end">
+                      <Button
+                        variant="outline"
+                        onClick={handleAddHoliday}
+                        className="w-full"
+                        disabled={
+                          !newHoliday.startDate ||
+                          !newHoliday.endDate ||
+                          !newHoliday.reason
+                        }
+                      >
+                        <Plus size={16} className="mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </div>
                   </div>
                 </div>
 

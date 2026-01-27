@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback, memo } from 'react';
+import { useMemo, useCallback, memo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
@@ -19,6 +19,7 @@ import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { formatDate, formatPrice } from '@/lib/utils';
 import { Plus, Calendar as CalendarIcon, Filter, List } from 'lucide-react';
+import { salonsApi } from '@/features/salons/api';
 
 // bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
 const NewBookingModal = dynamic(
@@ -185,6 +186,17 @@ export default function BookingsPageView() {
   const staffMembers = staffResponse?.data || [];
   const bookings = response || [];
 
+  // slotDuration 설정 로드
+  const [slotDuration, setSlotDuration] = useState<number>(30);
+  useEffect(() => {
+    if (!salonId) return;
+    salonsApi.getSettings(salonId).then((res) => {
+      if (res.success && res.data?.settings?.slot_duration_minutes) {
+        setSlotDuration(res.data.settings.slot_duration_minutes);
+      }
+    }).catch(() => {});
+  }, [salonId]);
+
   // 데이터 변환 (useMemo 내부에서 처리)
   const { designers, calendarResources, calendarEvents } = useBookingsData(
     bookings,
@@ -330,6 +342,7 @@ export default function BookingsPageView() {
             resources={calendarResources}
             onEventClick={handleEventClick}
             onTimeSlotClick={pageState.handleTimeSlotClick}
+            slotDuration={slotDuration}
           />
         ) : (
           <Card>

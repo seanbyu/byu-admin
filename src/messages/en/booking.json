@@ -27,7 +27,10 @@
     "closedDays": "Closed Days Settings",
     "closedDaysList": "Closed Days List",
     "noClosedDays": "No registered closed days",
-    "reasonPlaceholder": "e.g., Holiday"
+    "reasonPlaceholder": "e.g., Holiday",
+    "slotDuration": "Booking Time Slot",
+    "slotDuration30": "30 min",
+    "slotDuration60": "60 min"
   },
   "placeholders": {
     "customerName": "Enter customer name",

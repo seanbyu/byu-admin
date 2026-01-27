@@ -27,7 +27,10 @@
     "closedDays": "ตั้งค่าวันปิดทำการ",
     "closedDaysList": "รายการวันปิดทำการ",
     "noClosedDays": "ไม่มีวันปิดทำการที่ลงทะเบียน",
-    "reasonPlaceholder": "เช่น วันหยุดนักขัตฤกษ์"
+    "reasonPlaceholder": "เช่น วันหยุดนักขัตฤกษ์",
+    "slotDuration": "หน่วยเวลาจอง",
+    "slotDuration30": "30 นาที",
+    "slotDuration60": "60 นาที"
   },
   "placeholders": {
     "customerName": "กรอกชื่อลูกค้า",
