@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -17,6 +17,10 @@ import {
   Youtube,
   Music2,
 } from 'lucide-react';
+import type { WorkSchedule } from '../../types';
+import { useSalonStore } from '@/store/salonStore';
+import { StaffWorkSchedule } from './StaffWorkSchedule';
+import { toWorkSchedule, fromWorkSchedule } from '../../utils/staffSchedule';
 
 interface StaffProfileModalProps {
   isOpen: boolean;
@@ -51,6 +55,22 @@ export default function StaffProfileModal({
   const t = useTranslations();
   const [uploading, setUploading] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [workSchedule, setWorkSchedule] = useState<WorkSchedule>({});
+  const currentSalon = useSalonStore((s) => s.currentSalon);
+  // 매장 영업시간: DB 포맷 또는 배열 모두 대응
+  const salonHoursRaw = currentSalon?.businessHours;
+  const salonHoursDB = useMemo(() => {
+    if (!salonHoursRaw) return {};
+    // 이미 DB 포맷(객체)이면 그대로
+    if (!Array.isArray(salonHoursRaw)) return salonHoursRaw as Record<string, { enabled: boolean; open: string; close: string }>;
+    // 배열이면 DB 포맷으로 변환
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const result: Record<string, { enabled: boolean; open: string; close: string }> = {};
+    for (const h of salonHoursRaw) {
+      result[dayNames[h.dayOfWeek]] = { enabled: h.isOpen, open: h.openTime, close: h.closeTime };
+    }
+    return result;
+  }, [salonHoursRaw]);
   const {
     register,
     handleSubmit,
@@ -79,6 +99,14 @@ export default function StaffProfileModal({
           facebook: staff.socialLinks?.facebook || '',
         },
       });
+      // DB workSchedule 우선, 없으면 workHours에서 변환
+      if (staff.workSchedule) {
+        setWorkSchedule(staff.workSchedule);
+      } else if (staff.workHours) {
+        setWorkSchedule(toWorkSchedule(staff.workHours));
+      } else {
+        setWorkSchedule({});
+      }
     }
   }, [isOpen, staff, reset]);
 
@@ -99,6 +127,8 @@ export default function StaffProfileModal({
         specialties: specialtiesArray,
         profileImage: data.profileImage,
         socialLinks: data.socialLinks,
+        workSchedule,
+        workHours: fromWorkSchedule(workSchedule),
       } as any);
       onClose();
     } catch (error) {
@@ -338,6 +368,15 @@ export default function StaffProfileModal({
                 />
               </div>
             </div>
+          </div>
+
+          {/* 근무 스케줄 */}
+          <div className="pt-4 border-t border-secondary-200">
+            <StaffWorkSchedule
+              workSchedule={workSchedule}
+              salonHours={salonHoursDB}
+              onChange={setWorkSchedule}
+            />
           </div>
 
           <div className="flex justify-end space-x-3 pt-4 border-t border-secondary-200 mt-6">

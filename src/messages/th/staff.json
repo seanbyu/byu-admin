@@ -123,7 +123,8 @@
     "noHolidays": "ไม่มีวันหยุด/ลาที่ลงทะเบียน",
     "selectToSetSchedule": "เลือกพนักงานเพื่อตั้งค่าตาราง",
     "closed": "ปิด",
-    "reasonPlaceholder": "เช่น ลาพักร้อน"
+    "reasonPlaceholder": "เช่น ลาพักร้อน",
+    "workHoursHint": "วันปิดร้านจะถูกปิดใช้งานโดยอัตโนมัติ"
   },
   "errors": {
     "updateFailed": "การอัปเดตล้มเหลว"
