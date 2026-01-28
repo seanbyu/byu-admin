@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useCallback, memo, useState, useEffect } from 'react';
+import { useMemo, useCallback, memo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
@@ -186,16 +187,13 @@ export default function BookingsPageView() {
   const staffMembers = staffResponse?.data || [];
   const bookings = response || [];
 
-  // slotDuration 설정 로드
-  const [slotDuration, setSlotDuration] = useState<number>(30);
-  useEffect(() => {
-    if (!salonId) return;
-    salonsApi.getSettings(salonId).then((res) => {
-      if (res.success && res.data?.settings?.slot_duration_minutes) {
-        setSlotDuration(res.data.settings.slot_duration_minutes);
-      }
-    }).catch(() => {});
-  }, [salonId]);
+  // slotDuration 설정 로드 (TanStack Query)
+  const { data: settingsResponse } = useQuery({
+    queryKey: ['salon-settings', salonId],
+    queryFn: () => salonsApi.getSettings(salonId),
+    enabled: !!salonId,
+  });
+  const slotDuration = settingsResponse?.data?.settings?.slot_duration_minutes || 30;
 
   // 데이터 변환 (useMemo 내부에서 처리)
   const { designers, calendarResources, calendarEvents } = useBookingsData(

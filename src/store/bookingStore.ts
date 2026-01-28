@@ -1,59 +1,32 @@
 import { create } from 'zustand';
-import { Booking, BookingStatus } from '@/types';
 
-interface BookingState {
-  bookings: Booking[];
+/**
+ * Booking UI Store
+ * - 클라이언트 UI 상태만 관리
+ * - 서버 데이터(bookings)는 TanStack Query로 관리 (useBookings hook)
+ */
+interface BookingUIState {
+  // UI 상태
   selectedDate: Date;
-  setBookings: (bookings: Booking[]) => void;
-  addBooking: (booking: Booking) => void;
-  updateBooking: (id: string, data: Partial<Booking>) => void;
-  cancelBooking: (id: string) => void;
+  selectedStaffId: string | null;
+  isNewBookingModalOpen: boolean;
+
+  // Actions
   setSelectedDate: (date: Date) => void;
-  getBookingsByDate: (date: Date) => Booking[];
-  getBookingsByStaff: (staffId: string) => Booking[];
+  setSelectedStaffId: (staffId: string | null) => void;
+  openNewBookingModal: () => void;
+  closeNewBookingModal: () => void;
 }
 
-export const useBookingStore = create<BookingState>((set, get) => ({
-  bookings: [],
+export const useBookingStore = create<BookingUIState>((set) => ({
+  // UI 상태 초기값
   selectedDate: new Date(),
+  selectedStaffId: null,
+  isNewBookingModalOpen: false,
 
-  setBookings: (bookings) => set({ bookings }),
-
-  addBooking: (booking) =>
-    set((state) => ({
-      bookings: [...state.bookings, booking],
-    })),
-
-  updateBooking: (id, data) =>
-    set((state) => ({
-      bookings: state.bookings.map((b) =>
-        b.id === id ? { ...b, ...data } : b
-      ),
-    })),
-
-  cancelBooking: (id) =>
-    set((state) => ({
-      bookings: state.bookings.map((b) =>
-        b.id === id ? { ...b, status: BookingStatus.CANCELLED } : b
-      ),
-    })),
-
+  // Actions
   setSelectedDate: (date) => set({ selectedDate: date }),
-
-  getBookingsByDate: (date) => {
-    const bookings = get().bookings;
-    return bookings.filter((b) => {
-      const bookingDate = new Date(b.date);
-      return (
-        bookingDate.getFullYear() === date.getFullYear() &&
-        bookingDate.getMonth() === date.getMonth() &&
-        bookingDate.getDate() === date.getDate()
-      );
-    });
-  },
-
-  getBookingsByStaff: (staffId) => {
-    const bookings = get().bookings;
-    return bookings.filter((b) => b.staffId === staffId);
-  },
+  setSelectedStaffId: (staffId) => set({ selectedStaffId: staffId }),
+  openNewBookingModal: () => set({ isNewBookingModalOpen: true }),
+  closeNewBookingModal: () => set({ isNewBookingModalOpen: false }),
 }));

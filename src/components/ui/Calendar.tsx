@@ -1,11 +1,29 @@
 'use client';
 
 import React from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  addMonths,
+  subMonths,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+} from 'date-fns';
 import { ko, enUS, th } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, CalendarDays, CalendarRange } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  CalendarRange,
+} from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Button } from './Button';
+import { cn } from '@/lib/utils';
 
 const DATE_LOCALES = {
   ko,
@@ -23,9 +41,9 @@ interface CalendarEvent {
 }
 
 interface ResourceWorkHours {
-  dayOfWeek: number; // 0: 일요일, 1: 월요일, ..., 6: 토요일
-  openTime: string;  // "09:00"
-  closeTime: string; // "20:00"
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
   isOpen: boolean;
 }
 
@@ -47,7 +65,15 @@ interface CalendarProps {
 
 type ViewType = 'month' | 'day';
 
-export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick, onTimeSlotClick, resources = [], slotDuration = 60 }: CalendarProps) {
+export function Calendar({
+  selectedDate,
+  onDateSelect,
+  events = [],
+  onEventClick,
+  onTimeSlotClick,
+  resources = [],
+  slotDuration = 60,
+}: CalendarProps) {
   const t = useTranslations('common');
   const locale = useLocale();
   const dateLocale = DATE_LOCALES[locale as keyof typeof DATE_LOCALES] || enUS;
@@ -56,7 +82,6 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
   const [viewType, setViewType] = React.useState<ViewType>('month');
   const [currentDate, setCurrentDate] = React.useState(selectedDate);
 
-  // 외부 selectedDate prop 변경 시 내부 상태 동기화
   React.useEffect(() => {
     setCurrentDate(selectedDate);
     setCurrentMonth(selectedDate);
@@ -79,16 +104,11 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
   ];
 
   const getEventsForDay = (day: Date) => {
-    return events.filter(event => isSameDay(event.date, day));
+    return events.filter((event) => isSameDay(event.date, day));
   };
 
-  const previousMonth = () => {
-    setCurrentMonth(subMonths(currentMonth, 1));
-  };
-
-  const nextMonth = () => {
-    setCurrentMonth(addMonths(currentMonth, 1));
-  };
+  const previousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
   const previousDay = () => {
     const newDate = addDays(currentDate, -1);
@@ -102,13 +122,14 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
     onDateSelect(newDate);
   };
 
-  // 08:00 ~ 22:00 시간 슬롯 (slotDuration에 따라 동적 생성)
   const timeSlots = React.useMemo(() => {
     const slots: string[] = [];
-    const startMinutes = 8 * 60; // 08:00
-    const endMinutes = 22 * 60;  // 22:00
+    const startMinutes = 8 * 60;
+    const endMinutes = 22 * 60;
     for (let m = startMinutes; m < endMinutes; m += slotDuration) {
-      const hour = Math.floor(m / 60).toString().padStart(2, '0');
+      const hour = Math.floor(m / 60)
+        .toString()
+        .padStart(2, '0');
       const min = (m % 60).toString().padStart(2, '0');
       slots.push(`${hour}:${min}`);
     }
@@ -116,21 +137,25 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
   }, [slotDuration]);
 
   const getDayEvents = () => {
-    return events.filter(event => isSameDay(event.date, currentDate));
+    return events.filter((event) => isSameDay(event.date, currentDate));
   };
 
-  // 특정 직원의 특정 시간 슬롯 상태 확인
-  // 반환값: 'available' | 'unavailable' | 'dayOff'
-  const getSlotStatus = (resource: Resource, date: Date, time: string): 'available' | 'unavailable' | 'dayOff' => {
+  const getSlotStatus = (
+    resource: Resource,
+    date: Date,
+    time: string
+  ): 'available' | 'unavailable' | 'dayOff' => {
     if (!resource.workHours || resource.workHours.length === 0) {
-      return 'available'; // workHours가 없으면 기본적으로 예약 가능
+      return 'available';
     }
 
-    const dayOfWeek = date.getDay(); // 0: 일요일, 1: 월요일, ...
-    const workHoursForDay = resource.workHours.find(wh => wh.dayOfWeek === dayOfWeek);
+    const dayOfWeek = date.getDay();
+    const workHoursForDay = resource.workHours.find(
+      (wh) => wh.dayOfWeek === dayOfWeek
+    );
 
     if (!workHoursForDay || !workHoursForDay.isOpen) {
-      return 'dayOff'; // 해당 요일 휴무
+      return 'dayOff';
     }
 
     const [h, m] = time.split(':').map(Number);
@@ -143,22 +168,26 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
     if (slotMinutes >= openMinutes && slotMinutes < closeMinutes) {
       return 'available';
     }
-    return 'unavailable'; // 근무일이지만 업무 시간 외
+    return 'unavailable';
   };
 
   const renderDayView = () => {
     const dayEvents = getDayEvents();
 
-    // 리소스(직원)가 있을 경우 직원별 타임라인 뷰 렌더링
     if (resources.length > 0) {
       return (
         <div className="p-4">
-          {/* 헤더: 날짜 + 직원 컬럼 */}
+          {/* Header */}
           <div className="flex border-b border-secondary-200">
             <div className="w-20 flex-shrink-0 py-3 px-2 text-center font-semibold text-secondary-900 border-r border-secondary-200">
               {format(currentDate, 'M/d (E)', { locale: dateLocale })}
             </div>
-            <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${resources.length}, minmax(120px, 1fr))` }}>
+            <div
+              className="flex-1 grid"
+              style={{
+                gridTemplateColumns: `repeat(${resources.length}, minmax(120px, 1fr))`,
+              }}
+            >
               {resources.map((resource) => (
                 <div
                   key={resource.id}
@@ -170,80 +199,94 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
             </div>
           </div>
 
-          {/* 바디: 시간축 + 직원별 격자 */}
+          {/* Body */}
           <div className="overflow-y-auto max-h-[600px] overflow-x-auto">
-            {timeSlots.map((time) => {
-              return (
-                <div key={time} className="flex border-b border-secondary-100">
-                  {/* 시간축 */}
-                  <div className="w-20 flex-shrink-0 py-3 px-2 text-sm text-secondary-600 text-right border-r border-secondary-200">
-                    {time}
-                  </div>
-                  {/* 직원별 셀 */}
-                  <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${resources.length}, minmax(120px, 1fr))` }}>
-                    {resources.map((resource) => {
-                      const resourceEvents = dayEvents.filter(event => {
-                        return event.time === time && event.resourceId === resource.id;
-                      });
-
-                      const slotStatus = getSlotStatus(resource, currentDate, time);
-                      const isAvailable = slotStatus === 'available';
-
-                      return (
-                        <div
-                          key={resource.id}
-                          className={`py-2 px-2 min-h-[60px] relative border-r border-secondary-100 last:border-r-0 ${
-                            isAvailable
-                              ? 'cursor-pointer transition-colors hover:bg-blue-50'
-                              : 'bg-secondary-100 cursor-not-allowed'
-                          }`}
-                          onClick={() => {
-                            if (isAvailable && resourceEvents.length === 0) {
-                              onTimeSlotClick?.(currentDate, time, resource.id);
-                            }
-                          }}
-                        >
-                          {isAvailable ? (
-                            <>
-                              {resourceEvents.length === 0 && (
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                  <span className="text-xs text-secondary-400">+</span>
-                                </div>
-                              )}
-                              {resourceEvents.map((event) => (
-                                <div
-                                  key={event.id}
-                                  className={`mb-1 p-2 rounded cursor-pointer text-xs ${event.color || 'bg-primary-100 text-primary-700'}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onEventClick?.(event);
-                                  }}
-                                >
-                                  <div className="font-medium">{event.time}</div>
-                                  <div className="truncate">{event.title}</div>
-                                </div>
-                              ))}
-                            </>
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs text-secondary-400">
-                                {slotStatus === 'dayOff' ? t('calendar.dayOff') : t('calendar.unavailable')}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+            {timeSlots.map((time) => (
+              <div key={time} className="flex border-b border-secondary-100">
+                <div className="w-20 flex-shrink-0 py-3 px-2 text-sm text-secondary-600 text-right border-r border-secondary-200">
+                  {time}
                 </div>
-              );
-            })}
+                <div
+                  className="flex-1 grid"
+                  style={{
+                    gridTemplateColumns: `repeat(${resources.length}, minmax(120px, 1fr))`,
+                  }}
+                >
+                  {resources.map((resource) => {
+                    const resourceEvents = dayEvents.filter(
+                      (event) =>
+                        event.time === time && event.resourceId === resource.id
+                    );
+                    const slotStatus = getSlotStatus(
+                      resource,
+                      currentDate,
+                      time
+                    );
+                    const isAvailable = slotStatus === 'available';
+
+                    return (
+                      <div
+                        key={resource.id}
+                        className={cn(
+                          'py-2 px-2 min-h-[60px] relative border-r border-secondary-100 last:border-r-0',
+                          'transition-colors duration-fast',
+                          isAvailable
+                            ? 'cursor-pointer hover:bg-primary-50'
+                            : 'bg-secondary-100 cursor-not-allowed'
+                        )}
+                        onClick={() => {
+                          if (isAvailable && resourceEvents.length === 0) {
+                            onTimeSlotClick?.(currentDate, time, resource.id);
+                          }
+                        }}
+                      >
+                        {isAvailable ? (
+                          <>
+                            {resourceEvents.length === 0 && (
+                              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                <span className="text-xs text-secondary-400">
+                                  +
+                                </span>
+                              </div>
+                            )}
+                            {resourceEvents.map((event) => (
+                              <div
+                                key={event.id}
+                                className={cn(
+                                  'mb-1 p-2 rounded-md cursor-pointer text-xs',
+                                  event.color || 'bg-primary-100 text-primary-700'
+                                )}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEventClick?.(event);
+                                }}
+                              >
+                                <div className="font-medium">{event.time}</div>
+                                <div className="truncate">{event.title}</div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs text-secondary-400">
+                              {slotStatus === 'dayOff'
+                                ? t('calendar.dayOff')
+                                : t('calendar.unavailable')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       );
     }
 
-    // 기존 단일 컬럼 뷰
+    // Single column view
     return (
       <div className="p-4">
         <div className="flex border-b border-secondary-200">
@@ -255,7 +298,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
 
         <div className="overflow-y-auto max-h-[600px]">
           {timeSlots.map((time) => {
-            const timeEvents = dayEvents.filter(event => event.time === time);
+            const timeEvents = dayEvents.filter((event) => event.time === time);
 
             return (
               <div key={time} className="flex border-b border-secondary-100">
@@ -263,7 +306,10 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
                   {time}
                 </div>
                 <div
-                  className="flex-1 py-2 px-3 min-h-[60px] relative cursor-pointer transition-colors hover:bg-blue-50"
+                  className={cn(
+                    'flex-1 py-2 px-3 min-h-[60px] relative cursor-pointer',
+                    'transition-colors duration-fast hover:bg-primary-50'
+                  )}
                   onClick={() => {
                     if (timeEvents.length === 0) {
                       onTimeSlotClick?.(currentDate, time);
@@ -272,13 +318,18 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
                 >
                   {timeEvents.length === 0 && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <span className="text-xs text-secondary-400">{t('calendar.addBooking')}</span>
+                      <span className="text-xs text-secondary-400">
+                        {t('calendar.addBooking')}
+                      </span>
                     </div>
                   )}
                   {timeEvents.map((event) => (
                     <div
                       key={event.id}
-                      className={`mb-1 p-2 rounded cursor-pointer ${event.color || 'bg-primary-100 text-primary-700'}`}
+                      className={cn(
+                        'mb-1 p-2 rounded-md cursor-pointer',
+                        event.color || 'bg-primary-100 text-primary-700'
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
                         onEventClick?.(event);
@@ -305,9 +356,14 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
           {weekDays.map((day, index) => (
             <div
               key={day}
-              className={`text-center text-sm font-medium py-2 ${
-                index === 0 ? 'text-red-500' : index === 6 ? 'text-blue-500' : 'text-secondary-600'
-              }`}
+              className={cn(
+                'text-center text-sm font-medium py-2',
+                index === 0
+                  ? 'text-error-500'
+                  : index === 6
+                    ? 'text-info-500'
+                    : 'text-secondary-600'
+              )}
             >
               {day}
             </div>
@@ -326,33 +382,43 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
             return (
               <div
                 key={day.toString()}
-                className={`min-h-[100px] p-2 border rounded-lg cursor-pointer transition-colors ${
-                  isCurrentMonth ? 'bg-white' : 'bg-secondary-50'
-                } ${
-                  isSelected ? 'border-primary-500 bg-primary-50' : 'border-secondary-200'
-                } hover:border-primary-300`}
+                className={cn(
+                  'min-h-[100px] p-2 border rounded-lg cursor-pointer',
+                  'transition-colors duration-fast',
+                  isCurrentMonth ? 'bg-white' : 'bg-secondary-50',
+                  isSelected
+                    ? 'border-primary-500 bg-primary-50'
+                    : 'border-secondary-200 hover:border-primary-300'
+                )}
                 onClick={() => onDateSelect(day)}
               >
                 <div
-                  className={`text-sm font-medium mb-1 ${
-                    !isCurrentMonth ? 'text-secondary-400' :
-                    isToday ? 'text-white bg-primary-500 rounded-full w-6 h-6 flex items-center justify-center' :
-                    dayOfWeek === 0 ? 'text-red-500' :
-                    dayOfWeek === 6 ? 'text-blue-500' :
-                    'text-secondary-700'
-                  }`}
+                  className={cn(
+                    'text-sm font-medium mb-1',
+                    !isCurrentMonth && 'text-secondary-400',
+                    isToday &&
+                      'text-white bg-primary-500 rounded-full w-6 h-6 flex items-center justify-center',
+                    !isToday && isCurrentMonth && dayOfWeek === 0 && 'text-error-500',
+                    !isToday && isCurrentMonth && dayOfWeek === 6 && 'text-info-500',
+                    !isToday &&
+                      isCurrentMonth &&
+                      dayOfWeek !== 0 &&
+                      dayOfWeek !== 6 &&
+                      'text-secondary-700'
+                  )}
                 >
                   {format(day, 'd')}
                 </div>
 
-                {/* Events for this day */}
+                {/* Events */}
                 <div className="space-y-1">
                   {dayEvents.slice(0, 3).map((event) => (
                     <div
                       key={event.id}
-                      className={`text-xs p-1 rounded truncate cursor-pointer ${
+                      className={cn(
+                        'text-xs p-1 rounded truncate cursor-pointer',
                         event.color || 'bg-primary-100 text-primary-700'
-                      }`}
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
                         onEventClick?.(event);
@@ -377,34 +443,35 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
   };
 
   return (
-    <div className="bg-white rounded-lg border border-secondary-200">
+    <div className="bg-white rounded-lg border border-secondary-200 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-secondary-200">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           <h2 className="text-lg font-semibold text-secondary-900">
             {viewType === 'month'
               ? format(currentMonth, 'LLLL yyyy', { locale: dateLocale })
-              : format(currentDate, 'PPP', { locale: dateLocale })
-            }
+              : format(currentDate, 'PPP', { locale: dateLocale })}
           </h2>
           <div className="flex border border-secondary-200 rounded-lg overflow-hidden">
             <button
-              className={`px-3 py-1.5 flex items-center space-x-1 text-sm transition-colors ${
+              className={cn(
+                'px-3 py-1.5 flex items-center gap-1 text-sm transition-colors duration-fast',
                 viewType === 'month'
                   ? 'bg-primary-500 text-white'
                   : 'bg-white text-secondary-600 hover:bg-secondary-50'
-              }`}
+              )}
               onClick={() => setViewType('month')}
             >
               <CalendarRange size={16} />
               <span>{t('calendar.month')}</span>
             </button>
             <button
-              className={`px-3 py-1.5 flex items-center space-x-1 text-sm transition-colors ${
+              className={cn(
+                'px-3 py-1.5 flex items-center gap-1 text-sm transition-colors duration-fast',
                 viewType === 'day'
                   ? 'bg-primary-500 text-white'
                   : 'bg-white text-secondary-600 hover:bg-secondary-50'
-              }`}
+              )}
               onClick={() => setViewType('day')}
             >
               <CalendarDays size={16} />
@@ -412,7 +479,7 @@ export function Calendar({ selectedDate, onDateSelect, events = [], onEventClick
             </button>
           </div>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"

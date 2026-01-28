@@ -60,7 +60,7 @@ export function DatePicker({
       {label && (
         <label className="block text-sm font-medium text-secondary-700 mb-1">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-error-500 ml-1">*</span>}
         </label>
       )}
       <ReactDatePicker
@@ -73,17 +73,26 @@ export function DatePicker({
         minDate={minDate}
         maxDate={maxDate}
         className={cn(
-          'w-full px-3 py-2 border rounded-lg text-secondary-900 placeholder-secondary-400',
-          'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
+          // Base styles
+          'w-full px-3 py-2 text-sm',
+          'border rounded-lg',
+          'text-secondary-900 placeholder:text-secondary-400',
+          'transition-colors duration-fast',
+          // Focus styles
+          'focus:outline-none focus:ring-2 focus:border-transparent',
+          // Disabled styles
           'disabled:bg-secondary-100 disabled:cursor-not-allowed',
-          error ? 'border-red-500 focus:ring-red-500' : 'border-secondary-300',
+          // Error or default border
+          error
+            ? 'border-error-500 focus:ring-error-500'
+            : 'border-secondary-300 focus:ring-primary-500',
           className
         )}
         wrapperClassName="w-full"
         showPopperArrow={false}
         popperPlacement="bottom-start"
       />
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-error-600">{error}</p>}
     </div>
   );
 }

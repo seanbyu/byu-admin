@@ -9,6 +9,7 @@ interface Column<T> {
   header: string;
   render?: (item: T) => React.ReactNode;
   width?: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 interface TableProps<T> {
@@ -17,6 +18,7 @@ interface TableProps<T> {
   onRowClick?: (item: T) => void;
   loading?: boolean;
   emptyMessage?: string;
+  striped?: boolean;
 }
 
 export function Table<T extends { id: string }>({
@@ -25,24 +27,30 @@ export function Table<T extends { id: string }>({
   onRowClick,
   loading = false,
   emptyMessage,
+  striped = false,
 }: TableProps<T>) {
   const t = useTranslations('common');
   const emptyText = emptyMessage ?? t('noData');
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary-500 border-t-transparent" />
       </div>
     );
   }
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-secondary-500">
-        {emptyText}
-      </div>
+      <div className="text-center py-12 text-secondary-500">{emptyText}</div>
     );
   }
+
+  const alignStyles = {
+    left: 'text-left',
+    center: 'text-center',
+    right: 'text-right',
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -53,7 +61,8 @@ export function Table<T extends { id: string }>({
               <th
                 key={column.key}
                 className={cn(
-                  'px-6 py-3 text-left text-xs font-medium text-secondary-700 uppercase tracking-wider',
+                  'px-6 py-3 text-xs font-semibold text-secondary-600 uppercase tracking-wider',
+                  alignStyles[column.align || 'left'],
                   column.width
                 )}
               >
@@ -62,20 +71,25 @@ export function Table<T extends { id: string }>({
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-secondary-200">
-          {data.map((item) => (
+        <tbody className="bg-white divide-y divide-secondary-100">
+          {data.map((item, index) => (
             <tr
               key={item.id}
               onClick={() => onRowClick?.(item)}
               className={cn(
-                'hover:bg-secondary-50 transition-colors',
-                onRowClick && 'cursor-pointer'
+                'transition-colors duration-fast',
+                'hover:bg-secondary-50',
+                onRowClick && 'cursor-pointer',
+                striped && index % 2 === 1 && 'bg-secondary-50/50'
               )}
             >
               {columns.map((column) => (
                 <td
                   key={column.key}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900"
+                  className={cn(
+                    'px-6 py-4 text-sm text-secondary-900',
+                    alignStyles[column.align || 'left']
+                  )}
                 >
                   {column.render
                     ? column.render(item)

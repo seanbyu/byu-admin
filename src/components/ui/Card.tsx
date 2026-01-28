@@ -7,6 +7,8 @@ interface CardProps {
   title?: string;
   subtitle?: string;
   headerAction?: React.ReactNode;
+  hover?: boolean;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -15,11 +17,21 @@ export const Card: React.FC<CardProps> = ({
   title,
   subtitle,
   headerAction,
+  hover = false,
+  padding = 'md',
 }) => {
+  const paddingStyles = {
+    none: '',
+    sm: 'p-4',
+    md: 'p-6',
+    lg: 'p-8',
+  };
+
   return (
     <div
       className={cn(
         'bg-white rounded-lg shadow-sm border border-secondary-200',
+        hover && 'transition-shadow duration-normal hover:shadow-md',
         className
       )}
     >
@@ -40,7 +52,7 @@ export const Card: React.FC<CardProps> = ({
           </div>
         </div>
       )}
-      <div className="p-6">{children}</div>
+      <div className={paddingStyles[padding]}>{children}</div>
     </div>
   );
 };

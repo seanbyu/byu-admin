@@ -18,7 +18,8 @@ import {
   Music2,
 } from 'lucide-react';
 import type { WorkSchedule } from '../../types';
-import { useSalonStore } from '@/store/salonStore';
+import { useQuery } from '@tanstack/react-query';
+import { salonsApi } from '@/features/salons/api';
 import { StaffWorkSchedule } from './StaffWorkSchedule';
 import { toWorkSchedule, fromWorkSchedule } from '../../utils/staffSchedule';
 
@@ -56,9 +57,17 @@ export default function StaffProfileModal({
   const [uploading, setUploading] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule>({});
-  const currentSalon = useSalonStore((s) => s.currentSalon);
+
+  // TanStack Query로 salon 정보 가져오기
+  const { data: salonResponse } = useQuery({
+    queryKey: ['salon', staff.salonId],
+    queryFn: () => salonsApi.getSalon(staff.salonId),
+    enabled: isOpen && !!staff.salonId,
+  });
+  const currentSalon = salonResponse?.data as Record<string, any> | undefined;
+
   // 매장 영업시간: DB 포맷 또는 배열 모두 대응
-  const salonHoursRaw = currentSalon?.businessHours;
+  const salonHoursRaw = currentSalon?.business_hours || currentSalon?.businessHours;
   const salonHoursDB = useMemo(() => {
     if (!salonHoursRaw) return {};
     // 이미 DB 포맷(객체)이면 그대로

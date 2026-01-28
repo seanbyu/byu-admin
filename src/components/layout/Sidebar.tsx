@@ -210,7 +210,7 @@ export const Sidebar: React.FC = () => {
           'fixed top-0 left-0 z-50 h-screen bg-white border-r border-secondary-200 transition-transform duration-300 lg:relative',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
-        style={{ width: '280px' }}
+        style={{ width: 'var(--sidebar-width)' }}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}

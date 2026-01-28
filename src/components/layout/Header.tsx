@@ -81,7 +81,7 @@ export const Header: React.FC = () => {
             className="relative text-secondary-700 hover:text-secondary-900 transition-colors"
           >
             <Bell size={20} />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-error-500 rounded-full text-xs text-white flex items-center justify-center">
               3
             </span>
           </button>
@@ -118,7 +118,7 @@ export const Header: React.FC = () => {
         {/* Logout */}
         <button
           onClick={logout}
-          className="flex items-center space-x-2 text-secondary-700 hover:text-red-600 transition-colors"
+          className="flex items-center space-x-2 text-secondary-700 hover:text-error-600 transition-colors"
         >
           <LogOut size={20} />
           <span className="hidden sm:inline text-sm font-medium">
