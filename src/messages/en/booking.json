@@ -30,7 +30,13 @@
     "reasonPlaceholder": "e.g., Holiday",
     "slotDuration": "Booking Time Slot",
     "slotDuration30": "30 min",
-    "slotDuration60": "60 min"
+    "slotDuration60": "60 min",
+    "bookingAdvanceDays": "Booking Period",
+    "bookingAdvanceDays7": "1 week",
+    "bookingAdvanceDays14": "2 weeks",
+    "bookingAdvanceDays30": "1 month",
+    "bookingAdvanceDays60": "2 months",
+    "bookingAdvanceDays90": "3 months"
   },
   "placeholders": {
     "customerName": "Enter customer name",

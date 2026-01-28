@@ -85,8 +85,13 @@ export const endpoints = {
     // 살롱 설정 (Settings in Salon)
     settings: {
       path: (salonId: string) => `/salons/${salonId}/settings`,
-      queryKey: (salonId: string) =>
-        ['salons', salonId, 'settings'] as const,
+      queryKey: (salonId: string) => ['salons', salonId, 'settings'] as const,
+    },
+
+    // 직급 (Positions)
+    positions: {
+      path: (salonId: string) => `/salons/${salonId}/positions`,
+      queryKey: (salonId: string) => ['salons', salonId, 'positions'] as const,
     },
   },
 
@@ -197,6 +202,14 @@ export const endpoints = {
     images: {
       path: () => '/upload/images',
       queryKey: () => ['upload', 'images'] as const,
+    },
+  },
+
+  // 직급 (Positions) - Detail/Update/Delete
+  positions: {
+    detail: {
+      path: (id: string) => `/positions/${id}`,
+      queryKey: (id: string) => ['positions', id] as const,
     },
   },
 } as const;

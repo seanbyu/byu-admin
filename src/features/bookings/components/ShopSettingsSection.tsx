@@ -55,6 +55,7 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>(getDefaultBusinessHours());
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [slotDuration, setSlotDuration] = useState<number>(30);
+  const [bookingAdvanceDays, setBookingAdvanceDays] = useState<number>(30);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -86,6 +87,9 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
         }
         if (response.data.settings?.slot_duration_minutes) {
           setSlotDuration(response.data.settings.slot_duration_minutes);
+        }
+        if (response.data.settings?.booking_advance_days) {
+          setBookingAdvanceDays(response.data.settings.booking_advance_days);
         }
       }
     } catch (error) {
@@ -144,7 +148,10 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
       await salonsApi.updateSettings(salonId, {
         businessHours,
         holidays,
-        settings: { slot_duration_minutes: slotDuration },
+        settings: {
+          slot_duration_minutes: slotDuration,
+          booking_advance_days: bookingAdvanceDays,
+        },
       });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -185,22 +192,47 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
       </div>
 
       <div className="space-y-6">
-        {/* 예약 시간 단위 설정 */}
-        <div>
-          <h3 className="text-sm font-medium text-secondary-700 mb-3">
-            {t('booking.shopSettingsModal.slotDuration')}
-          </h3>
-          <div className="bg-secondary-50 rounded-lg p-4">
-            <Select
-              options={[
-                { value: '30', label: t('booking.shopSettingsModal.slotDuration30') },
-                { value: '60', label: t('booking.shopSettingsModal.slotDuration60') },
-              ]}
-              value={String(slotDuration)}
-              onChange={(e) => setSlotDuration(Number(e.target.value))}
-              className="w-40"
-              showPlaceholder={false}
-            />
+        {/* 예약 시간 단위 및 예약 가능 기간 설정 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* 예약 시간 단위 */}
+          <div>
+            <h3 className="text-sm font-medium text-secondary-700 mb-3">
+              {t('booking.shopSettingsModal.slotDuration')}
+            </h3>
+            <div className="bg-secondary-50 rounded-lg p-4">
+              <Select
+                options={[
+                  { value: '30', label: t('booking.shopSettingsModal.slotDuration30') },
+                  { value: '60', label: t('booking.shopSettingsModal.slotDuration60') },
+                ]}
+                value={String(slotDuration)}
+                onChange={(e) => setSlotDuration(Number(e.target.value))}
+                className="w-full"
+                showPlaceholder={false}
+              />
+            </div>
+          </div>
+
+          {/* 예약 가능 기간 */}
+          <div>
+            <h3 className="text-sm font-medium text-secondary-700 mb-3">
+              {t('booking.shopSettingsModal.bookingAdvanceDays')}
+            </h3>
+            <div className="bg-secondary-50 rounded-lg p-4">
+              <Select
+                options={[
+                  { value: '7', label: t('booking.shopSettingsModal.bookingAdvanceDays7') },
+                  { value: '14', label: t('booking.shopSettingsModal.bookingAdvanceDays14') },
+                  { value: '30', label: t('booking.shopSettingsModal.bookingAdvanceDays30') },
+                  { value: '60', label: t('booking.shopSettingsModal.bookingAdvanceDays60') },
+                  { value: '90', label: t('booking.shopSettingsModal.bookingAdvanceDays90') },
+                ]}
+                value={String(bookingAdvanceDays)}
+                onChange={(e) => setBookingAdvanceDays(Number(e.target.value))}
+                className="w-full"
+                showPlaceholder={false}
+              />
+            </div>
           </div>
         </div>
 

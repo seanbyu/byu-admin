@@ -30,7 +30,13 @@
     "reasonPlaceholder": "예: 설 연휴",
     "slotDuration": "예약 시간 단위",
     "slotDuration30": "30분",
-    "slotDuration60": "60분"
+    "slotDuration60": "60분",
+    "bookingAdvanceDays": "예약 가능 기간",
+    "bookingAdvanceDays7": "1주",
+    "bookingAdvanceDays14": "2주",
+    "bookingAdvanceDays30": "1개월",
+    "bookingAdvanceDays60": "2개월",
+    "bookingAdvanceDays90": "3개월"
   },
   "placeholders": {
     "customerName": "고객 이름을 입력하세요",

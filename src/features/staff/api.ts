@@ -1,6 +1,11 @@
 import { apiClient } from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
-import { Staff } from './types';
+import {
+  Staff,
+  StaffPosition,
+  CreatePositionDto,
+  UpdatePositionDto,
+} from './types';
 import { ApiResponse } from '@/types';
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -34,6 +39,28 @@ export const createStaffApi = (client?: SupabaseClient<any>) => {
   };
 };
 
-export const staffApi = {
-  // Legacy support removed
+export const staffPositionApi = {
+  getPositions: async (
+    salonId: string
+  ): Promise<ApiResponse<StaffPosition[]>> => {
+    return apiClient.get(endpoints.salons.positions.path(salonId));
+  },
+
+  createPosition: async (
+    salonId: string,
+    dto: CreatePositionDto
+  ): Promise<ApiResponse<StaffPosition>> => {
+    return apiClient.post(endpoints.salons.positions.path(salonId), dto);
+  },
+
+  updatePosition: async (
+    positionId: string,
+    dto: UpdatePositionDto
+  ): Promise<ApiResponse<StaffPosition>> => {
+    return apiClient.patch(endpoints.positions.detail.path(positionId), dto);
+  },
+
+  deletePosition: async (positionId: string): Promise<ApiResponse<void>> => {
+    return apiClient.delete(endpoints.positions.detail.path(positionId));
+  },
 };

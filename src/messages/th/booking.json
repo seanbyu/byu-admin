@@ -30,7 +30,13 @@
     "reasonPlaceholder": "เช่น วันหยุดนักขัตฤกษ์",
     "slotDuration": "หน่วยเวลาจอง",
     "slotDuration30": "30 นาที",
-    "slotDuration60": "60 นาที"
+    "slotDuration60": "60 นาที",
+    "bookingAdvanceDays": "ระยะเวลาการจอง",
+    "bookingAdvanceDays7": "1 สัปดาห์",
+    "bookingAdvanceDays14": "2 สัปดาห์",
+    "bookingAdvanceDays30": "1 เดือน",
+    "bookingAdvanceDays60": "2 เดือน",
+    "bookingAdvanceDays90": "3 เดือน"
   },
   "placeholders": {
     "customerName": "กรอกชื่อลูกค้า",

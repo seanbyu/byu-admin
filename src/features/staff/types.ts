@@ -26,10 +26,12 @@ export type WorkSchedule = {
 };
 
 // DB 호환 타입: salon-store-web의 HolidayEntry와 동일
-export type HolidayEntry = string | {
-  date: string;
-  reason?: string;
-};
+export type HolidayEntry =
+  | string
+  | {
+      date: string;
+      reason?: string;
+    };
 
 export interface Staff {
   id: string;
@@ -57,4 +59,23 @@ export interface Staff {
   email?: string;
   role?: UserRole;
   positionTitle?: string; // 직급/호칭 (simple text)
+}
+
+export interface StaffPosition {
+  id: string;
+  salonId: string;
+  name: string;
+  rank: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreatePositionDto {
+  name: string;
+  rank: number;
+}
+
+export interface UpdatePositionDto {
+  name?: string;
+  rank?: number;
 }
