@@ -199,6 +199,7 @@ export class MenuRepository extends BaseRepository {
         duration_minutes: menuData.duration,
         pricing_type: "FIXED",
         base_price: menuData.price,
+        display_order: menuData.displayOrder ?? 0,
       } as never)
       .select()
       .single();

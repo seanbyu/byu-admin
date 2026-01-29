@@ -1,26 +1,38 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { BookingStatus } from '@/types';
 import { Booking } from '../types';
 import { Staff } from '@/features/staff/types';
+import {
+  useBookingsUIStore,
+  selectShowNewBookingModal,
+  selectShowShopSettingsModal,
+  selectShowStaffScheduleModal,
+  selectSelectedDate,
+  selectStatusFilter,
+  selectViewMode,
+  selectSelectedTime,
+  selectSelectedStaffId,
+} from '../stores/bookingsStore';
 
-// 상수를 컴포넌트 외부로 호이스팅 (rendering-hoist-jsx)
-const STATUS_COLORS: Record<BookingStatus, string> = {
+// 상수를 모듈 레벨로 호이스팅
+const STATUS_COLORS: Readonly<Record<BookingStatus, string>> = {
   [BookingStatus.PENDING]: 'bg-yellow-100 text-yellow-700',
   [BookingStatus.CONFIRMED]: 'bg-blue-100 text-blue-700',
   [BookingStatus.COMPLETED]: 'bg-green-100 text-green-700',
   [BookingStatus.CANCELLED]: 'bg-red-100 text-red-700',
   [BookingStatus.NO_SHOW]: 'bg-gray-100 text-gray-700',
-};
+} as const;
 
-const STATUS_BADGE_VARIANTS: Record<BookingStatus, 'warning' | 'info' | 'success' | 'danger' | 'default'> = {
+const STATUS_BADGE_VARIANTS: Readonly<Record<BookingStatus, 'warning' | 'info' | 'success' | 'danger' | 'default'>> = {
   [BookingStatus.PENDING]: 'warning',
   [BookingStatus.CONFIRMED]: 'info',
   [BookingStatus.COMPLETED]: 'success',
   [BookingStatus.CANCELLED]: 'danger',
   [BookingStatus.NO_SHOW]: 'default',
-};
+} as const;
 
 export interface CalendarEvent {
   id: string;
@@ -50,17 +62,17 @@ export interface DesignerOption {
 }
 
 interface UseBookingsPageStateReturn {
-  // Modal states
+  // Modal states (from Zustand)
   showNewBookingModal: boolean;
   showShopSettingsModal: boolean;
   showStaffScheduleModal: boolean;
-  // View states
+  // View states (from Zustand)
   selectedDate: Date;
   statusFilter: string;
   viewMode: 'calendar' | 'table';
   selectedTime: string;
   selectedStaffId: string;
-  // Actions
+  // Actions (from Zustand)
   openNewBookingModal: () => void;
   closeNewBookingModal: () => void;
   openShopSettingsModal: () => void;
@@ -79,56 +91,35 @@ interface UseBookingsPageStateReturn {
 }
 
 export function useBookingsPageState(): UseBookingsPageStateReturn {
-  // Modal states
-  const [showNewBookingModal, setShowNewBookingModal] = useState(false);
-  const [showShopSettingsModal, setShowShopSettingsModal] = useState(false);
-  const [showStaffScheduleModal, setShowStaffScheduleModal] = useState(false);
+  // Zustand state - 개별 셀렉터로 불필요한 리렌더링 방지
+  const showNewBookingModal = useBookingsUIStore(selectShowNewBookingModal);
+  const showShopSettingsModal = useBookingsUIStore(selectShowShopSettingsModal);
+  const showStaffScheduleModal = useBookingsUIStore(selectShowStaffScheduleModal);
+  const selectedDate = useBookingsUIStore(selectSelectedDate);
+  const statusFilter = useBookingsUIStore(selectStatusFilter);
+  const viewMode = useBookingsUIStore(selectViewMode);
+  const selectedTime = useBookingsUIStore(selectSelectedTime);
+  const selectedStaffId = useBookingsUIStore(selectSelectedStaffId);
 
-  // View states
-  const [selectedDate, setSelectedDate] = useState(() => new Date()); // rerender-lazy-state-init
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'calendar' | 'table'>('calendar');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
+  // Zustand actions - useShallow로 안정적 참조 유지
+  const actions = useBookingsUIStore(
+    useShallow((state) => ({
+      openNewBookingModal: state.openNewBookingModal,
+      closeNewBookingModal: state.closeNewBookingModal,
+      openShopSettingsModal: state.openShopSettingsModal,
+      closeShopSettingsModal: state.closeShopSettingsModal,
+      openStaffScheduleModal: state.openStaffScheduleModal,
+      closeStaffScheduleModal: state.closeStaffScheduleModal,
+      setSelectedDate: state.setSelectedDate,
+      setStatusFilter: state.setStatusFilter,
+      setViewMode: state.setViewMode,
+      setSelectedTime: state.setSelectedTime,
+      setSelectedStaffId: state.setSelectedStaffId,
+      handleTimeSlotClick: state.handleTimeSlotClick,
+    }))
+  );
 
-  // Modal actions - useCallback으로 안정적인 참조 유지 (rerender-functional-setstate)
-  const openNewBookingModal = useCallback(() => {
-    setShowNewBookingModal(true);
-  }, []);
-
-  const closeNewBookingModal = useCallback(() => {
-    setShowNewBookingModal(false);
-    setSelectedTime('');
-    setSelectedStaffId('');
-  }, []);
-
-  const openShopSettingsModal = useCallback(() => {
-    setShowShopSettingsModal(true);
-  }, []);
-
-  const closeShopSettingsModal = useCallback(() => {
-    setShowShopSettingsModal(false);
-  }, []);
-
-  const openStaffScheduleModal = useCallback(() => {
-    setShowStaffScheduleModal(true);
-  }, []);
-
-  const closeStaffScheduleModal = useCallback(() => {
-    setShowStaffScheduleModal(false);
-  }, []);
-
-  // Time slot click handler
-  const handleTimeSlotClick = useCallback((date: Date, time: string, resourceId?: string) => {
-    setSelectedDate(date);
-    setSelectedTime(time);
-    if (resourceId) {
-      setSelectedStaffId(resourceId);
-    }
-    setShowNewBookingModal(true);
-  }, []);
-
-  // Status utilities - 컴포넌트 외부 상수 사용으로 재생성 방지
+  // Status utilities - 모듈 레벨 상수 사용으로 재생성 방지
   const getStatusColor = useCallback((status: BookingStatus): string => {
     return STATUS_COLORS[status];
   }, []);
@@ -137,34 +128,34 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
     return STATUS_BADGE_VARIANTS[status];
   }, []);
 
-  return {
-    // Modal states
-    showNewBookingModal,
-    showShopSettingsModal,
-    showStaffScheduleModal,
-    // View states
-    selectedDate,
-    statusFilter,
-    viewMode,
-    selectedTime,
-    selectedStaffId,
-    // Actions
-    openNewBookingModal,
-    closeNewBookingModal,
-    openShopSettingsModal,
-    closeShopSettingsModal,
-    openStaffScheduleModal,
-    closeStaffScheduleModal,
-    setSelectedDate,
-    setStatusFilter,
-    setViewMode,
-    setSelectedTime,
-    setSelectedStaffId,
-    handleTimeSlotClick,
-    // Utilities
-    getStatusColor,
-    getStatusBadgeVariant,
-  };
+  return useMemo(
+    () => ({
+      showNewBookingModal,
+      showShopSettingsModal,
+      showStaffScheduleModal,
+      selectedDate,
+      statusFilter,
+      viewMode,
+      selectedTime,
+      selectedStaffId,
+      ...actions,
+      getStatusColor,
+      getStatusBadgeVariant,
+    }),
+    [
+      showNewBookingModal,
+      showShopSettingsModal,
+      showStaffScheduleModal,
+      selectedDate,
+      statusFilter,
+      viewMode,
+      selectedTime,
+      selectedStaffId,
+      actions,
+      getStatusColor,
+      getStatusBadgeVariant,
+    ]
+  );
 }
 
 // 데이터 변환 유틸리티 (useMemo와 함께 사용)
@@ -190,7 +181,7 @@ export function useBookingsData(
       .map((staff) => ({
         id: staff.id,
         label: staff.name,
-        workHours: staff.workHours?.map(wh => ({
+        workHours: staff.workHours?.map((wh) => ({
           dayOfWeek: wh.dayOfWeek,
           openTime: wh.openTime,
           closeTime: wh.closeTime,
@@ -211,9 +202,12 @@ export function useBookingsData(
     }));
   }, [bookings, getStatusColor]);
 
-  return {
-    designers,
-    calendarResources,
-    calendarEvents,
-  };
+  return useMemo(
+    () => ({
+      designers,
+      calendarResources,
+      calendarEvents,
+    }),
+    [designers, calendarResources, calendarEvents]
+  );
 }

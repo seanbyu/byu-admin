@@ -114,11 +114,14 @@ export default function MenuItems({
       return;
     }
     try {
+      // 마지막 순서 계산 (현재 메뉴 개수)
+      const nextDisplayOrder = orderedMenus.length;
       await createMenu({
         name: newMenu.name,
         duration: newMenu.duration,
-        price: newMenu.price,
-      });
+        price: Number(newMenu.price),
+        displayOrder: nextDisplayOrder,
+      } as any);
       setNewMenu({ name: '', price: '', duration: 30 });
       setIsAdding(false);
     } catch (e) {

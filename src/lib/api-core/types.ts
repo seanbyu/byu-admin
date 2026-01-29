@@ -250,6 +250,7 @@ export interface CreateMenuDto {
   price: number;
   duration: number;
   description?: string;
+  displayOrder?: number;
 }
 
 // Menu update DTO

@@ -16,6 +16,7 @@ import { BookingStatus } from '@/types';
 import { Booking } from '../types';
 import { useBookings } from '../hooks/useBookings';
 import { useBookingsPageState, useBookingsData } from '../hooks/useBookingsPageState';
+import { salonSettingsKeys, SALON_SETTINGS_QUERY_OPTIONS } from '../hooks/queries';
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { formatDate, formatPrice } from '@/lib/utils';
@@ -35,12 +36,12 @@ const STATUS_OPTIONS = [
   { value: BookingStatus.CONFIRMED, label: 'booking.confirmed' },
   { value: BookingStatus.COMPLETED, label: 'booking.completed' },
   { value: BookingStatus.CANCELLED, label: 'booking.cancelled' },
-];
+] as const;
 
 // rerender-memo: 비싼 렌더링 작업을 메모이제이션
 const StatusBadge = memo(function StatusBadge({
   variant,
-  label
+  label,
 }: {
   variant: 'warning' | 'info' | 'success' | 'danger' | 'default';
   label: string;
@@ -113,25 +114,35 @@ const BookingFilters = memo(function BookingFilters({
   t: (key: string) => string;
 }) {
   // useMemo로 상태 옵션 번역 (js-cache-function-results)
-  const translatedStatusOptions = useMemo(() =>
-    STATUS_OPTIONS.map(opt => ({
-      value: opt.value,
-      label: t(opt.label),
-    })),
+  const translatedStatusOptions = useMemo(
+    () =>
+      STATUS_OPTIONS.map((opt) => ({
+        value: opt.value,
+        label: t(opt.label),
+      })),
     [t]
   );
 
-  const handleDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onDateChange(new Date(e.target.value));
-  }, [onDateChange]);
+  const handleDateChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onDateChange(new Date(e.target.value));
+    },
+    [onDateChange]
+  );
 
-  const handleStatusChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    onStatusChange(e.target.value);
-  }, [onStatusChange]);
+  const handleStatusChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      onStatusChange(e.target.value);
+    },
+    [onStatusChange]
+  );
 
-  const handleStaffChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    onStaffChange(e.target.value);
-  }, [onStaffChange]);
+  const handleStaffChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      onStaffChange(e.target.value);
+    },
+    [onStaffChange]
+  );
 
   return (
     <Card>
@@ -172,28 +183,30 @@ export default function BookingsPageView() {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
-  // Custom hooks로 상태 관리 분리
+  // Custom hooks로 상태 관리 분리 (Zustand 기반)
   const pageState = useBookingsPageState();
 
-  // 데이터 fetching
-  const { data: response, isLoading } = useBookings(salonId, {
+  // 데이터 fetching (TanStack Query)
+  const { bookings, isLoading } = useBookings(salonId, {
     enabled: !!salonId,
   });
 
-  const { data: staffResponse } = useStaff(salonId, {
+  const { staffData: staffMembers } = useStaff(salonId, {
     enabled: !!salonId,
   });
 
-  const staffMembers = staffResponse?.data || [];
-  const bookings = response || [];
-
-  // slotDuration 설정 로드 (TanStack Query)
+  // slotDuration 설정 로드 (TanStack Query with optimized options)
   const { data: settingsResponse } = useQuery({
-    queryKey: ['salon-settings', salonId],
+    queryKey: salonSettingsKeys.detail(salonId),
     queryFn: () => salonsApi.getSettings(salonId),
     enabled: !!salonId,
+    ...SALON_SETTINGS_QUERY_OPTIONS,
   });
-  const slotDuration = settingsResponse?.data?.settings?.slot_duration_minutes || 30;
+
+  const slotDuration = useMemo(
+    () => settingsResponse?.data?.settings?.slot_duration_minutes || 30,
+    [settingsResponse?.data?.settings?.slot_duration_minutes]
+  );
 
   // 데이터 변환 (useMemo 내부에서 처리)
   const { designers, calendarResources, calendarEvents } = useBookingsData(
@@ -203,67 +216,73 @@ export default function BookingsPageView() {
   );
 
   // 테이블 컬럼 정의 (useMemo로 메모이제이션)
-  const columns = useMemo(() => [
-    {
-      key: 'customerName',
-      header: t('booking.customer'),
-      render: (booking: Booking) => (
-        <div>
-          <p className="font-medium">{booking.customerName}</p>
-          <p className="text-xs text-secondary-500">{booking.customerPhone}</p>
-        </div>
-      ),
-    },
-    {
-      key: 'serviceName',
-      header: t('booking.service'),
-    },
-    {
-      key: 'date',
-      header: t('booking.date'),
-      render: (booking: Booking) => formatDate(booking.date, 'yyyy-MM-dd'),
-    },
-    {
-      key: 'time',
-      header: t('booking.time'),
-      render: (booking: Booking) => `${booking.startTime} - ${booking.endTime}`,
-    },
-    {
-      key: 'price',
-      header: t('booking.price'),
-      render: (booking: Booking) => formatPrice(booking.price),
-    },
-    {
-      key: 'status',
-      header: t('booking.status'),
-      render: (booking: Booking) => (
-        <StatusBadge
-          variant={pageState.getStatusBadgeVariant(booking.status)}
-          label={t(`booking.${booking.status.toLowerCase()}`)}
-        />
-      ),
-    },
-    {
-      key: 'source',
-      header: t('booking.source'),
-      render: (booking: Booking) => {
-        const sourceLabels: Record<string, string> = {
-          ONLINE: t('booking.online'),
-          PHONE: t('booking.phone'),
-          WALK_IN: t('booking.walkIn'),
-        };
-        return sourceLabels[booking.source] || booking.source;
+  const columns = useMemo(
+    () => [
+      {
+        key: 'customerName',
+        header: t('booking.customer'),
+        render: (booking: Booking) => (
+          <div>
+            <p className="font-medium">{booking.customerName}</p>
+            <p className="text-xs text-secondary-500">{booking.customerPhone}</p>
+          </div>
+        ),
       },
-    },
-  ], [t, pageState.getStatusBadgeVariant]);
+      {
+        key: 'serviceName',
+        header: t('booking.service'),
+      },
+      {
+        key: 'date',
+        header: t('booking.date'),
+        render: (booking: Booking) => formatDate(booking.date, 'yyyy-MM-dd'),
+      },
+      {
+        key: 'time',
+        header: t('booking.time'),
+        render: (booking: Booking) => `${booking.startTime} - ${booking.endTime}`,
+      },
+      {
+        key: 'price',
+        header: t('booking.price'),
+        render: (booking: Booking) => formatPrice(booking.price),
+      },
+      {
+        key: 'status',
+        header: t('booking.status'),
+        render: (booking: Booking) => (
+          <StatusBadge
+            variant={pageState.getStatusBadgeVariant(booking.status)}
+            label={t(`booking.${booking.status.toLowerCase()}`)}
+          />
+        ),
+      },
+      {
+        key: 'source',
+        header: t('booking.source'),
+        render: (booking: Booking) => {
+          const sourceLabels: Record<string, string> = {
+            ONLINE: t('booking.online'),
+            PHONE: t('booking.phone'),
+            WALK_IN: t('booking.walkIn'),
+          };
+          return sourceLabels[booking.source] || booking.source;
+        },
+      },
+    ],
+    [t, pageState.getStatusBadgeVariant]
+  );
 
   // 이벤트 핸들러 (useCallback으로 안정적 참조)
-  const handleEventClick = useCallback((event: { id: string }) => {
-    const booking = bookings.find((b: Booking) => b.id === event.id);
-    if (booking) {
-      console.log('View booking:', booking);
-    }
-  }, [bookings]);
+  const handleEventClick = useCallback(
+    (event: { id: string }) => {
+      const booking = bookings.find((b: Booking) => b.id === event.id);
+      if (booking) {
+        console.log('View booking:', booking);
+      }
+    },
+    [bookings]
+  );
 
   const handleRowClick = useCallback((booking: Booking) => {
     console.log('View booking:', booking);
@@ -271,11 +290,11 @@ export default function BookingsPageView() {
 
   const handleViewModeCalendar = useCallback(() => {
     pageState.setViewMode('calendar');
-  }, [pageState]);
+  }, [pageState.setViewMode]);
 
   const handleViewModeTable = useCallback(() => {
     pageState.setViewMode('table');
-  }, [pageState]);
+  }, [pageState.setViewMode]);
 
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
@@ -309,10 +328,7 @@ export default function BookingsPageView() {
               calendarLabel={t('common.calendar.view')}
               listLabel={t('common.calendar.list')}
             />
-            <Button
-              variant="primary"
-              onClick={pageState.openNewBookingModal}
-            >
+            <Button variant="primary" onClick={pageState.openNewBookingModal}>
               <Plus size={20} className="mr-2" />
               {t('booking.new')}
             </Button>
@@ -344,11 +360,7 @@ export default function BookingsPageView() {
           />
         ) : (
           <Card>
-            <Table
-              data={bookings}
-              columns={columns}
-              onRowClick={handleRowClick}
-            />
+            <Table data={bookings} columns={columns} onRowClick={handleRowClick} />
           </Card>
         )}
       </div>
