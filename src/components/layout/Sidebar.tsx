@@ -27,12 +27,28 @@ import { useAuthStore } from '@/store/authStore';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { UserRole } from '@/types';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase/client';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { isSidebarOpen, toggleSidebar } = useUIStore();
   const { user } = useAuthStore();
   const t = useTranslations();
+
+  const { data: salon } = useQuery({
+    queryKey: ['salon', user?.salonId],
+    queryFn: async () => {
+      if (!user?.salonId) return null;
+      const { data } = await supabase
+        .from('salons')
+        .select('name')
+        .eq('id', user.salonId)
+        .single();
+      return data;
+    },
+    enabled: !!user?.salonId,
+  });
 
   const [openSubmenus, setOpenSubmenus] = React.useState<string[]>([
     'salon-management',
@@ -218,7 +234,7 @@ export const Sidebar: React.FC = () => {
             <Link href="/dashboard" className="flex items-center">
               <Scissors className="w-8 h-8 text-primary-600" />
               <span className="ml-2 text-xl font-bold text-secondary-900">
-                Salon Admin
+                {salon?.name || 'Salon Admin'}
               </span>
             </Link>
             <button

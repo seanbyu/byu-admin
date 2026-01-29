@@ -29,6 +29,22 @@ CREATE POLICY "Salon admins can manage salon industries"
   );
 
 -- ============================================
+-- Salon Images
+-- ============================================
+ALTER TABLE salon_images ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view salon images"
+  ON salon_images FOR SELECT
+  USING (true);
+
+CREATE POLICY "Salon admins can manage salon images"
+  ON salon_images FOR ALL
+  USING (
+    salon_id = get_my_salon_id() AND
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
+  );
+
+-- ============================================
 -- Salons
 -- ============================================
 ALTER TABLE salons ENABLE ROW LEVEL SECURITY;
