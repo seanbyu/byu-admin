@@ -58,24 +58,33 @@ export interface Staff {
   phone?: string;
   email?: string;
   role?: UserRole;
-  positionTitle?: string; // 직급/호칭 (simple text)
+  positionId?: string;       // staff_positions 테이블 참조
+  positionTitle?: string;    // 직급/호칭 (한국어) - 조회용
+  positionTitle_en?: string; // 직급/호칭 (영어) - 조회용
+  positionTitle_th?: string; // 직급/호칭 (태국어) - 조회용
 }
 
 export interface StaffPosition {
   id: string;
   salonId: string;
-  name: string;
+  name: string;      // 한국어 (기본)
+  name_en?: string;  // 영어
+  name_th?: string;  // 태국어
   rank: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface CreatePositionDto {
-  name: string;
+  name: string;      // 한국어 (기본)
+  name_en?: string;  // 영어
+  name_th?: string;  // 태국어
   rank: number;
 }
 
 export interface UpdatePositionDto {
-  name?: string;
+  name?: string;      // 한국어 (기본)
+  name_en?: string;   // 영어
+  name_th?: string;   // 태국어
   rank?: number;
 }

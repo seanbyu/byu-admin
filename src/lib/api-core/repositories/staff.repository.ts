@@ -33,6 +33,7 @@ interface ProfileTableUpdates {
   social_links?: Partial<DBSocialLinks>;
   work_schedule?: DBWorkSchedule;
   holidays?: unknown[];
+  position_id?: string | null;
 }
 
 export class StaffRepository extends BaseRepository {
@@ -63,7 +64,14 @@ export class StaffRepository extends BaseRepository {
           permissions,
           is_booking_enabled,
           work_schedule,
-          holidays
+          holidays,
+          position_id,
+          staff_positions (
+            id,
+            name,
+            name_en,
+            name_th
+          )
         )
       `,
       )
@@ -152,6 +160,11 @@ export class StaffRepository extends BaseRepository {
       profileUpdates.holidays = updates.holidays;
     }
 
+    // Handle positionId update
+    if (updates.positionId !== undefined) {
+      profileUpdates.position_id = updates.positionId || null;
+    }
+
     // Handle user table updates
     const userUpdates: UserTableUpdates = {};
     if (typeof updates.isActive !== "undefined") {
@@ -218,6 +231,10 @@ export class StaffRepository extends BaseRepository {
       phone: user.phone,
       email: user.email,
       role: user.role as string,
+      positionId: (profile as any).position_id || null,
+      positionTitle: (profile as any).staff_positions?.name || null,
+      positionTitle_en: (profile as any).staff_positions?.name_en || null,
+      positionTitle_th: (profile as any).staff_positions?.name_th || null,
     };
   }
 

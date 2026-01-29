@@ -105,13 +105,30 @@
     "introduction": "แนะนำตัว",
     "introPlaceholder": "กรอกข้อมูลแนะนำพนักงาน",
     "positionTitle": "ตำแหน่ง/ชื่อเรียก",
-    "positionTitlePlaceholder": "เช่น ผู้อำนวยการ ผู้จัดการ ช่าง",
+    "positionTitlePlaceholder": "เลือกตำแหน่ง",
     "socialMedia": "โซเชียลมีเดีย",
     "updateFailed": "ไม่สามารถอัปเดตโปรไฟล์",
     "uploadFailed": "ไม่สามารถอัปโหลดรูปภาพ",
     "deleteImageTitle": "ลบรูปโปรไฟล์",
     "deleteImageDesc": "คุณต้องการลบรูปโปรไฟล์หรือไม่? จะไม่สามารถกู้คืนได้หลังบันทึก",
-    "deleteConfirm": "ลบ"
+    "deleteConfirm": "ลบ",
+    "position": {
+      "searchPlaceholder": "ค้นหาหรือใส่ตำแหน่งใหม่...",
+      "addNew": "เพิ่มใหม่",
+      "noPositions": "ไม่มีตำแหน่งที่ลงทะเบียน กรุณาพิมพ์ในช่องค้นหาเพื่อเพิ่ม",
+      "newPosition": "เพิ่มตำแหน่งใหม่",
+      "positionNameKo": "ชื่อตำแหน่ง (KO) *",
+      "positionNameEn": "Position (EN)",
+      "positionNameTh": "ตำแหน่ง (TH)",
+      "cancel": "ยกเลิก",
+      "save": "บันทึก",
+      "saving": "กำลังบันทึก...",
+      "edit": "แก้ไข",
+      "delete": "ลบ",
+      "deleteTitle": "ลบตำแหน่ง",
+      "deleteDesc": "คุณต้องการลบตำแหน่ง \"{name}\" หรือไม่? พนักงานที่ใช้ตำแหน่งนี้จะถูกยกเลิก",
+      "deleting": "กำลังลบ..."
+    }
   },
   "schedule": {
     "title": "ตั้งค่าตารางพนักงาน",

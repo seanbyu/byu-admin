@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Staff } from '../../types';
+import { Staff, StaffPosition } from '../../types';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase/client';
 import {
@@ -16,12 +16,12 @@ import {
   Facebook,
   Youtube,
   Music2,
+  ChevronDown,
+  Plus,
+  X,
+  Pencil,
 } from 'lucide-react';
-import type { WorkSchedule } from '../../types';
-import { useQuery } from '@tanstack/react-query';
-import { salonsApi } from '@/features/salons/api';
-import { StaffWorkSchedule } from './StaffWorkSchedule';
-import { toWorkSchedule, fromWorkSchedule } from '../../utils/staffSchedule';
+import { useStaffPositions } from '../../hooks/useStaffPositions';
 
 interface StaffProfileModalProps {
   isOpen: boolean;
@@ -33,10 +33,9 @@ interface StaffProfileModalProps {
 interface ProfileFormData {
   name: string;
   phone: string;
-  positionTitle: string; // 직급/호칭
   description: string;
   experience: number;
-  specialties: string; // Comma separated for input
+  specialties: string;
   profileImage: string;
   socialLinks: {
     instagram: string;
@@ -54,32 +53,38 @@ export default function StaffProfileModal({
   onSave,
 }: StaffProfileModalProps) {
   const t = useTranslations();
-  const [uploading, setUploading] = React.useState(false);
+  const [uploading, setUploading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [workSchedule, setWorkSchedule] = useState<WorkSchedule>({});
 
-  // TanStack Query로 salon 정보 가져오기
-  const { data: salonResponse } = useQuery({
-    queryKey: ['salon', staff.salonId],
-    queryFn: () => salonsApi.getSalon(staff.salonId),
+  // Position 관련 상태
+  const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [isEditingPosition, setIsEditingPosition] = useState<string | null>(null);
+  const [editPositionName, setEditPositionName] = useState('');
+  const [editPositionNameEn, setEditPositionNameEn] = useState('');
+  const [editPositionNameTh, setEditPositionNameTh] = useState('');
+  const [newPositionName, setNewPositionName] = useState('');
+  const [newPositionNameEn, setNewPositionNameEn] = useState('');
+  const [newPositionNameTh, setNewPositionNameTh] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [positionToDelete, setPositionToDelete] = useState<StaffPosition | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 직급 목록 가져오기
+  const {
+    positions,
+    isLoading: positionsLoading,
+    createPosition,
+    updatePosition,
+    deletePosition,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  } = useStaffPositions(staff.salonId, {
     enabled: isOpen && !!staff.salonId,
   });
-  const currentSalon = salonResponse?.data as Record<string, any> | undefined;
 
-  // 매장 영업시간: DB 포맷 또는 배열 모두 대응
-  const salonHoursRaw = currentSalon?.business_hours || currentSalon?.businessHours;
-  const salonHoursDB = useMemo(() => {
-    if (!salonHoursRaw) return {};
-    // 이미 DB 포맷(객체)이면 그대로
-    if (!Array.isArray(salonHoursRaw)) return salonHoursRaw as Record<string, { enabled: boolean; open: string; close: string }>;
-    // 배열이면 DB 포맷으로 변환
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const result: Record<string, { enabled: boolean; open: string; close: string }> = {};
-    for (const h of salonHoursRaw) {
-      result[dayNames[h.dayOfWeek]] = { enabled: h.isOpen, open: h.openTime, close: h.closeTime };
-    }
-    return result;
-  }, [salonHoursRaw]);
   const {
     register,
     handleSubmit,
@@ -91,12 +96,36 @@ export default function StaffProfileModal({
 
   const profileImage = watch('profileImage');
 
+  // 선택된 직급 정보
+  const selectedPosition = positions.find(p => p.id === selectedPositionId);
+
+  // 드롭다운 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+        setIsEditingPosition(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // 필터된 직급 목록
+  const filteredPositions = positions.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.name_en && p.name_en.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (p.name_th && p.name_th.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // 검색어가 기존 직급과 정확히 일치하는지 확인
+  const exactMatch = positions.some(p => p.name.toLowerCase() === searchTerm.toLowerCase());
+
   useEffect(() => {
     if (isOpen && staff) {
       reset({
         name: staff.name,
         phone: staff.phone || '',
-        positionTitle: staff.positionTitle || '',
         description: staff.description,
         experience: staff.experience,
         specialties: staff.specialties.join(', '),
@@ -108,16 +137,89 @@ export default function StaffProfileModal({
           facebook: staff.socialLinks?.facebook || '',
         },
       });
-      // DB workSchedule 우선, 없으면 workHours에서 변환
-      if (staff.workSchedule) {
-        setWorkSchedule(staff.workSchedule);
-      } else if (staff.workHours) {
-        setWorkSchedule(toWorkSchedule(staff.workHours));
-      } else {
-        setWorkSchedule({});
-      }
+      setSelectedPositionId(staff.positionId || null);
+      setIsCreatingNew(false);
+      setIsEditingPosition(null);
+      setNewPositionName('');
+      setNewPositionNameEn('');
+      setNewPositionNameTh('');
+      setSearchTerm('');
     }
   }, [isOpen, staff, reset]);
+
+  const handleSelectPosition = (position: StaffPosition) => {
+    setSelectedPositionId(position.id);
+    setIsCreatingNew(false);
+    setShowDropdown(false);
+    setSearchTerm('');
+  };
+
+  const handleCreateNewPosition = () => {
+    setIsCreatingNew(true);
+    setSelectedPositionId(null);
+    setNewPositionName(searchTerm);
+    setShowDropdown(false);
+  };
+
+  const handleCancelCreate = () => {
+    setIsCreatingNew(false);
+    setNewPositionName('');
+    setNewPositionNameEn('');
+    setNewPositionNameTh('');
+  };
+
+  const handleStartEdit = (e: React.MouseEvent, position: StaffPosition) => {
+    e.stopPropagation();
+    setIsEditingPosition(position.id);
+    setEditPositionName(position.name);
+    setEditPositionNameEn(position.name_en || '');
+    setEditPositionNameTh(position.name_th || '');
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingPosition(null);
+    setEditPositionName('');
+    setEditPositionNameEn('');
+    setEditPositionNameTh('');
+  };
+
+  const handleSaveEdit = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isEditingPosition || !editPositionName.trim()) return;
+
+    try {
+      await updatePosition({
+        positionId: isEditingPosition,
+        dto: {
+          name: editPositionName.trim(),
+          name_en: editPositionNameEn.trim() || '',
+          name_th: editPositionNameTh.trim() || '',
+        },
+      });
+      setIsEditingPosition(null);
+    } catch (error) {
+      console.error('Failed to update position:', error);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, position: StaffPosition) => {
+    e.stopPropagation();
+    setPositionToDelete(position);
+  };
+
+  const handleConfirmDeletePosition = async () => {
+    if (!positionToDelete) return;
+
+    try {
+      await deletePosition(positionToDelete.id);
+      if (selectedPositionId === positionToDelete.id) {
+        setSelectedPositionId(null);
+      }
+      setPositionToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete position:', error);
+    }
+  };
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
@@ -126,18 +228,29 @@ export default function StaffProfileModal({
         .map((s) => s.trim())
         .filter(Boolean);
 
+      let positionIdToSave = selectedPositionId;
+
+      // 새 직급 생성이 필요한 경우
+      if (isCreatingNew && newPositionName.trim()) {
+        const newPosition = await createPosition({
+          name: newPositionName.trim(),
+          name_en: newPositionNameEn.trim() || '',
+          name_th: newPositionNameTh.trim() || '',
+          rank: positions.length + 1,
+        });
+        positionIdToSave = newPosition?.data?.id || null;
+      }
+
       await onSave(staff.id, {
         name: data.name,
         password: data.password || undefined,
         phone: data.phone,
-        positionTitle: data.positionTitle,
+        positionId: positionIdToSave,
         description: data.description,
         experience: Number(data.experience),
         specialties: specialtiesArray,
         profileImage: data.profileImage,
         socialLinks: data.socialLinks,
-        workSchedule,
-        workHours: fromWorkSchedule(workSchedule),
       } as any);
       onClose();
     } catch (error) {
@@ -154,7 +267,6 @@ export default function StaffProfileModal({
       setUploading(true);
 
       const fileExt = file.name.split('.').pop();
-      // Use salonId/staffId/timestamp.ext structure
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `${staff.salonId}/${staff.id}/${fileName}`;
 
@@ -180,27 +292,22 @@ export default function StaffProfileModal({
   };
 
   const handleConfirmDelete = () => {
-    // 1. Optimistic UI Update: Clear image and close modal immediately
     const currentImage = watch('profileImage');
     setValue('profileImage', '', { shouldDirty: true, shouldValidate: true });
     setShowDeleteConfirm(false);
 
-    // 2. Background Storage Deletion
     if (currentImage) {
       const pathParts = currentImage.split('/avatars/');
       if (pathParts.length > 1) {
         const path = pathParts[1];
         const decodedPath = decodeURIComponent(path);
 
-        // Fire and forget
         supabase.storage
           .from('avatars')
           .remove([decodedPath])
           .then(({ error }) => {
             if (error) {
               console.error('Background storage delete error:', error);
-            } else {
-              console.log('Background storage delete success');
             }
           })
           .catch((err) => {
@@ -296,15 +403,183 @@ export default function StaffProfileModal({
             </div>
           </div>
 
-          {/* 직급/호칭 */}
+          {/* 직급/호칭 Creatable Combobox */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-secondary-700">
               {t('staff.profileModal.positionTitle')}
             </label>
-            <Input
-              {...register('positionTitle')}
-              placeholder={t('staff.profileModal.positionTitlePlaceholder')}
-            />
+
+            {!isCreatingNew ? (
+              <div className="relative" ref={dropdownRef}>
+                <div
+                  className="w-full px-3 py-2 border border-secondary-300 rounded-md bg-white cursor-pointer flex items-center justify-between"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                >
+                  <span className={selectedPosition ? 'text-secondary-900' : 'text-secondary-400'}>
+                    {selectedPosition
+                      ? `${selectedPosition.name}${selectedPosition.name_en ? ` / ${selectedPosition.name_en}` : ''}${selectedPosition.name_th ? ` / ${selectedPosition.name_th}` : ''}`
+                      : t('staff.profileModal.positionTitlePlaceholder')
+                    }
+                  </span>
+                  <ChevronDown size={18} className="text-secondary-400" />
+                </div>
+
+                {showDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-secondary-200 rounded-md shadow-lg max-h-80 overflow-auto">
+                    {/* 검색 입력 */}
+                    <div className="p-2 border-b border-secondary-100 sticky top-0 bg-white">
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 text-sm border border-secondary-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder={t('staff.profileModal.position.searchPlaceholder')}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+
+                    {/* 기존 직급 목록 */}
+                    {filteredPositions.map((position) => (
+                      <div key={position.id}>
+                        {isEditingPosition === position.id ? (
+                          /* 수정 모드 */
+                          <div
+                            className="p-3 border-b border-secondary-100 bg-primary-50/50"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="space-y-2">
+                              <Input
+                                placeholder={t('staff.profileModal.position.positionNameKo')}
+                                value={editPositionName}
+                                onChange={(e) => setEditPositionName(e.target.value)}
+                                className="text-sm"
+                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <Input
+                                  placeholder={t('staff.profileModal.position.positionNameEn')}
+                                  value={editPositionNameEn}
+                                  onChange={(e) => setEditPositionNameEn(e.target.value)}
+                                  className="text-sm"
+                                />
+                                <Input
+                                  placeholder={t('staff.profileModal.position.positionNameTh')}
+                                  value={editPositionNameTh}
+                                  onChange={(e) => setEditPositionNameTh(e.target.value)}
+                                  className="text-sm"
+                                />
+                              </div>
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={handleCancelEdit}
+                                  className="px-3 py-1 text-xs text-secondary-600 hover:text-secondary-800"
+                                >
+                                  {t('staff.profileModal.position.cancel')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleSaveEdit}
+                                  disabled={isUpdating || !editPositionName.trim()}
+                                  className="px-3 py-1 text-xs bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-50"
+                                >
+                                  {isUpdating ? t('staff.profileModal.position.saving') : t('staff.profileModal.position.save')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          /* 일반 모드 */
+                          <div
+                            className={`px-3 py-2 cursor-pointer hover:bg-secondary-50 flex items-center justify-between group ${
+                              selectedPositionId === position.id ? 'bg-primary-50 text-primary-700' : ''
+                            }`}
+                            onClick={() => handleSelectPosition(position)}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate">{position.name}</div>
+                              {(position.name_en || position.name_th) && (
+                                <div className="text-xs text-secondary-500 truncate">
+                                  {position.name_en && <span>EN: {position.name_en}</span>}
+                                  {position.name_en && position.name_th && <span> · </span>}
+                                  {position.name_th && <span>TH: {position.name_th}</span>}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={(e) => handleStartEdit(e, position)}
+                                className="p-1 text-secondary-400 hover:text-primary-500 hover:bg-primary-50 rounded"
+                                title={t('staff.profileModal.position.edit')}
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => handleDeleteClick(e, position)}
+                                className="p-1 text-secondary-400 hover:text-red-500 hover:bg-red-50 rounded"
+                                title={t('staff.profileModal.position.delete')}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* 새 직급 추가 옵션 */}
+                    {searchTerm && !exactMatch && (
+                      <div
+                        className="px-3 py-2 cursor-pointer hover:bg-primary-50 text-primary-600 border-t border-secondary-100 flex items-center gap-2"
+                        onClick={handleCreateNewPosition}
+                      >
+                        <Plus size={16} />
+                        <span>"{searchTerm}" {t('staff.profileModal.position.addNew')}</span>
+                      </div>
+                    )}
+
+                    {/* 직급이 없을 때 */}
+                    {filteredPositions.length === 0 && !searchTerm && (
+                      <div className="px-3 py-4 text-center text-secondary-400 text-sm">
+                        {t('staff.profileModal.position.noPositions')}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* 새 직급 생성 폼 */
+              <div className="space-y-3 p-3 border border-primary-200 rounded-md bg-primary-50/30">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-primary-700">{t('staff.profileModal.position.newPosition')}</span>
+                  <button
+                    type="button"
+                    onClick={handleCancelCreate}
+                    className="text-secondary-400 hover:text-secondary-600"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+                <Input
+                  placeholder={t('staff.profileModal.position.positionNameKo')}
+                  value={newPositionName}
+                  onChange={(e) => setNewPositionName(e.target.value)}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    placeholder={t('staff.profileModal.position.positionNameEn')}
+                    value={newPositionNameEn}
+                    onChange={(e) => setNewPositionNameEn(e.target.value)}
+                  />
+                  <Input
+                    placeholder={t('staff.profileModal.position.positionNameTh')}
+                    value={newPositionNameTh}
+                    onChange={(e) => setNewPositionNameTh(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -379,26 +654,22 @@ export default function StaffProfileModal({
             </div>
           </div>
 
-          {/* 근무 스케줄 */}
-          <div className="pt-4 border-t border-secondary-200">
-            <StaffWorkSchedule
-              workSchedule={workSchedule}
-              salonHours={salonHoursDB}
-              onChange={setWorkSchedule}
-            />
-          </div>
-
           <div className="flex justify-end space-x-3 pt-4 border-t border-secondary-200 mt-6">
             <Button variant="outline" type="button" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button variant="primary" type="submit" isLoading={isSubmitting}>
+            <Button
+              variant="primary"
+              type="submit"
+              isLoading={isSubmitting || isCreating}
+            >
               {t('common.save')}
             </Button>
           </div>
         </form>
       </Modal>
 
+      {/* 프로필 이미지 삭제 확인 모달 */}
       <ConfirmModal
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
@@ -406,6 +677,17 @@ export default function StaffProfileModal({
         title={t('staff.profileModal.deleteImageTitle')}
         description={t('staff.profileModal.deleteImageDesc')}
         confirmText={t('staff.profileModal.deleteConfirm')}
+        variant="destructive"
+      />
+
+      {/* 직급 삭제 확인 모달 */}
+      <ConfirmModal
+        isOpen={!!positionToDelete}
+        onClose={() => setPositionToDelete(null)}
+        onConfirm={handleConfirmDeletePosition}
+        title={t('staff.profileModal.position.deleteTitle')}
+        description={t('staff.profileModal.position.deleteDesc', { name: positionToDelete?.name || '' })}
+        confirmText={isDeleting ? t('staff.profileModal.position.deleting') : t('staff.profileModal.position.delete')}
         variant="destructive"
       />
     </>

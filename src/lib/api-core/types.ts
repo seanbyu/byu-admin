@@ -36,6 +36,7 @@ export interface DBStaffProfile {
   is_booking_enabled: boolean | null;
   work_schedule: DBWorkSchedule | null;
   holidays: Holiday[] | null;
+  position_id: string | null; // staff_positions 참조
 }
 
 // Work schedule in DB format (JSONB)
@@ -195,6 +196,7 @@ export interface UpdateStaffDto {
   permissions?: StaffPermission[] | DBPermissions;
   workHours?: BusinessHours[];
   holidays?: Holiday[];
+  positionId?: string | null; // staff_positions 참조
 }
 
 // Booking create DTO
@@ -315,6 +317,10 @@ export interface StaffResponse {
   phone: string | null;
   email: string;
   role: string;
+  positionId: string | null;       // staff_positions 참조
+  positionTitle: string | null;    // 직급/호칭 (한국어) - 조회용
+  positionTitle_en: string | null; // 직급/호칭 (영어) - 조회용
+  positionTitle_th: string | null; // 직급/호칭 (태국어) - 조회용
 }
 
 // Booking response (transformed from DB)

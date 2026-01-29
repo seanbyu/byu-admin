@@ -105,13 +105,30 @@
     "introduction": "Introduction",
     "introPlaceholder": "Enter staff introduction",
     "positionTitle": "Position/Title",
-    "positionTitlePlaceholder": "e.g., Director, Manager, Designer",
+    "positionTitlePlaceholder": "Select a position",
     "socialMedia": "Social Media",
     "updateFailed": "Failed to update profile.",
     "uploadFailed": "Failed to upload image.",
     "deleteImageTitle": "Delete Profile Image",
     "deleteImageDesc": "Are you sure you want to delete the profile image? This cannot be undone after saving.",
-    "deleteConfirm": "Delete"
+    "deleteConfirm": "Delete",
+    "position": {
+      "searchPlaceholder": "Search or enter new position...",
+      "addNew": "Add new",
+      "noPositions": "No positions registered. Enter in the search box to add.",
+      "newPosition": "Add New Position",
+      "positionNameKo": "Position Name (KO) *",
+      "positionNameEn": "Position (EN)",
+      "positionNameTh": "ตำแหน่ง (TH)",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteTitle": "Delete Position",
+      "deleteDesc": "Are you sure you want to delete \"{name}\"? Staff using this position will have it removed.",
+      "deleting": "Deleting..."
+    }
   },
   "schedule": {
     "title": "Staff Schedule Settings",
