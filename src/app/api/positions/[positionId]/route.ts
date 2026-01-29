@@ -62,10 +62,10 @@ export async function DELETE(
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Soft delete (set is_active to false)
+    // Hard delete - 완전 삭제
     const { error } = await supabase
       .from('staff_positions')
-      .update({ is_active: false })
+      .delete()
       .eq('id', positionId);
 
     if (error) throw new Error(error.message);
