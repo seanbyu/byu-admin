@@ -35,13 +35,13 @@ export default function StaffPageView() {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
-  // Custom hooks로 상태 관리 분리
+  // Custom hooks로 상태 관리 분리 (Zustand 기반)
   const pageState = useStaffPageState();
   const { isAdmin, canEdit } = useStaffPermissions(user?.id, user?.role);
 
-  // 데이터 fetching
+  // 데이터 fetching (TanStack Query)
   const {
-    data: response,
+    staffData,
     isLoading,
     error,
     updateStaff,
@@ -50,20 +50,18 @@ export default function StaffPageView() {
     enabled: !!salonId,
   });
 
-  const staffMembers = useMemo(() => response?.data || [], [response?.data]);
+  // staffMembers는 이미 useStaff에서 메모이제이션됨
+  const staffMembers = staffData;
 
   // 비즈니스 로직 핸들러
-  const {
-    handleResign,
-    handleBookingToggle,
-    handlePermissionSave,
-    handleProfileSave,
-    handleCreateSuccess,
-  } = useStaffActions({
+  const staffActions = useStaffActions({
     updateStaff,
     refetch,
     clearSelectedStaff: pageState.clearSelectedStaff,
   });
+
+  // 현재 직원 수 메모이제이션
+  const currentStaffCount = useMemo(() => staffMembers.length, [staffMembers.length]);
 
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
@@ -106,10 +104,10 @@ export default function StaffPageView() {
           formatPhone={pageState.formatPhone}
           formatDate={pageState.formatDate}
           getRoleName={pageState.getRoleName}
-          onResign={handleResign}
+          onResign={staffActions.handleResign}
           onPermissionClick={pageState.selectStaffForPermission}
           onProfileEdit={pageState.selectStaffForProfileEdit}
-          onBookingToggle={handleBookingToggle}
+          onBookingToggle={staffActions.handleBookingToggle}
         />
 
         {/* Modals - Suspense로 로딩 최적화 */}
@@ -118,9 +116,9 @@ export default function StaffPageView() {
             <CreateStaffModal
               isOpen={pageState.showInviteModal}
               onClose={pageState.closeInviteModal}
-              onSuccess={handleCreateSuccess}
+              onSuccess={staffActions.handleCreateSuccess}
               salonId={salonId}
-              currentStaffCount={staffMembers.length}
+              currentStaffCount={currentStaffCount}
             />
           )}
 
@@ -129,7 +127,7 @@ export default function StaffPageView() {
               isOpen={!!pageState.selectedStaff}
               onClose={pageState.clearSelectedStaff}
               staff={pageState.selectedStaff}
-              onSave={handlePermissionSave}
+              onSave={staffActions.handlePermissionSave}
             />
           )}
 
@@ -138,7 +136,7 @@ export default function StaffPageView() {
               isOpen={!!pageState.editingProfileStaff}
               onClose={pageState.clearEditingProfileStaff}
               staff={pageState.editingProfileStaff}
-              onSave={handleProfileSave}
+              onSave={staffActions.handleProfileSave}
             />
           )}
         </Suspense>

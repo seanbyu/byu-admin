@@ -36,7 +36,7 @@ export const Sidebar: React.FC = () => {
   const { user } = useAuthStore();
   const t = useTranslations();
 
-  const { data: salon } = useQuery({
+  const { data: salon } = useQuery<{ name: string } | null>({
     queryKey: ['salon', user?.salonId],
     queryFn: async () => {
       if (!user?.salonId) return null;

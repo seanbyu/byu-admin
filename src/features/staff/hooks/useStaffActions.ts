@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Staff, StaffPermission } from '../types';
 
@@ -27,38 +27,50 @@ export function useStaffActions({
   const t = useTranslations('staff');
 
   // 기본 업데이트 핸들러
-  const handleUpdateStaff = useCallback(async (
-    staffId: string,
-    updates: Partial<Staff>
-  ) => {
-    try {
-      await updateStaff({ staffId, updates });
-    } catch (err) {
-      console.error(err);
-      alert(t('errors.updateFailed'));
-    }
-  }, [updateStaff, t]);
+  const handleUpdateStaff = useCallback(
+    async (staffId: string, updates: Partial<Staff>) => {
+      try {
+        await updateStaff({ staffId, updates });
+      } catch (err) {
+        console.error(err);
+        alert(t('errors.updateFailed'));
+      }
+    },
+    [updateStaff, t]
+  );
 
   // 퇴사 처리
-  const handleResign = useCallback((staffId: string) => {
-    handleUpdateStaff(staffId, { isActive: false });
-  }, [handleUpdateStaff]);
+  const handleResign = useCallback(
+    (staffId: string) => {
+      handleUpdateStaff(staffId, { isActive: false });
+    },
+    [handleUpdateStaff]
+  );
 
   // 예약 허용 토글
-  const handleBookingToggle = useCallback((staffId: string, enabled: boolean) => {
-    handleUpdateStaff(staffId, { isBookingEnabled: enabled });
-  }, [handleUpdateStaff]);
+  const handleBookingToggle = useCallback(
+    (staffId: string, enabled: boolean) => {
+      handleUpdateStaff(staffId, { isBookingEnabled: enabled });
+    },
+    [handleUpdateStaff]
+  );
 
   // 권한 저장
-  const handlePermissionSave = useCallback(async (id: string, permissions: StaffPermission[]) => {
-    await handleUpdateStaff(id, { permissions });
-    clearSelectedStaff();
-  }, [handleUpdateStaff, clearSelectedStaff]);
+  const handlePermissionSave = useCallback(
+    async (id: string, permissions: StaffPermission[]) => {
+      await handleUpdateStaff(id, { permissions });
+      clearSelectedStaff();
+    },
+    [handleUpdateStaff, clearSelectedStaff]
+  );
 
   // 프로필 저장
-  const handleProfileSave = useCallback(async (id: string, updates: Partial<Staff>) => {
-    await handleUpdateStaff(id, updates);
-  }, [handleUpdateStaff]);
+  const handleProfileSave = useCallback(
+    async (id: string, updates: Partial<Staff>) => {
+      await handleUpdateStaff(id, updates);
+    },
+    [handleUpdateStaff]
+  );
 
   // 직원 생성 성공
   const handleCreateSuccess = useCallback(() => {
@@ -66,12 +78,22 @@ export function useStaffActions({
     refetch();
   }, [refetch, t]);
 
-  return {
-    handleUpdateStaff,
-    handleResign,
-    handleBookingToggle,
-    handlePermissionSave,
-    handleProfileSave,
-    handleCreateSuccess,
-  };
+  return useMemo(
+    () => ({
+      handleUpdateStaff,
+      handleResign,
+      handleBookingToggle,
+      handlePermissionSave,
+      handleProfileSave,
+      handleCreateSuccess,
+    }),
+    [
+      handleUpdateStaff,
+      handleResign,
+      handleBookingToggle,
+      handlePermissionSave,
+      handleProfileSave,
+      handleCreateSuccess,
+    ]
+  );
 }

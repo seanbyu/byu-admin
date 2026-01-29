@@ -1,62 +1,112 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { staffPositionApi } from '../api';
-import { StaffPosition, CreatePositionDto, UpdatePositionDto } from '../types';
+import { CreatePositionDto, UpdatePositionDto } from '../types';
+import { positionKeys, POSITION_QUERY_OPTIONS } from './queries';
 
-const POSITIONS_QUERY_KEY = 'staff-positions';
+interface UseStaffPositionsOptions {
+  enabled?: boolean;
+}
 
-export function useStaffPositions(salonId: string, options?: { enabled?: boolean }) {
+export function useStaffPositions(salonId: string, options?: UseStaffPositionsOptions) {
   const queryClient = useQueryClient();
+  const queryKey = useMemo(() => positionKeys.list(salonId), [salonId]);
 
   // Fetch positions
-  const {
-    data: response,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: [POSITIONS_QUERY_KEY, salonId],
+  const positionsQuery = useQuery({
+    queryKey,
     queryFn: () => staffPositionApi.getPositions(salonId),
     enabled: options?.enabled !== false && !!salonId,
+    ...POSITION_QUERY_OPTIONS,
   });
+
+  // Invalidate helper
+  const invalidatePositions = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
   // Create position
   const createMutation = useMutation({
-    mutationFn: (dto: CreatePositionDto) =>
-      staffPositionApi.createPosition(salonId, dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, salonId] });
-    },
+    mutationFn: useCallback(
+      (dto: CreatePositionDto) => staffPositionApi.createPosition(salonId, dto),
+      [salonId]
+    ),
+    onSuccess: invalidatePositions,
   });
 
   // Update position
   const updateMutation = useMutation({
-    mutationFn: ({ positionId, dto }: { positionId: string; dto: UpdatePositionDto }) =>
-      staffPositionApi.updatePosition(positionId, dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, salonId] });
-    },
+    mutationFn: useCallback(
+      ({ positionId, dto }: { positionId: string; dto: UpdatePositionDto }) =>
+        staffPositionApi.updatePosition(positionId, dto),
+      []
+    ),
+    onSuccess: invalidatePositions,
   });
 
   // Delete position
   const deleteMutation = useMutation({
-    mutationFn: (positionId: string) => staffPositionApi.deletePosition(positionId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, salonId] });
-    },
+    mutationFn: useCallback(
+      (positionId: string) => staffPositionApi.deletePosition(positionId),
+      []
+    ),
+    onSuccess: invalidatePositions,
   });
 
-  return {
-    positions: response?.data || [],
-    isLoading,
-    error: response?.error || error,
-    refetch,
-    createPosition: createMutation.mutateAsync,
-    updatePosition: updateMutation.mutateAsync,
-    deletePosition: deleteMutation.mutateAsync,
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-    isDeleting: deleteMutation.isPending,
-  };
+  // Memoized data
+  const positions = useMemo(
+    () => positionsQuery.data?.data || [],
+    [positionsQuery.data?.data]
+  );
+
+  // Memoized mutation functions
+  const createPosition = useCallback(
+    (dto: CreatePositionDto) => createMutation.mutateAsync(dto),
+    [createMutation]
+  );
+
+  const updatePosition = useCallback(
+    (params: { positionId: string; dto: UpdatePositionDto }) =>
+      updateMutation.mutateAsync(params),
+    [updateMutation]
+  );
+
+  const deletePosition = useCallback(
+    (positionId: string) => deleteMutation.mutateAsync(positionId),
+    [deleteMutation]
+  );
+
+  const refetch = useCallback(() => positionsQuery.refetch(), [positionsQuery]);
+
+  return useMemo(
+    () => ({
+      positions,
+      isLoading: positionsQuery.isLoading,
+      isFetching: positionsQuery.isFetching,
+      error: positionsQuery.data?.error || positionsQuery.error,
+      refetch,
+      createPosition,
+      updatePosition,
+      deletePosition,
+      isCreating: createMutation.isPending,
+      isUpdating: updateMutation.isPending,
+      isDeleting: deleteMutation.isPending,
+    }),
+    [
+      positions,
+      positionsQuery.isLoading,
+      positionsQuery.isFetching,
+      positionsQuery.data?.error,
+      positionsQuery.error,
+      refetch,
+      createPosition,
+      updatePosition,
+      deletePosition,
+      createMutation.isPending,
+      updateMutation.isPending,
+      deleteMutation.isPending,
+    ]
+  );
 }
