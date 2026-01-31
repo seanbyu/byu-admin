@@ -5,5 +5,56 @@
   "notifications": "알림",
   "korean": "한국어",
   "english": "English",
-  "thai": "ภาษาไทย"
+  "thai": "ภาษาไทย",
+  "tabs": {
+    "store": "매장 정보",
+    "plan": "요금제",
+    "account": "가입 정보"
+  },
+  "store": {
+    "image": "매장 이미지",
+    "changeImage": "이미지 변경",
+    "imageHint": "권장 크기: 400x400px (JPG, PNG)",
+    "basicInfo": "기본 정보",
+    "name": "매장명",
+    "ownerName": "대표자명",
+    "address": "주소",
+    "googleMapUrl": "구글맵 URL",
+    "viewMap": "지도 보기",
+    "phone": "전화번호",
+    "email": "이메일"
+  },
+  "plan": {
+    "current": "현재 요금제",
+    "active": "이용중",
+    "monthlyPrice": "월 {price}원",
+    "nextBilling": "다음 결제일: {date}",
+    "changePlan": "요금제 변경",
+    "perMonth": "원/월",
+    "contactUs": "문의",
+    "maxStaff": "직원 {count}명",
+    "unlimitedStaff": "직원 무제한",
+    "maxMenus": "메뉴 {count}개",
+    "unlimitedMenus": "메뉴 무제한",
+    "currentPlan": "현재 플랜",
+    "upgrade": "업그레이드",
+    "contactSales": "문의하기"
+  },
+  "account": {
+    "info": "계정 정보",
+    "username": "아이디",
+    "usernameCannotChange": "아이디는 변경할 수 없습니다",
+    "name": "이름",
+    "phone": "전화번호",
+    "sendCode": "인증번호 전송",
+    "verificationCode": "인증번호",
+    "enterCode": "인증번호 입력",
+    "changePassword": "비밀번호 변경",
+    "currentPassword": "현재 비밀번호",
+    "newPassword": "새 비밀번호",
+    "confirmPassword": "새 비밀번호 확인",
+    "updatePassword": "비밀번호 변경",
+    "passwordMismatch": "비밀번호가 일치하지 않습니다",
+    "passwordTooShort": "비밀번호는 8자 이상이어야 합니다"
+  }
 }

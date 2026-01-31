@@ -5,5 +5,55 @@
   "notifications": "การแจ้งเตือน",
   "korean": "한국어",
   "english": "English",
-  "thai": "ภาษาไทย"
+  "thai": "ภาษาไทย",
+  "tabs": {
+    "store": "ข้อมูลร้าน",
+    "plan": "แพ็คเกจ",
+    "account": "ข้อมูลบัญชี"
+  },
+  "store": {
+    "image": "รูปภาพร้าน",
+    "changeImage": "เปลี่ยนรูปภาพ",
+    "imageHint": "ขนาดที่แนะนำ: 400x400px (JPG, PNG)",
+    "basicInfo": "ข้อมูลพื้นฐาน",
+    "name": "ชื่อร้าน",
+    "ownerName": "ชื่อเจ้าของ",
+    "address": "ที่อยู่",
+    "googleMapUrl": "URL Google Map",
+    "viewMap": "ดูแผนที่",
+    "phone": "โทรศัพท์"
+  },
+  "plan": {
+    "current": "แพ็คเกจปัจจุบัน",
+    "active": "ใช้งานอยู่",
+    "monthlyPrice": "{price} วอน/เดือน",
+    "nextBilling": "เรียกเก็บเงินครั้งต่อไป: {date}",
+    "changePlan": "เปลี่ยนแพ็คเกจ",
+    "perMonth": "/เดือน",
+    "contactUs": "ติดต่อ",
+    "maxStaff": "พนักงาน {count} คน",
+    "unlimitedStaff": "พนักงานไม่จำกัด",
+    "maxMenus": "เมนู {count} รายการ",
+    "unlimitedMenus": "เมนูไม่จำกัด",
+    "currentPlan": "ปัจจุบัน",
+    "upgrade": "อัพเกรด",
+    "contactSales": "ติดต่อฝ่ายขาย"
+  },
+  "account": {
+    "info": "ข้อมูลบัญชี",
+    "username": "ชื่อผู้ใช้",
+    "usernameCannotChange": "ไม่สามารถเปลี่ยนชื่อผู้ใช้ได้",
+    "name": "ชื่อ",
+    "phone": "โทรศัพท์",
+    "sendCode": "ส่งรหัส",
+    "verificationCode": "รหัสยืนยัน",
+    "enterCode": "กรอกรหัสยืนยัน",
+    "changePassword": "เปลี่ยนรหัสผ่าน",
+    "currentPassword": "รหัสผ่านปัจจุบัน",
+    "newPassword": "รหัสผ่านใหม่",
+    "confirmPassword": "ยืนยันรหัสผ่านใหม่",
+    "updatePassword": "อัพเดทรหัสผ่าน",
+    "passwordMismatch": "รหัสผ่านไม่ตรงกัน",
+    "passwordTooShort": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"
+  }
 }

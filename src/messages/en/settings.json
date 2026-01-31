@@ -5,5 +5,55 @@
   "notifications": "Notifications",
   "korean": "한국어",
   "english": "English",
-  "thai": "ภาษาไทย"
+  "thai": "ภาษาไทย",
+  "tabs": {
+    "store": "Store Info",
+    "plan": "Plan",
+    "account": "Account"
+  },
+  "store": {
+    "image": "Store Image",
+    "changeImage": "Change Image",
+    "imageHint": "Recommended size: 400x400px (JPG, PNG)",
+    "basicInfo": "Basic Info",
+    "name": "Store Name",
+    "ownerName": "Owner Name",
+    "address": "Address",
+    "googleMapUrl": "Google Map URL",
+    "viewMap": "View Map",
+    "phone": "Phone"
+  },
+  "plan": {
+    "current": "Current Plan",
+    "active": "Active",
+    "monthlyPrice": "{price} KRW/month",
+    "nextBilling": "Next billing: {date}",
+    "changePlan": "Change Plan",
+    "perMonth": "/month",
+    "contactUs": "Contact",
+    "maxStaff": "{count} staff",
+    "unlimitedStaff": "Unlimited staff",
+    "maxMenus": "{count} menus",
+    "unlimitedMenus": "Unlimited menus",
+    "currentPlan": "Current",
+    "upgrade": "Upgrade",
+    "contactSales": "Contact Sales"
+  },
+  "account": {
+    "info": "Account Info",
+    "username": "Username",
+    "usernameCannotChange": "Username cannot be changed",
+    "name": "Name",
+    "phone": "Phone",
+    "sendCode": "Send Code",
+    "verificationCode": "Verification Code",
+    "enterCode": "Enter verification code",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters"
+  }
 }
