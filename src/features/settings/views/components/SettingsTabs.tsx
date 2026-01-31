@@ -20,13 +20,13 @@ export function SettingsTabs({ activeTab, onTabChange }: SettingsTabsProps) {
 
   return (
     <div className="border-b border-secondary-200">
-      <nav className="flex space-x-8" aria-label="Settings tabs">
+      <nav className="flex" aria-label="Settings tabs">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
             className={cn(
-              'py-4 px-1 border-b-2 font-medium text-sm transition-colors',
+              'flex-1 sm:flex-none py-3 sm:py-4 px-3 sm:px-6 border-b-2 font-medium text-sm transition-colors text-center',
               activeTab === tab.key
                 ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'

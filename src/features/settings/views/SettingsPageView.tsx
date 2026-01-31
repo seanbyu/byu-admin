@@ -107,10 +107,10 @@ export default function SettingsPageView() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-secondary-900">
+        <div className="px-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-secondary-900">
             {t('settings.title')}
           </h1>
         </div>
@@ -119,7 +119,7 @@ export default function SettingsPageView() {
         <SettingsTabs activeTab={activeTab} onTabChange={actions.setActiveTab} />
 
         {/* Tab Content */}
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           {activeTab === 'store' && (
             <StoreInfoTab
               storeInfo={storeInfoQuery.storeInfo}

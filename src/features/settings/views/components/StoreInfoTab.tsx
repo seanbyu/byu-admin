@@ -83,12 +83,13 @@ export function StoreInfoTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Store Image Section */}
-      <Card title={t('settings.store.image')}>
-        <div className="flex items-start space-x-6">
+      <Card title={t('settings.store.image')} padding="sm" className="sm:p-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+          {/* Image Preview */}
           <div
-            className="w-32 h-32 bg-secondary-100 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer hover:bg-secondary-200 transition-colors"
+            className="w-24 h-24 sm:w-32 sm:h-32 bg-secondary-100 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer hover:bg-secondary-200 transition-colors flex-shrink-0"
             onClick={handleImageClick}
           >
             {storeInfo?.imageUrl ? (
@@ -99,7 +100,7 @@ export function StoreInfoTab({
               />
             ) : (
               <svg
-                className="w-12 h-12 text-secondary-400"
+                className="w-10 h-10 sm:w-12 sm:h-12 text-secondary-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -113,8 +114,10 @@ export function StoreInfoTab({
               </svg>
             )}
           </div>
-          <div className="flex flex-col space-y-2">
-            <div className="flex space-x-2">
+
+          {/* Buttons & Hint */}
+          <div className="flex flex-col items-center sm:items-start space-y-2 w-full sm:w-auto">
+            <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -129,10 +132,11 @@ export function StoreInfoTab({
                 </Button>
               )}
             </div>
-            <p className="text-sm text-secondary-500">
+            <p className="text-xs sm:text-sm text-secondary-500 text-center sm:text-left">
               {t('settings.store.imageHint')}
             </p>
           </div>
+
           <input
             ref={fileInputRef}
             type="file"
@@ -144,8 +148,8 @@ export function StoreInfoTab({
       </Card>
 
       {/* Basic Info Section */}
-      <Card title={t('settings.store.basicInfo')}>
-        <div className="space-y-4">
+      <Card title={t('settings.store.basicInfo')} padding="sm" className="sm:p-6">
+        <div className="space-y-3 sm:space-y-4">
           <Input
             label={t('settings.store.name')}
             value={formData.name}
@@ -156,18 +160,20 @@ export function StoreInfoTab({
             value={formData.address}
             onChange={(e) => handleInputChange('address', e.target.value)}
           />
-          <Input
-            label={t('settings.store.phone')}
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            type="tel"
-          />
-          <Input
-            label={t('settings.store.email')}
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            type="email"
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <Input
+              label={t('settings.store.phone')}
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+              type="tel"
+            />
+            <Input
+              label={t('settings.store.email')}
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              type="email"
+            />
+          </div>
           <Input
             label="Instagram URL"
             value={formData.instagramUrl}
@@ -175,8 +181,8 @@ export function StoreInfoTab({
             placeholder="https://instagram.com/..."
           />
         </div>
-        <div className="mt-6 flex justify-end">
-          <Button onClick={handleSave} isLoading={isUpdating}>
+        <div className="mt-4 sm:mt-6 flex justify-end">
+          <Button onClick={handleSave} isLoading={isUpdating} className="w-full sm:w-auto">
             {t('common.save')}
           </Button>
         </div>

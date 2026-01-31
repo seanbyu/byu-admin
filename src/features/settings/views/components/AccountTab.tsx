@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -35,8 +35,8 @@ export function AccountTab({
   const t = useTranslations();
 
   const [formData, setFormData] = useState({
-    name: accountInfo?.name || '',
-    phone: accountInfo?.phone || '',
+    name: '',
+    phone: '',
     verificationCode: '',
   });
 
@@ -47,6 +47,17 @@ export function AccountTab({
   });
 
   const [passwordError, setPasswordError] = useState('');
+
+  // Update form when accountInfo changes
+  useEffect(() => {
+    if (accountInfo) {
+      setFormData({
+        name: accountInfo.name || '',
+        phone: accountInfo.phone || '',
+        verificationCode: '',
+      });
+    }
+  }, [accountInfo]);
 
   const handleInputChange = useCallback((field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -101,10 +112,10 @@ export function AccountTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Account Info Section */}
-      <Card title={t('settings.account.info')}>
-        <div className="space-y-4">
+      <Card title={t('settings.account.info')} padding="sm" className="sm:p-6">
+        <div className="space-y-3 sm:space-y-4">
           <Input
             label={t('settings.account.username')}
             value={accountInfo?.username || ''}
@@ -116,23 +127,26 @@ export function AccountTab({
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
           />
-          <div className="flex items-end space-x-2">
-            <div className="flex-1">
-              <Input
-                label={t('settings.account.phone')}
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                type="tel"
-              />
-            </div>
+
+          {/* Phone with verification - Stack on mobile */}
+          <div className="space-y-2">
+            <Input
+              label={t('settings.account.phone')}
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+              type="tel"
+            />
             <Button
               variant="outline"
+              size="sm"
               onClick={handleSendCode}
               isLoading={isSendingCode}
+              className="w-full sm:w-auto"
             >
               {t('settings.account.sendCode')}
             </Button>
           </div>
+
           {isVerificationSent && (
             <Input
               label={t('settings.account.verificationCode')}
@@ -142,16 +156,16 @@ export function AccountTab({
             />
           )}
         </div>
-        <div className="mt-6 flex justify-end">
-          <Button onClick={handleSaveAccount} isLoading={isUpdating}>
+        <div className="mt-4 sm:mt-6 flex justify-end">
+          <Button onClick={handleSaveAccount} isLoading={isUpdating} className="w-full sm:w-auto">
             {t('common.save')}
           </Button>
         </div>
       </Card>
 
       {/* Password Change Section */}
-      <Card title={t('settings.account.changePassword')}>
-        <div className="space-y-4">
+      <Card title={t('settings.account.changePassword')} padding="sm" className="sm:p-6">
+        <div className="space-y-3 sm:space-y-4">
           <Input
             label={t('settings.account.currentPassword')}
             type="password"
@@ -172,7 +186,7 @@ export function AccountTab({
             error={passwordError}
           />
         </div>
-        <div className="mt-6 flex justify-end">
+        <div className="mt-4 sm:mt-6 flex justify-end">
           <Button
             onClick={handleChangePassword}
             isLoading={isChangingPassword}
@@ -181,6 +195,7 @@ export function AccountTab({
               !passwordData.newPassword ||
               !passwordData.confirmPassword
             }
+            className="w-full sm:w-auto"
           >
             {t('settings.account.updatePassword')}
           </Button>

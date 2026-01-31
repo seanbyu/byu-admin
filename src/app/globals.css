@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===================================
+   RESPONSIVE ROOT FONT SIZE
+   모바일에서 전체 UI 자동 스케일링
+   =================================== */
+html {
+  font-size: 16px; /* PC 기본 (1rem = 16px) */
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 14px; /* 모바일 (1rem = 14px, 12.5% 축소) */
+  }
+}
+
 @layer base {
   :root {
     /* ===================================
