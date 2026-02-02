@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
+import React, { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 // 국가 코드 데이터
@@ -11,6 +11,27 @@ const COUNTRY_CODES = [
 ] as const;
 
 type CountryCode = typeof COUNTRY_CODES[number];
+
+// 전화번호에서 국가코드와 로컬번호를 분리하는 함수
+const parsePhoneNumber = (phone: string): { countryCode: CountryCode; localNumber: string } => {
+  if (!phone) {
+    return { countryCode: COUNTRY_CODES[0], localNumber: '' };
+  }
+
+  // 국가코드 순서대로 매칭 시도 (긴 코드부터 체크)
+  const sortedCodes = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length);
+
+  for (const country of sortedCodes) {
+    if (phone.startsWith(country.code)) {
+      // 국가코드 뒤의 구분자(-, 공백) 제거 후 로컬번호 추출
+      const localNumber = phone.slice(country.code.length).replace(/^[-\s]/, '');
+      return { countryCode: country, localNumber };
+    }
+  }
+
+  // 국가코드가 없으면 기본값(한국)과 전체 번호 반환
+  return { countryCode: COUNTRY_CODES[0], localNumber: phone };
+};
 
 interface PhoneInputProps {
   value: string;
@@ -28,8 +49,13 @@ export const PhoneInput = memo(function PhoneInput({
   error,
 }: PhoneInputProps) {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState<CountryCode>(COUNTRY_CODES[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 전화번호 파싱 (국가코드 + 로컬번호 분리)
+  const { countryCode: parsedCountry, localNumber } = useMemo(
+    () => parsePhoneNumber(value),
+    [value]
+  );
 
   // 외부 클릭 감지
   useEffect(() => {
@@ -42,16 +68,24 @@ export const PhoneInput = memo(function PhoneInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 국가 선택 핸들러
+  // 국가 선택 핸들러 - 국가코드 변경 시 전체 값 업데이트
   const handleCountrySelect = useCallback((country: CountryCode) => {
-    setSelectedCountry(country);
     setShowDropdown(false);
-  }, []);
+    // 로컬번호가 있으면 새 국가코드와 조합하여 저장
+    if (localNumber) {
+      onChange(`${country.code}-${localNumber}`);
+    }
+  }, [localNumber, onChange]);
 
-  // 전화번호 입력 핸들러 (저장은 기존 방식 유지 - 국가코드 없이)
+  // 전화번호 입력 핸들러 - 국가코드 포함하여 저장
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  }, [onChange]);
+    const newLocalNumber = e.target.value;
+    if (newLocalNumber) {
+      onChange(`${parsedCountry.code}-${newLocalNumber}`);
+    } else {
+      onChange('');
+    }
+  }, [parsedCountry.code, onChange]);
 
   return (
     <div className="space-y-1">
@@ -68,8 +102,8 @@ export const PhoneInput = memo(function PhoneInput({
             onClick={() => setShowDropdown(!showDropdown)}
             className="flex items-center gap-1 px-3 py-2 border border-r-0 border-secondary-300 rounded-l-md bg-secondary-50 hover:bg-secondary-100 transition-colors min-w-[90px]"
           >
-            <span className="text-lg">{selectedCountry.flag}</span>
-            <span className="text-sm text-secondary-600">{selectedCountry.code}</span>
+            <span className="text-lg">{parsedCountry.flag}</span>
+            <span className="text-sm text-secondary-600">{parsedCountry.code}</span>
             <ChevronDown size={14} className="text-secondary-400" />
           </button>
 
@@ -82,7 +116,7 @@ export const PhoneInput = memo(function PhoneInput({
                   type="button"
                   onClick={() => handleCountrySelect(country)}
                   className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-secondary-50 transition-colors ${
-                    selectedCountry.code === country.code ? 'bg-primary-50' : ''
+                    parsedCountry.code === country.code ? 'bg-primary-50' : ''
                   }`}
                 >
                   <span className="text-lg">{country.flag}</span>
@@ -94,10 +128,10 @@ export const PhoneInput = memo(function PhoneInput({
           )}
         </div>
 
-        {/* 전화번호 입력 */}
+        {/* 전화번호 입력 - 로컬번호만 표시 */}
         <input
           type="tel"
-          value={value}
+          value={localNumber}
           onChange={handlePhoneChange}
           placeholder={placeholder}
           className={`flex-1 px-3 py-2 border border-secondary-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
