@@ -10,6 +10,7 @@ import { useStaffPositions } from '../../../hooks/useStaffPositions';
 import { ProfileImageUploader } from './ProfileImageUploader';
 import { PositionSelector } from './PositionSelector';
 import { SocialLinksForm } from './SocialLinksForm';
+import { PhoneInput } from './PhoneInput';
 import { StaffProfileModalProps, ProfileFormData } from './types';
 
 function StaffProfileModal({
@@ -46,6 +47,7 @@ function StaffProfileModal({
   } = useForm<ProfileFormData>();
 
   const profileImage = watch('profileImage');
+  const phone = watch('phone');
 
   // 모달 열릴 때 폼 초기화
   useEffect(() => {
@@ -103,6 +105,11 @@ function StaffProfileModal({
     setSelectedPositionId(positionId);
   }, []);
 
+  // 전화번호 변경 핸들러
+  const handlePhoneChange = useCallback((value: string) => {
+    setValue('phone', value, { shouldDirty: true });
+  }, [setValue]);
+
   return (
     <Modal
       isOpen={isOpen}
@@ -118,9 +125,10 @@ function StaffProfileModal({
             {...register('name', { required: t('staff.profileModal.nameRequired') })}
             error={errors.name?.message}
           />
-          <Input
+          <PhoneInput
             label={t('staff.profileModal.phone')}
-            {...register('phone')}
+            value={phone || ''}
+            onChange={handlePhoneChange}
             placeholder="010-0000-0000"
           />
         </div>
