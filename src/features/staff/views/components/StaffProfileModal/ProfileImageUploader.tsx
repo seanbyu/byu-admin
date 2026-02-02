@@ -31,10 +31,6 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
 
       setUploading(true);
 
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${salonId}/${staffId}/${fileName}`;
-
       // 세션에서 토큰 가져오기
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token;
@@ -43,7 +39,20 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
         throw new Error('로그인이 필요합니다.');
       }
 
-      // Storage API 직접 호출
+      // 기존 이미지가 있으면 먼저 삭제
+      if (profileImage) {
+        const pathParts = profileImage.split('/avatars/');
+        if (pathParts.length > 1) {
+          const oldPath = decodeURIComponent(pathParts[1]);
+          await supabase.storage.from('avatars').remove([oldPath]);
+        }
+      }
+
+      // 새 파일 업로드
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${salonId}/${staffId}/${fileName}`;
+
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const uploadUrl = `${supabaseUrl}/storage/v1/object/avatars/${filePath}`;
 
@@ -69,7 +78,7 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
     } finally {
       setUploading(false);
     }
-  }, [salonId, staffId, onImageChange, t]);
+  }, [salonId, staffId, profileImage, onImageChange, t]);
 
   const handleConfirmDelete = useCallback(() => {
     onImageChange('');
