@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useStaffPositions } from '../../../hooks/useStaffPositions';
@@ -13,7 +12,7 @@ import { PositionSelector } from './PositionSelector';
 import { SocialLinksForm } from './SocialLinksForm';
 import { StaffProfileModalProps, ProfileFormData } from './types';
 
-export default function StaffProfileModal({
+function StaffProfileModal({
   isOpen,
   onClose,
   staff,
@@ -21,14 +20,10 @@ export default function StaffProfileModal({
 }: StaffProfileModalProps) {
   const t = useTranslations();
 
-  // Position 관련 상태
+  // Position 선택 상태
   const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
-  const [newPositionName, setNewPositionName] = useState('');
-  const [newPositionNameEn, setNewPositionNameEn] = useState('');
-  const [newPositionNameTh, setNewPositionNameTh] = useState('');
 
-  // 직급 목록 가져오기
+  // 직급 목록 가져오기 (TanStack Query)
   const {
     positions,
     createPosition,
@@ -52,6 +47,7 @@ export default function StaffProfileModal({
 
   const profileImage = watch('profileImage');
 
+  // 모달 열릴 때 폼 초기화
   useEffect(() => {
     if (isOpen && staff) {
       reset({
@@ -69,37 +65,21 @@ export default function StaffProfileModal({
         },
       });
       setSelectedPositionId(staff.positionId || null);
-      setIsCreatingNew(false);
-      setNewPositionName('');
-      setNewPositionNameEn('');
-      setNewPositionNameTh('');
     }
   }, [isOpen, staff, reset]);
 
-  const onSubmit = async (data: ProfileFormData) => {
+  // 폼 제출 핸들러
+  const onSubmit = useCallback(async (data: ProfileFormData) => {
     try {
       const specialtiesArray = data.specialties
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean);
 
-      let positionIdToSave = selectedPositionId;
-
-      // 새 직급 생성이 필요한 경우
-      if (isCreatingNew && newPositionName.trim()) {
-        const newPosition = await createPosition({
-          name: newPositionName.trim(),
-          name_en: newPositionNameEn.trim() || '',
-          name_th: newPositionNameTh.trim() || '',
-          rank: positions.length + 1,
-        });
-        positionIdToSave = newPosition?.data?.id || null;
-      }
-
       await onSave(staff.id, {
         name: data.name,
         phone: data.phone,
-        positionId: positionIdToSave,
+        positionId: selectedPositionId,
         description: data.description,
         experience: Number(data.experience),
         specialties: specialtiesArray,
@@ -111,21 +91,17 @@ export default function StaffProfileModal({
       console.error('Failed to update profile:', error);
       alert(t('staff.profileModal.updateFailed'));
     }
-  };
+  }, [staff.id, selectedPositionId, onSave, onClose, t]);
 
-  const handleImageChange = (url: string) => {
+  // 이미지 변경 핸들러
+  const handleImageChange = useCallback((url: string) => {
     setValue('profileImage', url, { shouldDirty: true, shouldValidate: true });
-  };
+  }, [setValue]);
 
-  const handlePositionSelect = (positionId: string | null) => {
+  // 직급 선택 핸들러
+  const handlePositionSelect = useCallback((positionId: string | null) => {
     setSelectedPositionId(positionId);
-    setIsCreatingNew(false);
-  };
-
-  const handleCreatePosition = async (data: { name: string; name_en: string; name_th: string; rank: number }) => {
-    const result = await createPosition(data);
-    return result;
-  };
+  }, []);
 
   return (
     <Modal
@@ -162,7 +138,7 @@ export default function StaffProfileModal({
           positions={positions}
           selectedPositionId={selectedPositionId}
           onSelect={handlePositionSelect}
-          onCreatePosition={handleCreatePosition}
+          onCreatePosition={createPosition}
           onUpdatePosition={updatePosition}
           onDeletePosition={deletePosition}
           isCreating={isCreating}
@@ -216,3 +192,5 @@ export default function StaffProfileModal({
     </Modal>
   );
 }
+
+export default memo(StaffProfileModal);

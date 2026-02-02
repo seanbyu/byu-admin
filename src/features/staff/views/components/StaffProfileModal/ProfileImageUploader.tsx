@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Camera, Trash2 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { supabase } from '@/lib/supabase/client';
 import { ProfileImageUploaderProps } from './types';
 
-export function ProfileImageUploader({
+export const ProfileImageUploader = memo(function ProfileImageUploader({
   profileImage,
   salonId,
   staffId,
@@ -17,7 +17,7 @@ export function ProfileImageUploader({
   const [uploading, setUploading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target.files?.[0];
       if (!file) return;
@@ -69,9 +69,9 @@ export function ProfileImageUploader({
     } finally {
       setUploading(false);
     }
-  };
+  }, [salonId, staffId, onImageChange, t]);
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = useCallback(() => {
     onImageChange('');
     setShowDeleteConfirm(false);
 
@@ -89,7 +89,7 @@ export function ProfileImageUploader({
           });
       }
     }
-  };
+  }, [profileImage, onImageChange]);
 
   return (
     <>
@@ -151,4 +151,4 @@ export function ProfileImageUploader({
       />
     </>
   );
-}
+});

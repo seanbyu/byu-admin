@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { memo, useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, Plus, X, Pencil, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
@@ -8,7 +8,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { StaffPosition } from '../../../types';
 import { PositionSelectorProps } from './types';
 
-export function PositionSelector({
+export const PositionSelector = memo(function PositionSelector({
   positions,
   selectedPositionId,
   onSelect,
@@ -40,7 +40,25 @@ export function PositionSelector({
   // 삭제 확인 모달 상태
   const [positionToDelete, setPositionToDelete] = useState<StaffPosition | null>(null);
 
-  const selectedPosition = positions.find(p => p.id === selectedPositionId);
+  // 메모이제이션된 값들
+  const selectedPosition = useMemo(
+    () => positions.find(p => p.id === selectedPositionId),
+    [positions, selectedPositionId]
+  );
+
+  const filteredPositions = useMemo(
+    () => positions.filter(p =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.name_en && p.name_en.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (p.name_th && p.name_th.toLowerCase().includes(searchTerm.toLowerCase()))
+    ),
+    [positions, searchTerm]
+  );
+
+  const exactMatch = useMemo(
+    () => positions.some(p => p.name.toLowerCase() === searchTerm.toLowerCase()),
+    [positions, searchTerm]
+  );
 
   // 드롭다운 외부 클릭 감지
   useEffect(() => {
@@ -54,36 +72,28 @@ export function PositionSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 필터된 직급 목록
-  const filteredPositions = positions.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.name_en && p.name_en.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (p.name_th && p.name_th.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const exactMatch = positions.some(p => p.name.toLowerCase() === searchTerm.toLowerCase());
-
-  const handleSelectPosition = (position: StaffPosition) => {
+  // 핸들러 함수들
+  const handleSelectPosition = useCallback((position: StaffPosition) => {
     onSelect(position.id);
     setIsCreatingNew(false);
     setShowDropdown(false);
     setSearchTerm('');
-  };
+  }, [onSelect]);
 
-  const handleCreateNewPosition = () => {
+  const handleCreateNewPosition = useCallback(() => {
     setIsCreatingNew(true);
     setNewPositionName(searchTerm);
     setShowDropdown(false);
-  };
+  }, [searchTerm]);
 
-  const handleCancelCreate = () => {
+  const handleCancelCreate = useCallback(() => {
     setIsCreatingNew(false);
     setNewPositionName('');
     setNewPositionNameEn('');
     setNewPositionNameTh('');
-  };
+  }, []);
 
-  const handleSaveNewPosition = async () => {
+  const handleSaveNewPosition = useCallback(async () => {
     if (!newPositionName.trim()) return;
     try {
       const newPosition = await onCreatePosition({
@@ -93,28 +103,31 @@ export function PositionSelector({
         rank: positions.length + 1,
       });
       onSelect(newPosition?.data?.id || null);
-      handleCancelCreate();
+      setIsCreatingNew(false);
+      setNewPositionName('');
+      setNewPositionNameEn('');
+      setNewPositionNameTh('');
     } catch (error) {
       console.error('Failed to create position:', error);
     }
-  };
+  }, [newPositionName, newPositionNameEn, newPositionNameTh, positions.length, onCreatePosition, onSelect]);
 
-  const handleStartEdit = (e: React.MouseEvent, position: StaffPosition) => {
+  const handleStartEdit = useCallback((e: React.MouseEvent, position: StaffPosition) => {
     e.stopPropagation();
     setIsEditingPosition(position.id);
     setEditPositionName(position.name);
     setEditPositionNameEn(position.name_en || '');
     setEditPositionNameTh(position.name_th || '');
-  };
+  }, []);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setIsEditingPosition(null);
     setEditPositionName('');
     setEditPositionNameEn('');
     setEditPositionNameTh('');
-  };
+  }, []);
 
-  const handleSaveEdit = async (e: React.MouseEvent) => {
+  const handleSaveEdit = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isEditingPosition || !editPositionName.trim()) return;
 
@@ -131,14 +144,14 @@ export function PositionSelector({
     } catch (error) {
       console.error('Failed to update position:', error);
     }
-  };
+  }, [isEditingPosition, editPositionName, editPositionNameEn, editPositionNameTh, onUpdatePosition]);
 
-  const handleDeleteClick = (e: React.MouseEvent, position: StaffPosition) => {
+  const handleDeleteClick = useCallback((e: React.MouseEvent, position: StaffPosition) => {
     e.stopPropagation();
     setPositionToDelete(position);
-  };
+  }, []);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!positionToDelete) return;
 
     try {
@@ -150,7 +163,7 @@ export function PositionSelector({
     } catch (error) {
       console.error('Failed to delete position:', error);
     }
-  };
+  }, [positionToDelete, onDeletePosition, selectedPositionId, onSelect]);
 
   return (
     <>
@@ -359,4 +372,4 @@ export function PositionSelector({
       />
     </>
   );
-}
+});

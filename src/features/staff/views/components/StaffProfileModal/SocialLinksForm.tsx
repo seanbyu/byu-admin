@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Instagram, Youtube, Music2, Facebook } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { SocialLinksFormProps } from './types';
 
-export function SocialLinksForm({ register }: SocialLinksFormProps) {
+export const SocialLinksForm = memo(function SocialLinksForm({ register }: SocialLinksFormProps) {
   const t = useTranslations();
 
   return (
@@ -58,4 +58,4 @@ export function SocialLinksForm({ register }: SocialLinksFormProps) {
       </div>
     </div>
   );
-}
+});
