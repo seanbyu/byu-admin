@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -8,7 +8,7 @@ import { Select } from '@/components/ui/Select';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { Card } from '@/components/ui/Card';
 import { BusinessHours, Holiday } from '@/types';
-import { Trash2, Plus, Check } from 'lucide-react';
+import { Trash2, Plus, Check, Store, CalendarOff } from 'lucide-react';
 import { salonsApi } from '@/features/salons/api';
 
 interface ShopSettingsSectionProps {
@@ -35,9 +35,9 @@ const TIME_OPTIONS = Array.from({ length: 15 }, (_, i) => {
 const getDefaultBusinessHours = (): BusinessHours[] => {
   return Array.from({ length: 7 }, (_, i) => ({
     dayOfWeek: i,
-    openTime: '08:00',
-    closeTime: '22:00',
-    isOpen: i !== 0,
+    openTime: '10:00',
+    closeTime: '19:00',
+    isOpen: i !== 1, // Monday off
   }));
 };
 
@@ -50,6 +50,281 @@ const getTodayString = (): string => {
   return `${year}-${month}-${day}`;
 };
 
+// 영업 설정 섹션 (영업 시간 + 예약 설정)
+export const BusinessSettingsCard = memo(function BusinessSettingsCard({
+  businessHours,
+  slotDuration,
+  bookingAdvanceDays,
+  onToggleDay,
+  onTimeChange,
+  onSlotDurationChange,
+  onBookingAdvanceDaysChange,
+  onSave,
+  isSaving,
+  saveSuccess,
+}: {
+  businessHours: BusinessHours[];
+  slotDuration: number;
+  bookingAdvanceDays: number;
+  onToggleDay: (dayOfWeek: number) => void;
+  onTimeChange: (dayOfWeek: number, field: 'openTime' | 'closeTime', value: string) => void;
+  onSlotDurationChange: (value: number) => void;
+  onBookingAdvanceDaysChange: (value: number) => void;
+  onSave: () => void;
+  isSaving: boolean;
+  saveSuccess: boolean;
+}) {
+  const t = useTranslations();
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Store size={18} className="text-secondary-600" />
+          <h2 className="text-base font-semibold text-secondary-900">
+            {t('booking.shopSettingsModal.title')}
+          </h2>
+        </div>
+        <div className="flex items-center gap-2">
+          {saveSuccess && (
+            <span className="flex items-center gap-1 text-xs text-green-600">
+              <Check size={14} />
+            </span>
+          )}
+          <Button variant="primary" size="sm" onClick={onSave} disabled={isSaving}>
+            {isSaving ? t('common.saving') : t('common.save')}
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {/* 예약 시간 단위 및 예약 가능 기간 */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-secondary-600 mb-1">
+              {t('booking.shopSettingsModal.slotDuration')}
+            </label>
+            <Select
+              options={[
+                { value: '30', label: t('booking.shopSettingsModal.slotDuration30') },
+                { value: '60', label: t('booking.shopSettingsModal.slotDuration60') },
+              ]}
+              value={String(slotDuration)}
+              onChange={(e) => onSlotDurationChange(Number(e.target.value))}
+              className="w-full"
+              showPlaceholder={false}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-secondary-600 mb-1">
+              {t('booking.shopSettingsModal.bookingAdvanceDays')}
+            </label>
+            <Select
+              options={[
+                { value: '7', label: t('booking.shopSettingsModal.bookingAdvanceDays7') },
+                { value: '14', label: t('booking.shopSettingsModal.bookingAdvanceDays14') },
+                { value: '30', label: t('booking.shopSettingsModal.bookingAdvanceDays30') },
+                { value: '60', label: t('booking.shopSettingsModal.bookingAdvanceDays60') },
+                { value: '90', label: t('booking.shopSettingsModal.bookingAdvanceDays90') },
+              ]}
+              value={String(bookingAdvanceDays)}
+              onChange={(e) => onBookingAdvanceDaysChange(Number(e.target.value))}
+              className="w-full"
+              showPlaceholder={false}
+            />
+          </div>
+        </div>
+
+        {/* 영업 시간 설정 */}
+        <div>
+          <label className="block text-xs font-medium text-secondary-600 mb-2">
+            {t('booking.shopSettingsModal.businessHours')}
+          </label>
+          <div className="bg-secondary-50 rounded-lg p-3">
+            <div className="space-y-2">
+              {businessHours
+                .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
+                .map((bh) => (
+                  <div
+                    key={bh.dayOfWeek}
+                    className="flex items-center gap-3 py-1.5 border-b border-secondary-200 last:border-b-0"
+                  >
+                    {/* 토글 */}
+                    <button
+                      type="button"
+                      onClick={() => onToggleDay(bh.dayOfWeek)}
+                      className={`w-10 h-5 rounded-full transition-colors relative shrink-0 ${
+                        bh.isOpen ? 'bg-primary-500' : 'bg-secondary-300'
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
+                          bh.isOpen ? 'right-0.5' : 'left-0.5'
+                        }`}
+                      />
+                    </button>
+
+                    {/* 요일 */}
+                    <span
+                      className={`text-sm font-medium w-12 shrink-0 ${
+                        bh.dayOfWeek === 0
+                          ? 'text-red-500'
+                          : bh.dayOfWeek === 6
+                            ? 'text-blue-500'
+                            : 'text-secondary-700'
+                      }`}
+                    >
+                      {t(DAY_KEYS[bh.dayOfWeek])}
+                    </span>
+
+                    {/* 시간 선택 */}
+                    {bh.isOpen ? (
+                      <div className="flex items-center gap-1.5">
+                        <Select
+                          options={TIME_OPTIONS}
+                          value={bh.openTime}
+                          onChange={(e) =>
+                            onTimeChange(bh.dayOfWeek, 'openTime', e.target.value)
+                          }
+                          className="w-20"
+                          showPlaceholder={false}
+                        />
+                        <span className="text-secondary-400 text-xs">~</span>
+                        <Select
+                          options={TIME_OPTIONS}
+                          value={bh.closeTime}
+                          onChange={(e) =>
+                            onTimeChange(bh.dayOfWeek, 'closeTime', e.target.value)
+                          }
+                          className="w-20"
+                          showPlaceholder={false}
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-secondary-400 text-xs">
+                        {t('staff.schedule.closed')}
+                      </span>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+});
+
+// 휴무일 설정 섹션
+export const HolidaySettingsCard = memo(function HolidaySettingsCard({
+  holidays,
+  newHoliday,
+  onNewHolidayChange,
+  onAddHoliday,
+  onRemoveHoliday,
+}: {
+  holidays: Holiday[];
+  newHoliday: { startDate: string; endDate: string; reason: string };
+  onNewHolidayChange: (field: string, value: string) => void;
+  onAddHoliday: () => void;
+  onRemoveHoliday: (id: string) => void;
+}) {
+  const t = useTranslations();
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <CalendarOff size={18} className="text-secondary-600" />
+        <h2 className="text-base font-semibold text-secondary-900">
+          {t('booking.shopSettingsModal.closedDays')}
+        </h2>
+      </div>
+
+      <div className="space-y-4">
+        {/* 새 휴무일 입력 */}
+        <div className="bg-secondary-50 rounded-lg p-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <DatePicker
+              label={t('common.form.startDate')}
+              value={newHoliday.startDate}
+              onChange={(date) => onNewHolidayChange('startDate', date)}
+            />
+            <DatePicker
+              label={t('common.form.endDate')}
+              value={newHoliday.endDate}
+              onChange={(date) => onNewHolidayChange('endDate', date)}
+              minDate={newHoliday.startDate ? new Date(newHoliday.startDate) : undefined}
+            />
+          </div>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input
+                label={t('common.form.reason')}
+                placeholder={t('booking.shopSettingsModal.reasonPlaceholder')}
+                value={newHoliday.reason}
+                onChange={(e) => onNewHolidayChange('reason', e.target.value)}
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onAddHoliday}
+                disabled={
+                  !newHoliday.startDate ||
+                  !newHoliday.endDate ||
+                  !newHoliday.reason
+                }
+                className="h-10"
+              >
+                <Plus size={16} />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* 휴무일 목록 */}
+        <div>
+          <h4 className="text-xs font-medium text-secondary-600 mb-2">
+            {t('booking.shopSettingsModal.closedDaysList')}
+          </h4>
+          {holidays.length > 0 ? (
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {holidays.map((holiday) => (
+                <div
+                  key={holiday.id}
+                  className="flex items-center justify-between p-2.5 bg-secondary-50 rounded-lg"
+                >
+                  <div className="text-sm">
+                    <span className="font-medium text-secondary-900">
+                      {holiday.startDate} ~ {holiday.endDate}
+                    </span>
+                    <span className="ml-2 text-secondary-500">
+                      {holiday.reason}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveHoliday(holiday.id)}
+                    className="p-1 text-red-500 hover:bg-red-50 rounded"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-secondary-400 text-center py-6 bg-secondary-50 rounded-lg">
+              {t('booking.shopSettingsModal.noClosedDays')}
+            </p>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+});
+
+// 메인 컴포넌트 (상태 관리)
 export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
   const t = useTranslations();
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>(getDefaultBusinessHours());
@@ -60,14 +335,12 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // 새 휴무일 입력 상태 (시작일은 오늘로 기본값)
   const [newHoliday, setNewHoliday] = useState({
     startDate: getTodayString(),
     endDate: '',
     reason: '',
   });
 
-  // 데이터 로드
   useEffect(() => {
     if (salonId) {
       loadSettings();
@@ -99,15 +372,15 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     }
   };
 
-  const handleToggleDay = (dayOfWeek: number) => {
+  const handleToggleDay = useCallback((dayOfWeek: number) => {
     setBusinessHours((prev) =>
       prev.map((bh) =>
         bh.dayOfWeek === dayOfWeek ? { ...bh, isOpen: !bh.isOpen } : bh
       )
     );
-  };
+  }, []);
 
-  const handleTimeChange = (
+  const handleTimeChange = useCallback((
     dayOfWeek: number,
     field: 'openTime' | 'closeTime',
     value: string
@@ -117,9 +390,13 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
         bh.dayOfWeek === dayOfWeek ? { ...bh, [field]: value } : bh
       )
     );
-  };
+  }, []);
 
-  const handleAddHoliday = () => {
+  const handleNewHolidayChange = useCallback((field: string, value: string) => {
+    setNewHoliday((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleAddHoliday = useCallback(() => {
     if (!newHoliday.startDate || !newHoliday.endDate || !newHoliday.reason) {
       return;
     }
@@ -133,13 +410,13 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
 
     setHolidays((prev) => [...prev, holiday]);
     setNewHoliday({ startDate: getTodayString(), endDate: '', reason: '' });
-  };
+  }, [newHoliday]);
 
-  const handleRemoveHoliday = (id: string) => {
+  const handleRemoveHoliday = useCallback((id: string) => {
     setHolidays((prev) => prev.filter((h) => h.id !== id));
-  };
+  }, []);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!salonId) return;
 
     setIsSaving(true);
@@ -160,251 +437,46 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [salonId, businessHours, holidays, slotDuration, bookingAdvanceDays]);
 
   if (isLoading) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="text-secondary-500">{t('common.loading')}</div>
-        </div>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="p-5">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-secondary-500">{t('common.loading')}</div>
+          </div>
+        </Card>
+        <Card className="p-5">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-secondary-500">{t('common.loading')}</div>
+          </div>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-secondary-900">
-          {t('booking.shopSettingsModal.title')}
-        </h2>
-        <div className="flex items-center gap-3">
-          {saveSuccess && (
-            <span className="flex items-center gap-1 text-sm text-green-600">
-              <Check size={16} />
-              {t('common.saved')}
-            </span>
-          )}
-          <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? t('common.saving') : t('common.save')}
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        {/* 예약 시간 단위 및 예약 가능 기간 설정 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* 예약 시간 단위 */}
-          <div>
-            <h3 className="text-sm font-medium text-secondary-700 mb-3">
-              {t('booking.shopSettingsModal.slotDuration')}
-            </h3>
-            <div className="bg-secondary-50 rounded-lg p-4">
-              <Select
-                options={[
-                  { value: '30', label: t('booking.shopSettingsModal.slotDuration30') },
-                  { value: '60', label: t('booking.shopSettingsModal.slotDuration60') },
-                ]}
-                value={String(slotDuration)}
-                onChange={(e) => setSlotDuration(Number(e.target.value))}
-                className="w-full"
-                showPlaceholder={false}
-              />
-            </div>
-          </div>
-
-          {/* 예약 가능 기간 */}
-          <div>
-            <h3 className="text-sm font-medium text-secondary-700 mb-3">
-              {t('booking.shopSettingsModal.bookingAdvanceDays')}
-            </h3>
-            <div className="bg-secondary-50 rounded-lg p-4">
-              <Select
-                options={[
-                  { value: '7', label: t('booking.shopSettingsModal.bookingAdvanceDays7') },
-                  { value: '14', label: t('booking.shopSettingsModal.bookingAdvanceDays14') },
-                  { value: '30', label: t('booking.shopSettingsModal.bookingAdvanceDays30') },
-                  { value: '60', label: t('booking.shopSettingsModal.bookingAdvanceDays60') },
-                  { value: '90', label: t('booking.shopSettingsModal.bookingAdvanceDays90') },
-                ]}
-                value={String(bookingAdvanceDays)}
-                onChange={(e) => setBookingAdvanceDays(Number(e.target.value))}
-                className="w-full"
-                showPlaceholder={false}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* 영업 시간 설정 */}
-        <div>
-          <h3 className="text-sm font-medium text-secondary-700 mb-3">
-            {t('booking.shopSettingsModal.businessHours')}
-          </h3>
-          <div className="bg-secondary-50 rounded-lg p-4">
-            <div className="space-y-3">
-              {businessHours
-                .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-                .map((bh) => (
-                  <div
-                    key={bh.dayOfWeek}
-                    className="flex items-center gap-4 py-2 border-b border-secondary-200 last:border-b-0"
-                  >
-                    {/* 요일 및 토글 */}
-                    <div className="min-w-[120px] flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleDay(bh.dayOfWeek)}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${
-                          bh.isOpen ? 'bg-primary-500' : 'bg-secondary-300'
-                        }`}
-                      >
-                        <span
-                          className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                            bh.isOpen ? 'right-1' : 'left-1'
-                          }`}
-                        />
-                      </button>
-                      <span
-                        className={`text-sm font-medium ${
-                          bh.dayOfWeek === 0
-                            ? 'text-red-500'
-                            : bh.dayOfWeek === 6
-                              ? 'text-blue-500'
-                              : 'text-secondary-700'
-                        }`}
-                      >
-                        {t(DAY_KEYS[bh.dayOfWeek])}
-                      </span>
-                    </div>
-
-                    {/* 시간 선택 */}
-                    {bh.isOpen ? (
-                      <div className="flex items-center gap-2 flex-1 flex-wrap sm:flex-nowrap">
-                        <Select
-                          options={TIME_OPTIONS}
-                          value={bh.openTime}
-                          onChange={(e) =>
-                            handleTimeChange(bh.dayOfWeek, 'openTime', e.target.value)
-                          }
-                          className="w-24 sm:w-28"
-                          showPlaceholder={false}
-                        />
-                        <span className="text-secondary-500">~</span>
-                        <Select
-                          options={TIME_OPTIONS}
-                          value={bh.closeTime}
-                          onChange={(e) =>
-                            handleTimeChange(bh.dayOfWeek, 'closeTime', e.target.value)
-                          }
-                          className="w-24 sm:w-28"
-                          showPlaceholder={false}
-                        />
-                      </div>
-                    ) : (
-                      <span className="text-secondary-400 text-sm flex-1">
-                        {t('staff.schedule.closed')}
-                      </span>
-                    )}
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-
-        {/* 휴무일 설정 */}
-        <div>
-          <h3 className="text-sm font-medium text-secondary-700 mb-3">
-            {t('booking.shopSettingsModal.closedDays')}
-          </h3>
-          <div className="bg-secondary-50 rounded-lg p-4">
-            {/* 새 휴무일 입력 */}
-            <div className="space-y-3 mb-4">
-              {/* 첫번째 줄: 시작일, 종료일 */}
-              <div className="grid grid-cols-2 gap-3">
-                <DatePicker
-                  label={t('common.form.startDate')}
-                  value={newHoliday.startDate}
-                  onChange={(date) =>
-                    setNewHoliday((prev) => ({ ...prev, startDate: date }))
-                  }
-                />
-                <DatePicker
-                  label={t('common.form.endDate')}
-                  value={newHoliday.endDate}
-                  onChange={(date) =>
-                    setNewHoliday((prev) => ({ ...prev, endDate: date }))
-                  }
-                  minDate={newHoliday.startDate ? new Date(newHoliday.startDate) : undefined}
-                />
-              </div>
-              {/* 두번째 줄: 사유, 추가 버튼 */}
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  label={t('common.form.reason')}
-                  placeholder={t('booking.shopSettingsModal.reasonPlaceholder')}
-                  value={newHoliday.reason}
-                  onChange={(e) =>
-                    setNewHoliday((prev) => ({ ...prev, reason: e.target.value }))
-                  }
-                />
-                <div className="flex items-end">
-                  <Button
-                    variant="outline"
-                    onClick={handleAddHoliday}
-                    className="w-full"
-                    disabled={
-                      !newHoliday.startDate ||
-                      !newHoliday.endDate ||
-                      !newHoliday.reason
-                    }
-                  >
-                    <Plus size={16} className="mr-1" />
-                    {t('common.add')}
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* 휴무일 목록 */}
-            {holidays.length > 0 ? (
-              <div className="border-t border-secondary-200 pt-4">
-                <h4 className="text-sm font-medium text-secondary-700 mb-3">
-                  {t('booking.shopSettingsModal.closedDaysList')}
-                </h4>
-                <div className="space-y-2">
-                  {holidays.map((holiday) => (
-                    <div
-                      key={holiday.id}
-                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-secondary-200"
-                    >
-                      <div>
-                        <span className="font-medium text-secondary-900">
-                          {holiday.startDate} ~ {holiday.endDate}
-                        </span>
-                        <span className="ml-3 text-secondary-600">
-                          {holiday.reason}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveHoliday(holiday.id)}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-secondary-500 text-center py-4">
-                {t('booking.shopSettingsModal.noClosedDays')}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </Card>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <BusinessSettingsCard
+        businessHours={businessHours}
+        slotDuration={slotDuration}
+        bookingAdvanceDays={bookingAdvanceDays}
+        onToggleDay={handleToggleDay}
+        onTimeChange={handleTimeChange}
+        onSlotDurationChange={setSlotDuration}
+        onBookingAdvanceDaysChange={setBookingAdvanceDays}
+        onSave={handleSave}
+        isSaving={isSaving}
+        saveSuccess={saveSuccess}
+      />
+      <HolidaySettingsCard
+        holidays={holidays}
+        newHoliday={newHoliday}
+        onNewHolidayChange={handleNewHolidayChange}
+        onAddHoliday={handleAddHoliday}
+        onRemoveHoliday={handleRemoveHoliday}
+      />
+    </div>
   );
 }
