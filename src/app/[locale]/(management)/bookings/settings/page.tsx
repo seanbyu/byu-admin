@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { ShopSettingsSection } from '@/features/bookings/components/ShopSettingsSection';
 import { StaffScheduleSection } from '@/features/bookings/components/StaffScheduleSection';
+import { StaffBookingSection } from '@/features/bookings/components/StaffBookingSection';
 
 export default function OnlineBookingSettingsPage() {
   const t = useTranslations();
@@ -33,6 +34,9 @@ export default function OnlineBookingSettingsPage() {
             {t('booking.settings.description')}
           </p>
         </div>
+
+        {/* 직원 예약 허용 설정 */}
+        <StaffBookingSection salonId={salonId} />
 
         {/* 설정 섹션들 - 가로 나란히 배치 */}
         <div className="flex flex-col lg:flex-row gap-6">
