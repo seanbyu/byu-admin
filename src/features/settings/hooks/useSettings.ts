@@ -1,20 +1,27 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { settingsApi } from '../api';
-import { StoreInfo, AccountInfo, Plan, Subscription } from '../types';
+import { StoreInfo, Plan, Subscription } from '../types';
 
-// Query Keys
+// ============================================
+// Query Keys - 일관된 키 관리
+// ============================================
+
 export const settingsKeys = {
   all: ['settings'] as const,
   storeInfo: (salonId: string) => [...settingsKeys.all, 'store', salonId] as const,
+  storeInfoDirect: (salonId: string) => ['salon-store-info', salonId] as const,
   plans: () => [...settingsKeys.all, 'plans'] as const,
   subscription: (salonId: string) => [...settingsKeys.all, 'subscription', salonId] as const,
   account: (userId: string) => [...settingsKeys.all, 'account', userId] as const,
 };
 
+// ============================================
 // Store Info Hook
+// ============================================
+
 export function useStoreInfo(salonId: string, options?: { enabled?: boolean }) {
   const queryClient = useQueryClient();
 
@@ -22,28 +29,29 @@ export function useStoreInfo(salonId: string, options?: { enabled?: boolean }) {
     queryKey: settingsKeys.storeInfo(salonId),
     queryFn: () => settingsApi.getStoreInfo(salonId),
     enabled: options?.enabled !== false && !!salonId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
+
+  // 모든 관련 쿼리 무효화 함수
+  const invalidateAllStoreQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: settingsKeys.storeInfo(salonId) });
+    queryClient.invalidateQueries({ queryKey: settingsKeys.storeInfoDirect(salonId) });
+    queryClient.invalidateQueries({ queryKey: ['salon', salonId] });
+  }, [queryClient, salonId]);
 
   const updateMutation = useMutation({
     mutationFn: (data: Partial<StoreInfo>) => settingsApi.updateStoreInfo(salonId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: settingsKeys.storeInfo(salonId) });
-    },
+    onSuccess: invalidateAllStoreQueries,
   });
 
   const uploadImageMutation = useMutation({
     mutationFn: (file: File) => settingsApi.uploadStoreImage(salonId, file),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: settingsKeys.storeInfo(salonId) });
-    },
+    onSuccess: invalidateAllStoreQueries,
   });
 
   const deleteImageMutation = useMutation({
     mutationFn: () => settingsApi.deleteStoreImage(salonId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: settingsKeys.storeInfo(salonId) });
-    },
+    onSuccess: invalidateAllStoreQueries,
   });
 
   const storeInfo = useMemo(() => query.data?.data || null, [query.data]);
@@ -62,7 +70,10 @@ export function useStoreInfo(salonId: string, options?: { enabled?: boolean }) {
   };
 }
 
-// Mock Plans Data
+// ============================================
+// Plans - Mock Data (변경 없음)
+// ============================================
+
 const MOCK_PLANS: Plan[] = [
   {
     id: 'basic',
@@ -90,7 +101,6 @@ const MOCK_PLANS: Plan[] = [
   },
 ];
 
-// Mock Subscription Data
 const MOCK_SUBSCRIPTION: Subscription = {
   planId: 'basic',
   planName: 'Basic',
@@ -99,9 +109,7 @@ const MOCK_SUBSCRIPTION: Subscription = {
   status: 'active',
 };
 
-// Plans Hook (Mock Data)
 export function usePlans() {
-  // Return mock data instead of API call
   return {
     plans: MOCK_PLANS,
     isLoading: false,
@@ -109,60 +117,26 @@ export function usePlans() {
   };
 }
 
-// Subscription Hook (Mock Data)
 export function useSubscription(salonId: string, options?: { enabled?: boolean }) {
-  // Return mock data instead of API call
+  const upgradePlan = useCallback(async (planId: string) => {
+    console.log('Upgrade plan:', planId);
+    // TODO: Implement real API call
+  }, []);
+
   return {
     subscription: MOCK_SUBSCRIPTION,
     isLoading: false,
     error: null,
-    upgradePlan: async (planId: string) => {
-      console.log('Upgrade plan:', planId);
-      // TODO: Implement real API call
-    },
+    upgradePlan,
     isUpgrading: false,
     refetch: () => Promise.resolve(),
   };
 }
 
-// Account Hook
-export function useAccount(userId: string, options?: { enabled?: boolean }) {
-  const queryClient = useQueryClient();
-
-  const query = useQuery({
-    queryKey: settingsKeys.account(userId),
-    queryFn: () => settingsApi.getAccountInfo(userId),
-    enabled: options?.enabled !== false && !!userId,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (data: Partial<AccountInfo>) => settingsApi.updateAccountInfo(userId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: settingsKeys.account(userId) });
-    },
-  });
-
-  const changePasswordMutation = useMutation({
-    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
-      settingsApi.changePassword(userId, data),
-  });
-
-  const accountInfo = useMemo(() => query.data?.data || null, [query.data]);
-
-  return {
-    accountInfo,
-    isLoading: query.isLoading,
-    error: query.error,
-    updateAccount: updateMutation.mutateAsync,
-    isUpdating: updateMutation.isPending,
-    changePassword: changePasswordMutation.mutateAsync,
-    isChangingPassword: changePasswordMutation.isPending,
-    refetch: query.refetch,
-  };
-}
-
+// ============================================
 // Phone Verification Hook
+// ============================================
+
 export function usePhoneVerification() {
   const sendCodeMutation = useMutation({
     mutationFn: (phone: string) => settingsApi.sendVerificationCode(phone),
@@ -181,13 +155,20 @@ export function usePhoneVerification() {
   };
 }
 
+// ============================================
 // Password Change Hook
+// ============================================
+
 export function usePasswordChange() {
   const changePasswordMutation = useMutation({
-    mutationFn: ({ userId, currentPassword, newPassword }: {
+    mutationFn: ({
+      userId,
+      currentPassword,
+      newPassword,
+    }: {
       userId: string;
       currentPassword: string;
-      newPassword: string
+      newPassword: string;
     }) => settingsApi.changePassword(userId, { currentPassword, newPassword }),
   });
 

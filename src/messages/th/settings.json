@@ -19,6 +19,9 @@
     "name": "ชื่อร้าน",
     "ownerName": "ชื่อเจ้าของ",
     "address": "ที่อยู่",
+    "addressPlaceholder": "กรอกที่อยู่ร้าน",
+    "noAddress": "ไม่มีที่อยู่ที่ลงทะเบียน",
+    "noInstagram": "ไม่มี Instagram ที่ลงทะเบียน",
     "googleMapUrl": "URL Google Map",
     "viewMap": "ดูแผนที่",
     "phone": "โทรศัพท์"

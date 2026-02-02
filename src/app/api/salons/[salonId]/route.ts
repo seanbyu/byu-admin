@@ -14,7 +14,7 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('salons')
-      .select('id, name, description, address, phone, email, images, instagram_url')
+      .select('id, name, description, address, phone, email, cover_image_url, settings')
       .eq('id', salonId)
       .single();
 
@@ -23,17 +23,18 @@ export async function GET(
     }
 
     // Transform to frontend format
+    const settings = data.settings as Record<string, any> || {};
     const storeInfo = {
       id: data.id,
       name: data.name || '',
-      ownerName: '', // Not stored in salons table
+      ownerName: '',
       address: data.address || '',
-      googleMapUrl: '', // Not in current schema
-      imageUrl: data.images?.[0] || '',
+      googleMapUrl: '',
+      imageUrl: data.cover_image_url || '',
       phone: data.phone || '',
       email: data.email || '',
       description: data.description || '',
-      instagramUrl: data.instagram_url || '',
+      instagramUrl: settings.instagram_url || '',
     };
 
     return NextResponse.json({
@@ -66,15 +67,30 @@ export async function PATCH(
     if (body.phone !== undefined) updates.phone = body.phone;
     if (body.email !== undefined) updates.email = body.email;
     if (body.description !== undefined) updates.description = body.description;
-    if (body.instagramUrl !== undefined) updates.instagram_url = body.instagramUrl;
 
     updates.updated_at = new Date().toISOString();
+
+    // Instagram URL은 settings JSONB에 저장
+    if (body.instagramUrl !== undefined) {
+      // 기존 settings 가져오기
+      const { data: currentData } = await supabase
+        .from('salons')
+        .select('settings')
+        .eq('id', salonId)
+        .single();
+
+      const currentSettings = (currentData?.settings as Record<string, any>) || {};
+      updates.settings = {
+        ...currentSettings,
+        instagram_url: body.instagramUrl,
+      };
+    }
 
     const { data, error } = await supabase
       .from('salons')
       .update(updates)
       .eq('id', salonId)
-      .select('id, name, description, address, phone, email, images, instagram_url')
+      .select('id, name, description, address, phone, email, cover_image_url, settings')
       .single();
 
     if (error) {
@@ -82,17 +98,18 @@ export async function PATCH(
     }
 
     // Transform to frontend format
+    const settings = data.settings as Record<string, any> || {};
     const storeInfo = {
       id: data.id,
       name: data.name || '',
       ownerName: '',
       address: data.address || '',
       googleMapUrl: '',
-      imageUrl: data.images?.[0] || '',
+      imageUrl: data.cover_image_url || '',
       phone: data.phone || '',
       email: data.email || '',
       description: data.description || '',
-      instagramUrl: data.instagram_url || '',
+      instagramUrl: settings.instagram_url || '',
     };
 
     return NextResponse.json({

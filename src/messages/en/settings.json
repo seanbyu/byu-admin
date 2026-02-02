@@ -19,6 +19,9 @@
     "name": "Store Name",
     "ownerName": "Owner Name",
     "address": "Address",
+    "addressPlaceholder": "Enter store address",
+    "noAddress": "No address registered",
+    "noInstagram": "No Instagram registered",
     "googleMapUrl": "Google Map URL",
     "viewMap": "View Map",
     "phone": "Phone"

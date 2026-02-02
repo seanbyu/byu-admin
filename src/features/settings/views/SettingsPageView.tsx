@@ -21,26 +21,36 @@ import { SettingsTabs } from './components/SettingsTabs';
 import { StoreInfoTab } from './components/StoreInfoTab';
 import { PlanTab } from './components/PlanTab';
 import { AccountTab } from './components/AccountTab';
-import { AccountInfo } from '../types';
+import { AccountInfo, StoreInfo } from '../types';
+
+// ============================================
+// Main Component
+// ============================================
 
 export default function SettingsPageView() {
   const t = useTranslations();
   const { user, updateUser } = useAuthStore();
   const salonId = user?.salonId || '';
 
-  // UI State (Zustand)
+  // ============================================
+  // UI State (Zustand) - 순수 UI 상태만
+  // ============================================
   const activeTab = useSettingsUIStore(selectActiveTab);
   const isVerificationSent = useSettingsUIStore(selectIsVerificationSent);
   const actions = useSettingsUIStore(selectSettingsActions);
 
-  // Data fetching (TanStack Query)
+  // ============================================
+  // Data fetching (TanStack Query) - 서버 데이터
+  // ============================================
   const storeInfoQuery = useStoreInfo(salonId, { enabled: !!salonId });
   const plansQuery = usePlans();
   const subscriptionQuery = useSubscription(salonId, { enabled: !!salonId });
   const phoneVerification = usePhoneVerification();
   const passwordChange = usePasswordChange();
 
-  // Convert authStore user to AccountInfo format
+  // ============================================
+  // Derived Data
+  // ============================================
   const accountInfo = useMemo<AccountInfo | null>(() => {
     if (!user) return null;
     return {
@@ -52,9 +62,11 @@ export default function SettingsPageView() {
     };
   }, [user]);
 
-  // Handlers
+  // ============================================
+  // Store Info Handlers
+  // ============================================
   const handleStoreInfoSave = useCallback(
-    async (data: Parameters<typeof storeInfoQuery.updateStoreInfo>[0]) => {
+    async (data: Partial<StoreInfo>) => {
       await storeInfoQuery.updateStoreInfo(data);
     },
     [storeInfoQuery]
@@ -71,6 +83,9 @@ export default function SettingsPageView() {
     await storeInfoQuery.deleteImage();
   }, [storeInfoQuery]);
 
+  // ============================================
+  // Plan Handlers
+  // ============================================
   const handlePlanUpgrade = useCallback(
     async (planId: string) => {
       await subscriptionQuery.upgradePlan(planId);
@@ -78,9 +93,11 @@ export default function SettingsPageView() {
     [subscriptionQuery]
   );
 
+  // ============================================
+  // Account Handlers
+  // ============================================
   const handleAccountSave = useCallback(
     async (data: Partial<AccountInfo>) => {
-      // Update local authStore
       updateUser({
         name: data.name,
         phone: data.phone,
@@ -105,6 +122,9 @@ export default function SettingsPageView() {
     [phoneVerification]
   );
 
+  // ============================================
+  // Render
+  // ============================================
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
@@ -118,11 +138,11 @@ export default function SettingsPageView() {
         {/* Tabs */}
         <SettingsTabs activeTab={activeTab} onTabChange={actions.setActiveTab} />
 
-        {/* Tab Content */}
+        {/* Tab Content - 조건부 렌더링 */}
         <div className="mt-4 sm:mt-6">
           {activeTab === 'store' && (
             <StoreInfoTab
-              storeInfo={storeInfoQuery.storeInfo}
+              salonId={salonId}
               isLoading={storeInfoQuery.isLoading}
               isUpdating={storeInfoQuery.isUpdating}
               isUploadingImage={storeInfoQuery.isUploadingImage}

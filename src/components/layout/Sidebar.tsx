@@ -4,11 +4,9 @@ import React from 'react';
 import {
   LayoutDashboard,
   Calendar,
-  CalendarDays,
   Settings2,
   Users,
   Scissors,
-  ShoppingBag,
   Star,
   TrendingUp,
   MessageSquare,
@@ -52,7 +50,6 @@ export const Sidebar: React.FC = () => {
 
   const [openSubmenus, setOpenSubmenus] = React.useState<string[]>([
     'salon-management',
-    'booking-management',
   ]);
 
   const toggleSubmenu = (name: string) => {
@@ -82,26 +79,11 @@ export const Sidebar: React.FC = () => {
       permissionKey: 'dashboard',
     },
     {
-      id: 'booking-management',
-      name: t('nav.bookings'),
+      name: t('nav.bookingCalendar'),
       icon: Calendar,
+      href: '/bookings/calendar',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
-      subItems: [
-        {
-          name: t('nav.bookingCalendar'),
-          icon: CalendarDays,
-          href: '/bookings/calendar',
-          roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
-          permissionKey: 'bookings',
-        },
-        {
-          name: t('nav.onlineBookingSettings'),
-          icon: Settings2,
-          href: '/bookings/settings',
-          roles: [UserRole.MANAGER, UserRole.ADMIN],
-          permissionKey: 'bookings',
-        },
-      ],
+      permissionKey: 'bookings',
     },
     {
       name: t('nav.customers'),
@@ -116,6 +98,13 @@ export const Sidebar: React.FC = () => {
       icon: Building2,
       roles: [UserRole.MANAGER, UserRole.ADMIN, UserRole.STAFF],
       subItems: [
+        {
+          name: t('nav.onlineBookingSettings'),
+          icon: Settings2,
+          href: '/bookings/settings',
+          roles: [UserRole.MANAGER, UserRole.ADMIN],
+          permissionKey: 'bookings',
+        },
         {
           name: t('nav.staff'),
           icon: Briefcase,

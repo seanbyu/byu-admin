@@ -106,10 +106,10 @@ export const StaffTableRow = memo(function StaffTableRow({
         {formatPhone(member.phone)}
       </td>
       <td className="px-6 py-4 text-center text-sm text-secondary-600">
-        {formatDate(member.createdAt)}
+        {member.role === 'ADMIN' || member.role === 'SUPER_ADMIN' ? '-' : formatDate(member.createdAt)}
       </td>
       <td className="px-6 py-4 text-center">
-        {isAdmin && member.role !== 'SUPER_ADMIN' ? (
+        {isAdmin && member.role !== 'SUPER_ADMIN' && member.role !== 'ADMIN' ? (
           <Button
             variant="outline"
             size="sm"
