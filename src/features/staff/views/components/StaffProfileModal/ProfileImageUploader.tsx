@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Camera, Trash2, Loader2 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -16,21 +16,17 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
   const t = useTranslations();
   const [uploading, setUploading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  // 로컬 미리보기 URL (업로드 중 즉시 표시용)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  // 컴포넌트 언마운트 시 미리보기 URL 정리
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // input 즉시 초기화 (같은 파일 재선택 가능하도록)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
 
     // 파일 크기 체크 (5MB 제한)
     const maxSize = 5 * 1024 * 1024;
@@ -64,6 +60,10 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const uploadUrl = `${supabaseUrl}/storage/v1/object/avatars/${filePath}`;
 
+      // 타임아웃 설정 (30초)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
       const response = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
@@ -71,7 +71,10 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
           'x-upsert': 'true',
         },
         body: file,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -92,20 +95,18 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
           });
         }
       }
-
-      // 로컬 미리보기 URL 정리
-      URL.revokeObjectURL(localPreviewUrl);
-      setPreviewUrl(null);
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      alert(error?.message || t('staff.profileModal.uploadFailed'));
-      // 실패 시 미리보기 제거
+      if (error.name === 'AbortError') {
+        alert(t('staff.profileModal.uploadTimeout') || '업로드 시간이 초과되었습니다.');
+      } else {
+        alert(error?.message || t('staff.profileModal.uploadFailed'));
+      }
+    } finally {
+      // 미리보기 URL 정리 및 상태 초기화
       URL.revokeObjectURL(localPreviewUrl);
       setPreviewUrl(null);
-    } finally {
       setUploading(false);
-      // input 초기화 (같은 파일 재선택 가능하도록)
-      e.target.value = '';
     }
   }, [salonId, staffId, profileImage, onImageChange, t]);
 
@@ -172,6 +173,7 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
           )}
           <div className="flex-1">
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={handleFileUpload}
