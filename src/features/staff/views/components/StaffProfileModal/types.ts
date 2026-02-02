@@ -20,7 +20,6 @@ export interface ProfileFormData {
     tiktok: string;
     facebook: string;
   };
-  password?: string;
 }
 
 export interface PositionSelectorProps {

@@ -98,7 +98,6 @@ export default function StaffProfileModal({
 
       await onSave(staff.id, {
         name: data.name,
-        password: data.password || undefined,
         phone: data.phone,
         positionId: positionIdToSave,
         description: data.description,
@@ -149,22 +148,6 @@ export default function StaffProfileModal({
             placeholder="010-0000-0000"
           />
         </div>
-
-        {/* 비밀번호 변경 섹션 */}
-        <div className="space-y-2 border-t border-secondary-200 pt-4 mt-2">
-          <label className="block text-sm font-medium text-secondary-700">
-            {t('staff.profileModal.passwordChange')}
-          </label>
-          <Input
-            type="password"
-            placeholder={t('staff.profileModal.passwordPlaceholder')}
-            {...register('password')}
-          />
-          <p className="text-xs text-secondary-500">
-            {t('staff.profileModal.passwordHint')}
-          </p>
-        </div>
-        <div className="border-b border-secondary-200 mb-4"></div>
 
         {/* 프로필 이미지 업로더 */}
         <ProfileImageUploader
