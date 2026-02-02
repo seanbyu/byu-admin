@@ -52,7 +52,8 @@
       "title": "Staff Booking Settings",
       "description": "Set which staff members can be selected for online bookings.",
       "noStaff": "No staff members registered.",
-      "hint": "Staff with booking disabled will not be shown to customers during online booking."
+      "hint": "Staff with booking disabled will not be shown to customers during online booking.",
+      "scheduleButton": "Schedule"
     }
   }
 }
