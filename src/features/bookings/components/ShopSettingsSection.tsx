@@ -186,7 +186,7 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
                           onChange={(e) =>
                             onTimeChange(bh.dayOfWeek, 'openTime', e.target.value)
                           }
-                          className="w-20"
+                          className="w-[88px]"
                           showPlaceholder={false}
                         />
                         <span className="text-secondary-400 text-xs">~</span>
@@ -196,7 +196,7 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
                           onChange={(e) =>
                             onTimeChange(bh.dayOfWeek, 'closeTime', e.target.value)
                           }
-                          className="w-20"
+                          className="w-[88px]"
                           showPlaceholder={false}
                         />
                       </div>
