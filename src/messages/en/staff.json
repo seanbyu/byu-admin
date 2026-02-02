@@ -109,6 +109,7 @@
     "socialMedia": "Social Media",
     "updateFailed": "Failed to update profile.",
     "uploadFailed": "Failed to upload image.",
+    "fileTooLarge": "File size exceeds 5MB limit.",
     "deleteImageTitle": "Delete Profile Image",
     "deleteImageDesc": "Are you sure you want to delete the profile image? This cannot be undone after saving.",
     "deleteConfirm": "Delete",

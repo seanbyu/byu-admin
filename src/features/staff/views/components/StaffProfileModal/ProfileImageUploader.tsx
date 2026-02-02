@@ -22,23 +22,50 @@ export function ProfileImageUploader({
       const file = e.target.files?.[0];
       if (!file) return;
 
+      // 파일 크기 체크 (5MB 제한)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert(t('staff.profileModal.fileTooLarge'));
+        return;
+      }
+
       setUploading(true);
 
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `${salonId}/${staffId}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
+      // 세션에서 토큰 가져오기
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
 
-      if (uploadError) throw uploadError;
+      if (!accessToken) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
+      // Storage API 직접 호출
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const uploadUrl = `${supabaseUrl}/storage/v1/object/avatars/${filePath}`;
+
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'x-upsert': 'true',
+        },
+        body: file,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+      }
 
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       onImageChange(data.publicUrl);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      alert(t('staff.profileModal.uploadFailed'));
+      alert(error?.message || t('staff.profileModal.uploadFailed'));
     } finally {
       setUploading(false);
     }

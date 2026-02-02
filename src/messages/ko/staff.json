@@ -109,6 +109,7 @@
     "socialMedia": "소셜 미디어",
     "updateFailed": "프로필 업데이트에 실패했습니다.",
     "uploadFailed": "이미지 업로드에 실패했습니다.",
+    "fileTooLarge": "파일 크기가 5MB를 초과합니다.",
     "deleteImageTitle": "프로필 이미지 삭제",
     "deleteImageDesc": "프로필 이미지를 삭제하시겠습니까? 삭제 후 저장하면 복구할 수 없습니다.",
     "deleteConfirm": "삭제",

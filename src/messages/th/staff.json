@@ -109,6 +109,7 @@
     "socialMedia": "โซเชียลมีเดีย",
     "updateFailed": "ไม่สามารถอัปเดตโปรไฟล์",
     "uploadFailed": "ไม่สามารถอัปโหลดรูปภาพ",
+    "fileTooLarge": "ขนาดไฟล์เกิน 5MB",
     "deleteImageTitle": "ลบรูปโปรไฟล์",
     "deleteImageDesc": "คุณต้องการลบรูปโปรไฟล์หรือไม่? จะไม่สามารถกู้คืนได้หลังบันทึก",
     "deleteConfirm": "ลบ",
