@@ -200,13 +200,11 @@ export class StaffRepository extends BaseRepository {
 
     // Update staff_profiles if profile fields exist
     if (Object.keys(profileUpdates).length > 0) {
-      // Type assertion needed due to Supabase generated types mismatch
+      // Use update instead of upsert to avoid salon_id NOT NULL constraint issue
       const { error: profileError } = await (this.supabase
         .from("staff_profiles") as ReturnType<typeof this.supabase.from>)
-        .upsert(
-          { user_id: staffId, ...profileUpdates } as never,
-          { onConflict: "user_id" }
-        );
+        .update(profileUpdates as never)
+        .eq("user_id", staffId);
 
       if (profileError) throw profileError;
     }
