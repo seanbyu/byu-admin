@@ -18,6 +18,7 @@ interface StaffScheduleModalProps {
   salonId: string;
   staffList: Staff[];
   onSave?: () => void;
+  salonBusinessHours?: BusinessHours[];
 }
 
 // 요일 키 매핑
@@ -37,12 +38,22 @@ const TIME_OPTIONS = Array.from({ length: 15 }, (_, i) => {
   return { value: `${hour}:00`, label: `${hour}:00` };
 });
 
-const getDefaultWorkHours = (): BusinessHours[] => {
+const getDefaultWorkHours = (salonBusinessHours?: BusinessHours[]): BusinessHours[] => {
+  // If salon business hours are provided, use them as default
+  if (salonBusinessHours && salonBusinessHours.length > 0) {
+    return salonBusinessHours.map((sh) => ({
+      dayOfWeek: sh.dayOfWeek,
+      openTime: sh.openTime,
+      closeTime: sh.closeTime,
+      isOpen: sh.isOpen,
+    }));
+  }
+  // Fallback to hardcoded defaults
   return Array.from({ length: 7 }, (_, i) => ({
     dayOfWeek: i,
-    openTime: '08:00',
-    closeTime: '22:00',
-    isOpen: i !== 0,
+    openTime: '10:00',
+    closeTime: '21:00',
+    isOpen: i !== 1, // Monday off by default
   }));
 };
 
@@ -52,10 +63,11 @@ export function StaffScheduleModal({
   salonId,
   staffList,
   onSave,
+  salonBusinessHours,
 }: StaffScheduleModalProps) {
   const t = useTranslations();
   const [selectedStaffId, setSelectedStaffId] = useState<string>('');
-  const [workHours, setWorkHours] = useState<BusinessHours[]>(getDefaultWorkHours());
+  const [workHours, setWorkHours] = useState<BusinessHours[]>(getDefaultWorkHours(salonBusinessHours));
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -74,24 +86,24 @@ export function StaffScheduleModal({
       if (selectedStaff.workHours && selectedStaff.workHours.length > 0) {
         setWorkHours(selectedStaff.workHours);
       } else {
-        setWorkHours(getDefaultWorkHours());
+        setWorkHours(getDefaultWorkHours(salonBusinessHours));
       }
       setHolidays(selectedStaff.holidays || []);
     } else {
-      setWorkHours(getDefaultWorkHours());
+      setWorkHours(getDefaultWorkHours(salonBusinessHours));
       setHolidays([]);
     }
-  }, [selectedStaff]);
+  }, [selectedStaff, salonBusinessHours]);
 
   // 모달 닫힐 때 상태 초기화
   useEffect(() => {
     if (!isOpen) {
       setSelectedStaffId('');
-      setWorkHours(getDefaultWorkHours());
+      setWorkHours(getDefaultWorkHours(salonBusinessHours));
       setHolidays([]);
       setNewHoliday({ startDate: '', endDate: '', reason: '' });
     }
-  }, [isOpen]);
+  }, [isOpen, salonBusinessHours]);
 
   const handleToggleDay = (dayOfWeek: number) => {
     setWorkHours((prev) =>

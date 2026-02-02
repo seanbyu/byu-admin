@@ -140,8 +140,10 @@
     "noHolidays": "ไม่มีวันหยุด/ลาที่ลงทะเบียน",
     "selectToSetSchedule": "เลือกพนักงานเพื่อตั้งค่าตาราง",
     "closed": "ปิด",
+    "salonClosed": "ร้านปิด",
     "reasonPlaceholder": "เช่น ลาพักร้อน",
-    "workHoursHint": "วันปิดร้านจะถูกปิดใช้งานโดยอัตโนมัติ"
+    "workHoursHint": "วันปิดร้านจะถูกปิดใช้งานโดยอัตโนมัติ",
+    "resetToSalonDefaults": "รีเซ็ตเป็นค่าเริ่มต้นร้าน"
   },
   "errors": {
     "updateFailed": "การอัปเดตล้มเหลว"

@@ -32,13 +32,13 @@ CREATE TABLE salons (
 
   -- Business hours (JSONB for flexibility)
   business_hours JSONB DEFAULT '{
-    "monday": {"enabled": true, "open": "08:00", "close": "22:00"},
-    "tuesday": {"enabled": true, "open": "08:00", "close": "22:00"},
-    "wednesday": {"enabled": true, "open": "08:00", "close": "22:00"},
-    "thursday": {"enabled": true, "open": "08:00", "close": "22:00"},
-    "friday": {"enabled": true, "open": "08:00", "close": "22:00"},
-    "saturday": {"enabled": true, "open": "08:00", "close": "22:00"},
-    "sunday": {"enabled": false, "open": null, "close": null}
+    "monday": {"enabled": false, "open": null, "close": null},
+    "tuesday": {"enabled": true, "open": "10:00", "close": "21:00"},
+    "wednesday": {"enabled": true, "open": "10:00", "close": "21:00"},
+    "thursday": {"enabled": true, "open": "10:00", "close": "21:00"},
+    "friday": {"enabled": true, "open": "10:00", "close": "21:00"},
+    "saturday": {"enabled": true, "open": "10:00", "close": "21:00"},
+    "sunday": {"enabled": true, "open": "10:00", "close": "21:00"}
   }'::jsonb,
 
   -- Holidays (휴무일)

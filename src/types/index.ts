@@ -35,7 +35,8 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
-  isApproved?: boolean; // 기본 true, 개별 사용자 승인은 사용하지 않음
+  isApproved?: boolean; // staff_profiles.is_approved (직원 개인 승인)
+  isOwner?: boolean; // staff_profiles.is_owner (살롱 오너 여부)
   permissions?: StaffPermission[];
 }
 

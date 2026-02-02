@@ -42,61 +42,73 @@ export class StaffRepository extends BaseRepository {
       throw new Error("Salon ID is required");
     }
 
-    const { data: users, error } = await this.supabase
-      .from("users")
+    // Query from staff_profiles and join users via user_id FK
+    const { data: profiles, error } = await this.supabase
+      .from("staff_profiles")
       .select(
         `
-        id,
-        name,
-        email,
-        phone,
-        role,
+        user_id,
         salon_id,
-        profile_image,
-        is_active,
+        is_owner,
+        is_approved,
+        bio,
+        years_of_experience,
+        specialties,
+        social_links,
+        permissions,
+        is_booking_enabled,
+        work_schedule,
+        holidays,
+        position_id,
         created_at,
-        updated_at,
-        staff_profiles (
-          bio,
-          years_of_experience,
-          specialties,
-          social_links,
-          permissions,
-          is_booking_enabled,
-          work_schedule,
-          holidays,
-          position_id,
-          staff_positions (
-            id,
-            name,
-            name_en,
-            name_th
-          )
+        staff_positions (
+          id,
+          name,
+          name_en,
+          name_th
+        ),
+        users!staff_profiles_user_id_fkey (
+          id,
+          name,
+          email,
+          phone,
+          role,
+          profile_image,
+          is_active,
+          created_at,
+          updated_at
         )
       `,
       )
       .eq("salon_id", salonId)
-      .in("role", ["SUPER_ADMIN", "ADMIN", "MANAGER", "STAFF"])
-      .eq("is_active", true)
+      .eq("is_approved", true)
       .order("created_at", { ascending: true });
 
     if (error) {
       throw new Error(error.message);
     }
 
-    if (!users) {
+    if (!profiles) {
       return [];
     }
 
-    return users.map((user) => this.transformToStaff(user as DBUserWithProfile));
+    // Filter by role and is_active from joined users table
+    const filteredProfiles = profiles.filter((p: any) => {
+      const user = p.users;
+      return user &&
+        user.is_active &&
+        ["SUPER_ADMIN", "ADMIN", "MANAGER", "STAFF"].includes(user.role);
+    });
+
+    return filteredProfiles.map((profile: any) => this.transformProfileToStaff(profile));
   }
 
   async getStaffCount(salonId: string): Promise<number> {
     const { count, error } = await this.supabase
-      .from("users")
-      .select("*", { count: "exact", head: true })
+      .from("staff_profiles")
+      .select("*, users!staff_profiles_user_id_fkey(role)", { count: "exact", head: true })
       .eq("salon_id", salonId)
-      .in("role", ["ADMIN", "MANAGER", "STAFF"]);
+      .eq("is_approved", true);
 
     if (error) throw new Error(error.message);
     return count || 0;
@@ -202,6 +214,42 @@ export class StaffRepository extends BaseRepository {
     return { success: true };
   }
 
+  // Transform from staff_profiles query result (profile with nested user)
+  private transformProfileToStaff(profile: any): StaffResponse {
+    const user = profile.users;
+    const position = profile.staff_positions;
+
+    return {
+      id: user.id,
+      userId: user.id,
+      salonId: profile.salon_id || "",
+      name: user.name,
+      description: profile.bio || "",
+      experience: profile.years_of_experience || 0,
+      profileImage: user.profile_image,
+      portfolioImages: [],
+      specialties: profile.specialties || [],
+      socialLinks: profile.social_links || {},
+      rating: 0,
+      reviewCount: 0,
+      isActive: user.is_active,
+      isBookingEnabled: profile.is_booking_enabled ?? true,
+      permissions: this.transformPermissionsFromDB(profile.permissions),
+      workHours: StaffRepository.transformWorkHoursFromDB(profile.work_schedule),
+      holidays: profile.holidays || [],
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
+      phone: user.phone,
+      email: user.email,
+      role: user.role as string,
+      positionId: profile.position_id || null,
+      positionTitle: position?.name || null,
+      positionTitle_en: position?.name_en || null,
+      positionTitle_th: position?.name_th || null,
+    };
+  }
+
+  // Transform from users query result (user with nested profile) - legacy method
   private transformToStaff(user: DBUserWithProfile): StaffResponse {
     const profileData = user.staff_profiles;
     const profile: Partial<DBStaffProfile> = Array.isArray(profileData)

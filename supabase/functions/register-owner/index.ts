@@ -186,6 +186,9 @@ serve(async (req) => {
     const salonId = salonData.id;
 
     // 4.5 Insert Salon Industries
+    let hasHairIndustry = false;
+    let hairIndustryId: string | null = null;
+
     if (reqBody.industryNames && Array.isArray(reqBody.industryNames)) {
       const industryNames = reqBody.industryNames;
 
@@ -200,6 +203,15 @@ serve(async (req) => {
           salon_id: salonId,
           industry_id: ind.id,
         }));
+
+        // Check if hair industry is selected
+        const hairIndustry = industriesData.find(
+          (ind: any) => ind.name.toLowerCase() === "hair"
+        );
+        if (hairIndustry) {
+          hasHairIndustry = true;
+          hairIndustryId = hairIndustry.id;
+        }
 
         const { error: industriesError } = await supabaseAdmin
           .from("salon_industries")
@@ -217,18 +229,44 @@ serve(async (req) => {
       }
     }
 
-    // 5. Upsert User with Salon ID and user_type
+    // 4.6 Create default service categories for Hair industry
+    if (hasHairIndustry) {
+      const defaultHairCategories = [
+        { name: "Cut", name_en: "Cut", name_th: "ตัดผม", display_order: 1 },
+        { name: "Perm", name_en: "Perm", name_th: "ดัดผม", display_order: 2 },
+        { name: "Color", name_en: "Color", name_th: "ทำสีผม", display_order: 3 },
+        { name: "Clinic", name_en: "Clinic", name_th: "คลินิก", display_order: 4 },
+      ];
+
+      const categoryRows = defaultHairCategories.map((cat) => ({
+        salon_id: salonId,
+        industry_id: hairIndustryId,
+        name: cat.name,
+        name_en: cat.name_en,
+        name_th: cat.name_th,
+        display_order: cat.display_order,
+        is_active: true,
+      }));
+
+      const { error: categoriesError } = await supabaseAdmin
+        .from("service_categories")
+        .insert(categoryRows);
+
+      if (categoriesError) {
+        console.error("Error creating default categories:", categoriesError);
+        // Non-critical error, continue without rollback
+      }
+    }
+
+    // 5. Upsert User (base info only - salon_id is now in staff_profiles)
     // 휴대폰 인증으로 생성된 경우 users 테이블에 행이 없을 수 있으므로 upsert 사용
-    // 참고: 사용자 승인(is_approved)은 기본 true, 살롱 승인(salons.approval_status)만 체크
     const { error: userError } = await supabaseAdmin
       .from("users")
       .upsert({
         id: finalUserId,
         email: email,
         name: name,
-        salon_id: salonId,
         is_active: true,
-        is_approved: true,
         phone: phone,
         user_type: "ADMIN_USER",
         role: "ADMIN",
@@ -243,12 +281,30 @@ serve(async (req) => {
       throw userError;
     }
 
-    // 6. Upsert Staff Profile with Permissions
+    // 6. Upsert Staff Profile with salon_id, is_owner, and Permissions
     // (휴대폰 인증 후 CUSTOMER로 생성된 경우 staff_profiles가 없으므로 upsert 사용)
+    // salon_id, is_owner, is_approved는 이제 staff_profiles에 저장
+    // work_schedule은 salon의 business_hours와 동일하게 설정
+    const defaultWorkSchedule = {
+      monday: { enabled: false, start: null, end: null },
+      tuesday: { enabled: true, start: "10:00", end: "21:00" },
+      wednesday: { enabled: true, start: "10:00", end: "21:00" },
+      thursday: { enabled: true, start: "10:00", end: "21:00" },
+      friday: { enabled: true, start: "10:00", end: "21:00" },
+      saturday: { enabled: true, start: "10:00", end: "21:00" },
+      sunday: { enabled: true, start: "10:00", end: "21:00" },
+    };
+
     const { error: profileError } = await supabaseAdmin
       .from("staff_profiles")
       .upsert({
         user_id: finalUserId,
+        salon_id: salonId,
+        is_owner: true,
+        is_approved: true,
+        approved_by: finalUserId,
+        approved_at: new Date().toISOString(),
+        work_schedule: defaultWorkSchedule,
         permissions: {
           bookings: { view: true, create: true, edit: true, delete: true },
           customers: { view: true, create: true, edit: true, delete: true },

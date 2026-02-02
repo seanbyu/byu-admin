@@ -53,6 +53,13 @@ interface Resource {
   workHours?: ResourceWorkHours[];
 }
 
+interface SalonBusinessHours {
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
+  isOpen: boolean;
+}
+
 interface CalendarProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
@@ -61,6 +68,7 @@ interface CalendarProps {
   onTimeSlotClick?: (date: Date, time: string, resourceId?: string) => void;
   resources?: Resource[];
   slotDuration?: number;
+  salonBusinessHours?: SalonBusinessHours[];
 }
 
 type ViewType = 'month' | 'day';
@@ -73,6 +81,7 @@ export function Calendar({
   onTimeSlotClick,
   resources = [],
   slotDuration = 60,
+  salonBusinessHours = [],
 }: CalendarProps) {
   const t = useTranslations('common');
   const locale = useLocale();
@@ -122,8 +131,38 @@ export function Calendar({
     onDateSelect(newDate);
   };
 
+  // Get salon business hours for a specific day
+  const getSalonHoursForDay = React.useCallback(
+    (date: Date): SalonBusinessHours | null => {
+      if (!salonBusinessHours || salonBusinessHours.length === 0) return null;
+      const dayOfWeek = date.getDay();
+      return salonBusinessHours.find((bh) => bh.dayOfWeek === dayOfWeek) || null;
+    },
+    [salonBusinessHours]
+  );
+
+  // Check if a time slot is within salon operating hours
+  const isWithinSalonHours = React.useCallback(
+    (date: Date, time: string): boolean => {
+      const salonHours = getSalonHoursForDay(date);
+      if (!salonHours) return true; // No salon hours set, allow all
+      if (!salonHours.isOpen) return false; // Salon closed on this day
+
+      const [h, m] = time.split(':').map(Number);
+      const slotMinutes = h * 60 + m;
+      const [oh, om] = salonHours.openTime.split(':').map(Number);
+      const openMinutes = oh * 60 + om;
+      const [ch, cm] = salonHours.closeTime.split(':').map(Number);
+      const closeMinutes = ch * 60 + cm;
+
+      return slotMinutes >= openMinutes && slotMinutes < closeMinutes;
+    },
+    [getSalonHoursForDay]
+  );
+
   const timeSlots = React.useMemo(() => {
     const slots: string[] = [];
+    // Default range 8:00 - 22:00, but we'll show all and disable based on salon hours
     const startMinutes = 8 * 60;
     const endMinutes = 22 * 60;
     for (let m = startMinutes; m < endMinutes; m += slotDuration) {
@@ -144,7 +183,19 @@ export function Calendar({
     resource: Resource,
     date: Date,
     time: string
-  ): 'available' | 'unavailable' | 'dayOff' => {
+  ): 'available' | 'unavailable' | 'dayOff' | 'salonClosed' => {
+    // First check salon business hours
+    const salonHours = getSalonHoursForDay(date);
+    if (salonHours) {
+      if (!salonHours.isOpen) {
+        return 'salonClosed'; // Salon is closed on this day
+      }
+      if (!isWithinSalonHours(date, time)) {
+        return 'salonClosed'; // Outside salon operating hours
+      }
+    }
+
+    // Then check staff work hours
     if (!resource.workHours || resource.workHours.length === 0) {
       return 'available';
     }
@@ -223,6 +274,7 @@ export function Calendar({
                       time
                     );
                     const isAvailable = slotStatus === 'available';
+                    const isSalonClosed = slotStatus === 'salonClosed';
 
                     return (
                       <div
@@ -232,7 +284,9 @@ export function Calendar({
                           'transition-colors duration-fast',
                           isAvailable
                             ? 'cursor-pointer hover:bg-primary-50'
-                            : 'bg-secondary-100 cursor-not-allowed'
+                            : isSalonClosed
+                              ? 'bg-secondary-200 cursor-not-allowed'
+                              : 'bg-secondary-100 cursor-not-allowed'
                         )}
                         onClick={() => {
                           if (isAvailable && resourceEvents.length === 0) {
@@ -269,9 +323,11 @@ export function Calendar({
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <span className="text-xs text-secondary-400">
-                              {slotStatus === 'dayOff'
-                                ? t('calendar.dayOff')
-                                : t('calendar.unavailable')}
+                              {isSalonClosed
+                                ? t('calendar.closed')
+                                : slotStatus === 'dayOff'
+                                  ? t('calendar.dayOff')
+                                  : t('calendar.unavailable')}
                             </span>
                           </div>
                         )}
@@ -299,6 +355,9 @@ export function Calendar({
         <div className="overflow-y-auto max-h-[600px]">
           {timeSlots.map((time) => {
             const timeEvents = dayEvents.filter((event) => event.time === time);
+            const withinSalonHours = isWithinSalonHours(currentDate, time);
+            const salonHours = getSalonHoursForDay(currentDate);
+            const isSalonClosedDay = salonHours && !salonHours.isOpen;
 
             return (
               <div key={time} className="flex border-b border-secondary-100">
@@ -307,38 +366,51 @@ export function Calendar({
                 </div>
                 <div
                   className={cn(
-                    'flex-1 py-2 px-3 min-h-[60px] relative cursor-pointer',
-                    'transition-colors duration-fast hover:bg-primary-50'
+                    'flex-1 py-2 px-3 min-h-[60px] relative',
+                    'transition-colors duration-fast',
+                    withinSalonHours
+                      ? 'cursor-pointer hover:bg-primary-50'
+                      : 'bg-secondary-200 cursor-not-allowed'
                   )}
                   onClick={() => {
-                    if (timeEvents.length === 0) {
+                    if (withinSalonHours && timeEvents.length === 0) {
                       onTimeSlotClick?.(currentDate, time);
                     }
                   }}
                 >
-                  {timeEvents.length === 0 && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                  {withinSalonHours ? (
+                    <>
+                      {timeEvents.length === 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                          <span className="text-xs text-secondary-400">
+                            {t('calendar.addBooking')}
+                          </span>
+                        </div>
+                      )}
+                      {timeEvents.map((event) => (
+                        <div
+                          key={event.id}
+                          className={cn(
+                            'mb-1 p-2 rounded-md cursor-pointer',
+                            event.color || 'bg-primary-100 text-primary-700'
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEventClick?.(event);
+                          }}
+                        >
+                          <div className="font-medium text-sm">{event.time}</div>
+                          <div className="text-sm">{event.title}</div>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs text-secondary-400">
-                        {t('calendar.addBooking')}
+                        {isSalonClosedDay ? t('calendar.dayOff') : t('calendar.closed')}
                       </span>
                     </div>
                   )}
-                  {timeEvents.map((event) => (
-                    <div
-                      key={event.id}
-                      className={cn(
-                        'mb-1 p-2 rounded-md cursor-pointer',
-                        event.color || 'bg-primary-100 text-primary-700'
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEventClick?.(event);
-                      }}
-                    >
-                      <div className="font-medium text-sm">{event.time}</div>
-                      <div className="text-sm">{event.title}</div>
-                    </div>
-                  ))}
                 </div>
               </div>
             );

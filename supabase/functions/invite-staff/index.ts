@@ -55,12 +55,12 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 4. Get Inviter's Salon ID from public.users
-    // We use admin client to ensure we can read the user's data regardless of RLS, although users should be able to read their own salon_id.
+    // 4. Get Inviter's Salon ID from staff_profiles (salon_id is now in staff_profiles)
+    // We use admin client to ensure we can read the user's data regardless of RLS
     const { data: inviterData, error: inviterDataError } = await supabaseAdmin
-      .from('users')
+      .from('staff_profiles')
       .select('salon_id')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (inviterDataError || !inviterData?.salon_id) {

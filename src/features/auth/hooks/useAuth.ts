@@ -87,18 +87,20 @@ export const useLogin = (options?: any) => {
 export const useLogout = (options?: { onLogout?: () => void }) => {
   const queryClient = useQueryClient();
 
-  const logout = useCallback(() => {
-    // 1. 로컬 상태 즉시 초기화
+  const logout = useCallback(async () => {
+    // 1. Supabase signOut 먼저 실행 (세션 완전 종료)
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('SignOut error:', error);
+    }
+
+    // 2. 로컬 상태 초기화
     queryClient.clear();
     useAuthStore.getState().logout();
 
-    // 2. 콜백 즉시 호출
+    // 3. 콜백 호출
     options?.onLogout?.();
-
-    // 3. 백그라운드에서 Supabase signOut
-    authApi.logout().catch((error) => {
-      console.error('Background signOut error:', error);
-    });
   }, [queryClient, options]);
 
   return useMemo(() => ({ logout }), [logout]);

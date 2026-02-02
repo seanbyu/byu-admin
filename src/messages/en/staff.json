@@ -140,8 +140,10 @@
     "noHolidays": "No registered holidays/leaves",
     "selectToSetSchedule": "Select a staff member to set schedule",
     "closed": "Closed",
+    "salonClosed": "Salon Closed",
     "reasonPlaceholder": "e.g., Annual leave",
-    "workHoursHint": "Salon closed days are automatically disabled"
+    "workHoursHint": "Salon closed days are automatically disabled",
+    "resetToSalonDefaults": "Reset to Salon Defaults"
   },
   "errors": {
     "updateFailed": "Update failed"

@@ -208,6 +208,11 @@ export default function BookingsPageView() {
     [settingsResponse?.data?.settings?.slot_duration_minutes]
   );
 
+  const businessHours = useMemo(
+    () => settingsResponse?.data?.businessHours || [],
+    [settingsResponse?.data?.businessHours]
+  );
+
   // 데이터 변환 (useMemo 내부에서 처리)
   const { designers, calendarResources, calendarEvents } = useBookingsData(
     bookings,
@@ -357,6 +362,7 @@ export default function BookingsPageView() {
             onEventClick={handleEventClick}
             onTimeSlotClick={pageState.handleTimeSlotClick}
             slotDuration={slotDuration}
+            salonBusinessHours={businessHours}
           />
         ) : (
           <Card>

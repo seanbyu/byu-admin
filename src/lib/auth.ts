@@ -60,12 +60,21 @@ export async function signInWithEmail(
       };
     }
 
-    // users 테이블에서 추가 정보 조회
-    const { data: userData, error: userError } = await supabase
+    // users 테이블에서 추가 정보 조회 (타임아웃 10초)
+    const userQueryPromise = supabase
       .from('users')
       .select('*')
       .eq('id', authData.user.id)
-      .single();
+      .maybeSingle();
+
+    const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: { message: 'Query timeout' } }), 10000)
+    );
+
+    const { data: userData, error: userError } = await Promise.race([
+      userQueryPromise,
+      timeoutPromise,
+    ]);
 
     // ========================================
     // 살롱 승인 상태 체크 함수
@@ -79,9 +88,14 @@ export async function signInWithEmail(
         .from('salons')
         .select('id, approval_status, rejected_reason')
         .eq('id', salonId)
-        .single();
+        .maybeSingle();
 
-      if (salonError || !salonData) {
+      if (salonError) {
+        console.warn('Salon query error:', salonError.message);
+        return null;
+      }
+
+      if (!salonData) {
         console.warn('Salon not found:', salonId);
         return null;
       }
@@ -150,47 +164,45 @@ export async function signInWithEmail(
     // users 테이블에 데이터가 있는 경우
     // ========================================
     const role = userData.role?.toUpperCase() || 'MANAGER';
-    let salonId = userData.salon_id;
+    let salonId: string | undefined = undefined;
+    let isOwner = false;
+    let isApproved = true;
     let permissions: any[] = [];
+
+    // staff_profiles에서 salon_id, is_owner, is_approved, permissions 조회
+    if (role === 'ADMIN' || role === 'MANAGER' || role === 'STAFF') {
+      const { data: profileData, error: profileError } = await supabase
+        .from('staff_profiles')
+        .select('salon_id, is_owner, is_approved, permissions')
+        .eq('user_id', userData.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.warn('Error fetching staff_profiles:', profileError.message);
+      }
+
+      if (profileData) {
+        salonId = profileData.salon_id;
+        isOwner = profileData.is_owner ?? false;
+        isApproved = profileData.is_approved ?? true;
+
+        if (profileData.permissions) {
+          permissions = Object.entries(profileData.permissions || {}).map(
+            ([key, val]: [string, any]) => ({
+              module: key,
+              canRead: val.view || false,
+              canWrite: val.edit || val.create || false,
+              canDelete: val.delete || false,
+            })
+          );
+        }
+      }
+    }
 
     // ADMIN 또는 MANAGER 역할이고 salon_id가 있으면 살롱 승인 상태 체크
     if (salonId && (role === 'ADMIN' || role === 'MANAGER')) {
       const approvalError = await checkSalonApproval(salonId, role);
       if (approvalError) return approvalError;
-    }
-
-    // salon_id 검증 및 권한 조회
-    if (salonId) {
-      const { data: salonData, error: salonError } = await supabase
-        .from('salons')
-        .select('id')
-        .eq('id', salonId)
-        .single();
-
-      if (salonError || !salonData) {
-        console.warn('Salon not found for user:', userData.id);
-        salonId = undefined;
-      } else {
-        // 직원 권한 조회 (staff_profiles 테이블)
-        if (role === 'MANAGER' || role === 'STAFF' || role === 'ADMIN') {
-          const { data: profileData } = await supabase
-            .from('staff_profiles')
-            .select('permissions')
-            .eq('user_id', userData.id)
-            .single();
-
-          if (profileData && profileData.permissions) {
-            permissions = Object.entries(profileData.permissions || {}).map(
-              ([key, val]: [string, any]) => ({
-                module: key,
-                canRead: val.view || false,
-                canWrite: val.edit || val.create || false,
-                canDelete: val.delete || false,
-              })
-            );
-          }
-        }
-      }
     }
 
     // users 테이블 데이터를 User 타입으로 변환
@@ -205,6 +217,8 @@ export async function signInWithEmail(
       createdAt: new Date(userData.created_at),
       updatedAt: new Date(userData.updated_at),
       isActive: userData.is_active ?? true,
+      isOwner: isOwner,
+      isApproved: isApproved,
       permissions: permissions,
     };
 
@@ -426,49 +440,38 @@ export async function getCurrentUser(): Promise<User | null> {
       return user;
     }
 
-    // salon_id 확인 및 검증
-    let salonId = userData.salon_id;
+    // staff_profiles에서 salon_id, is_owner, is_approved, permissions 조회
+    const role = userData.role?.toUpperCase();
+    let salonId: string | undefined = undefined;
+    let isOwner = false;
+    let isApproved = true;
     let permissions: any[] = [];
 
-    if (salonId) {
-      const { data: salonData, error: salonError } = await supabase
-        .from('salons')
-        .select('id')
-        .eq('id', salonId)
-        .single();
+    if (role === 'ADMIN' || role === 'MANAGER' || role === 'STAFF') {
+      const { data: profileData, error: profileError } = await supabase
+        .from('staff_profiles')
+        .select('salon_id, is_owner, is_approved, permissions')
+        .eq('user_id', userData.id)
+        .maybeSingle();
 
-      if (salonError || !salonData) {
-        console.warn('Salon not found for user:', userData.id);
-        salonId = undefined;
-      } else {
-        // 롤 체크
-        const role = userData.role?.toUpperCase();
-        if (role !== 'ADMIN' && role !== 'MANAGER' && role !== 'STAFF') {
-          console.warn(
-            'User has salon_id but invalid role for salon access:',
-            role
+      if (profileError) {
+        console.warn('Error fetching staff_profiles:', profileError.message);
+      }
+
+      if (profileData) {
+        salonId = profileData.salon_id;
+        isOwner = profileData.is_owner ?? false;
+        isApproved = profileData.is_approved ?? true;
+
+        if (profileData.permissions) {
+          permissions = Object.entries(profileData.permissions || {}).map(
+            ([key, val]: [string, any]) => ({
+              module: key,
+              canRead: val.view || false,
+              canWrite: val.edit || val.create || false,
+              canDelete: val.delete || false,
+            })
           );
-        }
-
-        // 직원 권한 조회 (staff_profiles 테이블)
-        if (role === 'MANAGER' || role === 'STAFF' || role === 'ADMIN') {
-          const { data: profileData } = await supabase
-            .from('staff_profiles')
-            .select('permissions')
-            .eq('user_id', userData.id)
-            .single();
-
-          if (profileData && profileData.permissions) {
-            // Transform JSON permissions to Array format
-            permissions = Object.entries(profileData.permissions || {}).map(
-              ([key, val]: [string, any]) => ({
-                module: key,
-                canRead: val.view || false,
-                canWrite: val.edit || val.create || false,
-                canDelete: val.delete || false,
-              })
-            );
-          }
         }
       }
     }
@@ -479,12 +482,14 @@ export async function getCurrentUser(): Promise<User | null> {
       email: userData.email,
       name: userData.name,
       phone: userData.phone || '',
-      role: (userData.role?.toUpperCase() as UserRole) || UserRole.MANAGER,
+      role: (role as UserRole) || UserRole.MANAGER,
       salonId: salonId,
       profileImage: userData.profile_image,
       createdAt: new Date(userData.created_at),
       updatedAt: new Date(userData.updated_at),
       isActive: userData.is_active ?? true,
+      isOwner: isOwner,
+      isApproved: isApproved,
       permissions: permissions,
     };
 

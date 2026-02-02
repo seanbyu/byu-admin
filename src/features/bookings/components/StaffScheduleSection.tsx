@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -9,9 +10,10 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { Card } from '@/components/ui/Card';
 import { BusinessHours, Holiday } from '@/types';
 import { Staff } from '@/features/staff/types';
-import { Trash2, Plus, Check } from 'lucide-react';
+import { Trash2, Plus, Check, RotateCcw } from 'lucide-react';
 import { createStaffApi } from '@/features/staff/api';
 import { useStaff } from '@/features/staff/hooks/useStaff';
+import { salonsApi } from '@/features/salons/api';
 
 interface StaffScheduleSectionProps {
   salonId: string;
@@ -34,12 +36,22 @@ const TIME_OPTIONS = Array.from({ length: 15 }, (_, i) => {
   return { value: `${hour}:00`, label: `${hour}:00` };
 });
 
-const getDefaultWorkHours = (): BusinessHours[] => {
+const getDefaultWorkHours = (salonBusinessHours?: BusinessHours[]): BusinessHours[] => {
+  // If salon business hours are provided, use them as default
+  if (salonBusinessHours && salonBusinessHours.length > 0) {
+    return salonBusinessHours.map((sh) => ({
+      dayOfWeek: sh.dayOfWeek,
+      openTime: sh.openTime,
+      closeTime: sh.closeTime,
+      isOpen: sh.isOpen,
+    }));
+  }
+  // Fallback to hardcoded defaults (matching salon defaults: 10:00-21:00, Monday off)
   return Array.from({ length: 7 }, (_, i) => ({
     dayOfWeek: i,
-    openTime: '08:00',
-    closeTime: '22:00',
-    isOpen: i !== 0,
+    openTime: '10:00',
+    closeTime: '21:00',
+    isOpen: i !== 1, // Monday off
   }));
 };
 
@@ -55,16 +67,36 @@ const getTodayString = (): string => {
 export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
   const t = useTranslations();
   const [selectedStaffId, setSelectedStaffId] = useState<string>('');
-  const [workHours, setWorkHours] = useState<BusinessHours[]>(getDefaultWorkHours());
+  const [workHours, setWorkHours] = useState<BusinessHours[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // 매장 설정 가져오기 (영업시간)
+  const { data: settingsResponse } = useQuery({
+    queryKey: ['salonSettings', salonId],
+    queryFn: () => salonsApi.getSettings(salonId),
+    enabled: !!salonId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const salonBusinessHours = useMemo(
+    () => settingsResponse?.data?.businessHours || [],
+    [settingsResponse?.data?.businessHours]
+  );
 
   // 직원 목록 가져오기
   const { data: staffResponse, isLoading: isLoadingStaff } = useStaff(salonId, {
     enabled: !!salonId,
   });
   const staffList = staffResponse?.data || [];
+
+  // 매장 영업시간이 로드되면 기본값 설정
+  useEffect(() => {
+    if (salonBusinessHours.length > 0 && workHours.length === 0) {
+      setWorkHours(getDefaultWorkHours(salonBusinessHours));
+    }
+  }, [salonBusinessHours, workHours.length]);
 
   // 새 휴가 입력 상태 (시작일은 오늘로 기본값)
   const [newHoliday, setNewHoliday] = useState({
@@ -81,16 +113,33 @@ export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
       if (selectedStaff.workHours && selectedStaff.workHours.length > 0) {
         setWorkHours(selectedStaff.workHours);
       } else {
-        setWorkHours(getDefaultWorkHours());
+        setWorkHours(getDefaultWorkHours(salonBusinessHours));
       }
       setHolidays(selectedStaff.holidays || []);
     } else {
-      setWorkHours(getDefaultWorkHours());
+      setWorkHours(getDefaultWorkHours(salonBusinessHours));
       setHolidays([]);
     }
-  }, [selectedStaff]);
+  }, [selectedStaff, salonBusinessHours]);
+
+  // 매장이 해당 요일에 휴무인지 확인
+  const isSalonClosedOnDay = (dayOfWeek: number): boolean => {
+    if (!salonBusinessHours || salonBusinessHours.length === 0) return false;
+    const salonDay = salonBusinessHours.find((sh) => sh.dayOfWeek === dayOfWeek);
+    return salonDay ? !salonDay.isOpen : false;
+  };
+
+  // 매장 기본값으로 초기화
+  const handleResetToSalonDefaults = () => {
+    if (salonBusinessHours && salonBusinessHours.length > 0) {
+      setWorkHours(getDefaultWorkHours(salonBusinessHours));
+    }
+  };
 
   const handleToggleDay = (dayOfWeek: number) => {
+    // 매장 휴무일이면 토글 불가
+    if (isSalonClosedOnDay(dayOfWeek)) return;
+
     setWorkHours((prev) =>
       prev.map((wh) =>
         wh.dayOfWeek === dayOfWeek ? { ...wh, isOpen: !wh.isOpen } : wh
@@ -136,9 +185,17 @@ export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
     setIsSaving(true);
     setSaveSuccess(false);
     try {
+      // 매장 휴무일은 직원도 자동으로 휴무 처리
+      const adjustedWorkHours = workHours.map((wh) => {
+        if (isSalonClosedOnDay(wh.dayOfWeek)) {
+          return { ...wh, isOpen: false };
+        }
+        return wh;
+      });
+
       const staffApi = createStaffApi();
       await staffApi.updateStaff(salonId, selectedStaffId, {
-        workHours,
+        workHours: adjustedWorkHours,
         holidays,
       });
       setSaveSuccess(true);
@@ -204,76 +261,104 @@ export function StaffScheduleSection({ salonId }: StaffScheduleSectionProps) {
           <>
             {/* 업무 시간 설정 */}
             <div>
-              <h3 className="text-sm font-medium text-secondary-700 mb-3">
-                {t('staff.schedule.workHours')}
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-secondary-700">
+                  {t('staff.schedule.workHours')}
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetToSalonDefaults}
+                  disabled={salonBusinessHours.length === 0}
+                >
+                  <RotateCcw size={14} className="mr-1" />
+                  {t('staff.schedule.resetToSalonDefaults')}
+                </Button>
+              </div>
+              <p className="text-xs text-secondary-500 mb-3">
+                {t('staff.schedule.workHoursHint')}
+              </p>
               <div className="bg-secondary-50 rounded-lg p-4">
                 <div className="space-y-3">
                   {workHours
                     .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-                    .map((wh) => (
-                      <div
-                        key={wh.dayOfWeek}
-                        className="flex items-center gap-4 py-2 border-b border-secondary-200 last:border-b-0"
-                      >
-                        {/* 요일 및 토글 */}
-                        <div className="min-w-[120px] flex items-center gap-2 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleDay(wh.dayOfWeek)}
-                            className={`w-12 h-6 rounded-full transition-colors relative ${
-                              wh.isOpen ? 'bg-primary-500' : 'bg-secondary-300'
-                            }`}
-                          >
-                            <span
-                              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                                wh.isOpen ? 'right-1' : 'left-1'
+                    .map((wh) => {
+                      const salonClosed = isSalonClosedOnDay(wh.dayOfWeek);
+                      return (
+                        <div
+                          key={wh.dayOfWeek}
+                          className={`flex items-center gap-4 py-2 border-b border-secondary-200 last:border-b-0 ${
+                            salonClosed ? 'opacity-60' : ''
+                          }`}
+                        >
+                          {/* 요일 및 토글 */}
+                          <div className="min-w-[120px] flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleDay(wh.dayOfWeek)}
+                              disabled={salonClosed}
+                              className={`w-12 h-6 rounded-full transition-colors relative ${
+                                salonClosed
+                                  ? 'bg-secondary-200 cursor-not-allowed'
+                                  : wh.isOpen
+                                    ? 'bg-primary-500'
+                                    : 'bg-secondary-300'
                               }`}
-                            />
-                          </button>
-                          <span
-                            className={`text-sm font-medium ${
-                              wh.dayOfWeek === 0
-                                ? 'text-red-500'
-                                : wh.dayOfWeek === 6
-                                  ? 'text-blue-500'
-                                  : 'text-secondary-700'
-                            }`}
-                          >
-                            {t(DAY_KEYS[wh.dayOfWeek])}
-                          </span>
-                        </div>
-
-                        {/* 시간 선택 */}
-                        {wh.isOpen ? (
-                          <div className="flex items-center gap-2 flex-1 flex-wrap sm:flex-nowrap">
-                            <Select
-                              options={TIME_OPTIONS}
-                              value={wh.openTime}
-                              onChange={(e) =>
-                                handleTimeChange(wh.dayOfWeek, 'openTime', e.target.value)
-                              }
-                              className="w-24 sm:w-28"
-                              showPlaceholder={false}
-                            />
-                            <span className="text-secondary-500">~</span>
-                            <Select
-                              options={TIME_OPTIONS}
-                              value={wh.closeTime}
-                              onChange={(e) =>
-                                handleTimeChange(wh.dayOfWeek, 'closeTime', e.target.value)
-                              }
-                              className="w-24 sm:w-28"
-                              showPlaceholder={false}
-                            />
+                            >
+                              <span
+                                className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                                  wh.isOpen && !salonClosed ? 'right-1' : 'left-1'
+                                }`}
+                              />
+                            </button>
+                            <span
+                              className={`text-sm font-medium ${
+                                wh.dayOfWeek === 0
+                                  ? 'text-red-500'
+                                  : wh.dayOfWeek === 6
+                                    ? 'text-blue-500'
+                                    : 'text-secondary-700'
+                              }`}
+                            >
+                              {t(DAY_KEYS[wh.dayOfWeek])}
+                            </span>
                           </div>
-                        ) : (
-                          <span className="text-secondary-400 text-sm flex-1">
-                            {t('staff.schedule.closed')}
-                          </span>
-                        )}
-                      </div>
-                    ))}
+
+                          {/* 시간 선택 */}
+                          {salonClosed ? (
+                            <span className="text-secondary-400 text-sm flex-1">
+                              {t('staff.schedule.salonClosed')}
+                            </span>
+                          ) : wh.isOpen ? (
+                            <div className="flex items-center gap-2 flex-1 flex-wrap sm:flex-nowrap">
+                              <Select
+                                options={TIME_OPTIONS}
+                                value={wh.openTime}
+                                onChange={(e) =>
+                                  handleTimeChange(wh.dayOfWeek, 'openTime', e.target.value)
+                                }
+                                className="w-24 sm:w-28"
+                                showPlaceholder={false}
+                              />
+                              <span className="text-secondary-500">~</span>
+                              <Select
+                                options={TIME_OPTIONS}
+                                value={wh.closeTime}
+                                onChange={(e) =>
+                                  handleTimeChange(wh.dayOfWeek, 'closeTime', e.target.value)
+                                }
+                                className="w-24 sm:w-28"
+                                showPlaceholder={false}
+                              />
+                            </div>
+                          ) : (
+                            <span className="text-secondary-400 text-sm flex-1">
+                              {t('staff.schedule.closed')}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
             </div>
