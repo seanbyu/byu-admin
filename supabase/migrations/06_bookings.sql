@@ -7,13 +7,11 @@ CREATE TABLE bookings (
   -- Relationships
   salon_id UUID NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
 
-  -- Customer Link (Composite FK)
-  customer_id UUID NOT NULL,
-  customer_user_type user_type NOT NULL DEFAULT 'CUSTOMER',
+  -- Customer Link (simple FK)
+  customer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 
-  -- Designer Link (Composite FK)
-  designer_id UUID NOT NULL,
-  designer_user_type user_type NOT NULL DEFAULT 'ADMIN_USER',
+  -- Designer Link (simple FK)
+  designer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 
   service_id UUID NOT NULL REFERENCES services(id) ON DELETE RESTRICT,
 
@@ -56,15 +54,7 @@ CREATE TABLE bookings (
 
   -- Constraints
   CONSTRAINT valid_time_range CHECK (end_time > start_time),
-  CONSTRAINT valid_total CHECK (total_price >= 0),
-
-  -- Ensure user types are correct for the role
-  CONSTRAINT booking_customer_type_check CHECK (customer_user_type = 'CUSTOMER'),
-  CONSTRAINT booking_designer_type_check CHECK (designer_user_type = 'ADMIN_USER'),
-
-  -- Composite Foreign Keys
-  FOREIGN KEY (customer_id, customer_user_type) REFERENCES users(id, user_type) ON DELETE CASCADE,
-  FOREIGN KEY (designer_id, designer_user_type) REFERENCES users(id, user_type) ON DELETE CASCADE
+  CONSTRAINT valid_total CHECK (total_price >= 0)
 );
 
 -- Indexes

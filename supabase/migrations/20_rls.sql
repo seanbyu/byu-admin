@@ -21,10 +21,11 @@ CREATE POLICY "Salon admins can manage salon industries"
   ON salon_industries FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM users
-      WHERE id = auth.uid()
-      AND salon_id = salon_industries.salon_id
-      AND role IN ('ADMIN', 'MANAGER', 'SUPER_ADMIN')
+      SELECT 1 FROM staff_profiles sp
+      JOIN users u ON u.id = sp.user_id
+      WHERE sp.user_id = auth.uid()
+      AND sp.salon_id = salon_industries.salon_id
+      AND u.role IN ('ADMIN', 'MANAGER', 'SUPER_ADMIN')
     )
   );
 
@@ -83,11 +84,16 @@ CREATE POLICY "Super admins can view all users"
     get_my_role() = 'SUPER_ADMIN'
   );
 
--- Users can view same salon users
+-- Users can view same salon users (via staff_profiles join)
 CREATE POLICY "Users can view same salon users"
   ON users FOR SELECT
   USING (
-    salon_id = get_my_salon_id()
+    EXISTS (
+      SELECT 1 FROM staff_profiles my_sp
+      JOIN staff_profiles their_sp ON my_sp.salon_id = their_sp.salon_id
+      WHERE my_sp.user_id = auth.uid()
+      AND their_sp.user_id = users.id
+    )
   );
 
 -- Public can view active salon staff (for booking)
@@ -96,7 +102,11 @@ CREATE POLICY "Public can view active salon staff"
   USING (
     user_type = 'ADMIN_USER'
     AND is_active = true
-    AND salon_id IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM staff_profiles sp
+      WHERE sp.user_id = users.id
+      AND sp.salon_id IS NOT NULL
+    )
   );
 
 -- Users can update their own profile
@@ -108,11 +118,7 @@ CREATE POLICY "Users can update their own profile"
 CREATE POLICY "Admins can create users in their salon"
   ON users FOR INSERT
   WITH CHECK (
-    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER') AND
-    (
-      get_my_role() = 'SUPER_ADMIN' OR
-      salon_id = get_my_salon_id()
-    )
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
   );
 
 -- ============================================
@@ -143,10 +149,7 @@ CREATE POLICY "Staff users can view their own profile"
 CREATE POLICY "Staff users in same salon can view each other"
   ON staff_profiles FOR SELECT
   USING (
-    user_id IN (
-      SELECT id FROM users
-      WHERE salon_id = get_my_salon_id()
-    )
+    salon_id = get_my_salon_id()
   );
 
 CREATE POLICY "Public can view staff profiles for bookings"
@@ -158,29 +161,15 @@ CREATE POLICY "Public can view staff profiles for bookings"
 CREATE POLICY "Admins and Managers can update staff profiles in their salon"
   ON staff_profiles FOR UPDATE
   USING (
-    EXISTS (
-      SELECT 1 FROM users AS acting_user
-      WHERE acting_user.id = auth.uid()
-      AND acting_user.role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
-      AND acting_user.salon_id = (
-        SELECT target_user.salon_id FROM users AS target_user
-        WHERE target_user.id = staff_profiles.user_id
-      )
-    )
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
+    AND salon_id = get_my_salon_id()
   );
 
 CREATE POLICY "Admins and Managers can insert staff profiles"
   ON staff_profiles FOR INSERT
   WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM users AS acting_user
-      WHERE acting_user.id = auth.uid()
-      AND acting_user.role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
-      AND acting_user.salon_id = (
-        SELECT target_user.salon_id FROM users AS target_user
-        WHERE target_user.id = staff_profiles.user_id
-      )
-    )
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
+    AND salon_id = get_my_salon_id()
   );
 
 -- ============================================

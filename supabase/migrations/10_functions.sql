@@ -20,9 +20,10 @@ RETURNS user_role AS $$
   SELECT role FROM users WHERE id = auth.uid();
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
+-- Updated: Now queries staff_profiles instead of users
 CREATE OR REPLACE FUNCTION get_my_salon_id()
 RETURNS UUID AS $$
-  SELECT salon_id FROM users WHERE id = auth.uid();
+  SELECT salon_id FROM staff_profiles WHERE user_id = auth.uid();
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 -- Update customer stats on booking completion
