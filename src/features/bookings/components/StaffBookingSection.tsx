@@ -128,6 +128,9 @@ export const StaffBookingSection = memo(function StaffBookingSection({
                         <Check size={14} />
                       </span>
                     )}
+                    <span className="text-sm text-secondary-600 hidden sm:inline">
+                      {t('booking.settings.staffBooking.bookingAllowed')}
+                    </span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
