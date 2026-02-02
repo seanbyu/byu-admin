@@ -21,12 +21,11 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
 
-    // input 즉시 초기화 (같은 파일 재선택 가능하도록)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    // input 즉시 초기화 (같은 파일 재선택 가능하도록) - 파일 체크 전에 실행
+    e.target.value = '';
+
+    if (!file) return;
 
     // 파일 크기 체크 (5MB 제한)
     const maxSize = 5 * 1024 * 1024;
