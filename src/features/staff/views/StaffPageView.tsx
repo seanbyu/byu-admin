@@ -107,7 +107,6 @@ export default function StaffPageView() {
           onResign={staffActions.handleResign}
           onPermissionClick={pageState.selectStaffForPermission}
           onProfileEdit={pageState.selectStaffForProfileEdit}
-          onBookingToggle={staffActions.handleBookingToggle}
         />
 
         {/* Modals - Suspense로 로딩 최적화 */}

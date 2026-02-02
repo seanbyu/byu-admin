@@ -17,7 +17,6 @@ export interface StaffTableRowProps {
   onResign: (staffId: string) => void;
   onPermissionClick: (staff: Staff) => void;
   onProfileEdit: (staff: Staff) => void;
-  onBookingToggle: (staffId: string, enabled: boolean) => void;
 }
 
 // rendering-hoist-jsx: 기본 프로필 아이콘 호이스팅
@@ -51,7 +50,6 @@ export const StaffTableRow = memo(function StaffTableRow({
   onResign,
   onPermissionClick,
   onProfileEdit,
-  onBookingToggle,
 }: StaffTableRowProps) {
   const t = useTranslations('staff');
 
@@ -68,10 +66,6 @@ export const StaffTableRow = memo(function StaffTableRow({
   const handleProfileEditClick = useCallback(() => {
     onProfileEdit(member);
   }, [member, onProfileEdit]);
-
-  const handleBookingToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onBookingToggle(member.id, e.target.checked);
-  }, [member.id, onBookingToggle]);
 
   return (
     <tr className="hover:bg-gray-50">
@@ -173,19 +167,6 @@ export const StaffTableRow = memo(function StaffTableRow({
       </td>
       <td className="px-6 py-4 text-center text-sm text-secondary-600">
         {getRoleName(member.role)}
-      </td>
-      <td className="px-6 py-4 text-center">
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={member.isBookingEnabled}
-            disabled={!canEdit}
-            onChange={handleBookingToggle}
-          />
-          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed" />
-          <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300" />
-        </label>
       </td>
     </tr>
   );

@@ -14,7 +14,6 @@ const TABLE_HEADER_KEYS = [
   'table.adminPermission',
   'table.profile',
   'table.position',
-  'table.bookingAllowed',
 ] as const;
 
 // rerender-memo: 테이블 헤더 컴포넌트 메모이제이션

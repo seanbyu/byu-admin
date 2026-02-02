@@ -15,7 +15,6 @@ interface StaffTableProps {
   onResign: (staffId: string) => void;
   onPermissionClick: (staff: Staff) => void;
   onProfileEdit: (staff: Staff) => void;
-  onBookingToggle: (staffId: string, enabled: boolean) => void;
 }
 
 // rerender-memo: 테이블 컴포넌트 메모이제이션
@@ -29,7 +28,6 @@ export const StaffTable = memo(function StaffTable({
   onResign,
   onPermissionClick,
   onProfileEdit,
-  onBookingToggle,
 }: StaffTableProps) {
   return (
     <div className="bg-white rounded-lg border border-secondary-200">
@@ -49,7 +47,6 @@ export const StaffTable = memo(function StaffTable({
               onResign={onResign}
               onPermissionClick={onPermissionClick}
               onProfileEdit={onProfileEdit}
-              onBookingToggle={onBookingToggle}
             />
           ))}
         </tbody>
