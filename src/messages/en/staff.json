@@ -96,11 +96,11 @@
     "dashboard": "Dashboard",
     "bookings": "Booking Management",
     "customers": "Customer Management",
+    "salonManagement": "Salon Management",
     "staff": "Employee Management",
-    "services": "Service Management",
+    "menus": "Menu Management",
     "reviews": "Review Management",
     "sales": "Sales Management",
-    "chat": "Chat",
     "settings": "Settings"
   },
   "profileModal": {

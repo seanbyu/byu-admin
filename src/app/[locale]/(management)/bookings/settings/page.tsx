@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { ShopSettingsSection } from '@/features/bookings/components/ShopSettingsSection';
 import { StaffBookingSection } from '@/features/bookings/components/StaffBookingSection';
+import { InterpreterServiceSection } from '@/features/bookings/components/InterpreterServiceSection';
 
 export default function OnlineBookingSettingsPage() {
   const t = useTranslations();
@@ -36,6 +37,9 @@ export default function OnlineBookingSettingsPage() {
 
         {/* 직원 예약 허용 설정 */}
         <StaffBookingSection salonId={salonId} />
+
+        {/* 통역 서비스 설정 */}
+        <InterpreterServiceSection salonId={salonId} />
 
         {/* 샵 영업 설정 */}
         <ShopSettingsSection salonId={salonId} />

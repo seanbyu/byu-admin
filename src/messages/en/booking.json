@@ -55,6 +55,22 @@
       "hint": "Staff with booking disabled will not be shown to customers during online booking.",
       "scheduleButton": "Schedule",
       "bookingAllowed": "Booking"
+    },
+    "interpreter": {
+      "title": "Interpreter Service",
+      "description": "Configure interpreter service availability for international customers.",
+      "enabled": "Interpreter Service Available",
+      "enabledDescription": "When enabled, customers will see interpreter service availability during booking.",
+      "supportedLanguages": "Supported Languages",
+      "supportedLanguagesHint": "Select languages available for interpretation (multiple selection)",
+      "languages": {
+        "ko": "Korean",
+        "en": "English",
+        "th": "Thai",
+        "zh": "Chinese",
+        "ja": "Japanese",
+        "vi": "Vietnamese"
+      }
     }
   }
 }

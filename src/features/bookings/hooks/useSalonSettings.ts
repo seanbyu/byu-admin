@@ -1,0 +1,130 @@
+'use client';
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { salonsApi } from '@/features/salons/api';
+import { salonSettingsKeys, SALON_SETTINGS_QUERY_OPTIONS } from './queries';
+import { BusinessHours, Holiday } from '@/types';
+import { SupportedLanguage } from '../constants';
+
+// ============================================
+// Salon Settings Types
+// ============================================
+
+export interface SalonSettings {
+  slot_duration_minutes?: number;
+  booking_advance_days?: number;
+  interpreter_enabled?: boolean;
+  supported_languages?: SupportedLanguage[];
+}
+
+export interface SalonSettingsData {
+  businessHours: BusinessHours[];
+  holidays: Holiday[];
+  settings: SalonSettings;
+}
+
+// ============================================
+// useSalonSettings Hook
+// - Fetches salon settings using TanStack Query
+// ============================================
+
+export function useSalonSettings(salonId: string) {
+  return useQuery({
+    queryKey: salonSettingsKeys.detail(salonId),
+    queryFn: async () => {
+      const response = await salonsApi.getSettings(salonId);
+      if (!response.success) {
+        throw new Error('Failed to fetch salon settings');
+      }
+      return response.data as SalonSettingsData;
+    },
+    enabled: !!salonId,
+    ...SALON_SETTINGS_QUERY_OPTIONS,
+  });
+}
+
+// ============================================
+// useSalonSettingsMutation Hook
+// - Updates salon settings with cache invalidation
+// ============================================
+
+interface UpdateSettingsInput {
+  businessHours?: BusinessHours[];
+  holidays?: Holiday[];
+  settings?: Partial<SalonSettings>;
+}
+
+export function useSalonSettingsMutation(salonId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: UpdateSettingsInput) => {
+      const response = await salonsApi.updateSettings(salonId, data);
+      if (!response.success) {
+        throw new Error('Failed to update salon settings');
+      }
+      return response;
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({
+        queryKey: salonSettingsKeys.detail(salonId),
+      });
+    },
+  });
+}
+
+// ============================================
+// Specialized Mutation Hooks
+// ============================================
+
+// Business hours mutation
+export function useBusinessHoursMutation(salonId: string) {
+  const mutation = useSalonSettingsMutation(salonId);
+
+  return {
+    ...mutation,
+    mutateBusinessHours: (
+      businessHours: BusinessHours[],
+      slotDuration: number,
+      bookingAdvanceDays: number
+    ) =>
+      mutation.mutateAsync({
+        businessHours,
+        settings: {
+          slot_duration_minutes: slotDuration,
+          booking_advance_days: bookingAdvanceDays,
+        },
+      }),
+  };
+}
+
+// Holidays mutation
+export function useHolidaysMutation(salonId: string) {
+  const mutation = useSalonSettingsMutation(salonId);
+
+  return {
+    ...mutation,
+    mutateHolidays: (holidays: Holiday[]) =>
+      mutation.mutateAsync({ holidays }),
+  };
+}
+
+// Interpreter settings mutation
+export function useInterpreterSettingsMutation(salonId: string) {
+  const mutation = useSalonSettingsMutation(salonId);
+
+  return {
+    ...mutation,
+    mutateInterpreterSettings: (
+      interpreterEnabled: boolean,
+      supportedLanguages: SupportedLanguage[]
+    ) =>
+      mutation.mutateAsync({
+        settings: {
+          interpreter_enabled: interpreterEnabled,
+          supported_languages: supportedLanguages,
+        },
+      }),
+  };
+}

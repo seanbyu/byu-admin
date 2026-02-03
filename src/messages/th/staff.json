@@ -96,11 +96,11 @@
     "dashboard": "แดชบอร์ด",
     "bookings": "จัดการการจอง",
     "customers": "จัดการลูกค้า",
+    "salonManagement": "จัดการร้าน",
     "staff": "จัดการพนักงาน",
-    "services": "จัดการบริการ",
+    "menus": "จัดการเมนู",
     "reviews": "จัดการรีวิว",
     "sales": "จัดการยอดขาย",
-    "chat": "แชท",
     "settings": "ตั้งค่า"
   },
   "profileModal": {

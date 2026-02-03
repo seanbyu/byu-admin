@@ -9,7 +9,6 @@ import {
   Scissors,
   Star,
   TrendingUp,
-  MessageSquare,
   Settings,
   Building2,
   Briefcase,
@@ -134,13 +133,6 @@ export const Sidebar: React.FC = () => {
           permissionKey: 'sales',
         },
       ],
-    },
-    {
-      name: t('nav.chat'),
-      icon: MessageSquare,
-      href: '/chat',
-      roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
-      permissionKey: 'chat',
     },
     {
       name: t('nav.settings'),

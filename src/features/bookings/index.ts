@@ -1,8 +1,16 @@
+// ============================================
+// Bookings Feature - Main Export
+// ============================================
+
 // Types
 export * from './types';
 
 // API
 export { createBookingsApi } from './api';
+
+// Constants & Utils
+export * from './constants';
+export * from './utils';
 
 // Stores (Zustand)
 export {
@@ -18,6 +26,18 @@ export {
   selectBookingsUIActions,
 } from './stores/bookingsStore';
 
+export {
+  useSettingsFormStore,
+  selectBusinessHours,
+  selectSlotDuration,
+  selectBookingAdvanceDays,
+  selectHolidays,
+  selectNewHoliday,
+  selectInterpreterEnabled,
+  selectSupportedLanguages,
+  selectIsDirty,
+} from './stores/settingsStore';
+
 // Query Keys & Options
 export {
   bookingKeys,
@@ -29,6 +49,13 @@ export {
 // Hooks
 export { useBookings } from './hooks/useBookings';
 export {
+  useSalonSettings,
+  useSalonSettingsMutation,
+  useBusinessHoursMutation,
+  useHolidaysMutation,
+  useInterpreterSettingsMutation,
+} from './hooks/useSalonSettings';
+export {
   useBookingsPageState,
   useBookingsData,
   type CalendarEvent,
@@ -36,6 +63,21 @@ export {
   type CalendarResourceWorkHours,
   type DesignerOption,
 } from './hooks/useBookingsPageState';
+
+// Components
+export {
+  ShopSettingsSection,
+  InterpreterServiceSection,
+  StaffBookingSection,
+  NewBookingModal,
+  StaffScheduleEditModal,
+  StaffScheduleModal,
+  ShopSettingsModal,
+  BusinessSettingsCard,
+  HolidaySettingsCard,
+  InterpreterServiceCard,
+  StaffBookingCard,
+} from './components';
 
 // Views
 export { default as BookingsPageView } from './views/BookingsPageView';
