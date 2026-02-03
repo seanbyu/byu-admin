@@ -14,8 +14,8 @@ export class BookingRepository extends BaseRepository {
       .from("bookings")
       .select(`
         *,
-        customer:users!bookings_customer_id_fkey(id, name, phone),
-        designer:users!bookings_designer_id_fkey(id, name),
+        customer:customers!bookings_customer_id_fkey(id, name, phone),
+        artist:users!bookings_artist_id_fkey(id, name),
         service:services(id, name, base_price)
       `)
       .eq("salon_id", salonId)
@@ -70,8 +70,8 @@ export class BookingRepository extends BaseRepository {
       customerName: booking.customer?.name || "고객",
       customerPhone: booking.customer?.phone || "",
       salonId: booking.salon_id,
-      staffId: booking.designer_id,
-      staffName: booking.designer?.name || "",
+      staffId: booking.artist_id,
+      staffName: booking.artist?.name || "",
       serviceId: booking.service_id,
       serviceName: booking.service?.name || "",
       date: booking.booking_date,

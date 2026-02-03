@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { useSalonSettings, useContactChannelsMutation } from '../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../stores/settingsStore';
-import { ContactChannelsCard } from './settings';
+import { ContactChannelsCard } from './booking-settings';
 
 interface ContactChannelsSectionProps {
   salonId: string;

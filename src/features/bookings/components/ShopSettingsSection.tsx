@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Holiday } from '@/types';
 import { useSalonSettings, useBusinessHoursMutation, useHolidaysMutation } from '../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../stores/settingsStore';
-import { BusinessSettingsCard, HolidaySettingsCard } from './settings';
+import { BusinessSettingsCard, HolidaySettingsCard } from './booking-settings';
 
 interface ShopSettingsSectionProps {
   salonId: string;

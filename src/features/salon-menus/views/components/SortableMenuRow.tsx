@@ -102,6 +102,7 @@ export default function SortableMenuRow({
           {/* Price Input */}
           <div className="w-32 text-right pr-4">
             <div className="flex items-center justify-end gap-1">
+              <span className="text-sm">{t('menu.unit.currency')}</span>
               <input
                 type="number"
                 className="w-20 px-2 py-1.5 border border-gray-300 rounded text-sm text-right"
@@ -114,7 +115,6 @@ export default function SortableMenuRow({
                   })
                 }
               />
-              <span className="text-sm">{t('menu.unit.currency')}</span>
             </div>
           </div>
 
@@ -143,7 +143,7 @@ export default function SortableMenuRow({
 
             <div className="w-32 text-right text-price">
               {menu.pricing_type === 'FIXED'
-                ? `${(menu.base_price || menu.price || 0).toLocaleString()}${t('menu.unit.currency')}`
+                ? `${t('menu.unit.currency')}${(menu.base_price || menu.price || 0).toLocaleString()}`
                 : t('common.currency.variable')}
             </div>
           </div>

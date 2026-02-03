@@ -52,7 +52,8 @@ export async function POST(
     }
 
     if (action === 'create_customer' || !action) {
-      const result = await service.createCustomer(salonId, data);
+      // 기존 고객이 있으면 반환, 없으면 새로 생성
+      const result = await service.findOrCreateCustomer(salonId, data);
       return NextResponse.json({ success: true, data: result });
     }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { StaffBookingCard } from './settings';
+import { StaffBookingCard } from './booking-settings';
 
 interface StaffBookingSectionProps {
   salonId: string;

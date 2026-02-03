@@ -1,6 +1,7 @@
 {
   "title": "จัดการการจอง",
   "new": "จองใหม่",
+  "detail": "รายละเอียดการจอง",
   "status": "สถานะ",
   "pending": "รอดำเนินการ",
   "confirmed": "ยืนยันแล้ว",
@@ -40,7 +41,25 @@
   },
   "placeholders": {
     "customerName": "กรอกชื่อลูกค้า",
-    "notesPlaceholder": "กรอกหมายเหตุพิเศษ"
+    "notesPlaceholder": "กรอกหมายเหตุพิเศษ",
+    "selectService": "เลือกบริการ"
+  },
+  "customerType": {
+    "local": "คนในประเทศ",
+    "foreign": "ชาวต่างชาติ",
+    "foreignHint": "ลูกค้าชาวต่างชาติสามารถลงทะเบียนได้โดยไม่ต้องมีหมายเลขโทรศัพท์"
+  },
+  "existingCustomers": "ลูกค้าเดิม",
+  "newCustomerConfirm": {
+    "title": "ลูกค้าใหม่",
+    "message": "นี่คือลูกค้าใหม่ บันทึกและดำเนินการต่อหรือไม่?"
+  },
+  "errors": {
+    "nameRequired": "กรุณากรอกชื่อ",
+    "phoneRequired": "กรุณากรอกหมายเลขโทรศัพท์",
+    "staffRequired": "กรุณาเลือกพนักงาน",
+    "serviceRequired": "กรุณาเลือกบริการ",
+    "timeRequired": "กรุณาเลือกเวลา"
   },
   "sampleServices": {
     "cut": "ตัดผม - 35,000 วอน",

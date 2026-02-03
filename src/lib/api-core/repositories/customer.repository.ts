@@ -28,6 +28,20 @@ export class CustomerRepository extends BaseRepository {
     return data as DBCustomer;
   }
 
+  async findByPhone(salonId: string, phone: string): Promise<DBCustomer | null> {
+    if (!phone) return null;
+
+    const { data, error } = await (this.supabase as any)
+      .from("customers")
+      .select("*")
+      .eq("salon_id", salonId)
+      .eq("phone", phone)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data as DBCustomer | null;
+  }
+
   async createCustomer(customer: CreateCustomerDto): Promise<DBCustomer> {
     const { data, error } = await (this.supabase as any)
       .from("customers")

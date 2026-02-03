@@ -7,6 +7,7 @@ export interface Booking {
   customerPhone: string;
   salonId: string;
   staffId: string;
+  staffName: string;
   serviceId: string;
   serviceName: string;
   date: Date;

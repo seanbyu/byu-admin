@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { useSalonSettings, useInterpreterSettingsMutation } from '../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../stores/settingsStore';
-import { InterpreterServiceCard } from './settings';
+import { InterpreterServiceCard } from './booking-settings';
 import { SupportedLanguage } from '../constants';
 
 interface InterpreterServiceSectionProps {

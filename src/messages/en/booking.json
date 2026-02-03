@@ -1,6 +1,7 @@
 {
   "title": "Booking Management",
   "new": "New Booking",
+  "detail": "Booking Details",
   "status": "Status",
   "pending": "Pending",
   "confirmed": "Confirmed",
@@ -40,7 +41,25 @@
   },
   "placeholders": {
     "customerName": "Enter customer name",
-    "notesPlaceholder": "Enter any special notes"
+    "notesPlaceholder": "Enter any special notes",
+    "selectService": "Select a service"
+  },
+  "customerType": {
+    "local": "Local",
+    "foreign": "Foreign",
+    "foreignHint": "Foreign customers can register without a phone number"
+  },
+  "existingCustomers": "Existing Customers",
+  "newCustomerConfirm": {
+    "title": "New Customer",
+    "message": "This is a new customer. Save and continue?"
+  },
+  "errors": {
+    "nameRequired": "Please enter a name",
+    "phoneRequired": "Please enter a phone number",
+    "staffRequired": "Please select a staff member",
+    "serviceRequired": "Please select a service",
+    "timeRequired": "Please select a time"
   },
   "sampleServices": {
     "cut": "Haircut - 35,000 KRW",

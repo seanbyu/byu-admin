@@ -89,8 +89,8 @@ export interface DBBooking {
   salon_id: string;
   customer_id: string;
   customer_user_type: string;
-  designer_id: string;
-  designer_user_type: string;
+  artist_id: string;
+  artist_user_type: string;
   service_id: string;
   booking_date: string;
   start_time: string;
@@ -115,7 +115,7 @@ export interface DBBooking {
 
 export interface DBBookingWithRelations extends DBBooking {
   customer: { id: string; name: string; phone: string | null } | null;
-  designer: { id: string; name: string } | null;
+  artist: { id: string; name: string } | null;
   service: { id: string; name: string; base_price: number } | null;
 }
 
@@ -203,7 +203,7 @@ export interface UpdateStaffDto {
 export interface CreateBookingDto {
   salon_id: string;
   customer_id: string;
-  designer_id: string;
+  artist_id: string;
   service_id: string;
   booking_date: string;
   start_time: string;
@@ -216,6 +216,13 @@ export interface CreateBookingDto {
 
 // Booking update DTO
 export interface UpdateBookingDto {
+  artist_id?: string;
+  service_id?: string;
+  booking_date?: string;
+  start_time?: string;
+  end_time?: string;
+  total_price?: number;
+  customer_notes?: string | null;
   status?: string;
   cancelled_at?: string;
   cancellation_reason?: string;

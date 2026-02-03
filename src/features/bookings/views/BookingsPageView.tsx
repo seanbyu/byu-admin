@@ -283,15 +283,15 @@ export default function BookingsPageView() {
     (event: { id: string }) => {
       const booking = bookings.find((b: Booking) => b.id === event.id);
       if (booking) {
-        console.log('View booking:', booking);
+        pageState.openBookingDetailModal(booking);
       }
     },
-    [bookings]
+    [bookings, pageState.openBookingDetailModal]
   );
 
   const handleRowClick = useCallback((booking: Booking) => {
-    console.log('View booking:', booking);
-  }, []);
+    pageState.openBookingDetailModal(booking);
+  }, [pageState.openBookingDetailModal]);
 
   const handleViewModeCalendar = useCallback(() => {
     pageState.setViewMode('calendar');
@@ -379,10 +379,30 @@ export default function BookingsPageView() {
           selectedDate={pageState.selectedDate}
           selectedTime={pageState.selectedTime}
           selectedStaffId={pageState.selectedStaffId}
+          selectedServiceId={pageState.selectedServiceId}
           designers={designers}
           onDateChange={pageState.setSelectedDate}
           onTimeChange={pageState.setSelectedTime}
           onStaffChange={pageState.setSelectedStaffId}
+          onServiceChange={pageState.setSelectedServiceId}
+        />
+      )}
+
+      {/* 예약 상세 모달 (수정용) */}
+      {pageState.showBookingDetailModal && pageState.selectedBooking && (
+        <NewBookingModal
+          isOpen={pageState.showBookingDetailModal}
+          onClose={pageState.closeBookingDetailModal}
+          selectedDate={new Date(pageState.selectedBooking.date)}
+          selectedTime={pageState.selectedBooking.startTime}
+          selectedStaffId={pageState.selectedBooking.staffId}
+          selectedServiceId={pageState.selectedBooking.serviceId}
+          designers={designers}
+          onDateChange={pageState.setSelectedDate}
+          onTimeChange={pageState.setSelectedTime}
+          onStaffChange={pageState.setSelectedStaffId}
+          onServiceChange={pageState.setSelectedServiceId}
+          editBooking={pageState.selectedBooking}
         />
       )}
     </Layout>

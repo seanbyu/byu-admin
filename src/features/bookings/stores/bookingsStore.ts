@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { Booking } from '../types';
 
 // ============================================
 // Bookings UI State Store (Zustand)
@@ -14,8 +15,12 @@ type ViewMode = 'calendar' | 'table';
 interface BookingsUIState {
   // Modal states
   showNewBookingModal: boolean;
+  showBookingDetailModal: boolean;
   showShopSettingsModal: boolean;
   showStaffScheduleModal: boolean;
+
+  // Selected booking for edit
+  selectedBooking: Booking | null;
 
   // View states
   selectedDate: Date;
@@ -23,10 +28,13 @@ interface BookingsUIState {
   viewMode: ViewMode;
   selectedTime: string;
   selectedStaffId: string;
+  selectedServiceId: string;
 
   // Modal actions
   openNewBookingModal: () => void;
   closeNewBookingModal: () => void;
+  openBookingDetailModal: (booking: Booking) => void;
+  closeBookingDetailModal: () => void;
   openShopSettingsModal: () => void;
   closeShopSettingsModal: () => void;
   openStaffScheduleModal: () => void;
@@ -38,6 +46,7 @@ interface BookingsUIState {
   setViewMode: (mode: ViewMode) => void;
   setSelectedTime: (time: string) => void;
   setSelectedStaffId: (staffId: string) => void;
+  setSelectedServiceId: (serviceId: string) => void;
 
   // Combined action
   handleTimeSlotClick: (date: Date, time: string, resourceId?: string) => void;
@@ -48,13 +57,16 @@ interface BookingsUIState {
 
 const initialState = {
   showNewBookingModal: false,
+  showBookingDetailModal: false,
   showShopSettingsModal: false,
   showStaffScheduleModal: false,
+  selectedBooking: null as Booking | null,
   selectedDate: new Date(),
   statusFilter: '',
   viewMode: 'calendar' as ViewMode,
   selectedTime: '',
   selectedStaffId: '',
+  selectedServiceId: '',
 };
 
 export const useBookingsUIStore = create<BookingsUIState>()(
@@ -68,10 +80,16 @@ export const useBookingsUIStore = create<BookingsUIState>()(
 
       closeNewBookingModal: () =>
         set(
-          { showNewBookingModal: false, selectedTime: '', selectedStaffId: '' },
+          { showNewBookingModal: false, selectedTime: '', selectedStaffId: '', selectedServiceId: '' },
           false,
           'closeNewBookingModal'
         ),
+
+      openBookingDetailModal: (booking: Booking) =>
+        set({ showBookingDetailModal: true, selectedBooking: booking }, false, 'openBookingDetailModal'),
+
+      closeBookingDetailModal: () =>
+        set({ showBookingDetailModal: false, selectedBooking: null }, false, 'closeBookingDetailModal'),
 
       openShopSettingsModal: () =>
         set({ showShopSettingsModal: true }, false, 'openShopSettingsModal'),
@@ -101,6 +119,9 @@ export const useBookingsUIStore = create<BookingsUIState>()(
       setSelectedStaffId: (staffId) =>
         set({ selectedStaffId: staffId }, false, 'setSelectedStaffId'),
 
+      setSelectedServiceId: (serviceId) =>
+        set({ selectedServiceId: serviceId }, false, 'setSelectedServiceId'),
+
       // Combined action for time slot click
       handleTimeSlotClick: (date, time, resourceId) =>
         set(
@@ -125,6 +146,8 @@ export const useBookingsUIStore = create<BookingsUIState>()(
 // Selectors (메모이제이션을 위한 셀렉터)
 // ============================================
 export const selectShowNewBookingModal = (state: BookingsUIState) => state.showNewBookingModal;
+export const selectShowBookingDetailModal = (state: BookingsUIState) => state.showBookingDetailModal;
+export const selectSelectedBooking = (state: BookingsUIState) => state.selectedBooking;
 export const selectShowShopSettingsModal = (state: BookingsUIState) => state.showShopSettingsModal;
 export const selectShowStaffScheduleModal = (state: BookingsUIState) => state.showStaffScheduleModal;
 export const selectSelectedDate = (state: BookingsUIState) => state.selectedDate;
@@ -132,11 +155,14 @@ export const selectStatusFilter = (state: BookingsUIState) => state.statusFilter
 export const selectViewMode = (state: BookingsUIState) => state.viewMode;
 export const selectSelectedTime = (state: BookingsUIState) => state.selectedTime;
 export const selectSelectedStaffId = (state: BookingsUIState) => state.selectedStaffId;
+export const selectSelectedServiceId = (state: BookingsUIState) => state.selectedServiceId;
 
 // Actions selector
 export const selectBookingsUIActions = (state: BookingsUIState) => ({
   openNewBookingModal: state.openNewBookingModal,
   closeNewBookingModal: state.closeNewBookingModal,
+  openBookingDetailModal: state.openBookingDetailModal,
+  closeBookingDetailModal: state.closeBookingDetailModal,
   openShopSettingsModal: state.openShopSettingsModal,
   closeShopSettingsModal: state.closeShopSettingsModal,
   openStaffScheduleModal: state.openStaffScheduleModal,
@@ -146,6 +172,7 @@ export const selectBookingsUIActions = (state: BookingsUIState) => ({
   setViewMode: state.setViewMode,
   setSelectedTime: state.setSelectedTime,
   setSelectedStaffId: state.setSelectedStaffId,
+  setSelectedServiceId: state.setSelectedServiceId,
   handleTimeSlotClick: state.handleTimeSlotClick,
   reset: state.reset,
 });

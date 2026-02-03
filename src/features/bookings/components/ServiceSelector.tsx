@@ -1,0 +1,149 @@
+'use client';
+
+import { useState, useMemo, useCallback, memo } from 'react';
+import { useCategories, useMenus } from '@/features/salon-menus/hooks/useSalonMenus';
+import { cn } from '@/lib/utils';
+
+interface ServiceSelectorProps {
+  salonId: string;
+  selectedServiceId: string;
+  onServiceChange: (serviceId: string) => void;
+  isLoading?: boolean;
+}
+
+function ServiceSelectorComponent({
+  salonId,
+  selectedServiceId,
+  onServiceChange,
+}: ServiceSelectorProps) {
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+
+  // 카테고리 데이터 가져오기
+  const { categories, isLoading: isCategoriesLoading } = useCategories(salonId);
+
+  // 메뉴 데이터 가져오기
+  const { menus, isLoading: isMenusLoading } = useMenus(salonId, undefined, {
+    enabled: !!salonId,
+  });
+
+  // 카테고리별 메뉴 그룹화
+  const menusByCategory = useMemo(() => {
+    if (!menus || menus.length === 0) return {};
+    return menus
+      .filter((menu) => menu.is_active)
+      .reduce((acc, menu) => {
+        const categoryId = menu.category_id;
+        if (!acc[categoryId]) {
+          acc[categoryId] = [];
+        }
+        acc[categoryId].push(menu);
+        return acc;
+      }, {} as Record<string, typeof menus>);
+  }, [menus]);
+
+  // 메뉴가 있는 카테고리만 필터링
+  const visibleCategories = useMemo(() => {
+    if (!categories) return [];
+    return categories.filter((cat) => menusByCategory[cat.id]?.length > 0);
+  }, [categories, menusByCategory]);
+
+  // 첫 번째 카테고리 자동 선택
+  useMemo(() => {
+    if (!selectedCategoryId && visibleCategories.length > 0) {
+      setSelectedCategoryId(visibleCategories[0].id);
+    }
+  }, [visibleCategories, selectedCategoryId]);
+
+  // 현재 선택된 카테고리의 메뉴 목록
+  const currentMenus = useMemo(() => {
+    if (!selectedCategoryId) return [];
+    return menusByCategory[selectedCategoryId] || [];
+  }, [selectedCategoryId, menusByCategory]);
+
+  // 카테고리 선택 핸들러
+  const handleCategoryClick = useCallback((categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+  }, []);
+
+  // 서비스 선택 핸들러
+  const handleServiceClick = useCallback((serviceId: string) => {
+    onServiceChange(serviceId);
+  }, [onServiceChange]);
+
+  if (isCategoriesLoading || isMenusLoading) {
+    return (
+      <div className="border border-secondary-200 rounded-lg p-4 text-center text-secondary-500">
+        Loading...
+      </div>
+    );
+  }
+
+  if (visibleCategories.length === 0) {
+    return (
+      <div className="border border-secondary-200 rounded-lg p-4 text-center text-secondary-500">
+        등록된 서비스가 없습니다
+      </div>
+    );
+  }
+
+  return (
+    <div className="border border-secondary-200 rounded-lg overflow-hidden">
+      <div className="flex h-[240px]">
+        {/* 카테고리 목록 (왼쪽) */}
+        <div className="w-1/3 border-r border-secondary-200 overflow-y-auto bg-secondary-50">
+          {visibleCategories.map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => handleCategoryClick(category.id)}
+              className={cn(
+                'w-full px-4 py-3 text-left text-sm font-medium transition-colors border-l-2',
+                selectedCategoryId === category.id
+                  ? 'bg-primary-50 text-primary-700 border-l-primary-500'
+                  : 'bg-white text-secondary-700 border-l-transparent hover:bg-secondary-50'
+              )}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+
+        {/* 서비스 목록 (오른쪽) */}
+        <div className="w-2/3 overflow-y-auto">
+          {currentMenus.map((menu) => (
+            <button
+              key={menu.id}
+              type="button"
+              onClick={() => handleServiceClick(menu.id)}
+              className={cn(
+                'w-full px-4 py-3 text-left border-b border-secondary-100 last:border-b-0 transition-colors',
+                selectedServiceId === menu.id
+                  ? 'bg-primary-50'
+                  : 'hover:bg-secondary-50'
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className={cn(
+                    'text-sm',
+                    selectedServiceId === menu.id
+                      ? 'text-primary-700 font-medium'
+                      : 'text-secondary-700'
+                  )}
+                >
+                  {menu.name}
+                </span>
+                <span className="text-xs text-secondary-500">
+                  {menu.duration_minutes ?? 0}min / ฿{(menu.base_price || menu.price || 0).toLocaleString()}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const ServiceSelector = memo(ServiceSelectorComponent);
+export default ServiceSelector;

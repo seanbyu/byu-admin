@@ -193,7 +193,8 @@ export default function MenuItems({
             <option value={90}>{t('durations.90min')}</option>
             <option value={120}>{t('durations.120min')}</option>
           </select>
-          <div className="flex items-center gap-1 w-24">
+          <div className="flex items-center gap-1 w-28">
+            <span className="text-sm text-gray-500 whitespace-nowrap">{t('unit.currency')}</span>
             <input
               type="number"
               className="w-full px-2 py-2 text-sm border rounded-md text-right"
@@ -203,7 +204,6 @@ export default function MenuItems({
                 setNewMenu({ ...newMenu, price: e.target.value })
               }
             />
-            <span className="text-sm text-gray-500 whitespace-nowrap">{t('unit.currency')}</span>
           </div>
           <Button size="sm" onClick={handleAddMenu}>
             {t('confirm')}

@@ -48,6 +48,7 @@ export const Sidebar: React.FC = () => {
   });
 
   const [openSubmenus, setOpenSubmenus] = React.useState<string[]>([
+    'booking-management',
     'salon-management',
   ]);
 
@@ -78,11 +79,19 @@ export const Sidebar: React.FC = () => {
       permissionKey: 'dashboard',
     },
     {
-      name: t('nav.bookingCalendar'),
+      id: 'booking-management',
+      name: t('nav.bookings'),
       icon: Calendar,
-      href: '/bookings/calendar',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
-      permissionKey: 'bookings',
+      subItems: [
+        {
+          name: t('nav.bookingCalendar'),
+          icon: Calendar,
+          href: '/bookings/calendar',
+          roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+          permissionKey: 'bookings',
+        },
+      ],
     },
     {
       name: t('nav.customers'),

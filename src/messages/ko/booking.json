@@ -1,6 +1,7 @@
 {
   "title": "예약 관리",
   "new": "새 예약",
+  "detail": "예약 상세정보",
   "status": "상태",
   "pending": "대기",
   "confirmed": "확인됨",
@@ -40,7 +41,25 @@
   },
   "placeholders": {
     "customerName": "고객 이름을 입력하세요",
-    "notesPlaceholder": "특이사항이 있다면 입력하세요"
+    "notesPlaceholder": "특이사항이 있다면 입력하세요",
+    "selectService": "서비스를 선택하세요"
+  },
+  "customerType": {
+    "local": "내국인",
+    "foreign": "외국인",
+    "foreignHint": "외국인 고객은 전화번호 없이 등록 가능합니다"
+  },
+  "existingCustomers": "기존 고객",
+  "newCustomerConfirm": {
+    "title": "신규 고객",
+    "message": "신규 고객입니다. 저장하시겠습니까?"
+  },
+  "errors": {
+    "nameRequired": "이름을 입력해주세요",
+    "phoneRequired": "전화번호를 입력해주세요",
+    "staffRequired": "직원을 선택해주세요",
+    "serviceRequired": "서비스를 선택해주세요",
+    "timeRequired": "시간을 선택해주세요"
   },
   "sampleServices": {
     "cut": "커트 - 35,000원",

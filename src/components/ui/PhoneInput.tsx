@@ -12,10 +12,17 @@ const COUNTRY_CODES = [
 
 type CountryCode = typeof COUNTRY_CODES[number];
 
+// 국가코드 찾기 헬퍼
+const findCountryByCode = (code: string): CountryCode => {
+  return COUNTRY_CODES.find(c => c.code === code) || COUNTRY_CODES[0];
+};
+
 // 전화번호에서 국가코드와 로컬번호를 분리하는 함수
-const parsePhoneNumber = (phone: string): { countryCode: CountryCode; localNumber: string } => {
+const parsePhoneNumber = (phone: string, defaultCode: string = '+82'): { countryCode: CountryCode; localNumber: string } => {
+  const defaultCountry = findCountryByCode(defaultCode);
+
   if (!phone) {
-    return { countryCode: COUNTRY_CODES[0], localNumber: '' };
+    return { countryCode: defaultCountry, localNumber: '' };
   }
 
   // 국가코드 순서대로 매칭 시도 (긴 코드부터 체크)
@@ -24,13 +31,32 @@ const parsePhoneNumber = (phone: string): { countryCode: CountryCode; localNumbe
   for (const country of sortedCodes) {
     if (phone.startsWith(country.code)) {
       // 국가코드 뒤의 구분자(-, 공백) 제거 후 로컬번호 추출
-      const localNumber = phone.slice(country.code.length).replace(/^[-\s]/, '');
+      let localNumber = phone.slice(country.code.length).replace(/^[-\s]/, '');
+
+      // 태국 번호의 경우 표시용으로 앞에 0 추가 (저장된 값에는 0이 없음)
+      if (country.code === '+66' && localNumber && !localNumber.startsWith('0')) {
+        localNumber = '0' + localNumber;
+      }
+
       return { countryCode: country, localNumber };
     }
   }
 
-  // 국가코드가 없으면 기본값(한국)과 전체 번호 반환
-  return { countryCode: COUNTRY_CODES[0], localNumber: phone };
+  // 국가코드가 없으면 기본값과 전체 번호 반환
+  return { countryCode: defaultCountry, localNumber: phone };
+};
+
+// 저장할 때 로컬번호에서 앞의 0 제거 (태국 번호용)
+const formatForSave = (countryCode: string, localNumber: string): string => {
+  if (!localNumber) return '';
+
+  let formatted = localNumber;
+  // 태국 번호의 경우 앞의 0 제거
+  if (countryCode === '+66' && formatted.startsWith('0')) {
+    formatted = formatted.slice(1);
+  }
+
+  return `${countryCode}-${formatted}`;
 };
 
 interface PhoneInputProps {
@@ -39,6 +65,8 @@ interface PhoneInputProps {
   label?: string;
   placeholder?: string;
   error?: string;
+  defaultCountryCode?: string; // 기본 국가코드 (예: '+66', '+82')
+  disabled?: boolean;
 }
 
 export const PhoneInput = memo(function PhoneInput({
@@ -47,14 +75,16 @@ export const PhoneInput = memo(function PhoneInput({
   label,
   placeholder = '010-0000-0000',
   error,
+  defaultCountryCode = '+82',
+  disabled = false,
 }: PhoneInputProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 전화번호 파싱 (국가코드 + 로컬번호 분리)
   const { countryCode: parsedCountry, localNumber } = useMemo(
-    () => parsePhoneNumber(value),
-    [value]
+    () => parsePhoneNumber(value, defaultCountryCode),
+    [value, defaultCountryCode]
   );
 
   // 외부 클릭 감지
@@ -85,9 +115,10 @@ export const PhoneInput = memo(function PhoneInput({
   const handleCountrySelect = useCallback((country: CountryCode) => {
     setShowDropdown(false);
     setSelectedCountryCode(country);
-    // 로컬번호가 있으면 새 국가코드와 조합하여 저장
+    // 로컬번호가 있으면 새 국가코드와 조합하여 저장 (0 제거 처리 포함)
     if (localNumber) {
-      onChange(`${country.code}-${localNumber}`);
+      const formatted = formatForSave(country.code, localNumber);
+      onChange(formatted);
     }
   }, [localNumber, onChange]);
 
@@ -95,16 +126,18 @@ export const PhoneInput = memo(function PhoneInput({
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     // 숫자와 하이픈만 허용
     const rawValue = e.target.value.replace(/[^0-9-]/g, '');
-    // 숫자만 추출하여 길이 체크 (최대 11자리)
+    // 숫자만 추출하여 길이 체크 (최대 12자리 - 0 포함)
     const digitsOnly = rawValue.replace(/-/g, '');
-    if (digitsOnly.length > 11) {
-      return; // 11자리 초과 시 입력 무시
+    if (digitsOnly.length > 12) {
+      return; // 12자리 초과 시 입력 무시
     }
 
     if (rawValue) {
       // value가 있으면 기존 국가코드 유지, 없으면 선택된 국가코드 사용
       const countryCode = value ? parsedCountry.code : selectedCountryCode.code;
-      onChange(`${countryCode}-${rawValue}`);
+      // 저장 시 앞의 0 제거 (태국 번호)
+      const formatted = formatForSave(countryCode, rawValue);
+      onChange(formatted);
     } else {
       onChange('');
     }
@@ -122,11 +155,16 @@ export const PhoneInput = memo(function PhoneInput({
         <div className="relative" ref={dropdownRef}>
           <button
             type="button"
-            onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-1 px-3 py-2 border border-r-0 border-secondary-300 rounded-l-md bg-secondary-50 hover:bg-secondary-100 transition-colors min-w-[90px]"
+            onClick={() => !disabled && setShowDropdown(!showDropdown)}
+            disabled={disabled}
+            className={`flex items-center gap-1 px-3 py-2 border border-r-0 border-secondary-300 rounded-l-md transition-colors min-w-[90px] ${
+              disabled
+                ? 'bg-secondary-100 cursor-not-allowed opacity-60'
+                : 'bg-secondary-50 hover:bg-secondary-100'
+            }`}
           >
             <span className="text-lg">{displayCountry.flag}</span>
-            <span className="text-sm text-secondary-600">{displayCountry.code}</span>
+            <span className={`text-sm ${disabled ? 'text-secondary-400' : 'text-secondary-600'}`}>{displayCountry.code}</span>
             <ChevronDown size={14} className="text-secondary-400" />
           </button>
 
@@ -157,9 +195,10 @@ export const PhoneInput = memo(function PhoneInput({
           value={localNumber}
           onChange={handlePhoneChange}
           placeholder={placeholder}
+          disabled={disabled}
           className={`flex-1 px-3 py-2 border border-secondary-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
             error ? 'border-red-500' : ''
-          }`}
+          } ${disabled ? 'bg-secondary-100 cursor-not-allowed opacity-60' : ''}`}
         />
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}

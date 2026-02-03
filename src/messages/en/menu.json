@@ -56,7 +56,7 @@
   },
   "unit": {
     "minutes": "min",
-    "currency": "KRW"
+    "currency": "฿"
   },
   "durations": {
     "15min": "15 min",

@@ -8,6 +8,8 @@ import { Staff } from '@/features/staff/types';
 import {
   useBookingsUIStore,
   selectShowNewBookingModal,
+  selectShowBookingDetailModal,
+  selectSelectedBooking,
   selectShowShopSettingsModal,
   selectShowStaffScheduleModal,
   selectSelectedDate,
@@ -15,6 +17,7 @@ import {
   selectViewMode,
   selectSelectedTime,
   selectSelectedStaffId,
+  selectSelectedServiceId,
 } from '../stores/bookingsStore';
 
 // 상수를 모듈 레벨로 호이스팅
@@ -64,6 +67,8 @@ export interface DesignerOption {
 interface UseBookingsPageStateReturn {
   // Modal states (from Zustand)
   showNewBookingModal: boolean;
+  showBookingDetailModal: boolean;
+  selectedBooking: Booking | null;
   showShopSettingsModal: boolean;
   showStaffScheduleModal: boolean;
   // View states (from Zustand)
@@ -72,9 +77,12 @@ interface UseBookingsPageStateReturn {
   viewMode: 'calendar' | 'table';
   selectedTime: string;
   selectedStaffId: string;
+  selectedServiceId: string;
   // Actions (from Zustand)
   openNewBookingModal: () => void;
   closeNewBookingModal: () => void;
+  openBookingDetailModal: (booking: Booking) => void;
+  closeBookingDetailModal: () => void;
   openShopSettingsModal: () => void;
   closeShopSettingsModal: () => void;
   openStaffScheduleModal: () => void;
@@ -84,6 +92,7 @@ interface UseBookingsPageStateReturn {
   setViewMode: (mode: 'calendar' | 'table') => void;
   setSelectedTime: (time: string) => void;
   setSelectedStaffId: (staffId: string) => void;
+  setSelectedServiceId: (serviceId: string) => void;
   handleTimeSlotClick: (date: Date, time: string, resourceId?: string) => void;
   // Utilities
   getStatusColor: (status: BookingStatus) => string;
@@ -93,6 +102,8 @@ interface UseBookingsPageStateReturn {
 export function useBookingsPageState(): UseBookingsPageStateReturn {
   // Zustand state - 개별 셀렉터로 불필요한 리렌더링 방지
   const showNewBookingModal = useBookingsUIStore(selectShowNewBookingModal);
+  const showBookingDetailModal = useBookingsUIStore(selectShowBookingDetailModal);
+  const selectedBooking = useBookingsUIStore(selectSelectedBooking);
   const showShopSettingsModal = useBookingsUIStore(selectShowShopSettingsModal);
   const showStaffScheduleModal = useBookingsUIStore(selectShowStaffScheduleModal);
   const selectedDate = useBookingsUIStore(selectSelectedDate);
@@ -100,12 +111,15 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
   const viewMode = useBookingsUIStore(selectViewMode);
   const selectedTime = useBookingsUIStore(selectSelectedTime);
   const selectedStaffId = useBookingsUIStore(selectSelectedStaffId);
+  const selectedServiceId = useBookingsUIStore(selectSelectedServiceId);
 
   // Zustand actions - useShallow로 안정적 참조 유지
   const actions = useBookingsUIStore(
     useShallow((state) => ({
       openNewBookingModal: state.openNewBookingModal,
       closeNewBookingModal: state.closeNewBookingModal,
+      openBookingDetailModal: state.openBookingDetailModal,
+      closeBookingDetailModal: state.closeBookingDetailModal,
       openShopSettingsModal: state.openShopSettingsModal,
       closeShopSettingsModal: state.closeShopSettingsModal,
       openStaffScheduleModal: state.openStaffScheduleModal,
@@ -115,6 +129,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       setViewMode: state.setViewMode,
       setSelectedTime: state.setSelectedTime,
       setSelectedStaffId: state.setSelectedStaffId,
+      setSelectedServiceId: state.setSelectedServiceId,
       handleTimeSlotClick: state.handleTimeSlotClick,
     }))
   );
@@ -131,6 +146,8 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
   return useMemo(
     () => ({
       showNewBookingModal,
+      showBookingDetailModal,
+      selectedBooking,
       showShopSettingsModal,
       showStaffScheduleModal,
       selectedDate,
@@ -138,12 +155,15 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       viewMode,
       selectedTime,
       selectedStaffId,
+      selectedServiceId,
       ...actions,
       getStatusColor,
       getStatusBadgeVariant,
     }),
     [
       showNewBookingModal,
+      showBookingDetailModal,
+      selectedBooking,
       showShopSettingsModal,
       showStaffScheduleModal,
       selectedDate,
@@ -151,6 +171,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       viewMode,
       selectedTime,
       selectedStaffId,
+      selectedServiceId,
       actions,
       getStatusColor,
       getStatusBadgeVariant,
@@ -195,7 +216,7 @@ export function useBookingsData(
     return bookings.map((booking) => ({
       id: booking.id,
       date: new Date(booking.date),
-      title: `${booking.customerName} - ${booking.serviceName}`,
+      title: `${booking.serviceName} / ${booking.staffName}`,
       time: booking.startTime,
       color: getStatusColor(booking.status),
       resourceId: booking.staffId,
