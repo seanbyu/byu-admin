@@ -55,6 +55,7 @@
     "resendCode": "ส่งใหม่",
     "codeExpired": "รหัสยืนยันหมดอายุแล้ว กรุณาส่งใหม่",
     "phoneVerified": "ยืนยันเบอร์โทรศัพท์สำเร็จ",
+    "phoneAlreadyRegistered": "เบอร์โทรศัพท์นี้ลงทะเบียนกับบัญชีอื่นแล้ว",
     "verifyCodeError": "รหัสยืนยันหมดอายุหรือไม่ถูกต้อง",
     "changePassword": "เปลี่ยนรหัสผ่าน",
     "currentPassword": "รหัสผ่านปัจจุบัน",

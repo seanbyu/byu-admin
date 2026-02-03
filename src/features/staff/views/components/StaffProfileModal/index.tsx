@@ -3,6 +3,7 @@
 import React, { memo, useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -10,7 +11,6 @@ import { useStaffPositions } from '../../../hooks/useStaffPositions';
 import { ProfileImageUploader } from './ProfileImageUploader';
 import { PositionSelector } from './PositionSelector';
 import { SocialLinksForm } from './SocialLinksForm';
-import { PhoneInput } from '@/components/ui/PhoneInput';
 import { StaffProfileModalProps, ProfileFormData } from './types';
 
 function StaffProfileModal({
@@ -47,7 +47,6 @@ function StaffProfileModal({
   } = useForm<ProfileFormData>();
 
   const profileImage = watch('profileImage');
-  const phone = watch('phone');
 
   // 모달 열릴 때 폼 초기화
   useEffect(() => {
@@ -105,11 +104,6 @@ function StaffProfileModal({
     setSelectedPositionId(positionId);
   }, []);
 
-  // 전화번호 변경 핸들러
-  const handlePhoneChange = useCallback((value: string) => {
-    setValue('phone', value, { shouldDirty: true });
-  }, [setValue]);
-
   return (
     <Modal
       isOpen={isOpen}
@@ -118,19 +112,34 @@ function StaffProfileModal({
       size="lg"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* 이름 & 전화번호 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label={t('staff.profileModal.name')}
-            {...register('name', { required: t('staff.profileModal.nameRequired') })}
-            error={errors.name?.message}
-          />
-          <PhoneInput
-            label={t('staff.profileModal.phone')}
-            value={phone || ''}
-            onChange={handlePhoneChange}
-            placeholder="010-0000-0000"
-          />
+        {/* 이름 */}
+        <Input
+          label={t('staff.profileModal.name')}
+          {...register('name', { required: t('staff.profileModal.nameRequired') })}
+          error={errors.name?.message}
+          helperText={t('staff.profileModal.nameHint')}
+        />
+
+        {/* 연락처 (읽기 전용) */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-secondary-700">
+              {t('staff.profileModal.phone')}
+            </label>
+            <Link
+              href="/settings/account"
+              className="text-xs text-primary-600 hover:text-primary-700 hover:underline"
+              onClick={onClose}
+            >
+              {t('staff.profileModal.goToSettings')}
+            </Link>
+          </div>
+          <div className="w-full px-3 py-2 text-sm border border-secondary-200 rounded-lg bg-secondary-50 text-secondary-600">
+            {staff.phone || '-'}
+          </div>
+          <p className="text-xs text-secondary-500">
+            {t('staff.profileModal.phoneHint')}
+          </p>
         </div>
 
         {/* 프로필 이미지 업로더 */}

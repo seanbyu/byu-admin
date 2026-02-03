@@ -2,12 +2,12 @@
 
 import { useCallback, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { useAuthStore } from '@/store/authStore';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   useSettingsUIStore,
-  selectActiveTab,
   selectIsVerificationSent,
   selectIsPhoneVerified,
   selectSettingsActions,
@@ -24,32 +24,43 @@ import { SettingsTabs } from './components/SettingsTabs';
 import { StoreInfoTab } from './components/StoreInfoTab';
 import { PlanTab } from './components/PlanTab';
 import { AccountTab } from './components/AccountTab';
-import { AccountInfo, StoreInfo } from '../types';
+import { AccountInfo, SettingsTab, StoreInfo } from '../types';
+
+// ============================================
+// Props
+// ============================================
+
+interface SettingsPageViewProps {
+  initialTab?: SettingsTab;
+}
 
 // ============================================
 // Main Component
 // ============================================
 
-export default function SettingsPageView() {
+export default function SettingsPageView({ initialTab = 'account' }: SettingsPageViewProps) {
   const t = useTranslations();
+  const router = useRouter();
   const { user, updateUser } = useAuthStore();
   const toast = useToast();
   const salonId = user?.salonId || '';
 
+  // URL 기반 활성 탭
+  const activeTab = initialTab;
+
   // ============================================
-  // UI State (Zustand) - 순수 UI 상태만
+  // UI State (Zustand) - 인증 관련 UI 상태만
   // ============================================
-  const activeTab = useSettingsUIStore(selectActiveTab);
   const isVerificationSent = useSettingsUIStore(selectIsVerificationSent);
   const isPhoneVerified = useSettingsUIStore(selectIsPhoneVerified);
   const actions = useSettingsUIStore(selectSettingsActions);
 
-  // isOwner가 아닌 경우 account 탭으로 강제 이동
+  // isOwner가 아닌 경우 account 탭으로 강제 리다이렉트
   useEffect(() => {
     if (!user?.isOwner && (activeTab === 'store' || activeTab === 'plan')) {
-      actions.setActiveTab('account');
+      router.replace('/settings/account');
     }
-  }, [user?.isOwner, activeTab, actions]);
+  }, [user?.isOwner, activeTab, router]);
 
   // ============================================
   // Data fetching (TanStack Query) - 서버 데이터
@@ -179,7 +190,6 @@ export default function SettingsPageView() {
         {/* Tabs */}
         <SettingsTabs
           activeTab={activeTab}
-          onTabChange={actions.setActiveTab}
           isOwner={user?.isOwner}
         />
 

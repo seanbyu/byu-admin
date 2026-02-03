@@ -97,5 +97,19 @@
     "sales": "Sales Management",
     "reviews": "Reviews Management",
     "customers": "Customers Management"
+  },
+  "password": {
+    "label": "Password",
+    "confirmLabel": "Confirm Password",
+    "placeholder": "Enter password",
+    "confirmPlaceholder": "Re-enter password",
+    "lengthRule": "8-20 characters",
+    "letterRule": "Contains letters",
+    "numberRule": "Contains numbers",
+    "specialRule": "Contains special characters (!@#$%^&* etc.)",
+    "mismatch": "Passwords do not match.",
+    "match": "Passwords match.",
+    "required": "Please enter password.",
+    "invalid": "Invalid password format."
   }
 }

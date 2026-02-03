@@ -48,12 +48,34 @@ export async function createStaff({
     }
 
     // Verify user belongs to the salon and has permission
-    // Assuming salon_id is in metadata or we check a table.
-    // Using metadata for performance (Standard Claim)
-    const userSalonId = user.user_metadata.salon_id;
-    const userRole = user.user_metadata.role;
+    // Check staff_profiles table for accurate salon membership (user_metadata may be stale)
+    const { data: staffProfile, error: profileError } = await supabaseAdmin
+      .from('staff_profiles')
+      .select('salon_id, is_owner')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-    if (userSalonId !== salonId) {
+    if (profileError) {
+      console.error('Staff profile query error:', profileError);
+      throw new Error('Failed to verify user permissions');
+    }
+
+    // Get role from users table (more reliable than metadata)
+    const { data: userData, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (userError) {
+      console.error('User query error:', userError);
+      throw new Error('Failed to verify user role');
+    }
+
+    const userSalonId = staffProfile?.salon_id;
+    const userRole = userData?.role?.toUpperCase() || user.user_metadata?.role?.toUpperCase();
+
+    if (!userSalonId || userSalonId !== salonId) {
       throw new Error(
         'Unauthorized: You do not have permission for this salon'
       );

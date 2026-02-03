@@ -32,6 +32,7 @@ export function useVerificationTimer(
   const { timeout = DEFAULT_TIMEOUT, onExpire } = options;
 
   const [timeLeft, setTimeLeft] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false); // 타이머가 시작된 적이 있는지 추적
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const onExpireRef = useRef(onExpire);
 
@@ -52,6 +53,7 @@ export function useVerificationTimer(
   const startTimer = useCallback(() => {
     clearTimer();
     setTimeLeft(timeout);
+    setHasStarted(true);
 
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
@@ -69,6 +71,7 @@ export function useVerificationTimer(
   const resetTimer = useCallback(() => {
     clearTimer();
     setTimeLeft(0);
+    setHasStarted(false);
   }, [clearTimer]);
 
   // 타이머 중지 (현재 시간 유지)
@@ -85,7 +88,7 @@ export function useVerificationTimer(
 
   return {
     timeLeft,
-    isExpired: timeLeft === 0,
+    isExpired: hasStarted && timeLeft === 0, // 타이머가 시작된 후에만 만료 상태로 판단
     isRunning: timeLeft > 0,
     formattedTime: formatTime(timeLeft),
     startTimer,

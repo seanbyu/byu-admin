@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from './Input';
 import { Button } from './Button';
@@ -55,9 +55,11 @@ export const VerificationCodeInput = memo(function VerificationCodeInput({
     }
   }, [shouldStartTimer, isRunning, isVerified, startTimer]);
 
-  // 외부에서 리셋 트리거
+  // 외부에서 리셋 트리거 - 값이 실제로 변경될 때만 리셋
+  const prevResetTriggerRef = useRef(resetTrigger);
   useEffect(() => {
-    if (resetTrigger > 0) {
+    if (resetTrigger !== prevResetTriggerRef.current) {
+      prevResetTriggerRef.current = resetTrigger;
       resetTimer();
     }
   }, [resetTrigger, resetTimer]);

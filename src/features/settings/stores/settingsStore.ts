@@ -1,16 +1,13 @@
 'use client';
 
 import { create } from 'zustand';
-import { SettingsTab } from '../types';
 
 // ============================================
 // UI State Store - 순수 UI 상태만 관리
+// (탭 상태는 URL로 관리됨)
 // ============================================
 
 interface SettingsUIState {
-  // Tab state
-  activeTab: SettingsTab;
-
   // Phone verification
   isVerificationSent: boolean;
   isPhoneVerified: boolean;
@@ -21,9 +18,6 @@ interface SettingsUIState {
 }
 
 interface SettingsUIActions {
-  // Tab
-  setActiveTab: (tab: SettingsTab) => void;
-
   // Verification
   setVerificationSent: (sent: boolean) => void;
   setPhoneVerified: (verified: boolean) => void;
@@ -41,7 +35,6 @@ interface SettingsUIActions {
 type SettingsUIStore = SettingsUIState & { actions: SettingsUIActions };
 
 const initialState: SettingsUIState = {
-  activeTab: 'store',
   isVerificationSent: false,
   isPhoneVerified: false,
   editingField: null,
@@ -51,8 +44,6 @@ const initialState: SettingsUIState = {
 export const useSettingsUIStore = create<SettingsUIStore>((set) => ({
   ...initialState,
   actions: {
-    setActiveTab: (tab) => set({ activeTab: tab }),
-
     setVerificationSent: (sent) => set({ isVerificationSent: sent }),
 
     setPhoneVerified: (verified) => set({ isPhoneVerified: verified }),
@@ -76,7 +67,6 @@ export const useSettingsUIStore = create<SettingsUIStore>((set) => ({
 // Selectors - 메모이제이션을 위한 단순 selector
 // ============================================
 
-export const selectActiveTab = (state: SettingsUIStore) => state.activeTab;
 export const selectIsVerificationSent = (state: SettingsUIStore) => state.isVerificationSent;
 export const selectIsPhoneVerified = (state: SettingsUIStore) => state.isPhoneVerified;
 export const selectEditingField = (state: SettingsUIStore) => state.editingField;

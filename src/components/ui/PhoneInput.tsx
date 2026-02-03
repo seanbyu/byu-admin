@@ -68,24 +68,47 @@ export const PhoneInput = memo(function PhoneInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // 선택된 국가코드 상태 (value가 비어있을 때도 유지)
+  const [selectedCountryCode, setSelectedCountryCode] = useState<CountryCode>(parsedCountry);
+
+  // value가 변경되면 파싱된 국가코드로 업데이트
+  useEffect(() => {
+    if (value) {
+      setSelectedCountryCode(parsedCountry);
+    }
+  }, [value, parsedCountry]);
+
+  // 실제 표시할 국가코드 (value가 있으면 파싱된 값, 없으면 선택된 값)
+  const displayCountry = value ? parsedCountry : selectedCountryCode;
+
   // 국가 선택 핸들러 - 국가코드 변경 시 전체 값 업데이트
   const handleCountrySelect = useCallback((country: CountryCode) => {
     setShowDropdown(false);
+    setSelectedCountryCode(country);
     // 로컬번호가 있으면 새 국가코드와 조합하여 저장
     if (localNumber) {
       onChange(`${country.code}-${localNumber}`);
     }
   }, [localNumber, onChange]);
 
-  // 전화번호 입력 핸들러 - 국가코드 포함하여 저장
+  // 전화번호 입력 핸들러 - 선택된 국가코드 포함하여 저장
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newLocalNumber = e.target.value;
-    if (newLocalNumber) {
-      onChange(`${parsedCountry.code}-${newLocalNumber}`);
+    // 숫자와 하이픈만 허용
+    const rawValue = e.target.value.replace(/[^0-9-]/g, '');
+    // 숫자만 추출하여 길이 체크 (최대 11자리)
+    const digitsOnly = rawValue.replace(/-/g, '');
+    if (digitsOnly.length > 11) {
+      return; // 11자리 초과 시 입력 무시
+    }
+
+    if (rawValue) {
+      // value가 있으면 기존 국가코드 유지, 없으면 선택된 국가코드 사용
+      const countryCode = value ? parsedCountry.code : selectedCountryCode.code;
+      onChange(`${countryCode}-${rawValue}`);
     } else {
       onChange('');
     }
-  }, [parsedCountry.code, onChange]);
+  }, [value, parsedCountry.code, selectedCountryCode.code, onChange]);
 
   return (
     <div className="space-y-1">
@@ -102,8 +125,8 @@ export const PhoneInput = memo(function PhoneInput({
             onClick={() => setShowDropdown(!showDropdown)}
             className="flex items-center gap-1 px-3 py-2 border border-r-0 border-secondary-300 rounded-l-md bg-secondary-50 hover:bg-secondary-100 transition-colors min-w-[90px]"
           >
-            <span className="text-lg">{parsedCountry.flag}</span>
-            <span className="text-sm text-secondary-600">{parsedCountry.code}</span>
+            <span className="text-lg">{displayCountry.flag}</span>
+            <span className="text-sm text-secondary-600">{displayCountry.code}</span>
             <ChevronDown size={14} className="text-secondary-400" />
           </button>
 
@@ -116,7 +139,7 @@ export const PhoneInput = memo(function PhoneInput({
                   type="button"
                   onClick={() => handleCountrySelect(country)}
                   className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-secondary-50 transition-colors ${
-                    parsedCountry.code === country.code ? 'bg-primary-50' : ''
+                    displayCountry.code === country.code ? 'bg-primary-50' : ''
                   }`}
                 >
                   <span className="text-lg">{country.flag}</span>

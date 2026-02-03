@@ -35,6 +35,7 @@ export const AccountFormSection = memo(function AccountFormSection({
   const [resetTrigger, setResetTrigger] = useState(0);
 
   // 에러 메시지 상태
+  const [sendCodeError, setSendCodeError] = useState<string | null>(null);
   const [verifyError, setVerifyError] = useState<string | null>(null);
 
   // Update form when accountInfo changes
@@ -57,18 +58,26 @@ export const AccountFormSection = memo(function AccountFormSection({
     // 전화번호 변경 시 인증 상태 및 에러 리셋
     onVerificationSentChange(false);
     onPhoneVerifiedChange(false);
+    setSendCodeError(null);
     setVerifyError(null);
     setResetTrigger((prev) => prev + 1);
   }, [onVerificationSentChange, onPhoneVerifiedChange]);
 
   const handleSendCode = useCallback(async () => {
     try {
+      setSendCodeError(null);
       await onSendVerificationCode(formData.phone);
       onVerificationSentChange(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send OTP:', error);
+      // 이미 등록된 전화번호인 경우
+      if (error?.message?.includes('already been registered')) {
+        setSendCodeError(t('settings.account.phoneAlreadyRegistered'));
+      } else {
+        setSendCodeError(error?.message || t('common.error'));
+      }
     }
-  }, [formData.phone, onSendVerificationCode, onVerificationSentChange]);
+  }, [formData.phone, onSendVerificationCode, onVerificationSentChange, t]);
 
   const handleVerifyCode = useCallback(async () => {
     try {
@@ -86,11 +95,24 @@ export const AccountFormSection = memo(function AccountFormSection({
     }
   }, [formData.phone, formData.verificationCode, onVerifyCode, onPhoneVerifiedChange, t]);
 
-  // 전화번호가 변경되었는지 확인
-  const isPhoneChanged = accountInfo?.phone !== formData.phone;
+  // 전화번호 유효성 검사 (10~11자리)
+  const getLocalPhoneDigits = (phone: string) => {
+    // 국가코드 제거 후 숫자만 추출
+    const withoutCountryCode = phone.replace(/^\+\d{1,3}-?/, '');
+    return withoutCountryCode.replace(/[^0-9]/g, '');
+  };
+  const phoneDigits = getLocalPhoneDigits(formData.phone);
+  const isValidPhoneLength = phoneDigits.length >= 10 && phoneDigits.length <= 11;
 
-  // 저장 가능 여부: 전화번호 미변경 or 인증 완료
-  const canSave = !isPhoneChanged || isPhoneVerified;
+  // 전화번호가 변경되었는지 확인 (null/undefined 처리)
+  const originalPhone = accountInfo?.phone || '';
+  const isPhoneChanged = originalPhone !== formData.phone;
+
+  // 전화번호가 유효하고 변경된 경우 인증 필요
+  const needsPhoneVerification = isPhoneChanged && isValidPhoneLength;
+
+  // 저장 가능 여부: 인증 불필요 or 인증 완료
+  const canSave = !needsPhoneVerification || isPhoneVerified;
 
   const handleSaveAccount = useCallback(async () => {
     await onSave({
@@ -125,10 +147,14 @@ export const AccountFormSection = memo(function AccountFormSection({
             size="sm"
             onClick={handleSendCode}
             isLoading={isSendingCode}
+            disabled={!isValidPhoneLength}
             className="w-full sm:w-auto"
           >
             {t('settings.account.sendCode')}
           </Button>
+          {sendCodeError && (
+            <p className="text-sm text-red-500">{sendCodeError}</p>
+          )}
         </div>
 
         {isVerificationSent && !isPhoneVerified && (

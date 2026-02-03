@@ -1,71 +1,99 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createStaffApi } from '../api';
-import { supabase } from '@/lib/supabase/client';
+import { staffApi } from '../api';
 import { Staff } from '../types';
-import { staffKeys, STAFF_QUERY_OPTIONS } from './queries';
+import { staffKeys, staffQueries } from './queries';
 
-const staffApi = createStaffApi(supabase);
+// ============================================
+// useStaff Hook
+// - TanStack Query로 직원 데이터 관리
+// - Optimistic updates로 빠른 UX 제공
+// ============================================
 
 interface UseStaffOptions {
   enabled?: boolean;
 }
 
-export const useStaff = (salonId: string, options?: UseStaffOptions) => {
+interface UpdateStaffParams {
+  staffId: string;
+  updates: Partial<Staff>;
+}
+
+export function useStaff(salonId: string, options?: UseStaffOptions) {
   const queryClient = useQueryClient();
-  const queryKey = useMemo(() => staffKeys.list(salonId), [salonId]);
 
-  const staffQuery = useQuery({
-    queryKey,
-    queryFn: () => staffApi.getStaffList(salonId),
+  // staffQueries.list()의 select 옵션으로 데이터가 자동 변환됨
+  const query = useQuery({
+    ...staffQueries.list(salonId),
     enabled: !!salonId && options?.enabled !== false,
-    ...STAFF_QUERY_OPTIONS,
   });
 
-  const updateStaffMutation = useMutation({
-    mutationFn: useCallback(
-      ({ staffId, updates }: { staffId: string; updates: Partial<Staff> }) =>
-        staffApi.updateStaff(salonId, staffId, updates),
-      [salonId]
-    ),
-    onSuccess: useCallback(() => {
-      queryClient.invalidateQueries({ queryKey });
-    }, [queryClient, queryKey]),
+  // Mutation with optimistic updates
+  const updateMutation = useMutation({
+    mutationFn: ({ staffId, updates }: UpdateStaffParams) =>
+      staffApi.update(salonId, staffId, updates),
+
+    // Optimistic update: 서버 응답 전에 UI 먼저 업데이트
+    onMutate: async ({ staffId, updates }) => {
+      // 진행 중인 refetch 취소
+      await queryClient.cancelQueries({ queryKey: staffKeys.list(salonId) });
+
+      // 이전 데이터 스냅샷
+      const previousData = queryClient.getQueryData(staffKeys.list(salonId));
+
+      // 낙관적 업데이트
+      queryClient.setQueryData(staffKeys.list(salonId), (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: old.data.map((staff: Staff) =>
+            staff.id === staffId ? { ...staff, ...updates } : staff
+          ),
+        };
+      });
+
+      return { previousData };
+    },
+
+    // 에러 시 롤백
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(staffKeys.list(salonId), context.previousData);
+      }
+    },
+
+    // 성공/실패 후 무효화로 서버 데이터와 동기화
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: staffKeys.list(salonId) });
+    },
   });
 
-  // Memoized return values
-  const staffData = useMemo(() => staffQuery.data?.data || [], [staffQuery.data?.data]);
-
+  // Stable callback references
   const updateStaff = useCallback(
-    (params: { staffId: string; updates: Partial<Staff> }) =>
-      updateStaffMutation.mutateAsync(params),
-    [updateStaffMutation]
+    (params: UpdateStaffParams) => updateMutation.mutateAsync(params),
+    [updateMutation]
   );
 
-  const refetch = useCallback(() => staffQuery.refetch(), [staffQuery]);
+  const refetch = useCallback(() => query.refetch(), [query]);
 
-  return useMemo(
-    () => ({
-      data: staffQuery.data,
-      staffData,
-      isLoading: staffQuery.isLoading,
-      isFetching: staffQuery.isFetching,
-      error: staffQuery.error,
-      refetch,
-      updateStaff,
-      isUpdating: updateStaffMutation.isPending,
-    }),
-    [
-      staffQuery.data,
-      staffData,
-      staffQuery.isLoading,
-      staffQuery.isFetching,
-      staffQuery.error,
-      refetch,
-      updateStaff,
-      updateStaffMutation.isPending,
-    ]
-  );
-};
+  return {
+    // Data
+    staffData: query.data ?? [],
+    rawResponse: queryClient.getQueryData(staffKeys.list(salonId)),
+
+    // Query state
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    error: query.error,
+
+    // Actions
+    refetch,
+    updateStaff,
+    isUpdating: updateMutation.isPending,
+  };
+}
+
+// Type export for external use
+export type UseStaffReturn = ReturnType<typeof useStaff>;

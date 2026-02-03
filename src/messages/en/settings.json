@@ -55,6 +55,7 @@
     "resendCode": "Resend",
     "codeExpired": "Verification code has expired. Please resend.",
     "phoneVerified": "Phone number verified successfully",
+    "phoneAlreadyRegistered": "This phone number is already registered to another account",
     "verifyCodeError": "Verification code has expired or is invalid",
     "changePassword": "Change Password",
     "currentPassword": "Current Password",

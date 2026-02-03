@@ -5,8 +5,9 @@ import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
 import { supabase } from '@/lib/supabase/client';
 import { createStaff } from '@/actions/staff';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { createAuthApi } from '@/features/auth/api';
+import { PasswordWithConfirm, validatePassword } from '@/components/ui/PasswordInput';
 
 type CheckStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
 const authApi = createAuthApi(supabase);
@@ -32,13 +33,9 @@ export default function CreateStaffModal({
   const [role, setRole] = useState('STAFF');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
 
   // Email duplicate check state
   const [emailCheckStatus, setEmailCheckStatus] = useState<CheckStatus>('idle');
@@ -48,7 +45,7 @@ export default function CreateStaffModal({
   const isLimitReached = currentStaffCount >= MAX_FREE_STAFF;
 
   // 이메일 형식 검증
-  const validateEmail = (value: string): boolean => {
+  const validateEmailFormat = (value: string): boolean => {
     const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
     if (!value) {
       setEmailError(t('staff.validation.emailRequired'));
@@ -59,43 +56,6 @@ export default function CreateStaffModal({
       return false;
     }
     setEmailError(null);
-    return true;
-  };
-
-  // 비밀번호 형식 검증 (영문+숫자+특수문자 8~20자)
-  const validatePassword = (value: string): boolean => {
-    const hasLetter = /[a-zA-Z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-    const isValidLength = value.length >= 8 && value.length <= 20;
-
-    if (!value) {
-      setPasswordError(t('staff.validation.passwordRequired'));
-      return false;
-    }
-    if (!isValidLength) {
-      setPasswordError(t('staff.validation.passwordLength'));
-      return false;
-    }
-    if (!hasLetter || !hasNumber || !hasSpecial) {
-      setPasswordError(t('staff.validation.passwordPattern'));
-      return false;
-    }
-    setPasswordError(null);
-    return true;
-  };
-
-  // 비밀번호 확인 검증
-  const validateConfirmPassword = (value: string): boolean => {
-    if (!value) {
-      setConfirmPasswordError(t('staff.validation.confirmPasswordRequired'));
-      return false;
-    }
-    if (value !== password) {
-      setConfirmPasswordError(t('staff.validation.passwordMismatch'));
-      return false;
-    }
-    setConfirmPasswordError(null);
     return true;
   };
 
@@ -137,11 +97,19 @@ export default function CreateStaffModal({
     e.preventDefault();
 
     // 유효성 검사
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
-    const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
+    const isEmailValid = validateEmailFormat(email);
+    const passwordValidation = validatePassword(password);
+    const isPasswordMatch = password === confirmPassword;
 
-    if (!isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+    if (!isEmailValid) return;
+
+    if (!passwordValidation.isValid) {
+      setError(t('staff.validation.passwordPattern'));
+      return;
+    }
+
+    if (!isPasswordMatch) {
+      setError(t('staff.validation.passwordMismatch'));
       return;
     }
 
@@ -185,8 +153,6 @@ export default function CreateStaffModal({
       setPassword('');
       setConfirmPassword('');
       setEmailError(null);
-      setPasswordError(null);
-      setConfirmPasswordError(null);
       setEmailCheckStatus('idle');
       setEmailCheckMessage('');
     } catch (err: any) {
@@ -225,6 +191,7 @@ export default function CreateStaffModal({
           )}
         </div>
 
+        {/* 이메일 입력 */}
         <div className="space-y-2">
           <label
             htmlFor="email"
@@ -240,8 +207,7 @@ export default function CreateStaffModal({
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                if (emailError) validateEmail(e.target.value);
-                // 이메일 변경 시 중복확인 상태 초기화
+                if (emailError) validateEmailFormat(e.target.value);
                 if (emailCheckStatus !== 'idle') {
                   setEmailCheckStatus('idle');
                   setEmailCheckMessage('');
@@ -277,82 +243,20 @@ export default function CreateStaffModal({
           )}
         </div>
 
-        <div className="space-y-2">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t('staff.createModal.password')}
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              required
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (passwordError) validatePassword(e.target.value);
-              }}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
-                passwordError ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder={t('staff.createModal.passwordPlaceholder')}
-              disabled={isLimitReached}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-          {passwordError ? (
-            <p className="text-sm text-red-500">{passwordError}</p>
-          ) : (
-            <p className="text-xs text-gray-500">
-              {t('staff.createModal.passwordHint')}
-            </p>
-          )}
-        </div>
+        {/* 비밀번호 + 확인 (공통 컴포넌트) */}
+        <PasswordWithConfirm
+          password={password}
+          confirmPassword={confirmPassword}
+          onPasswordChange={setPassword}
+          onConfirmChange={setConfirmPassword}
+          passwordLabel={t('staff.createModal.password')}
+          confirmLabel={t('staff.createModal.confirmPassword')}
+          passwordPlaceholder={t('staff.createModal.passwordPlaceholder')}
+          confirmPlaceholder={t('staff.createModal.confirmPasswordPlaceholder')}
+          disabled={isLimitReached}
+        />
 
-        <div className="space-y-2">
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t('staff.createModal.confirmPassword')}
-          </label>
-          <div className="relative">
-            <input
-              id="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
-              required
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                if (confirmPasswordError) validateConfirmPassword(e.target.value);
-              }}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
-                confirmPasswordError ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder={t('staff.createModal.confirmPasswordPlaceholder')}
-              disabled={isLimitReached}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-            >
-              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-          {confirmPasswordError && (
-            <p className="text-sm text-red-500">{confirmPasswordError}</p>
-          )}
-        </div>
-
+        {/* 이름 입력 */}
         <div className="space-y-2">
           <label
             htmlFor="name"
@@ -372,6 +276,7 @@ export default function CreateStaffModal({
           />
         </div>
 
+        {/* 역할 선택 */}
         <div className="space-y-2">
           <label
             htmlFor="role"
@@ -391,6 +296,7 @@ export default function CreateStaffModal({
           </select>
         </div>
 
+        {/* 버튼 */}
         <div className="flex justify-end pt-4 space-x-3">
           <button
             type="button"

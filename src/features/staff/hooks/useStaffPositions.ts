@@ -1,75 +1,144 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { staffPositionApi } from '../api';
-import { CreatePositionDto, UpdatePositionDto } from '../types';
-import { positionKeys, POSITION_QUERY_OPTIONS } from './queries';
+import { positionApi } from '../api';
+import { CreatePositionDto, UpdatePositionDto, StaffPosition } from '../types';
+import { positionKeys, positionQueries } from './queries';
+
+// ============================================
+// useStaffPositions Hook
+// - TanStack Query로 직급 데이터 관리
+// - CRUD 작업에 대한 optimistic updates
+// ============================================
 
 interface UseStaffPositionsOptions {
   enabled?: boolean;
 }
 
-export function useStaffPositions(salonId: string, options?: UseStaffPositionsOptions) {
-  const queryClient = useQueryClient();
-  const queryKey = useMemo(() => positionKeys.list(salonId), [salonId]);
+interface UpdatePositionParams {
+  positionId: string;
+  dto: UpdatePositionDto;
+}
 
-  // Fetch positions
-  const positionsQuery = useQuery({
-    queryKey,
-    queryFn: () => staffPositionApi.getPositions(salonId),
+export function useStaffPositions(
+  salonId: string,
+  options?: UseStaffPositionsOptions
+) {
+  const queryClient = useQueryClient();
+  const queryKey = positionKeys.list(salonId);
+
+  // Query with auto-transformed data via select
+  const query = useQuery({
+    ...positionQueries.list(salonId),
     enabled: options?.enabled !== false && !!salonId,
-    ...POSITION_QUERY_OPTIONS,
   });
 
-  // Invalidate helper
+  // Helper: invalidate positions
   const invalidatePositions = useCallback(() => {
     queryClient.invalidateQueries({ queryKey });
   }, [queryClient, queryKey]);
 
-  // Create position
+  // Create mutation with optimistic update
   const createMutation = useMutation({
-    mutationFn: useCallback(
-      (dto: CreatePositionDto) => staffPositionApi.createPosition(salonId, dto),
-      [salonId]
-    ),
-    onSuccess: invalidatePositions,
+    mutationFn: (dto: CreatePositionDto) => positionApi.create(salonId, dto),
+
+    onMutate: async (newPosition) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData(queryKey);
+
+      // Optimistic: 임시 ID로 추가
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old?.data) return old;
+        const tempPosition: StaffPosition = {
+          id: `temp-${Date.now()}`,
+          salonId,
+          ...newPosition,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        return { ...old, data: [...old.data, tempPosition] };
+      });
+
+      return { previousData };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+    },
+
+    onSettled: invalidatePositions,
   });
 
-  // Update position
+  // Update mutation with optimistic update
   const updateMutation = useMutation({
-    mutationFn: useCallback(
-      ({ positionId, dto }: { positionId: string; dto: UpdatePositionDto }) =>
-        staffPositionApi.updatePosition(positionId, dto),
-      []
-    ),
-    onSuccess: invalidatePositions,
+    mutationFn: ({ positionId, dto }: UpdatePositionParams) =>
+      positionApi.update(positionId, dto),
+
+    onMutate: async ({ positionId, dto }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData(queryKey);
+
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: old.data.map((pos: StaffPosition) =>
+            pos.id === positionId ? { ...pos, ...dto, updatedAt: new Date() } : pos
+          ),
+        };
+      });
+
+      return { previousData };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+    },
+
+    onSettled: invalidatePositions,
   });
 
-  // Delete position
+  // Delete mutation with optimistic update
   const deleteMutation = useMutation({
-    mutationFn: useCallback(
-      (positionId: string) => staffPositionApi.deletePosition(positionId),
-      []
-    ),
-    onSuccess: invalidatePositions,
+    mutationFn: (positionId: string) => positionApi.delete(positionId),
+
+    onMutate: async (positionId) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData(queryKey);
+
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: old.data.filter((pos: StaffPosition) => pos.id !== positionId),
+        };
+      });
+
+      return { previousData };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+    },
+
+    onSettled: invalidatePositions,
   });
 
-  // Memoized data
-  const positions = useMemo(
-    () => positionsQuery.data?.data || [],
-    [positionsQuery.data?.data]
-  );
-
-  // Memoized mutation functions
+  // Stable callback references
   const createPosition = useCallback(
     (dto: CreatePositionDto) => createMutation.mutateAsync(dto),
     [createMutation]
   );
 
   const updatePosition = useCallback(
-    (params: { positionId: string; dto: UpdatePositionDto }) =>
-      updateMutation.mutateAsync(params),
+    (params: UpdatePositionParams) => updateMutation.mutateAsync(params),
     [updateMutation]
   );
 
@@ -78,35 +147,29 @@ export function useStaffPositions(salonId: string, options?: UseStaffPositionsOp
     [deleteMutation]
   );
 
-  const refetch = useCallback(() => positionsQuery.refetch(), [positionsQuery]);
+  const refetch = useCallback(() => query.refetch(), [query]);
 
-  return useMemo(
-    () => ({
-      positions,
-      isLoading: positionsQuery.isLoading,
-      isFetching: positionsQuery.isFetching,
-      error: positionsQuery.data?.error || positionsQuery.error,
-      refetch,
-      createPosition,
-      updatePosition,
-      deletePosition,
-      isCreating: createMutation.isPending,
-      isUpdating: updateMutation.isPending,
-      isDeleting: deleteMutation.isPending,
-    }),
-    [
-      positions,
-      positionsQuery.isLoading,
-      positionsQuery.isFetching,
-      positionsQuery.data?.error,
-      positionsQuery.error,
-      refetch,
-      createPosition,
-      updatePosition,
-      deletePosition,
-      createMutation.isPending,
-      updateMutation.isPending,
-      deleteMutation.isPending,
-    ]
-  );
+  return {
+    // Data
+    positions: query.data ?? [],
+
+    // Query state
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    error: query.error,
+
+    // Actions
+    refetch,
+    createPosition,
+    updatePosition,
+    deletePosition,
+
+    // Mutation states
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+  };
 }
+
+// Type export for external use
+export type UseStaffPositionsReturn = ReturnType<typeof useStaffPositions>;

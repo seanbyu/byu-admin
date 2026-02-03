@@ -4,11 +4,11 @@ export type { StoreInfo, Plan, Subscription, AccountInfo, SettingsTab } from './
 // API
 export { settingsApi } from './api';
 
-// Stores (Zustand) - UI 상태만 관리
+// Stores (Zustand) - UI 상태만 관리 (탭 상태는 URL로 관리됨)
 export {
   useSettingsUIStore,
-  selectActiveTab,
   selectIsVerificationSent,
+  selectIsPhoneVerified,
   selectEditingField,
   selectTempValue,
   selectSettingsActions,

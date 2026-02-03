@@ -1,7 +1,8 @@
 'use client';
 
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { SettingsTab } from '../../types';
 
@@ -16,31 +17,25 @@ const ALL_TABS: { key: SettingsTab; labelKey: string; ownerOnly?: boolean }[] = 
 ];
 
 // ============================================
-// Tab Button Component (memoized)
+// Tab Link Component (memoized)
 // ============================================
 
-interface TabButtonProps {
+interface TabLinkProps {
   tabKey: SettingsTab;
   labelKey: string;
   isActive: boolean;
-  onClick: (tab: SettingsTab) => void;
 }
 
-const TabButton = memo(function TabButton({
+const TabLink = memo(function TabLink({
   tabKey,
   labelKey,
   isActive,
-  onClick,
-}: TabButtonProps) {
+}: TabLinkProps) {
   const t = useTranslations();
 
-  const handleClick = useCallback(() => {
-    onClick(tabKey);
-  }, [onClick, tabKey]);
-
   return (
-    <button
-      onClick={handleClick}
+    <Link
+      href={`/settings/${tabKey}`}
       className={cn(
         'flex-1 sm:flex-none py-3 sm:py-4 px-3 sm:px-6 border-b-2 font-medium text-sm transition-colors text-center',
         isActive
@@ -49,7 +44,7 @@ const TabButton = memo(function TabButton({
       )}
     >
       {t(labelKey)}
-    </button>
+    </Link>
   );
 });
 
@@ -59,7 +54,6 @@ const TabButton = memo(function TabButton({
 
 interface SettingsTabsProps {
   activeTab: SettingsTab;
-  onTabChange: (tab: SettingsTab) => void;
   isOwner?: boolean;
 }
 
@@ -69,7 +63,6 @@ interface SettingsTabsProps {
 
 export const SettingsTabs = memo(function SettingsTabs({
   activeTab,
-  onTabChange,
   isOwner = false,
 }: SettingsTabsProps) {
   // isOwner가 아니면 ownerOnly 탭은 제외
@@ -81,12 +74,11 @@ export const SettingsTabs = memo(function SettingsTabs({
     <div className="border-b border-secondary-200">
       <nav className="flex" aria-label="Settings tabs">
         {visibleTabs.map((tab) => (
-          <TabButton
+          <TabLink
             key={tab.key}
             tabKey={tab.key}
             labelKey={tab.labelKey}
             isActive={activeTab === tab.key}
-            onClick={onTabChange}
           />
         ))}
       </nav>

@@ -97,5 +97,19 @@
     "sales": "매출 관리",
     "reviews": "리뷰 관리",
     "customers": "고객 관리"
+  },
+  "password": {
+    "label": "비밀번호",
+    "confirmLabel": "비밀번호 확인",
+    "placeholder": "비밀번호 입력",
+    "confirmPlaceholder": "비밀번호 재입력",
+    "lengthRule": "8~20자",
+    "letterRule": "영문 포함",
+    "numberRule": "숫자 포함",
+    "specialRule": "특수문자 포함 (!@#$%^&* 등)",
+    "mismatch": "비밀번호가 일치하지 않습니다.",
+    "match": "비밀번호가 일치합니다.",
+    "required": "비밀번호를 입력해주세요.",
+    "invalid": "비밀번호 형식이 올바르지 않습니다."
   }
 }

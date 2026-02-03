@@ -20,11 +20,11 @@ export const StaffBookingSection = memo(function StaffBookingSection({
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [selectedStaffForSchedule, setSelectedStaffForSchedule] = useState<Staff | null>(null);
 
-  const { data: staffResponse, isLoading, updateStaff, isUpdating, refetch } = useStaff(salonId, {
+  const { staffData, isLoading, updateStaff, isUpdating, refetch } = useStaff(salonId, {
     enabled: !!salonId,
   });
 
-  const staffList = staffResponse?.data || [];
+  const staffList = staffData;
 
   const handleBookingToggle = useCallback(
     async (staffId: string, enabled: boolean) => {
