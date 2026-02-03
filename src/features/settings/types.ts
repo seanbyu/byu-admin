@@ -40,3 +40,45 @@ export interface AccountInfo {
 }
 
 export type SettingsTab = 'store' | 'plan' | 'account';
+
+export interface AccountFormSectionProps {
+  accountInfo: AccountInfo | null;
+  isUpdating: boolean;
+  isSendingCode: boolean;
+  isVerificationSent: boolean;
+  isVerifying: boolean;
+  isPhoneVerified: boolean;
+  onSave: (data: Partial<AccountInfo>) => Promise<void>;
+  onSendVerificationCode: (phone: string) => Promise<void>;
+  onVerifyCode: (phone: string, code: string) => Promise<void>;
+  onVerificationSentChange: (sent: boolean) => void;
+  onPhoneVerifiedChange: (verified: boolean) => void;
+}
+
+export interface PasswordChangeSectionProps {
+  isChangingPassword: boolean;
+  onChangePassword: (data: {
+    currentPassword: string;
+    newPassword: string;
+  }) => Promise<void>;
+}
+
+export interface AccountTabProps {
+  accountInfo: AccountInfo | null;
+  isLoading: boolean;
+  isUpdating: boolean;
+  isChangingPassword: boolean;
+  isSendingCode: boolean;
+  isVerificationSent: boolean;
+  isVerifying: boolean;
+  isPhoneVerified: boolean;
+  onSave: (data: Partial<AccountInfo>) => Promise<void>;
+  onChangePassword: (data: {
+    currentPassword: string;
+    newPassword: string;
+  }) => Promise<void>;
+  onSendVerificationCode: (phone: string) => Promise<void>;
+  onVerifyCode: (phone: string, code: string) => Promise<void>;
+  onVerificationSentChange: (sent: boolean) => void;
+  onPhoneVerifiedChange: (verified: boolean) => void;
+}

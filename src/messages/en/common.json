@@ -73,6 +73,11 @@
     "applyFilter": "Apply Filter"
   },
   "comingSoon": "Coming Soon",
+  "verificationCode": "Verification Code",
+  "enterCode": "Enter verification code",
+  "verify": "Verify",
+  "resend": "Resend",
+  "codeExpired": "Verification code has expired. Please resend.",
   "dashboard": {
     "welcome": "Welcome, {name}!",
     "todayBookings": "Today's Bookings",

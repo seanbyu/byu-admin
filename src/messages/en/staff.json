@@ -49,9 +49,12 @@
     "limitReached": "Free plan limit reached.",
     "description": "Admin creates ID and password directly to share with the employee.",
     "email": "Employee Email",
+    "emailHint": "Please enter the employee's actual email address",
     "password": "Password",
     "passwordPlaceholder": "Set password",
     "passwordHint": "8-20 characters, letters + numbers + special chars",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter password",
     "name": "Name",
     "namePlaceholder": "John Doe",
     "role": "Role",
@@ -66,7 +69,14 @@
     "passwordRequired": "Please enter password.",
     "passwordLength": "Password must be 8-20 characters.",
     "passwordPattern": "Must include letters, numbers, and special characters.",
-    "loginRequired": "You must be logged in to register an employee."
+    "confirmPasswordRequired": "Please confirm your password.",
+    "passwordMismatch": "Passwords do not match.",
+    "loginRequired": "You must be logged in to register an employee.",
+    "checkDuplicate": "Check",
+    "emailAvailable": "Email is available.",
+    "emailTaken": "Email is already in use.",
+    "emailCheckError": "Error occurred while checking email.",
+    "emailCheckRequired": "Please check email availability."
   },
   "permissionModal": {
     "title": "Set Permissions",

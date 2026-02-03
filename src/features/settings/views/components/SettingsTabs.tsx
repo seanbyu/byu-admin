@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { SettingsTab } from '../../types';
@@ -9,9 +9,9 @@ import { SettingsTab } from '../../types';
 // Tab config - hoisted outside component
 // ============================================
 
-const TABS: { key: SettingsTab; labelKey: string }[] = [
-  { key: 'store', labelKey: 'settings.tabs.store' },
-  { key: 'plan', labelKey: 'settings.tabs.plan' },
+const ALL_TABS: { key: SettingsTab; labelKey: string; ownerOnly?: boolean }[] = [
+  { key: 'store', labelKey: 'settings.tabs.store', ownerOnly: true },
+  { key: 'plan', labelKey: 'settings.tabs.plan', ownerOnly: true },
   { key: 'account', labelKey: 'settings.tabs.account' },
 ];
 
@@ -60,6 +60,7 @@ const TabButton = memo(function TabButton({
 interface SettingsTabsProps {
   activeTab: SettingsTab;
   onTabChange: (tab: SettingsTab) => void;
+  isOwner?: boolean;
 }
 
 // ============================================
@@ -69,11 +70,17 @@ interface SettingsTabsProps {
 export const SettingsTabs = memo(function SettingsTabs({
   activeTab,
   onTabChange,
+  isOwner = false,
 }: SettingsTabsProps) {
+  // isOwner가 아니면 ownerOnly 탭은 제외
+  const visibleTabs = useMemo(() => {
+    return ALL_TABS.filter((tab) => !tab.ownerOnly || isOwner);
+  }, [isOwner]);
+
   return (
     <div className="border-b border-secondary-200">
       <nav className="flex" aria-label="Settings tabs">
-        {TABS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <TabButton
             key={tab.key}
             tabKey={tab.key}

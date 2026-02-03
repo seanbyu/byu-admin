@@ -1,11 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
 import { supabase } from '@/lib/supabase/client';
 import { createStaff } from '@/actions/staff';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { createAuthApi } from '@/features/auth/api';
+
+type CheckStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
+const authApi = createAuthApi(supabase);
 
 interface CreateStaffModalProps {
   isOpen: boolean;
@@ -27,11 +31,18 @@ export default function CreateStaffModal({
   const [name, setName] = useState('');
   const [role, setRole] = useState('STAFF');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+
+  // Email duplicate check state
+  const [emailCheckStatus, setEmailCheckStatus] = useState<CheckStatus>('idle');
+  const [emailCheckMessage, setEmailCheckMessage] = useState<string>('');
 
   const MAX_FREE_STAFF = 5;
   const isLimitReached = currentStaffCount >= MAX_FREE_STAFF;
@@ -74,14 +85,69 @@ export default function CreateStaffModal({
     return true;
   };
 
+  // 비밀번호 확인 검증
+  const validateConfirmPassword = (value: string): boolean => {
+    if (!value) {
+      setConfirmPasswordError(t('staff.validation.confirmPasswordRequired'));
+      return false;
+    }
+    if (value !== password) {
+      setConfirmPasswordError(t('staff.validation.passwordMismatch'));
+      return false;
+    }
+    setConfirmPasswordError(null);
+    return true;
+  };
+
+  // 이메일 중복 확인
+  const checkEmailDuplicate = useCallback(async () => {
+    if (!email) {
+      setEmailError(t('staff.validation.emailRequired'));
+      return;
+    }
+
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    if (!emailRegex.test(email)) {
+      setEmailError(t('staff.validation.emailInvalid'));
+      return;
+    }
+
+    setEmailCheckStatus('checking');
+    setEmailCheckMessage('');
+    setEmailError(null);
+
+    try {
+      const data = await authApi.checkDuplicate({ type: 'email', value: email });
+
+      if (data.available) {
+        setEmailCheckStatus('available');
+        setEmailCheckMessage(t('staff.validation.emailAvailable'));
+      } else {
+        setEmailCheckStatus('taken');
+        setEmailCheckMessage(t('staff.validation.emailTaken'));
+      }
+    } catch (err: any) {
+      console.error(err);
+      setEmailCheckStatus('error');
+      setEmailCheckMessage(t('staff.validation.emailCheckError'));
+    }
+  }, [email, t]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // 유효성 검사
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
+    const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
 
-    if (!isEmailValid || !isPasswordValid) {
+    if (!isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+      return;
+    }
+
+    // 이메일 중복 확인 여부 체크
+    if (emailCheckStatus !== 'available') {
+      setError(t('staff.validation.emailCheckRequired'));
       return;
     }
 
@@ -117,17 +183,13 @@ export default function CreateStaffModal({
       setEmail('');
       setRole('STAFF');
       setPassword('');
+      setConfirmPassword('');
       setEmailError(null);
       setPasswordError(null);
+      setConfirmPasswordError(null);
+      setEmailCheckStatus('idle');
+      setEmailCheckMessage('');
     } catch (err: any) {
-      if (
-        err.message?.includes('User from sub claim') ||
-        err.message?.toLowerCase().includes('unauthorized')
-      ) {
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-        return;
-      }
       setError(err.message);
     } finally {
       setLoading(false);
@@ -170,23 +232,48 @@ export default function CreateStaffModal({
           >
             {t('staff.createModal.email')}
           </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (emailError) validateEmail(e.target.value);
-            }}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-              emailError ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="example@email.com"
-            disabled={isLimitReached}
-          />
-          {emailError && (
+          <div className="flex gap-2">
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) validateEmail(e.target.value);
+                // 이메일 변경 시 중복확인 상태 초기화
+                if (emailCheckStatus !== 'idle') {
+                  setEmailCheckStatus('idle');
+                  setEmailCheckMessage('');
+                }
+              }}
+              className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                emailError ? 'border-red-500' : emailCheckStatus === 'available' ? 'border-green-500' : 'border-gray-300'
+              }`}
+              placeholder="example@email.com"
+              disabled={isLimitReached}
+            />
+            <button
+              type="button"
+              onClick={checkEmailDuplicate}
+              disabled={isLimitReached || emailCheckStatus === 'checking' || !email}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {emailCheckStatus === 'checking' ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                t('staff.validation.checkDuplicate')
+              )}
+            </button>
+          </div>
+          {emailError ? (
             <p className="text-sm text-red-500">{emailError}</p>
+          ) : emailCheckMessage ? (
+            <p className={`text-sm ${emailCheckStatus === 'available' ? 'text-green-600' : 'text-red-600'}`}>
+              {emailCheckMessage}
+            </p>
+          ) : (
+            <p className="text-xs text-gray-500">{t('staff.createModal.emailHint')}</p>
           )}
         </div>
 
@@ -232,6 +319,42 @@ export default function CreateStaffModal({
 
         <div className="space-y-2">
           <label
+            htmlFor="confirmPassword"
+            className="block text-sm font-medium text-gray-700"
+          >
+            {t('staff.createModal.confirmPassword')}
+          </label>
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              required
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (confirmPasswordError) validateConfirmPassword(e.target.value);
+              }}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
+                confirmPasswordError ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder={t('staff.createModal.confirmPasswordPlaceholder')}
+              disabled={isLimitReached}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          {confirmPasswordError && (
+            <p className="text-sm text-red-500">{confirmPasswordError}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label
             htmlFor="name"
             className="block text-sm font-medium text-gray-700"
           >
@@ -265,7 +388,6 @@ export default function CreateStaffModal({
           >
             <option value="STAFF">{t('staff.createModal.roleStaff')}</option>
             <option value="MANAGER">{t('staff.createModal.roleManager')}</option>
-            <option value="ADMIN">{t('staff.createModal.roleAdmin')}</option>
           </select>
         </div>
 

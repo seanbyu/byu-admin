@@ -49,9 +49,12 @@
     "limitReached": "무료 플랜의 제한 인원에 도달했습니다.",
     "description": "관리자가 아이디와 비밀번호를 직접 생성하여 직원에게 전달하는 방식입니다.",
     "email": "직원 이메일",
+    "emailHint": "직원이 실제 사용하는 이메일을 입력해주세요",
     "password": "비밀번호",
     "passwordPlaceholder": "비밀번호 설정",
     "passwordHint": "8~20자, 영문 + 숫자 + 특수문자 포함",
+    "confirmPassword": "비밀번호 확인",
+    "confirmPasswordPlaceholder": "비밀번호 재입력",
     "name": "이름",
     "namePlaceholder": "홍길동",
     "role": "역할",
@@ -66,7 +69,14 @@
     "passwordRequired": "비밀번호를 입력해주세요.",
     "passwordLength": "비밀번호는 8~20자여야 합니다.",
     "passwordPattern": "영문, 숫자, 특수문자를 모두 포함해야 합니다.",
-    "loginRequired": "직원을 등록하려면 로그인해야 합니다."
+    "confirmPasswordRequired": "비밀번호 확인을 입력해주세요.",
+    "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+    "loginRequired": "직원을 등록하려면 로그인해야 합니다.",
+    "checkDuplicate": "중복확인",
+    "emailAvailable": "사용 가능한 이메일입니다.",
+    "emailTaken": "이미 사용 중인 이메일입니다.",
+    "emailCheckError": "이메일 중복 확인 중 오류가 발생했습니다.",
+    "emailCheckRequired": "이메일 중복 확인을 해주세요."
   },
   "permissionModal": {
     "title": "권한 설정",

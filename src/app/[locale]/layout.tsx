@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import '../globals.css';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AuthInitializer } from '@/components/auth/AuthInitializer';
+import { ToastProvider } from '@/components/ui/ToastProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -35,8 +36,10 @@ export default async function RootLayout({
       <body className={inter.className} suppressHydrationWarning={true}>
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
-            <AuthInitializer />
-            {children}
+            <ToastProvider>
+              <AuthInitializer />
+              {children}
+            </ToastProvider>
           </QueryProvider>
         </NextIntlClientProvider>
       </body>

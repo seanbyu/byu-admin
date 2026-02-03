@@ -10,7 +10,7 @@ import { useStaffPositions } from '../../../hooks/useStaffPositions';
 import { ProfileImageUploader } from './ProfileImageUploader';
 import { PositionSelector } from './PositionSelector';
 import { SocialLinksForm } from './SocialLinksForm';
-import { PhoneInput } from './PhoneInput';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { StaffProfileModalProps, ProfileFormData } from './types';
 
 function StaffProfileModal({

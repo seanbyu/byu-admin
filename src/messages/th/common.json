@@ -73,6 +73,11 @@
     "applyFilter": "กรอง"
   },
   "comingSoon": "เร็วๆ นี้",
+  "verificationCode": "รหัสยืนยัน",
+  "enterCode": "กรอกรหัสยืนยัน",
+  "verify": "ยืนยัน",
+  "resend": "ส่งใหม่",
+  "codeExpired": "รหัสยืนยันหมดอายุแล้ว กรุณาส่งใหม่",
   "dashboard": {
     "welcome": "ยินดีต้อนรับ, {name}!",
     "todayBookings": "การจองวันนี้",

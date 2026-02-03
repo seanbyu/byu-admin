@@ -73,6 +73,11 @@
     "applyFilter": "필터 적용"
   },
   "comingSoon": "준비 중입니다",
+  "verificationCode": "인증번호",
+  "enterCode": "인증번호 입력",
+  "verify": "확인",
+  "resend": "재전송",
+  "codeExpired": "인증시간이 만료되었습니다. 다시 전송해주세요.",
   "dashboard": {
     "welcome": "환영합니다, {name}님!",
     "todayBookings": "오늘 예약",

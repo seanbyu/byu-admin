@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { VerificationCodeInput } from '@/components/ui/VerificationCodeInput';
 import { Check, X, Loader2, Eye, EyeOff, ChevronLeft } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { Select } from '@/components/ui/Select';
@@ -445,20 +446,17 @@ export default function RegisterPageView() {
             </div>
 
             {otpSent && !otpVerified && (
-              <div className="flex gap-2 mt-2">
-                <Input
-                  placeholder={t('placeholders.otp')}
-                  {...register('otp')}
+              <div className="mt-2">
+                <VerificationCodeInput
+                  value={otp || ''}
+                  onChange={(value) => setValue('otp', value)}
+                  onVerify={handleVerifyOtp}
+                  onResend={handleSendOtp}
+                  isVerifying={otpLoading}
+                  isSending={otpLoading}
+                  isVerified={otpVerified}
+                  startTimer={otpSent}
                 />
-                <Button
-                  type="button"
-                  onClick={handleVerifyOtp}
-                  disabled={otpLoading}
-                  variant="primary"
-                  className="h-[42px]"
-                >
-                  {t('verifyOtp')}
-                </Button>
               </div>
             )}
             {otpVerified && (

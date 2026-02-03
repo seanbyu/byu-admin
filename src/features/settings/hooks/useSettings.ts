@@ -117,7 +117,7 @@ export function usePlans() {
   };
 }
 
-export function useSubscription(salonId: string, options?: { enabled?: boolean }) {
+export function useSubscription(_salonId: string, _options?: { enabled?: boolean }) {
   const upgradePlan = useCallback(async (planId: string) => {
     console.log('Upgrade plan:', planId);
     // TODO: Implement real API call
@@ -134,24 +134,89 @@ export function useSubscription(salonId: string, options?: { enabled?: boolean }
 }
 
 // ============================================
-// Phone Verification Hook
+// Account Info Hook (Update Only)
+// 조회는 authStore에서 하고, 업데이트만 API 호출
 // ============================================
 
-export function usePhoneVerification() {
-  const sendCodeMutation = useMutation({
-    mutationFn: (phone: string) => settingsApi.sendVerificationCode(phone),
-  });
+import { AccountInfo } from '../types';
 
-  const verifyMutation = useMutation({
-    mutationFn: ({ phone, code }: { phone: string; code: string }) =>
-      settingsApi.verifyCode(phone, code),
+export function useAccountInfo(userId: string) {
+  const updateMutation = useMutation({
+    mutationFn: (data: Partial<AccountInfo>) => settingsApi.updateAccountInfo(userId, data),
   });
 
   return {
-    sendCode: sendCodeMutation.mutateAsync,
-    isSendingCode: sendCodeMutation.isPending,
-    verifyCode: verifyMutation.mutateAsync,
-    isVerifying: verifyMutation.isPending,
+    updateAccountInfo: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
+    updateError: updateMutation.error,
+  };
+}
+
+// ============================================
+// Phone Verification Hook (Supabase - Phone Change)
+// 이미 로그인된 사용자의 전화번호 변경용
+// ============================================
+
+import { supabase } from '@/lib/supabase/client';
+
+// E.164 포맷으로 변환 (예: +82-01012345678 → 821012345678)
+// Supabase 테스트 번호 형식과 맞추기 위해 + 기호 제거
+const toE164 = (phone: string): string => {
+  // 하이픈 및 + 기호 제거
+  let formatted = phone.replace(/[-+]/g, '');
+
+  // 국가코드 뒤의 0 제거 (예: 820 → 82, 660 → 66)
+  // 82010... → 8210..., 66095... → 6695...
+  formatted = formatted.replace(/^(\d{1,3})0/, '$1');
+
+  return formatted;
+};
+
+export function usePhoneVerification() {
+  // 전화번호 변경 요청 (인증 코드 발송)
+  const sendOtpMutation = useMutation({
+    mutationFn: async (phone: string) => {
+      const e164Phone = toE164(phone);
+      console.log('[OTP] Sending OTP to:', { original: phone, e164: e164Phone });
+      // updateUser를 사용하면 새 전화번호로 인증 코드가 발송됨
+      const { error } = await supabase.auth.updateUser({ phone: e164Phone });
+      if (error) {
+        console.error('[OTP] Send error:', error);
+        throw error;
+      }
+      console.log('[OTP] OTP sent successfully');
+      return { success: true, e164Phone };
+    },
+  });
+
+  // 인증 코드 확인
+  const verifyOtpMutation = useMutation({
+    mutationFn: async ({ phone, token }: { phone: string; token: string }) => {
+      const e164Phone = toE164(phone);
+      console.log('[OTP] Verifying OTP:', { original: phone, e164: e164Phone, token });
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: e164Phone,
+        token,
+        type: 'sms', // 테스트 번호 호환을 위해 sms 타입 사용
+      });
+      if (error) {
+        console.error('[OTP] Verify error:', error);
+        throw error;
+      }
+      console.log('[OTP] Verification successful:', data.user);
+      return { success: true, user: data.user };
+    },
+  });
+
+  return {
+    sendCode: sendOtpMutation.mutateAsync,
+    isSendingCode: sendOtpMutation.isPending,
+    sendError: sendOtpMutation.error,
+    verifyCode: verifyOtpMutation.mutateAsync,
+    isVerifying: verifyOtpMutation.isPending,
+    verifyError: verifyOtpMutation.error,
+    resetSendCode: sendOtpMutation.reset,
+    resetVerify: verifyOtpMutation.reset,
   };
 }
 

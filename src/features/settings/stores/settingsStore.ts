@@ -13,6 +13,7 @@ interface SettingsUIState {
 
   // Phone verification
   isVerificationSent: boolean;
+  isPhoneVerified: boolean;
 
   // Store info editing states
   editingField: 'name' | 'address' | 'instagram' | null;
@@ -25,6 +26,7 @@ interface SettingsUIActions {
 
   // Verification
   setVerificationSent: (sent: boolean) => void;
+  setPhoneVerified: (verified: boolean) => void;
 
   // Field editing - 단일 함수로 통합
   startEditing: (field: 'name' | 'address' | 'instagram', initialValue: string) => void;
@@ -41,6 +43,7 @@ type SettingsUIStore = SettingsUIState & { actions: SettingsUIActions };
 const initialState: SettingsUIState = {
   activeTab: 'store',
   isVerificationSent: false,
+  isPhoneVerified: false,
   editingField: null,
   tempValue: '',
 };
@@ -51,6 +54,8 @@ export const useSettingsUIStore = create<SettingsUIStore>((set) => ({
     setActiveTab: (tab) => set({ activeTab: tab }),
 
     setVerificationSent: (sent) => set({ isVerificationSent: sent }),
+
+    setPhoneVerified: (verified) => set({ isPhoneVerified: verified }),
 
     startEditing: (field, initialValue) => set({
       editingField: field,
@@ -73,6 +78,7 @@ export const useSettingsUIStore = create<SettingsUIStore>((set) => ({
 
 export const selectActiveTab = (state: SettingsUIStore) => state.activeTab;
 export const selectIsVerificationSent = (state: SettingsUIStore) => state.isVerificationSent;
+export const selectIsPhoneVerified = (state: SettingsUIStore) => state.isPhoneVerified;
 export const selectEditingField = (state: SettingsUIStore) => state.editingField;
 export const selectTempValue = (state: SettingsUIStore) => state.tempValue;
 export const selectSettingsActions = (state: SettingsUIStore) => state.actions;
