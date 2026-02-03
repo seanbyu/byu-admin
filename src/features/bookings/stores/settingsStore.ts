@@ -5,6 +5,7 @@ import { devtools } from 'zustand/middleware';
 import { BusinessHours, Holiday } from '@/types';
 import { SupportedLanguage } from '../constants';
 import { getDefaultBusinessHours, getTodayString } from '../utils';
+import { ContactChannels } from '../hooks/useSalonSettings';
 
 // ============================================
 // Settings Form State Store (Zustand)
@@ -30,6 +31,9 @@ interface SettingsFormState {
   interpreterEnabled: boolean;
   supportedLanguages: SupportedLanguage[];
 
+  // Contact Channels Form
+  contactChannels: ContactChannels;
+
   // Form status
   isDirty: boolean;
 
@@ -51,6 +55,11 @@ interface SettingsFormState {
   setSupportedLanguages: (languages: SupportedLanguage[]) => void;
   toggleLanguage: (language: SupportedLanguage) => void;
 
+  // Contact Channels Actions
+  setContactChannels: (channels: ContactChannels) => void;
+  toggleContactChannel: (channel: 'line' | 'instagram') => void;
+  setContactChannelId: (channel: 'line' | 'instagram', id: string) => void;
+
   // Initialize from server data
   initializeFromServer: (data: {
     businessHours?: BusinessHours[];
@@ -60,6 +69,7 @@ interface SettingsFormState {
       booking_advance_days?: number;
       interpreter_enabled?: boolean;
       supported_languages?: SupportedLanguage[];
+      contact_channels?: ContactChannels;
     };
   }) => void;
 
@@ -74,6 +84,11 @@ const initialNewHoliday = {
   reason: '',
 };
 
+const initialContactChannels: ContactChannels = {
+  line: { enabled: false, id: '' },
+  instagram: { enabled: false, id: '' },
+};
+
 const initialState = {
   businessHours: getDefaultBusinessHours(),
   slotDuration: 30,
@@ -82,6 +97,7 @@ const initialState = {
   newHoliday: initialNewHoliday,
   interpreterEnabled: false,
   supportedLanguages: [] as SupportedLanguage[],
+  contactChannels: initialContactChannels,
   isDirty: false,
 };
 
@@ -167,10 +183,19 @@ export const useSettingsFormStore = create<SettingsFormState>()(
 
       toggleInterpreterEnabled: () =>
         set(
-          (state) => ({
-            interpreterEnabled: !state.interpreterEnabled,
-            isDirty: true,
-          }),
+          (state) => {
+            const newEnabled = !state.interpreterEnabled;
+            // 토글 ON 시 선택된 언어가 없으면 영어를 기본으로 선택
+            const newLanguages =
+              newEnabled && state.supportedLanguages.length === 0
+                ? ['en' as SupportedLanguage]
+                : state.supportedLanguages;
+            return {
+              interpreterEnabled: newEnabled,
+              supportedLanguages: newLanguages,
+              isDirty: true,
+            };
+          },
           false,
           'toggleInterpreterEnabled'
         ),
@@ -180,14 +205,57 @@ export const useSettingsFormStore = create<SettingsFormState>()(
 
       toggleLanguage: (language) =>
         set(
+          (state) => {
+            const isSelected = state.supportedLanguages.includes(language);
+            // 통역 서비스가 활성화되어 있고, 마지막 언어를 해제하려는 경우 방지
+            if (isSelected && state.interpreterEnabled && state.supportedLanguages.length === 1) {
+              return state; // 변경 없이 현재 상태 유지
+            }
+            return {
+              supportedLanguages: isSelected
+                ? state.supportedLanguages.filter((l) => l !== language)
+                : [...state.supportedLanguages, language],
+              isDirty: true,
+            };
+          },
+          false,
+          'toggleLanguage'
+        ),
+
+      // Contact Channels Actions
+      setContactChannels: (channels) =>
+        set({ contactChannels: channels, isDirty: true }, false, 'setContactChannels'),
+
+      toggleContactChannel: (channel) =>
+        set(
           (state) => ({
-            supportedLanguages: state.supportedLanguages.includes(language)
-              ? state.supportedLanguages.filter((l) => l !== language)
-              : [...state.supportedLanguages, language],
+            contactChannels: {
+              ...state.contactChannels,
+              [channel]: {
+                ...state.contactChannels[channel],
+                enabled: !state.contactChannels[channel]?.enabled,
+              },
+            },
             isDirty: true,
           }),
           false,
-          'toggleLanguage'
+          'toggleContactChannel'
+        ),
+
+      setContactChannelId: (channel, id) =>
+        set(
+          (state) => ({
+            contactChannels: {
+              ...state.contactChannels,
+              [channel]: {
+                ...state.contactChannels[channel],
+                id,
+              },
+            },
+            isDirty: true,
+          }),
+          false,
+          'setContactChannelId'
         ),
 
       // Initialize from server data
@@ -200,6 +268,7 @@ export const useSettingsFormStore = create<SettingsFormState>()(
             bookingAdvanceDays: data.settings?.booking_advance_days || 30,
             interpreterEnabled: data.settings?.interpreter_enabled || false,
             supportedLanguages: (data.settings?.supported_languages as SupportedLanguage[]) || [],
+            contactChannels: data.settings?.contact_channels || initialContactChannels,
             isDirty: false,
           },
           false,
@@ -227,4 +296,5 @@ export const selectHolidays = (state: SettingsFormState) => state.holidays;
 export const selectNewHoliday = (state: SettingsFormState) => state.newHoliday;
 export const selectInterpreterEnabled = (state: SettingsFormState) => state.interpreterEnabled;
 export const selectSupportedLanguages = (state: SettingsFormState) => state.supportedLanguages;
+export const selectContactChannels = (state: SettingsFormState) => state.contactChannels;
 export const selectIsDirty = (state: SettingsFormState) => state.isDirty;

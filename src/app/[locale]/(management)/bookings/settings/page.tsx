@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { ShopSettingsSection } from '@/features/bookings/components/ShopSettingsSection';
 import { StaffBookingSection } from '@/features/bookings/components/StaffBookingSection';
 import { InterpreterServiceSection } from '@/features/bookings/components/InterpreterServiceSection';
+import { ContactChannelsSection } from '@/features/bookings/components/ContactChannelsSection';
 
 export default function OnlineBookingSettingsPage() {
   const t = useTranslations();
@@ -40,6 +41,9 @@ export default function OnlineBookingSettingsPage() {
 
         {/* 통역 서비스 설정 */}
         <InterpreterServiceSection salonId={salonId} />
+
+        {/* 문의 채널 설정 */}
+        <ContactChannelsSection salonId={salonId} />
 
         {/* 샵 영업 설정 */}
         <ShopSettingsSection salonId={salonId} />

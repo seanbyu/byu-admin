@@ -71,6 +71,14 @@
         "ja": "Japanese",
         "vi": "Vietnamese"
       }
+    },
+    "contactChannels": {
+      "title": "Contact Channels",
+      "description": "Set up contact channels for customer inquiries. Customers can reach you through these channels.",
+      "linePlaceholder": "@salonname or https://line.me/ti/p/...",
+      "lineHint": "Enter your LINE Official Account ID or friend add URL",
+      "instagramPlaceholder": "@instagram_username",
+      "instagramHint": "Enter your Instagram username (with or without @)"
     }
   }
 }

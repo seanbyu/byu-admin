@@ -10,11 +10,23 @@ import { SupportedLanguage } from '../constants';
 // Salon Settings Types
 // ============================================
 
+// Contact Channel Settings
+export interface ContactChannel {
+  enabled: boolean;
+  id: string; // LINE ID 또는 Instagram username
+}
+
+export interface ContactChannels {
+  line?: ContactChannel;
+  instagram?: ContactChannel;
+}
+
 export interface SalonSettings {
   slot_duration_minutes?: number;
   booking_advance_days?: number;
   interpreter_enabled?: boolean;
   supported_languages?: SupportedLanguage[];
+  contact_channels?: ContactChannels;
 }
 
 export interface SalonSettingsData {
@@ -124,6 +136,21 @@ export function useInterpreterSettingsMutation(salonId: string) {
         settings: {
           interpreter_enabled: interpreterEnabled,
           supported_languages: supportedLanguages,
+        },
+      }),
+  };
+}
+
+// Contact channels mutation
+export function useContactChannelsMutation(salonId: string) {
+  const mutation = useSalonSettingsMutation(salonId);
+
+  return {
+    ...mutation,
+    mutateContactChannels: (contactChannels: ContactChannels) =>
+      mutation.mutateAsync({
+        settings: {
+          contact_channels: contactChannels,
         },
       }),
   };

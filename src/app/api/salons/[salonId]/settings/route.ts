@@ -64,9 +64,20 @@ export async function PATCH(
       updates.holidays = body.holidays;
     }
 
-    // Handle settings update
+    // Handle settings update (merge with existing settings)
     if (body.settings) {
-      updates.settings = body.settings;
+      // Fetch current settings to merge
+      const { data: currentData } = await supabase
+        .from('salons')
+        .select('settings')
+        .eq('id', salonId)
+        .single();
+
+      const currentSettings = currentData?.settings || {};
+      updates.settings = {
+        ...currentSettings,
+        ...body.settings,
+      };
     }
 
     updates.updated_at = new Date().toISOString();

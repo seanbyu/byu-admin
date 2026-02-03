@@ -71,6 +71,14 @@
         "ja": "일본어",
         "vi": "베트남어"
       }
+    },
+    "contactChannels": {
+      "title": "문의 채널 설정",
+      "description": "고객 문의를 받을 채널을 설정합니다. 고객이 이 채널을 통해 연락할 수 있습니다.",
+      "linePlaceholder": "@salonname 또는 https://line.me/ti/p/...",
+      "lineHint": "LINE 공식계정 ID 또는 친구추가 URL을 입력하세요",
+      "instagramPlaceholder": "@instagram_username",
+      "instagramHint": "Instagram 사용자명을 입력하세요 (@ 포함/미포함 가능)"
     }
   }
 }

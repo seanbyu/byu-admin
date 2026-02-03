@@ -307,3 +307,68 @@ CREATE POLICY "Salon staff can respond to reviews"
   USING (
     salon_id = get_my_salon_id()
   );
+
+-- ============================================
+-- User Favorite Salons (즐겨찾기)
+-- ============================================
+ALTER TABLE user_favorite_salons ENABLE ROW LEVEL SECURITY;
+
+-- Users can view their own favorites
+CREATE POLICY "Users can view their own favorites"
+  ON user_favorite_salons FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Users can add favorites
+CREATE POLICY "Users can add favorites"
+  ON user_favorite_salons FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Users can remove their own favorites
+CREATE POLICY "Users can remove their own favorites"
+  ON user_favorite_salons FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Salon admins can view who favorited their salon (analytics)
+CREATE POLICY "Salon admins can view their salon favorites"
+  ON user_favorite_salons FOR SELECT
+  USING (
+    salon_id = get_my_salon_id() AND
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
+  );
+
+-- ============================================
+-- User Favorite Artists (아티스트 즐겨찾기)
+-- ============================================
+ALTER TABLE user_favorite_artists ENABLE ROW LEVEL SECURITY;
+
+-- Users can view their own favorite artists
+CREATE POLICY "Users can view their own favorite artists"
+  ON user_favorite_artists FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Users can add favorite artists
+CREATE POLICY "Users can add favorite artists"
+  ON user_favorite_artists FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Users can remove their own favorite artists
+CREATE POLICY "Users can remove their own favorite artists"
+  ON user_favorite_artists FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Artists can view who favorited them (analytics)
+CREATE POLICY "Artists can view their own favorites"
+  ON user_favorite_artists FOR SELECT
+  USING (auth.uid() = artist_id);
+
+-- Salon admins can view favorite stats for their salon's artists
+CREATE POLICY "Salon admins can view their artists favorites"
+  ON user_favorite_artists FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM staff_profiles sp
+      WHERE sp.user_id = user_favorite_artists.artist_id
+      AND sp.salon_id = get_my_salon_id()
+    ) AND
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
+  );

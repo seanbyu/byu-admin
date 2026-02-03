@@ -71,6 +71,14 @@
         "ja": "ญี่ปุ่น",
         "vi": "เวียดนาม"
       }
+    },
+    "contactChannels": {
+      "title": "ช่องทางติดต่อ",
+      "description": "ตั้งค่าช่องทางติดต่อสำหรับการสอบถามของลูกค้า ลูกค้าสามารถติดต่อคุณผ่านช่องทางเหล่านี้",
+      "linePlaceholder": "@salonname หรือ https://line.me/ti/p/...",
+      "lineHint": "กรอก LINE Official Account ID หรือ URL เพิ่มเพื่อน",
+      "instagramPlaceholder": "@instagram_username",
+      "instagramHint": "กรอกชื่อผู้ใช้ Instagram (มีหรือไม่มี @ ก็ได้)"
     }
   }
 }
