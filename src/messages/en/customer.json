@@ -1,11 +1,85 @@
 {
   "title": "Customer Management",
-  "customerNumber": "Customer No.",
+  "pageDescription": "Manage customer information and view service history",
+  "customerNumber": "Customer Number",
   "name": "Name",
   "phone": "Phone",
   "email": "Email",
   "notes": "Notes",
   "lastVisit": "Last Visit",
   "totalVisits": "Total Visits",
-  "addCustomer": "Add Customer"
+  "addCustomer": "Add Customer",
+  "noCustomers": "No customers registered",
+  "noSearchResults": "No search results",
+  "noVisit": "No visit record",
+  "latestBooking": "Latest Booking",
+  "primaryArtist": "Primary Artist",
+  "favoriteService": "Favorite Service",
+
+  "type": {
+    "foreign": "Foreign"
+  },
+
+  "filter": {
+    "all": "All",
+    "new": "New",
+    "returning": "Returning",
+    "regular": "Regular",
+    "dormant": "Dormant",
+    "vip": "VIP"
+  },
+
+  "sort": {
+    "lastVisit": "Last Visit",
+    "totalVisits": "Total Visits",
+    "totalSpent": "Total Spent",
+    "name": "Name",
+    "createdAt": "Created At"
+  },
+
+  "view": {
+    "card": "Card",
+    "table": "Table"
+  },
+
+  "search": {
+    "placeholder": "Search by name, phone, or email..."
+  },
+
+  "field": {
+    "name": "Name",
+    "contact": "Contact",
+    "phone": "Phone",
+    "email": "Email",
+    "tags": "Tags",
+    "totalVisits": "Total Visits",
+    "totalSpent": "Total Spent",
+    "lastVisit": "Last Visit",
+    "firstVisit": "First Visit",
+    "primaryArtist": "Primary Artist",
+    "favoriteService": "Favorite Service",
+    "notes": "Notes"
+  },
+
+  "stats": {
+    "visits": "Visits",
+    "spent": "Spent",
+    "totalVisits": "Total Visits",
+    "totalSpent": "Total Spent",
+    "avgInterval": "Avg Visit Interval",
+    "avgSpending": "Avg Spending",
+    "favoriteService": "Favorite Service",
+    "favoriteArtist": "Favorite Artist"
+  },
+
+  "chart": {
+    "title": "Customer Chart",
+    "noData": "Unable to load customer information",
+    "statistics": "Statistics",
+    "favorites": "Favorites",
+    "serviceHistory": "Service History",
+    "noHistory": "No service history",
+    "customerNotes": "Customer Notes",
+    "staffNotes": "Staff Notes"
+  }
 }

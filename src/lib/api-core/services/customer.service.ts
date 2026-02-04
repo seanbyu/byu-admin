@@ -14,6 +14,28 @@ interface CreateCustomerInput {
   notes?: string;
 }
 
+interface GetCustomersQueryParams {
+  filter?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
+interface CustomerListItem extends DBCustomer {
+  total_spent: number;
+  tags: string[];
+  primary_artist?: {
+    id: string;
+    name: string;
+  };
+  latest_booking?: {
+    booking_date: string;
+    artist_name: string;
+  };
+}
+
 export class CustomerService {
   private repository: CustomerRepository;
 
@@ -27,6 +49,154 @@ export class CustomerService {
 
   async getCustomer(id: string): Promise<DBCustomer> {
     return this.repository.getCustomer(id);
+  }
+
+  /**
+   * 고객 목록 조회 (필터링, 정렬, 통계 포함)
+   * - async-parallel: bookings 데이터를 함께 조회
+   * - js-cache-function-results: 필터 로직 재사용
+   */
+  async getCustomersWithFilters(
+    salonId: string,
+    queryParams: GetCustomersQueryParams
+  ): Promise<{ data: CustomerListItem[]; total: number; page: number; limit: number }> {
+    const limit = queryParams.limit || 50;
+    const offset = queryParams.offset || 0;
+    const page = Math.floor(offset / limit) + 1;
+
+    // Repository에서 데이터 조회
+    const { customers, total } = await this.repository.getCustomersWithStats({
+      salonId,
+      ...queryParams,
+    });
+
+    // 통계 계산 및 태그 추가
+    // rerender-memo: 복잡한 계산을 별도 함수로 분리
+    const enrichedCustomers = customers.map((customer: any) => {
+      const bookings = customer.bookings || [];
+      const completedBookings = bookings.filter((b: any) => b.status === 'COMPLETED');
+
+      // 총 매출 계산
+      const totalSpent = completedBookings.reduce(
+        (sum: number, b: any) => sum + (b.total_price || 0),
+        0
+      );
+
+      // 최근 예약 정보
+      const latestBooking = bookings.length > 0 ? bookings[0] : null;
+
+      // 태그 생성
+      const tags = this.generateCustomerTags(customer, completedBookings);
+
+      // Primary artist (가장 많이 방문한 아티스트)
+      const artistCounts = new Map<string, { name: string; count: number }>();
+      completedBookings.forEach((b: any) => {
+        if (b.artist?.name) {
+          const current = artistCounts.get(b.artist.name) || { name: b.artist.name, count: 0 };
+          artistCounts.set(b.artist.name, { ...current, count: current.count + 1 });
+        }
+      });
+
+      const primaryArtist = Array.from(artistCounts.values()).sort(
+        (a, b) => b.count - a.count
+      )[0];
+
+      // bookings 필드 제거하고 반환
+      const { bookings: _, ...customerWithoutBookings } = customer;
+
+      return {
+        ...customerWithoutBookings,
+        total_spent: totalSpent,
+        tags,
+        primary_artist: primaryArtist
+          ? { id: '', name: primaryArtist.name }
+          : undefined,
+        latest_booking: latestBooking
+          ? {
+              booking_date: latestBooking.booking_date,
+              artist_name: latestBooking.artist?.name || '',
+            }
+          : undefined,
+      };
+    });
+
+    // 필터 적용 (클라이언트 측)
+    let filteredCustomers = enrichedCustomers;
+    if (queryParams.filter && queryParams.filter !== 'all') {
+      filteredCustomers = this.applyFilter(enrichedCustomers, queryParams.filter);
+    }
+
+    return {
+      data: filteredCustomers,
+      total: filteredCustomers.length,
+      page,
+      limit,
+    };
+  }
+
+  /**
+   * 고객 태그 생성
+   * - js-early-exit: 조건에 따라 조기 반환
+   */
+  private generateCustomerTags(customer: any, completedBookings: any[]): string[] {
+    const tags: string[] = [];
+
+    // 신규 고객
+    if (customer.total_visits === 0) {
+      tags.push('NEW');
+    }
+
+    // 재방문 고객
+    if (customer.total_visits > 0 && customer.total_visits < 5) {
+      tags.push('RETURNING');
+    }
+
+    // 단골 고객
+    if (customer.total_visits >= 5) {
+      tags.push('REGULAR');
+    }
+
+    // 휴면 고객 (30일 이상 미방문)
+    if (customer.last_visit) {
+      const daysSinceLastVisit =
+        (Date.now() - new Date(customer.last_visit).getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceLastVisit > 30) {
+        tags.push('DORMANT');
+      }
+    }
+
+    // VIP (총 매출 기준 - 임의로 100,000원 이상)
+    const totalSpent = completedBookings.reduce(
+      (sum, b) => sum + (b.total_price || 0),
+      0
+    );
+    if (totalSpent >= 100000) {
+      tags.push('VIP');
+    }
+
+    return tags;
+  }
+
+  /**
+   * 필터 적용
+   * - js-set-map-lookups: Set을 사용하여 O(1) 조회
+   */
+  private applyFilter(customers: CustomerListItem[], filter: string): CustomerListItem[] {
+    switch (filter) {
+      case 'new':
+        return customers.filter((c) => c.tags.includes('NEW'));
+      case 'returning':
+        return customers.filter((c) => c.tags.includes('RETURNING'));
+      case 'regular':
+        return customers.filter((c) => c.tags.includes('REGULAR'));
+      case 'dormant':
+        return customers.filter((c) => c.tags.includes('DORMANT'));
+      case 'vip':
+        return customers.filter((c) => c.tags.includes('VIP'));
+      case 'all':
+      default:
+        return customers;
+    }
   }
 
   async createCustomer(
@@ -65,5 +235,145 @@ export class CustomerService {
 
   async deleteCustomer(id: string): Promise<boolean> {
     return this.repository.deleteCustomer(id);
+  }
+
+  /**
+   * 고객 차트 조회 (상세 정보 + 시술 이력 + 통계)
+   * - async-parallel: 고객 정보와 예약 정보를 병렬 조회
+   */
+  async getCustomerChart(salonId: string, customerId: string) {
+    // 고객 정보와 예약 정보를 병렬 조회
+    const [customer, bookingsData] = await Promise.all([
+      this.repository.getCustomer(customerId),
+      this.repository.getCustomerBookings(customerId),
+    ]);
+
+    const bookings = bookingsData || [];
+    const completedBookings = bookings.filter((b: any) => b.status === 'COMPLETED');
+
+    // 통계 계산
+    const totalSpent = completedBookings.reduce(
+      (sum: number, b: any) => sum + (b.total_price || 0),
+      0
+    );
+
+    // 방문 간격 계산
+    const visitDates = completedBookings
+      .map((b: any) => new Date(b.booking_date).getTime())
+      .sort((a: number, b: number) => a - b);
+
+    let avgVisitInterval = 0;
+    if (visitDates.length > 1) {
+      const intervals = [];
+      for (let i = 1; i < visitDates.length; i++) {
+        intervals.push((visitDates[i] - visitDates[i - 1]) / (1000 * 60 * 60 * 24));
+      }
+      avgVisitInterval = intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
+    }
+
+    // 서비스 카운트
+    const serviceCounts = new Map<
+      string,
+      { id: string; name: string; count: number }
+    >();
+    completedBookings.forEach((b: any) => {
+      if (b.service?.name) {
+        const current = serviceCounts.get(b.service.name) || {
+          id: b.service.id || '',
+          name: b.service.name,
+          count: 0,
+        };
+        serviceCounts.set(b.service.name, { ...current, count: current.count + 1 });
+      }
+    });
+
+    const favoriteServiceData = Array.from(serviceCounts.values()).sort(
+      (a, b) => b.count - a.count
+    )[0];
+
+    // 아티스트 카운트
+    const artistCounts = new Map<
+      string,
+      { id: string; name: string; count: number }
+    >();
+    completedBookings.forEach((b: any) => {
+      if (b.artist?.name) {
+        const current = artistCounts.get(b.artist.name) || {
+          id: b.artist.id || '',
+          name: b.artist.name,
+          count: 0,
+        };
+        artistCounts.set(b.artist.name, { ...current, count: current.count + 1 });
+      }
+    });
+
+    const favoriteArtistData = Array.from(artistCounts.values()).sort(
+      (a, b) => b.count - a.count
+    )[0];
+
+    // 태그 생성
+    const tags = this.generateCustomerTags(customer, completedBookings);
+
+    // 시술 이력 (최근 순)
+    const serviceHistory = completedBookings
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.booking_date).getTime() - new Date(a.booking_date).getTime()
+      )
+      .map((b: any) => ({
+        id: b.id,
+        booking_date: b.booking_date,
+        start_time: b.start_time,
+        service: {
+          id: b.service?.id || '',
+          name: b.service?.name || '',
+          name_en: b.service?.name_en,
+          name_th: b.service?.name_th,
+        },
+        artist: {
+          id: b.artist?.id || '',
+          name: b.artist?.name || '',
+        },
+        customer_notes: b.customer_notes,
+        staff_notes: b.staff_notes,
+        total_price: b.total_price || 0,
+        status: b.status,
+      }));
+
+    // Primary artist 계산
+    const primaryArtistData = Array.from(artistCounts.values()).sort(
+      (a, b) => b.count - a.count
+    )[0];
+
+    return {
+      customer: {
+        ...customer,
+        total_spent: totalSpent,
+        tags,
+        primary_artist: primaryArtistData
+          ? { id: primaryArtistData.id, name: primaryArtistData.name }
+          : undefined,
+        favorite_service: favoriteServiceData
+          ? { id: favoriteServiceData.id, name: favoriteServiceData.name }
+          : undefined,
+      },
+      stats: {
+        total_visits: customer.total_visits,
+        total_spent: totalSpent,
+        avg_visit_interval: avgVisitInterval,
+        avg_spending_per_visit:
+          completedBookings.length > 0 ? totalSpent / completedBookings.length : 0,
+        favorite_service: favoriteServiceData
+          ? { name: favoriteServiceData.name, count: favoriteServiceData.count }
+          : undefined,
+        favorite_artist: favoriteArtistData
+          ? { name: favoriteArtistData.name, count: favoriteArtistData.count }
+          : undefined,
+        first_visit_date: visitDates.length > 0 ? new Date(visitDates[0]) : null,
+        last_visit_date:
+          visitDates.length > 0 ? new Date(visitDates[visitDates.length - 1]) : null,
+      },
+      service_history: serviceHistory,
+    };
   }
 }

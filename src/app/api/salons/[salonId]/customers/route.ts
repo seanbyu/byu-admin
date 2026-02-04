@@ -14,13 +14,30 @@ export async function GET(
     const searchParams = req.nextUrl.searchParams;
     const id = searchParams.get('id');
 
+    // 개별 고객 조회
     if (id) {
       const data = await service.getCustomer(id);
       return NextResponse.json({ success: true, data });
     }
 
-    const data = await service.getCustomers(salonId);
-    return NextResponse.json({ success: true, data });
+    // 고객 목록 조회 (필터링, 정렬, 통계 포함)
+    const filter = searchParams.get('filter') || undefined;
+    const search = searchParams.get('search') || undefined;
+    const sortBy = searchParams.get('sort_by') || 'last_visit';
+    const sortOrder = (searchParams.get('sort_order') || 'desc') as 'asc' | 'desc';
+    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const offset = parseInt(searchParams.get('offset') || '0', 10);
+
+    const result = await service.getCustomersWithFilters(salonId, {
+      filter,
+      search,
+      sortBy,
+      sortOrder,
+      limit,
+      offset,
+    });
+
+    return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: error.message },

@@ -1,5 +1,6 @@
 {
   "title": "จัดการลูกค้า",
+  "pageDescription": "จัดการข้อมูลลูกค้าและดูประวัติการบริการ",
   "customerNumber": "หมายเลขลูกค้า",
   "name": "ชื่อ",
   "phone": "โทรศัพท์",
@@ -7,5 +8,78 @@
   "notes": "หมายเหตุ",
   "lastVisit": "เข้ามาล่าสุด",
   "totalVisits": "จำนวนครั้งที่เข้ามา",
-  "addCustomer": "เพิ่มลูกค้า"
+  "addCustomer": "เพิ่มลูกค้า",
+  "noCustomers": "ไม่มีลูกค้าที่ลงทะเบียน",
+  "noSearchResults": "ไม่พบผลการค้นหา",
+  "noVisit": "ไม่มีบันทึกการเข้ามา",
+  "latestBooking": "การจองล่าสุด",
+  "primaryArtist": "ช่างประจำ",
+  "favoriteService": "บริการที่ชอบ",
+
+  "type": {
+    "foreign": "ชาวต่างชาติ"
+  },
+
+  "filter": {
+    "all": "ทั้งหมด",
+    "new": "ลูกค้าใหม่",
+    "returning": "กลับมาอีกครั้ง",
+    "regular": "ประจำ",
+    "dormant": "ไม่ได้เข้ามานาน",
+    "vip": "วีไอพี"
+  },
+
+  "sort": {
+    "lastVisit": "เข้ามาล่าสุด",
+    "totalVisits": "จำนวนครั้งที่เข้ามา",
+    "totalSpent": "ยอดใช้จ่ายทั้งหมด",
+    "name": "ชื่อ",
+    "createdAt": "วันที่ลงทะเบียน"
+  },
+
+  "view": {
+    "card": "การ์ด",
+    "table": "ตาราง"
+  },
+
+  "search": {
+    "placeholder": "ค้นหาด้วยชื่อ, โทรศัพท์, หรืออีเมล..."
+  },
+
+  "field": {
+    "name": "ชื่อ",
+    "contact": "ติดต่อ",
+    "phone": "โทรศัพท์",
+    "email": "อีเมล",
+    "tags": "ป้ายกำกับ",
+    "totalVisits": "จำนวนครั้งทั้งหมด",
+    "totalSpent": "ยอดใช้จ่ายทั้งหมด",
+    "lastVisit": "เข้ามาล่าสุด",
+    "firstVisit": "เข้ามาครั้งแรก",
+    "primaryArtist": "ช่างประจำ",
+    "favoriteService": "บริการที่ชอบ",
+    "notes": "หมายเหตุ"
+  },
+
+  "stats": {
+    "visits": "ครั้ง",
+    "spent": "ใช้จ่าย",
+    "totalVisits": "จำนวนครั้งทั้งหมด",
+    "totalSpent": "ยอดใช้จ่ายทั้งหมด",
+    "avgInterval": "ระยะเวลาเฉลี่ยระหว่างการเข้ามา",
+    "avgSpending": "ค่าใช้จ่ายเฉลี่ย",
+    "favoriteService": "บริการที่ชอบ",
+    "favoriteArtist": "ช่างที่ชอบ"
+  },
+
+  "chart": {
+    "title": "ข้อมูลลูกค้า",
+    "noData": "ไม่สามารถโหลดข้อมูลลูกค้าได้",
+    "statistics": "สถิติ",
+    "favorites": "รายการโปรด",
+    "serviceHistory": "ประวัติการบริการ",
+    "noHistory": "ไม่มีประวัติการบริการ",
+    "customerNotes": "บันทึกจากลูกค้า",
+    "staffNotes": "บันทึกจากพนักงาน"
+  }
 }

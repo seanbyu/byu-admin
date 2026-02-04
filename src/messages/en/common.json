@@ -20,6 +20,12 @@
   "select": "Select",
   "close": "Close",
   "complete": "Complete",
+  "days": "days",
+  "times": "times",
+  "sort": {
+    "asc": "Ascending",
+    "desc": "Descending"
+  },
   "dayNames": {
     "sunday": "Sunday",
     "monday": "Monday",

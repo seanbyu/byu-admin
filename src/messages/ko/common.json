@@ -20,6 +20,12 @@
   "select": "선택하세요",
   "close": "닫기",
   "complete": "완료",
+  "days": "일",
+  "times": "회",
+  "sort": {
+    "asc": "오름차순",
+    "desc": "내림차순"
+  },
   "dayNames": {
     "sunday": "일요일",
     "monday": "월요일",
