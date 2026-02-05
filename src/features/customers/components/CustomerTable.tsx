@@ -59,11 +59,21 @@ const CustomerTags = memo(function CustomerTags({ tags }: { tags: CustomerTag[] 
 interface CustomerTableProps {
   customers: CustomerListItem[];
   onCustomerClick: (customerId: string) => void;
+  currentPage: number;
+  pageSize: number;
+  totalCount: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
 }
 
 export const CustomerTable = memo(function CustomerTable({
   customers,
   onCustomerClick,
+  currentPage,
+  pageSize,
+  totalCount,
+  onPageChange,
+  onPageSizeChange,
 }: CustomerTableProps) {
   const t = useTranslations();
 
@@ -79,6 +89,15 @@ export const CustomerTable = memo(function CustomerTable({
   const columns = useMemo(
     () => [
       {
+        key: 'customer_number',
+        header: t('customer.field.customerNumber'),
+        render: (customer: CustomerListItem) => (
+          <span className="text-sm font-mono text-secondary-700">
+            {customer.id.slice(-8).toUpperCase()}
+          </span>
+        ),
+      },
+      {
         key: 'name',
         header: t('customer.field.name'),
         render: (customer: CustomerListItem) => (
@@ -93,29 +112,36 @@ export const CustomerTable = memo(function CustomerTable({
         ),
       },
       {
-        key: 'contact',
-        header: t('customer.field.contact'),
+        key: 'phone',
+        header: t('customer.field.phone'),
         render: (customer: CustomerListItem) => (
-          <div className="text-sm">
-            {customer.phone && (
-              <p className="text-secondary-700">{customer.phone}</p>
-            )}
-            {customer.email && (
-              <p className="text-secondary-500 text-xs truncate max-w-[200px]">
-                {customer.email}
-              </p>
-            )}
-            {!customer.phone && !customer.email && (
+          <span className="text-sm text-secondary-700">
+            {customer.phone || (
               <span className="text-secondary-400">-</span>
             )}
-          </div>
+          </span>
         ),
       },
       {
-        key: 'tags',
-        header: t('customer.field.tags'),
+        key: 'notes',
+        header: t('customer.field.notes'),
         render: (customer: CustomerListItem) => (
-          <CustomerTags tags={customer.tags} />
+          <span className="text-sm text-secondary-700 truncate max-w-[150px] block">
+            {customer.notes || (
+              <span className="text-secondary-400">-</span>
+            )}
+          </span>
+        ),
+      },
+      {
+        key: 'last_visit',
+        header: t('customer.field.lastVisit'),
+        render: (customer: CustomerListItem) => (
+          <span className="text-sm text-secondary-700">
+            {customer.last_visit
+              ? formatDate(new Date(customer.last_visit), 'yyyy-MM-dd')
+              : t('customer.noVisit')}
+          </span>
         ),
       },
       {
@@ -137,13 +163,12 @@ export const CustomerTable = memo(function CustomerTable({
         ),
       },
       {
-        key: 'last_visit',
-        header: t('customer.field.lastVisit'),
+        key: 'no_show',
+        header: t('customer.field.noShow'),
         render: (customer: CustomerListItem) => (
           <span className="text-sm text-secondary-700">
-            {customer.last_visit
-              ? formatDate(new Date(customer.last_visit), 'yyyy-MM-dd')
-              : t('customer.noVisit')}
+            {/* TODO: 노쇼 데이터 추가 필요 */}
+            <span className="text-secondary-400">-</span>
           </span>
         ),
       },
@@ -159,13 +184,21 @@ export const CustomerTable = memo(function CustomerTable({
         ),
       },
       {
-        key: 'favorite_service',
-        header: t('customer.field.favoriteService'),
+        key: 'created_at',
+        header: t('customer.field.createdAt'),
         render: (customer: CustomerListItem) => (
           <span className="text-sm text-secondary-700">
-            {customer.favorite_service?.name || (
-              <span className="text-secondary-400">-</span>
-            )}
+            {formatDate(new Date(customer.created_at), 'yyyy-MM-dd')}
+          </span>
+        ),
+      },
+      {
+        key: 'membership',
+        header: t('customer.field.membership'),
+        render: (customer: CustomerListItem) => (
+          <span className="text-sm text-secondary-700">
+            {/* TODO: 정액권 데이터 추가 필요 */}
+            <span className="text-secondary-400">-</span>
           </span>
         ),
       },
@@ -173,12 +206,130 @@ export const CustomerTable = memo(function CustomerTable({
     [t]
   );
 
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize + 1;
+  const endIndex = Math.min(currentPage * pageSize, totalCount);
+
+  // 페이지 번호 생성
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible + 2) {
+      // 페이지가 적으면 모두 표시
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 페이지가 많으면 ... 포함
+      pages.push(1);
+
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+
+      if (currentPage <= 3) {
+        end = maxVisible;
+      } else if (currentPage >= totalPages - 2) {
+        start = totalPages - maxVisible + 1;
+      }
+
+      if (start > 2) pages.push('...');
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (end < totalPages - 1) pages.push('...');
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
   return (
-    <Table
-      data={customers}
-      columns={columns}
-      onRowClick={handleRowClick}
-      emptyMessage={t('customer.noCustomers')}
-    />
+    <div className="space-y-4">
+      <Table
+        data={customers}
+        columns={columns}
+        onRowClick={handleRowClick}
+        emptyMessage={t('customer.noCustomers')}
+      />
+
+      {/* Pagination */}
+      {totalCount > 0 && (
+        <div className="flex items-center justify-between px-4 py-3 border-t border-secondary-200">
+          {/* Left: Info */}
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-secondary-600">
+              {t('common.pagination.showing', {
+                start: startIndex,
+                end: endIndex,
+                total: totalCount,
+              })}
+            </span>
+
+            {/* Page size selector */}
+            <select
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              className="px-2 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value={10}>10 / {t('common.pagination.page')}</option>
+              <option value={20}>20 / {t('common.pagination.page')}</option>
+              <option value={50}>50 / {t('common.pagination.page')}</option>
+              <option value={100}>100 / {t('common.pagination.page')}</option>
+            </select>
+          </div>
+
+          {/* Right: Page navigation */}
+          <div className="flex items-center space-x-2">
+            {/* Previous button */}
+            <button
+              type="button"
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('common.pagination.previous')}
+            </button>
+
+            {/* Page numbers */}
+            <div className="flex items-center space-x-1">
+              {getPageNumbers().map((page, idx) =>
+                page === '...' ? (
+                  <span key={`ellipsis-${idx}`} className="px-2 text-secondary-400">
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => onPageChange(page as number)}
+                    className={`px-3 py-1 text-sm rounded-lg ${
+                      currentPage === page
+                        ? 'bg-primary-500 text-white font-medium'
+                        : 'bg-white text-secondary-700 hover:bg-secondary-50 border border-secondary-200'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+            </div>
+
+            {/* Next button */}
+            <button
+              type="button"
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('common.pagination.next')}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 });

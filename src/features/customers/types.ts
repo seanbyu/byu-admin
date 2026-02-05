@@ -6,8 +6,6 @@ export type CustomerType = 'local' | 'foreign';
 
 export type CustomerTag = 'VIP' | 'REGULAR' | 'NEW' | 'RETURNING' | 'DORMANT' | 'CHURNED';
 
-export type CustomerViewMode = 'card' | 'table';
-
 export type CustomerSortBy = 'last_visit' | 'total_visits' | 'total_spent' | 'name' | 'created_at';
 
 export type CustomerFilterType = 'all' | 'new' | 'returning' | 'regular' | 'dormant' | 'vip';
@@ -211,14 +209,15 @@ export interface UpdateCustomerDto {
 // ============================================
 
 export interface CustomerPageState {
-  // View mode
-  viewMode: CustomerViewMode;
-
   // Filters
   activeFilter: CustomerFilterType;
   searchQuery: string;
   sortBy: CustomerSortBy;
   sortOrder: 'asc' | 'desc';
+
+  // Pagination
+  currentPage: number;
+  pageSize: number;
 
   // Selected customers (for batch operations)
   selectedCustomerIds: string[];
@@ -228,11 +227,12 @@ export interface CustomerPageState {
   selectedCustomerId: string | null;
 
   // Actions
-  setViewMode: (mode: CustomerViewMode) => void;
   setActiveFilter: (filter: CustomerFilterType) => void;
   setSearchQuery: (query: string) => void;
   setSortBy: (sortBy: CustomerSortBy) => void;
   toggleSortOrder: () => void;
+  setCurrentPage: (page: number) => void;
+  setPageSize: (size: number) => void;
   toggleCustomerSelection: (customerId: string) => void;
   clearSelection: () => void;
   openChartModal: (customerId: string) => void;

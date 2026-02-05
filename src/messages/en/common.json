@@ -117,5 +117,11 @@
     "match": "Passwords match.",
     "required": "Please enter password.",
     "invalid": "Invalid password format."
+  },
+  "pagination": {
+    "showing": "{start} - {end} of {total}",
+    "page": "page",
+    "previous": "Previous",
+    "next": "Next"
   }
 }

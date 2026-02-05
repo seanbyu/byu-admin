@@ -9,6 +9,7 @@
   "lastVisit": "เข้ามาล่าสุด",
   "totalVisits": "จำนวนครั้งที่เข้ามา",
   "addCustomer": "เพิ่มลูกค้า",
+  "addNew": "เพิ่มลูกค้าใหม่",
   "noCustomers": "ไม่มีลูกค้าที่ลงทะเบียน",
   "noSearchResults": "ไม่พบผลการค้นหา",
   "noVisit": "ไม่มีบันทึกการเข้ามา",
@@ -17,6 +18,7 @@
   "favoriteService": "บริการที่ชอบ",
 
   "type": {
+    "local": "คนในประเทศ",
     "foreign": "ชาวต่างชาติ"
   },
 
@@ -47,6 +49,7 @@
   },
 
   "field": {
+    "customerNumber": "หมายเลขลูกค้า",
     "name": "ชื่อ",
     "contact": "ติดต่อ",
     "phone": "โทรศัพท์",
@@ -56,9 +59,21 @@
     "totalSpent": "ยอดใช้จ่ายทั้งหมด",
     "lastVisit": "เข้ามาล่าสุด",
     "firstVisit": "เข้ามาครั้งแรก",
-    "primaryArtist": "ช่างประจำ",
+    "primaryArtist": "พนักงาน",
     "favoriteService": "บริการที่ชอบ",
-    "notes": "หมายเหตุ"
+    "notes": "หมายเหตุลูกค้า",
+    "customerType": "ประเภทลูกค้า",
+    "noShow": "ไม่มาตามนัด",
+    "createdAt": "วันที่ลงทะเบียน",
+    "membership": "สมาชิก"
+  },
+
+  "edit": {
+    "title": "แก้ไขข้อมูลลูกค้า",
+    "namePlaceholder": "กรอกชื่อลูกค้า",
+    "phonePlaceholder": "กรอกหมายเลขโทรศัพท์",
+    "emailPlaceholder": "กรอกอีเมล",
+    "notesPlaceholder": "กรอกหมายเหตุ"
   },
 
   "stats": {

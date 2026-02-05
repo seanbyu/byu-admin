@@ -9,6 +9,7 @@
   "lastVisit": "Last Visit",
   "totalVisits": "Total Visits",
   "addCustomer": "Add Customer",
+  "addNew": "Add New Customer",
   "noCustomers": "No customers registered",
   "noSearchResults": "No search results",
   "noVisit": "No visit record",
@@ -17,6 +18,7 @@
   "favoriteService": "Favorite Service",
 
   "type": {
+    "local": "Local",
     "foreign": "Foreign"
   },
 
@@ -47,6 +49,7 @@
   },
 
   "field": {
+    "customerNumber": "Customer No.",
     "name": "Name",
     "contact": "Contact",
     "phone": "Phone",
@@ -56,9 +59,21 @@
     "totalSpent": "Total Spent",
     "lastVisit": "Last Visit",
     "firstVisit": "First Visit",
-    "primaryArtist": "Primary Artist",
+    "primaryArtist": "Staff",
     "favoriteService": "Favorite Service",
-    "notes": "Notes"
+    "notes": "Notes",
+    "customerType": "Customer Type",
+    "noShow": "No-Show",
+    "createdAt": "Registered",
+    "membership": "Membership"
+  },
+
+  "edit": {
+    "title": "Edit Customer",
+    "namePlaceholder": "Enter customer name",
+    "phonePlaceholder": "Enter phone number",
+    "emailPlaceholder": "Enter email address",
+    "notesPlaceholder": "Enter notes"
   },
 
   "stats": {

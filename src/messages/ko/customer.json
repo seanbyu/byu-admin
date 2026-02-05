@@ -9,6 +9,7 @@
   "lastVisit": "마지막 방문",
   "totalVisits": "총 방문 횟수",
   "addCustomer": "고객 추가",
+  "addNew": "신규 고객 등록",
   "noCustomers": "등록된 고객이 없습니다",
   "noSearchResults": "검색 결과가 없습니다",
   "noVisit": "방문 기록 없음",
@@ -17,6 +18,7 @@
   "favoriteService": "자주 받는 서비스",
 
   "type": {
+    "local": "내국인",
     "foreign": "외국인"
   },
 
@@ -47,6 +49,7 @@
   },
 
   "field": {
+    "customerNumber": "고객번호",
     "name": "이름",
     "contact": "연락처",
     "phone": "전화번호",
@@ -56,9 +59,21 @@
     "totalSpent": "총 지출",
     "lastVisit": "최근 방문",
     "firstVisit": "첫 방문",
-    "primaryArtist": "주 담당",
+    "primaryArtist": "담당자",
     "favoriteService": "선호 서비스",
-    "notes": "메모"
+    "notes": "고객메모",
+    "customerType": "고객 유형",
+    "noShow": "노쇼",
+    "createdAt": "고객등록일",
+    "membership": "정액권"
+  },
+
+  "edit": {
+    "title": "고객 정보 수정",
+    "namePlaceholder": "고객 이름을 입력하세요",
+    "phonePlaceholder": "전화번호를 입력하세요",
+    "emailPlaceholder": "이메일을 입력하세요",
+    "notesPlaceholder": "메모를 입력하세요"
   },
 
   "stats": {

@@ -7,14 +7,13 @@ import { Card } from '@/components/ui/Card';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { CustomerPageHeader } from '../components/CustomerPageHeader';
-import { CustomerCard } from '../components/CustomerCard';
 import { CustomerTable } from '../components/CustomerTable';
 import { CustomerChartModal } from '../components/CustomerChartModal';
+import { EditCustomerModal } from '../components/EditCustomerModal';
 import {
-  useCustomerUIStore,
   useCustomerFilters,
   useCustomerModals,
-  useViewMode,
+  useCustomerPagination,
   useCustomerUIActions,
 } from '../stores/customerStore';
 import { customerQueries } from '../hooks/queries';
@@ -114,8 +113,8 @@ export default function CustomersPageView() {
 
   // Zustand store (선택적 구독)
   const { activeFilter, searchQuery, sortBy, sortOrder } = useCustomerFilters();
-  const { showChartModal, selectedCustomerId } = useCustomerModals();
-  const viewMode = useViewMode();
+  const { showChartModal, showEditModal, selectedCustomerId } = useCustomerModals();
+  const { currentPage, pageSize } = useCustomerPagination();
   const actions = useCustomerUIActions();
 
   // TanStack Query: 고객 목록 조회
@@ -132,11 +131,20 @@ export default function CustomersPageView() {
 
   const customers = data?.customers || [];
 
-  // js-cache-function-results: 필터링/정렬을 메모이제이션
+  // js-cache-function-results: 필터링/정렬/페이징을 메모이제이션
   const filteredAndSortedCustomers = useMemo(() => {
     const filtered = filterCustomers(customers, activeFilter, searchQuery);
     return sortCustomers(filtered, sortBy, sortOrder);
   }, [customers, activeFilter, searchQuery, sortBy, sortOrder]);
+
+  // 페이지네이션 적용
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredAndSortedCustomers.slice(startIndex, endIndex);
+  }, [filteredAndSortedCustomers, currentPage, pageSize]);
+
+  const totalCount = filteredAndSortedCustomers.length;
 
   // 필터별 카운트 계산 (js-cache-function-results)
   const filterCounts = useMemo(() => {
@@ -164,7 +172,7 @@ export default function CustomersPageView() {
   // advanced-event-handler-refs: 안정적인 이벤트 핸들러
   const handleCustomerClick = useCallback(
     (customerId: string) => {
-      actions.openChartModal(customerId);
+      actions.openEditModal(customerId);
     },
     [actions]
   );
@@ -172,6 +180,15 @@ export default function CustomersPageView() {
   const handleCloseChartModal = useCallback(() => {
     actions.closeChartModal();
   }, [actions]);
+
+  const handleCloseEditModal = useCallback(() => {
+    actions.closeEditModal();
+  }, [actions]);
+
+  const handleAddCustomer = useCallback(() => {
+    // TODO: 신규 고객 등록 모달 구현
+    console.log('Add new customer');
+  }, []);
 
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
@@ -204,49 +221,28 @@ export default function CustomersPageView() {
         <CustomerPageHeader
           activeFilter={activeFilter}
           searchQuery={searchQuery}
-          viewMode={viewMode}
           filterCounts={filterCounts}
           onFilterChange={actions.setActiveFilter}
           onSearchChange={actions.setSearchQuery}
-          onViewModeChange={actions.setViewMode}
           sortBy={sortBy}
           sortOrder={sortOrder}
           onSortByChange={actions.setSortBy}
           onSortOrderChange={actions.setSortOrder}
+          onAddCustomer={handleAddCustomer}
         />
 
         {/* Content */}
-        {filteredAndSortedCustomers.length === 0 ? (
-          <Card>
-            <div className="py-12 text-center text-secondary-500">
-              {searchQuery
-                ? t('customer.noSearchResults')
-                : t('customer.noCustomers')}
-            </div>
-          </Card>
-        ) : (
-          <>
-            {/* rendering-conditional-render: 뷰 모드에 따라 조건부 렌더링 */}
-            {viewMode === 'card' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredAndSortedCustomers.map((customer) => (
-                  <CustomerCard
-                    key={customer.id}
-                    customer={customer}
-                    onClick={handleCustomerClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CustomerTable
-                  customers={filteredAndSortedCustomers}
-                  onCustomerClick={handleCustomerClick}
-                />
-              </Card>
-            )}
-          </>
-        )}
+        <Card>
+          <CustomerTable
+            customers={paginatedCustomers}
+            onCustomerClick={handleCustomerClick}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={actions.setCurrentPage}
+            onPageSizeChange={actions.setPageSize}
+          />
+        </Card>
       </div>
 
       {/* Chart Modal - bundle-conditional: 조건부 렌더링 */}
@@ -256,6 +252,15 @@ export default function CustomersPageView() {
           customerId={selectedCustomerId}
           salonId={salonId}
           onClose={handleCloseChartModal}
+        />
+      )}
+
+      {/* Edit Customer Modal */}
+      {showEditModal && selectedCustomerId && (
+        <EditCustomerModal
+          isOpen={showEditModal}
+          customer={customers.find((c) => c.id === selectedCustomerId) || null}
+          onClose={handleCloseEditModal}
         />
       )}
     </Layout>

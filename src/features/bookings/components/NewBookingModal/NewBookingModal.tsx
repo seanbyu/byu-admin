@@ -35,7 +35,7 @@ function NewBookingModalComponent({
   const isEditMode = !!editBooking;
 
   // Data hooks
-  const { customers } = useCustomers(salonId);
+  const { customers } = useCustomers({ salon_id: salonId });
   const { menus } = useMenus(salonId, undefined, { enabled: !!salonId });
 
   // Form hook

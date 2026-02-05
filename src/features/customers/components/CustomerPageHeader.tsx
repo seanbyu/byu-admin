@@ -1,12 +1,11 @@
 'use client';
 
 import { memo, useCallback } from 'react';
-import { Input } from '@/components/ui/Input';
 import { useTranslations } from 'next-intl';
-import { Search, Grid, List, ArrowUpDown } from 'lucide-react';
+import { Search, ArrowUpDown, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import type {
   CustomerFilterType,
-  CustomerViewMode,
   CustomerSortBy,
 } from '../types';
 
@@ -47,51 +46,6 @@ const FilterTabs = memo(function FilterTabs({
           <span className="ml-2 text-sm opacity-75">({tab.count})</span>
         </button>
       ))}
-    </div>
-  );
-});
-
-// ============================================
-// View Mode Toggle Component
-// ============================================
-
-const ViewModeToggle = memo(function ViewModeToggle({
-  viewMode,
-  onViewModeChange,
-  cardLabel,
-  tableLabel,
-}: {
-  viewMode: CustomerViewMode;
-  onViewModeChange: (mode: CustomerViewMode) => void;
-  cardLabel: string;
-  tableLabel: string;
-}) {
-  return (
-    <div className="flex border border-secondary-200 rounded-lg overflow-hidden">
-      <button
-        type="button"
-        className={`px-4 py-2 flex items-center space-x-2 transition-colors ${
-          viewMode === 'card'
-            ? 'bg-primary-500 text-white'
-            : 'bg-white text-secondary-600 hover:bg-secondary-50'
-        }`}
-        onClick={() => onViewModeChange('card')}
-      >
-        <Grid size={18} />
-        <span>{cardLabel}</span>
-      </button>
-      <button
-        type="button"
-        className={`px-4 py-2 flex items-center space-x-2 transition-colors ${
-          viewMode === 'table'
-            ? 'bg-primary-500 text-white'
-            : 'bg-white text-secondary-600 hover:bg-secondary-50'
-        }`}
-        onClick={() => onViewModeChange('table')}
-      >
-        <List size={18} />
-        <span>{tableLabel}</span>
-      </button>
     </div>
   );
 });
@@ -158,29 +112,27 @@ const SortDropdown = memo(function SortDropdown({
 interface CustomerPageHeaderProps {
   activeFilter: CustomerFilterType;
   searchQuery: string;
-  viewMode: CustomerViewMode;
   filterCounts: Record<CustomerFilterType, number>;
   onFilterChange: (filter: CustomerFilterType) => void;
   onSearchChange: (query: string) => void;
-  onViewModeChange: (mode: CustomerViewMode) => void;
   sortBy: CustomerSortBy;
   sortOrder: 'asc' | 'desc';
   onSortByChange: (sortBy: CustomerSortBy) => void;
   onSortOrderChange: (order: 'asc' | 'desc') => void;
+  onAddCustomer: () => void;
 }
 
 export const CustomerPageHeader = memo(function CustomerPageHeader({
   activeFilter,
   searchQuery,
-  viewMode,
   filterCounts,
   onFilterChange,
   onSearchChange,
-  onViewModeChange,
   sortBy,
   sortOrder,
   onSortByChange,
   onSortOrderChange,
+  onAddCustomer,
 }: CustomerPageHeaderProps) {
   const t = useTranslations();
 
@@ -216,7 +168,7 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
 
   return (
     <div className="space-y-4">
-      {/* Title and Actions */}
+      {/* Title and Add Button */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-secondary-900">
@@ -226,12 +178,10 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
             {t('customer.pageDescription')}
           </p>
         </div>
-        <ViewModeToggle
-          viewMode={viewMode}
-          onViewModeChange={onViewModeChange}
-          cardLabel={t('customer.view.card')}
-          tableLabel={t('customer.view.table')}
-        />
+        <Button onClick={onAddCustomer} className="flex items-center space-x-2">
+          <Plus size={20} />
+          <span>{t('customer.addNew')}</span>
+        </Button>
       </div>
 
       {/* Filter Tabs */}

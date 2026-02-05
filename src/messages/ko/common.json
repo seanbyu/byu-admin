@@ -117,5 +117,11 @@
     "match": "비밀번호가 일치합니다.",
     "required": "비밀번호를 입력해주세요.",
     "invalid": "비밀번호 형식이 올바르지 않습니다."
+  },
+  "pagination": {
+    "showing": "{start} - {end} / 총 {total}개",
+    "page": "페이지",
+    "previous": "이전",
+    "next": "다음"
   }
 }

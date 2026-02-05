@@ -68,7 +68,7 @@ export function useBookingSave({
 }: UseBookingSaveProps): UseBookingSaveReturn {
   const t = useTranslations();
   const { createBooking, updateBooking, isCreating, isUpdating } = useBookings(salonId);
-  const { createCustomer, isCreating: isCreatingCustomer } = useCustomers(salonId);
+  const { createCustomer, isCreating: isCreatingCustomer } = useCustomers({ salon_id: salonId });
 
   const [showNewCustomerConfirm, setShowNewCustomerConfirm] = useState(false);
 
