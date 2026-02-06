@@ -1,4 +1,8 @@
 -- ============================================
+-- Services & Pricing
+-- ============================================
+
+-- ============================================
 -- Service Categories Table
 -- ============================================
 CREATE TABLE service_categories (
@@ -26,12 +30,10 @@ CREATE TABLE service_categories (
   UNIQUE(salon_id, name)
 );
 
--- Indexes
 CREATE INDEX idx_service_categories_salon ON service_categories(salon_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_service_categories_active ON service_categories(is_active, salon_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_service_categories_industry ON service_categories(industry_id);
 
--- Comments
 COMMENT ON TABLE service_categories IS 'Service categories for organizing services (CUT, PERM, COLOR, etc.)';
 
 -- ============================================
@@ -77,24 +79,19 @@ CREATE TABLE services (
     (pricing_type = 'FIXED' AND base_price IS NOT NULL) OR
     (pricing_type = 'POSITION_BASED')
   ),
-  UNIQUE (id, pricing_type) -- Added for composite FK in service_position_prices
+  UNIQUE (id, pricing_type)  -- For composite FK in service_position_prices
 );
 
--- Indexes
 CREATE INDEX idx_services_salon ON services(salon_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_services_category ON services(category_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_services_active ON services(is_active, salon_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_services_pricing_type ON services(pricing_type);
 
--- Comments
 COMMENT ON TABLE services IS 'Services offered by salons';
-COMMENT ON COLUMN services.pricing_type IS 'FIXED: single price for all, POSITION_BASED: different prices per staff position';
-COMMENT ON COLUMN services.base_price IS 'Used only when pricing_type=FIXED';
 
 -- ============================================
 -- Service Position Prices Table
 -- ============================================
--- Used only for services with pricing_type='POSITION_BASED'
 CREATE TABLE service_position_prices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   service_id UUID NOT NULL,
@@ -111,14 +108,11 @@ CREATE TABLE service_position_prices (
 
   UNIQUE(service_id, position_id),
 
-  -- Ensure this is only used for POSITION_BASED services
   CONSTRAINT position_prices_type_check CHECK (pricing_type = 'POSITION_BASED'),
   FOREIGN KEY (service_id, pricing_type) REFERENCES services(id, pricing_type) ON DELETE CASCADE
 );
 
--- Indexes
 CREATE INDEX idx_service_position_prices_service ON service_position_prices(service_id);
 CREATE INDEX idx_service_position_prices_position ON service_position_prices(position_id);
 
--- Comments
-COMMENT ON TABLE service_position_prices IS 'Position-based pricing for services (only when pricing_type=POSITION_BASED)';
+COMMENT ON TABLE service_position_prices IS 'Position-based pricing for services';

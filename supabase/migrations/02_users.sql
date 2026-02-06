@@ -1,5 +1,5 @@
 -- ============================================
--- Users Table (unified for both admin users and customers)
+-- Users Table (Unified for admin users and LINE customers)
 -- ============================================
 
 CREATE TABLE users (
@@ -17,7 +17,14 @@ CREATE TABLE users (
 
   -- Auth info
   auth_provider auth_provider NOT NULL DEFAULT 'EMAIL',
-  provider_user_id TEXT, -- ID from social provider (LINE, Google, etc.)
+  provider_user_id TEXT,  -- ID from social provider (LINE, Google, etc.)
+
+  -- LINE profile (for LINE login users)
+  line_profile JSONB DEFAULT NULL,
+  -- Example: {"displayName": "홍길동", "pictureUrl": "...", "statusMessage": "..."}
+
+  -- Customer link (for LINE users linked to salon customer)
+  customer_id UUID,  -- Will add FK after customers table is created
 
   -- Status
   is_active BOOLEAN NOT NULL DEFAULT true,
@@ -29,7 +36,7 @@ CREATE TABLE users (
 
   -- Constraints
   CONSTRAINT valid_user_type_role CHECK (
-    (user_type = 'ADMIN_USER' AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'STAFF')) OR
+    (user_type = 'SALON' AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'ARTIST', 'STAFF')) OR
     (user_type = 'CUSTOMER' AND role = 'CUSTOMER')
   )
 );
@@ -39,9 +46,8 @@ CREATE INDEX idx_users_email ON users(email) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_user_type ON users(user_type) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_role ON users(role) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_provider ON users(auth_provider, provider_user_id);
+CREATE INDEX idx_users_phone ON users(phone) WHERE phone IS NOT NULL;
 
--- Comments
-COMMENT ON TABLE users IS 'Unified users table for both admin users and customers';
-COMMENT ON COLUMN users.user_type IS 'Discriminator: ADMIN_USER or CUSTOMER';
-COMMENT ON COLUMN users.role IS 'System-level role for permissions (SUPER_ADMIN, ADMIN, MANAGER, STAFF, CUSTOMER)';
-COMMENT ON COLUMN users.auth_provider IS 'Authentication method used';
+COMMENT ON TABLE users IS 'Unified users table for both admin users and LINE customers';
+COMMENT ON COLUMN users.customer_id IS 'Link to customers table (for LINE login users)';
+COMMENT ON COLUMN users.line_profile IS 'LINE profile data for LINE login users';

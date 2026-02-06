@@ -1,16 +1,18 @@
 -- ============================================
--- Extensions
+-- Extensions & ENUMs
+-- Salon Store Admin Database Schema v2.0
 -- ============================================
--- Note: Using gen_random_uuid() instead of gen_random_uuid()
--- gen_random_uuid() is built-in to PostgreSQL 13+
 
 -- ============================================
--- ENUMS (Idempotent - safe to rerun)
+-- ENUMS
 -- ============================================
 
 -- User type discriminator
 DO $$ BEGIN
-  CREATE TYPE user_type AS ENUM ('ADMIN_USER', 'CUSTOMER');
+  CREATE TYPE user_type AS ENUM (
+    'SALON',      -- 살롱 측 사용자 (B2B: ADMIN, MANAGER, ARTIST, STAFF)
+    'CUSTOMER'    -- 고객 (B2C: LINE 예약 고객)
+  );
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -20,6 +22,7 @@ DO $$ BEGIN
     'SUPER_ADMIN',    -- Platform owner (manages all salons)
     'ADMIN',          -- Salon owner (default on signup)
     'MANAGER',        -- Salon manager
+    'ARTIST',         -- Artist/Designer (시술 담당)
     'STAFF',          -- General staff
     'CUSTOMER'        -- Customer
   );
@@ -37,7 +40,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
--- Salon approval status (플랫폼 관리자가 승인)
+-- Salon approval status
 DO $$ BEGIN
   CREATE TYPE approval_status_type AS ENUM (
     'pending',        -- 승인 대기
@@ -67,6 +70,15 @@ DO $$ BEGIN
     'PAID',
     'REFUNDED',
     'FAILED'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- Customer type
+DO $$ BEGIN
+  CREATE TYPE customer_type AS ENUM (
+    'local',          -- 내국인
+    'foreign'         -- 외국인
   );
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;

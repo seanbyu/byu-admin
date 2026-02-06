@@ -56,9 +56,7 @@ CREATE POLICY "Anyone can view active salons"
 
 CREATE POLICY "Super admins can manage all salons"
   ON salons FOR ALL
-  USING (
-    get_my_role() = 'SUPER_ADMIN'
-  );
+  USING (get_my_role() = 'SUPER_ADMIN');
 
 CREATE POLICY "Admins can update their own salon"
   ON salons FOR UPDATE
@@ -72,19 +70,14 @@ CREATE POLICY "Admins can update their own salon"
 -- ============================================
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
--- Users can view their own profile
 CREATE POLICY "Users can view their own profile"
   ON users FOR SELECT
   USING (auth.uid() = id);
 
--- Super admins can view all users
 CREATE POLICY "Super admins can view all users"
   ON users FOR SELECT
-  USING (
-    get_my_role() = 'SUPER_ADMIN'
-  );
+  USING (get_my_role() = 'SUPER_ADMIN');
 
--- Users can view same salon users (via staff_profiles join)
 CREATE POLICY "Users can view same salon users"
   ON users FOR SELECT
   USING (
@@ -96,11 +89,10 @@ CREATE POLICY "Users can view same salon users"
     )
   );
 
--- Public can view active salon staff (for booking)
 CREATE POLICY "Public can view active salon staff"
   ON users FOR SELECT
   USING (
-    user_type = 'ADMIN_USER'
+    user_type = 'SALON'
     AND is_active = true
     AND EXISTS (
       SELECT 1 FROM staff_profiles sp
@@ -109,17 +101,13 @@ CREATE POLICY "Public can view active salon staff"
     )
   );
 
--- Users can update their own profile
 CREATE POLICY "Users can update their own profile"
   ON users FOR UPDATE
   USING (auth.uid() = id);
 
--- Admins can create users in their salon
 CREATE POLICY "Admins can create users in their salon"
   ON users FOR INSERT
-  WITH CHECK (
-    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
-  );
+  WITH CHECK (get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER'));
 
 -- ============================================
 -- Staff Positions
@@ -148,17 +136,13 @@ CREATE POLICY "Staff users can view their own profile"
 
 CREATE POLICY "Staff users in same salon can view each other"
   ON staff_profiles FOR SELECT
-  USING (
-    salon_id = get_my_salon_id()
-  );
+  USING (salon_id = get_my_salon_id());
 
 CREATE POLICY "Public can view staff profiles for bookings"
   ON staff_profiles FOR SELECT
-  USING (
-    is_booking_enabled = true
-  );
+  USING (is_booking_enabled = true);
 
-CREATE POLICY "Admins and Managers can update staff profiles in their salon"
+CREATE POLICY "Admins and Managers can update staff profiles"
   ON staff_profiles FOR UPDATE
   USING (
     get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
@@ -173,26 +157,39 @@ CREATE POLICY "Admins and Managers can insert staff profiles"
   );
 
 -- ============================================
--- Customer Profiles
+-- Customers
 -- ============================================
-ALTER TABLE customer_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Customers can view their own profile"
-  ON customer_profiles FOR SELECT
-  USING (auth.uid() = user_id);
+CREATE POLICY "Salon staff can view their customers"
+  ON customers FOR SELECT
+  USING (salon_id = get_my_salon_id());
 
-CREATE POLICY "Customers can update their own profile"
-  ON customer_profiles FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Salon staff can view customer profiles"
-  ON customer_profiles FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE id = auth.uid() AND user_type = 'ADMIN_USER'
-    )
+CREATE POLICY "Salon staff can create customers"
+  ON customers FOR INSERT
+  WITH CHECK (
+    salon_id = get_my_salon_id() AND
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'STAFF')
   );
+
+CREATE POLICY "Salon staff can update their customers"
+  ON customers FOR UPDATE
+  USING (
+    salon_id = get_my_salon_id() AND
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'STAFF')
+  );
+
+CREATE POLICY "Salon managers can delete customers"
+  ON customers FOR DELETE
+  USING (
+    salon_id = get_my_salon_id() AND
+    get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
+  );
+
+-- Customers can view their own record (via user_id link)
+CREATE POLICY "Customers can view their own customer record"
+  ON customers FOR SELECT
+  USING (user_id = auth.uid());
 
 -- ============================================
 -- Service Categories
@@ -252,25 +249,42 @@ ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Customers can view their own bookings"
   ON bookings FOR SELECT
-  USING (auth.uid() = customer_id);
+  USING (
+    EXISTS (
+      SELECT 1 FROM customers c
+      WHERE c.id = bookings.customer_id
+      AND c.user_id = auth.uid()
+    )
+  );
 
-CREATE POLICY "Designers can view their own bookings"
+CREATE POLICY "Artists can view their own bookings"
   ON bookings FOR SELECT
-  USING (auth.uid() = designer_id);
+  USING (auth.uid() = artist_id);
 
 CREATE POLICY "Salon staff can view salon bookings"
   ON bookings FOR SELECT
-  USING (
-    salon_id = get_my_salon_id()
-  );
+  USING (salon_id = get_my_salon_id());
 
 CREATE POLICY "Customers can create bookings"
   ON bookings FOR INSERT
-  WITH CHECK (auth.uid() = customer_id);
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM customers c
+      WHERE c.id = bookings.customer_id
+      AND c.user_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "Customers can update their pending bookings"
   ON bookings FOR UPDATE
-  USING (auth.uid() = customer_id AND status = 'PENDING');
+  USING (
+    EXISTS (
+      SELECT 1 FROM customers c
+      WHERE c.id = bookings.customer_id
+      AND c.user_id = auth.uid()
+    )
+    AND status = 'PENDING'
+  );
 
 CREATE POLICY "Salon staff can manage salon bookings"
   ON bookings FOR ALL
@@ -291,8 +305,12 @@ CREATE POLICY "Anyone can view visible reviews"
 CREATE POLICY "Customers can create reviews for completed bookings"
   ON reviews FOR INSERT
   WITH CHECK (
-    auth.uid() = customer_id AND
     EXISTS (
+      SELECT 1 FROM customers c
+      WHERE c.id = reviews.customer_id
+      AND c.user_id = auth.uid()
+    )
+    AND EXISTS (
       SELECT 1 FROM bookings
       WHERE id = booking_id AND status = 'COMPLETED'
     )
@@ -300,35 +318,35 @@ CREATE POLICY "Customers can create reviews for completed bookings"
 
 CREATE POLICY "Customers can update their own reviews"
   ON reviews FOR UPDATE
-  USING (auth.uid() = customer_id);
+  USING (
+    EXISTS (
+      SELECT 1 FROM customers c
+      WHERE c.id = reviews.customer_id
+      AND c.user_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "Salon staff can respond to reviews"
   ON reviews FOR UPDATE
-  USING (
-    salon_id = get_my_salon_id()
-  );
+  USING (salon_id = get_my_salon_id());
 
 -- ============================================
--- User Favorite Salons (즐겨찾기)
+-- User Favorite Salons
 -- ============================================
 ALTER TABLE user_favorite_salons ENABLE ROW LEVEL SECURITY;
 
--- Users can view their own favorites
 CREATE POLICY "Users can view their own favorites"
   ON user_favorite_salons FOR SELECT
   USING (auth.uid() = user_id);
 
--- Users can add favorites
 CREATE POLICY "Users can add favorites"
   ON user_favorite_salons FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Users can remove their own favorites
 CREATE POLICY "Users can remove their own favorites"
   ON user_favorite_salons FOR DELETE
   USING (auth.uid() = user_id);
 
--- Salon admins can view who favorited their salon (analytics)
 CREATE POLICY "Salon admins can view their salon favorites"
   ON user_favorite_salons FOR SELECT
   USING (
@@ -337,31 +355,26 @@ CREATE POLICY "Salon admins can view their salon favorites"
   );
 
 -- ============================================
--- User Favorite Artists (아티스트 즐겨찾기)
+-- User Favorite Artists
 -- ============================================
 ALTER TABLE user_favorite_artists ENABLE ROW LEVEL SECURITY;
 
--- Users can view their own favorite artists
 CREATE POLICY "Users can view their own favorite artists"
   ON user_favorite_artists FOR SELECT
   USING (auth.uid() = user_id);
 
--- Users can add favorite artists
 CREATE POLICY "Users can add favorite artists"
   ON user_favorite_artists FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Users can remove their own favorite artists
 CREATE POLICY "Users can remove their own favorite artists"
   ON user_favorite_artists FOR DELETE
   USING (auth.uid() = user_id);
 
--- Artists can view who favorited them (analytics)
-CREATE POLICY "Artists can view their own favorites"
+CREATE POLICY "Artists can view who favorited them"
   ON user_favorite_artists FOR SELECT
   USING (auth.uid() = artist_id);
 
--- Salon admins can view favorite stats for their salon's artists
 CREATE POLICY "Salon admins can view their artists favorites"
   ON user_favorite_artists FOR SELECT
   USING (

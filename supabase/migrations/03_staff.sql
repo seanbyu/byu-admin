@@ -1,4 +1,8 @@
 -- ============================================
+-- Staff Positions & Profiles
+-- ============================================
+
+-- ============================================
 -- Staff Positions Table (customizable per salon)
 -- ============================================
 CREATE TABLE staff_positions (
@@ -27,11 +31,9 @@ CREATE TABLE staff_positions (
   UNIQUE(salon_id, name)
 );
 
--- Indexes
 CREATE INDEX idx_staff_positions_salon ON staff_positions(salon_id) WHERE is_active = true;
 CREATE INDEX idx_staff_positions_level ON staff_positions(salon_id, level);
 
--- Comments
 COMMENT ON TABLE staff_positions IS 'Customizable staff positions per salon (디렉터, 스페셜 디렉터, etc.)';
 COMMENT ON COLUMN staff_positions.level IS 'Hierarchy level for pricing (1=lowest, higher=more expensive)';
 
@@ -41,18 +43,18 @@ COMMENT ON COLUMN staff_positions.level IS 'Hierarchy level for pricing (1=lowes
 CREATE TABLE staff_profiles (
   user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
 
-  -- Salon association (moved from users table)
+  -- Salon association
   salon_id UUID NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
 
   -- Owner flag (salon owner/representative)
   is_owner BOOLEAN NOT NULL DEFAULT false,
 
-  -- Approval workflow (moved from users table)
+  -- Approval workflow
   is_approved BOOLEAN NOT NULL DEFAULT true,
   approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
   approved_at TIMESTAMP WITH TIME ZONE,
 
-  -- Hierarchy tracking (moved from users table)
+  -- Hierarchy tracking
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
 
   -- Position (customizable by salon)
@@ -70,8 +72,7 @@ CREATE TABLE staff_profiles (
     "settings": {"view": false, "edit": false}
   }'::jsonb,
 
-  -- Work schedule (JSONB for flexible schedule management)
-  -- Default matches salons.business_hours (Monday off, 10:00-21:00)
+  -- Work schedule
   work_schedule JSONB DEFAULT '{
     "monday": {"enabled": false, "start": null, "end": null},
     "tuesday": {"enabled": true, "start": "10:00", "end": "21:00"},
@@ -91,20 +92,12 @@ CREATE TABLE staff_profiles (
   years_of_experience INTEGER,
 
   -- Social media links
-  social_links JSONB DEFAULT '{
-    "instagram": null,
-    "tiktok": null,
-    "youtube": null,
-    "facebook": null,
-    "twitter": null,
-    "website": null
-  }'::jsonb,
+  social_links JSONB DEFAULT '{}'::jsonb,
 
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
--- Indexes
 CREATE INDEX idx_staff_profiles_salon ON staff_profiles(salon_id);
 CREATE INDEX idx_staff_profiles_position ON staff_profiles(position_id);
 CREATE INDEX idx_staff_profiles_created_by ON staff_profiles(created_by);
@@ -112,54 +105,5 @@ CREATE INDEX idx_staff_profiles_created_by ON staff_profiles(created_by);
 -- Ensure only one owner per salon
 CREATE UNIQUE INDEX idx_staff_profiles_salon_owner ON staff_profiles(salon_id) WHERE is_owner = true;
 
--- Comments
-COMMENT ON TABLE staff_profiles IS 'Additional profile data for staff users (admins, managers, staff)';
-COMMENT ON COLUMN staff_profiles.salon_id IS 'Salon this staff member belongs to';
-COMMENT ON COLUMN staff_profiles.position_id IS 'Reference to customizable staff position';
-COMMENT ON COLUMN staff_profiles.permissions IS 'JSONB custom permissions for granular access control';
-COMMENT ON COLUMN staff_profiles.social_links IS 'Social media links (Instagram, TikTok, YouTube, etc.)';
+COMMENT ON TABLE staff_profiles IS 'Additional profile data for staff users';
 COMMENT ON COLUMN staff_profiles.is_booking_enabled IS 'Determines if the staff member can receive bookings';
-COMMENT ON COLUMN staff_profiles.holidays IS 'Staff vacation/off dates as JSON array';
-COMMENT ON COLUMN staff_profiles.is_approved IS 'Default true for all users. Salon approval (salons.approval_status) is the gating factor.';
-COMMENT ON COLUMN staff_profiles.created_by IS 'User ID who created this staff account (for hierarchy tracking)';
-COMMENT ON COLUMN staff_profiles.is_owner IS 'Salon owner/representative. Only one owner allowed per salon.';
-
--- ============================================
--- Customer Profiles Table
--- ============================================
-CREATE TABLE customer_profiles (
-  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-
-  -- LINE integration
-  line_user_id TEXT UNIQUE,
-  line_display_name TEXT,
-  line_picture_url TEXT,
-  line_status_message TEXT,
-
-  -- Customer preferences
-  preferred_salon_id UUID REFERENCES salons(id) ON DELETE SET NULL,
-  preferred_designer_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  preferences JSONB DEFAULT '{}'::jsonb, -- Styling preferences, allergies, etc.
-
-  -- Customer stats
-  total_bookings INTEGER NOT NULL DEFAULT 0,
-  total_spent DECIMAL(10, 2) NOT NULL DEFAULT 0,
-  last_visit_at TIMESTAMP WITH TIME ZONE,
-
-  -- Marketing
-  marketing_consent BOOLEAN NOT NULL DEFAULT false,
-
-  -- Notes (visible to staff)
-  notes TEXT,
-
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
-
--- Indexes
-CREATE INDEX idx_customer_profiles_line ON customer_profiles(line_user_id);
-CREATE INDEX idx_customer_profiles_salon ON customer_profiles(preferred_salon_id);
-
--- Comments
-COMMENT ON TABLE customer_profiles IS 'Additional profile data for customers with LINE integration';
-COMMENT ON COLUMN customer_profiles.line_user_id IS 'LINE user ID for LINE login and notifications';

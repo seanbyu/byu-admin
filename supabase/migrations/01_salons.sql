@@ -1,11 +1,17 @@
 -- ============================================
--- Industries Table (Dynamic)
+-- Salons & Related Tables
+-- ============================================
+
+-- ============================================
+-- Industries Table
 -- ============================================
 CREATE TABLE industries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+COMMENT ON TABLE industries IS 'Business types (HAIR, NAIL, ESTHETIC, etc.)';
 
 -- ============================================
 -- Salons Table
@@ -44,7 +50,7 @@ CREATE TABLE salons (
   -- Holidays (휴무일)
   holidays JSONB DEFAULT '[]'::jsonb,
 
-  -- Media (Logo and Cover only, others in salon_images)
+  -- Media
   logo_url TEXT,
   cover_image_url TEXT,
 
@@ -60,7 +66,7 @@ CREATE TABLE salons (
   -- Subscription plan
   plan_type TEXT NOT NULL DEFAULT 'FREE',
 
-  -- Approval status (플랫폼 관리자가 승인)
+  -- Approval status
   approval_status approval_status_type NOT NULL DEFAULT 'pending',
   rejected_reason TEXT,
   approved_at TIMESTAMP WITH TIME ZONE,
@@ -80,13 +86,7 @@ CREATE INDEX idx_salons_active ON salons(is_active) WHERE deleted_at IS NULL;
 CREATE INDEX idx_salons_location ON salons(latitude, longitude) WHERE deleted_at IS NULL;
 CREATE INDEX idx_salons_approval ON salons(approval_status);
 
--- Comments
 COMMENT ON TABLE salons IS 'Beauty salon information';
-COMMENT ON COLUMN salons.approval_status IS 'Salon approval status: pending (awaiting admin approval), approved, rejected';
-COMMENT ON COLUMN salons.rejected_reason IS 'Reason for rejection if approval_status is rejected';
-COMMENT ON COLUMN salons.trial_ends_at IS 'Trial period end date for subscription plans';
-COMMENT ON COLUMN salons.plan_type IS 'Subscription plan type: FREE or PREMIUM';
-COMMENT ON COLUMN salons.holidays IS 'Shop holiday/closure dates as JSON array';
 
 -- ============================================
 -- Salon Industries (Many-to-Many)
