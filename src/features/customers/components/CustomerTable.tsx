@@ -85,15 +85,18 @@ export const CustomerTable = memo(function CustomerTable({
     [onCustomerClick]
   );
 
+  // 페이지네이션을 고려한 시작 번호
+  const startNumber = (currentPage - 1) * pageSize;
+
   // js-cache-function-results: 컬럼 정의를 메모이제이션
   const columns = useMemo(
     () => [
       {
         key: 'customer_number',
         header: t('customer.field.customerNumber'),
-        render: (customer: CustomerListItem) => (
+        render: (_customer: CustomerListItem, index: number) => (
           <span className="text-sm font-mono text-secondary-700">
-            {customer.id.slice(-8).toUpperCase()}
+            {startNumber + index + 1}
           </span>
         ),
       },
@@ -203,7 +206,7 @@ export const CustomerTable = memo(function CustomerTable({
         ),
       },
     ],
-    [t]
+    [t, startNumber]
   );
 
   // 페이지네이션 계산

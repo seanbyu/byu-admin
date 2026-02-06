@@ -1,5 +1,5 @@
-import CustomersPageView from '@/features/customers/views/CustomersPageView';
+import { redirect } from 'next/navigation';
 
 export default function CustomersPage() {
-  return <CustomersPageView />;
+  redirect('/customers/chart');
 }

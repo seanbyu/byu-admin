@@ -41,6 +41,14 @@ export interface ProfileImageUploaderProps {
   onImageChange: (url: string) => void;
 }
 
+export interface SocialLinksData {
+  instagram: string;
+  youtube: string;
+  tiktok: string;
+  facebook: string;
+}
+
 export interface SocialLinksFormProps {
-  register: any;
+  values: SocialLinksData;
+  onChange: (field: keyof SocialLinksData, value: string) => void;
 }

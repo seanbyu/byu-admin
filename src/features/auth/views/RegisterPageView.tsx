@@ -7,7 +7,8 @@ import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { VerificationCodeInput } from '@/components/ui/VerificationCodeInput';
-import { Check, X, Loader2, Eye, EyeOff, ChevronLeft } from 'lucide-react';
+import { PasswordInput, PasswordConfirmInput, validatePassword } from '@/components/ui/PasswordInput';
+import { Check, Loader2, ChevronLeft } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { Select } from '@/components/ui/Select';
 import { CheckStatus } from '../types';
@@ -33,8 +34,6 @@ export default function RegisterPageView() {
   const tInd = useTranslations('auth.industries');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Phone Auth State
   const [otpSent, setOtpSent] = useState(false);
@@ -79,6 +78,8 @@ export default function RegisterPageView() {
   const phone = watch('phone');
   const countryCode = watch('countryCode');
   const otp = watch('otp');
+  const password = watch('password');
+  const confirmPassword = watch('confirmPassword');
 
   const toggleIndustry = (value: string) => {
     const current = industryNames || [];
@@ -170,6 +171,18 @@ export default function RegisterPageView() {
     // Pre-checks
     if (!otpVerified || !verifiedUser) {
       setError(t('errors.verifyPhone'));
+      return;
+    }
+
+    // Password validation
+    const passwordValidation = validatePassword(data.password || '');
+    if (!passwordValidation.isValid) {
+      setError(t('errors.invalidPassword'));
+      return;
+    }
+
+    if (data.password !== data.confirmPassword) {
+      setError(t('errors.passwordMismatch'));
       return;
     }
 
@@ -287,54 +300,24 @@ export default function RegisterPageView() {
               <label className="block text-sm font-medium text-gray-900">
                 {t('password')} <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder={t('placeholders.password')}
-                  {...register('password', {
-                    required: t('errors.required'),
-                    minLength: {
-                      value: 8,
-                      message: t('helpers.password'),
-                    },
-                  })}
-                  error={errors.password?.message}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+              <PasswordInput
+                value={password || ''}
+                onChange={(value) => setValue('password', value)}
+                placeholder={t('placeholders.password')}
+                showValidationRules={true}
+              />
             </div>
 
             <div className="space-y-1">
-              <div className="relative">
-                <Input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder={t('placeholders.confirmPassword')}
-                  {...register('confirmPassword', {
-                    required: t('errors.required'),
-                    validate: (val) =>
-                      val === watch('password') || t('errors.passwordMismatch'),
-                  })}
-                  error={errors.confirmPassword?.message}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-gray-400"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-              <p className="text-xs text-gray-400">{t('helpers.password')}</p>
+              <label className="block text-sm font-medium text-gray-900">
+                {t('confirmPassword')} <span className="text-red-500">*</span>
+              </label>
+              <PasswordConfirmInput
+                password={password || ''}
+                confirmPassword={confirmPassword || ''}
+                onConfirmChange={(value) => setValue('confirmPassword', value)}
+                placeholder={t('placeholders.confirmPassword')}
+              />
             </div>
           </div>
 

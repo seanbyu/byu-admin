@@ -11,7 +11,7 @@ import { useStaffPositions } from '../../../hooks/useStaffPositions';
 import { ProfileImageUploader } from './ProfileImageUploader';
 import { PositionSelector } from './PositionSelector';
 import { SocialLinksForm } from './SocialLinksForm';
-import { StaffProfileModalProps, ProfileFormData } from './types';
+import { StaffProfileModalProps, ProfileFormData, SocialLinksData } from './types';
 
 function StaffProfileModal({
   isOpen,
@@ -23,6 +23,14 @@ function StaffProfileModal({
 
   // Position 선택 상태
   const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
+
+  // Social Links 상태 (controlled component)
+  const [socialLinks, setSocialLinks] = useState<SocialLinksData>({
+    instagram: '',
+    youtube: '',
+    tiktok: '',
+    facebook: '',
+  });
 
   // 직급 목록 가져오기 (TanStack Query)
   const {
@@ -65,6 +73,13 @@ function StaffProfileModal({
           facebook: staff.socialLinks?.facebook || '',
         },
       });
+      // Social Links 상태 초기화
+      setSocialLinks({
+        instagram: staff.socialLinks?.instagram || '',
+        youtube: staff.socialLinks?.youtube || '',
+        tiktok: staff.socialLinks?.tiktok || '',
+        facebook: staff.socialLinks?.facebook || '',
+      });
       setSelectedPositionId(staff.positionId || null);
     }
   }, [isOpen, staff, reset]);
@@ -85,14 +100,14 @@ function StaffProfileModal({
         experience: Number(data.experience),
         specialties: specialtiesArray,
         profileImage: data.profileImage,
-        socialLinks: data.socialLinks,
+        socialLinks: socialLinks, // controlled state 사용
       } as any);
       onClose();
     } catch (error) {
       console.error('Failed to update profile:', error);
       alert(t('staff.profileModal.updateFailed'));
     }
-  }, [staff.id, selectedPositionId, onSave, onClose, t]);
+  }, [staff.id, selectedPositionId, socialLinks, onSave, onClose, t]);
 
   // 이미지 변경 핸들러
   const handleImageChange = useCallback((url: string) => {
@@ -102,6 +117,11 @@ function StaffProfileModal({
   // 직급 선택 핸들러
   const handlePositionSelect = useCallback((positionId: string | null) => {
     setSelectedPositionId(positionId);
+  }, []);
+
+  // Social Links 변경 핸들러
+  const handleSocialLinkChange = useCallback((field: keyof SocialLinksData, value: string) => {
+    setSocialLinks(prev => ({ ...prev, [field]: value }));
   }, []);
 
   return (
@@ -190,7 +210,10 @@ function StaffProfileModal({
         </div>
 
         {/* 소셜 미디어 링크 */}
-        <SocialLinksForm register={register} />
+        <SocialLinksForm
+          values={socialLinks}
+          onChange={handleSocialLinkChange}
+        />
 
         {/* 버튼 */}
         <div className="flex justify-end space-x-3 pt-4 border-t border-secondary-200 mt-6">

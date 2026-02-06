@@ -50,6 +50,7 @@ export const Sidebar: React.FC = () => {
   const [openSubmenus, setOpenSubmenus] = React.useState<string[]>([
     'booking-management',
     'salon-management',
+    'customer-management',
   ]);
 
   const toggleSubmenu = (name: string) => {
@@ -94,11 +95,19 @@ export const Sidebar: React.FC = () => {
       ],
     },
     {
+      id: 'customer-management',
       name: t('nav.customers'),
       icon: Users,
-      href: '/customers',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
-      permissionKey: 'customers',
+      subItems: [
+        {
+          name: t('nav.customerChart'),
+          icon: Users,
+          href: '/customers/chart',
+          roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+          permissionKey: 'customers',
+        },
+      ],
     },
     {
       id: 'salon-management',

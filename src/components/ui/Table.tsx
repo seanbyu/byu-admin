@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 interface Column<T> {
   key: string;
   header: string;
-  render?: (item: T) => React.ReactNode;
+  render?: (item: T, index: number) => React.ReactNode;
   width?: string;
   align?: 'left' | 'center' | 'right';
 }
@@ -92,7 +92,7 @@ export function Table<T extends { id: string }>({
                   )}
                 >
                   {column.render
-                    ? column.render(item)
+                    ? column.render(item, index)
                     : (item as any)[column.key]}
                 </td>
               ))}

@@ -7,10 +7,78 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Cleanup tracker for rollback
+interface CleanupTracker {
+  authUserCreated: boolean;
+  authUserId: string | null;
+  salonCreated: boolean;
+  salonId: string | null;
+  userRecordCreated: boolean;
+  originalAuthMetadata: Record<string, unknown> | null;
+  isOtpUser: boolean;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  // Initialize cleanup tracker
+  const cleanup: CleanupTracker = {
+    authUserCreated: false,
+    authUserId: null,
+    salonCreated: false,
+    salonId: null,
+    userRecordCreated: false,
+    originalAuthMetadata: null,
+    isOtpUser: false,
+  };
+
+  // Create Supabase Service Role Client (early init for cleanup)
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+  );
+
+  // Cleanup function
+  const performCleanup = async () => {
+    console.log("Performing cleanup...", cleanup);
+
+    try {
+      // Delete salon first (has FK dependencies)
+      if (cleanup.salonCreated && cleanup.salonId) {
+        console.log("Deleting salon:", cleanup.salonId);
+        await supabaseAdmin.from("staff_profiles").delete().eq("salon_id", cleanup.salonId);
+        await supabaseAdmin.from("salon_industries").delete().eq("salon_id", cleanup.salonId);
+        await supabaseAdmin.from("service_categories").delete().eq("salon_id", cleanup.salonId);
+        await supabaseAdmin.from("salons").delete().eq("id", cleanup.salonId);
+      }
+
+      // Delete user record
+      if (cleanup.userRecordCreated && cleanup.authUserId) {
+        console.log("Deleting user record:", cleanup.authUserId);
+        await supabaseAdmin.from("user_identities").delete().eq("user_id", cleanup.authUserId);
+        await supabaseAdmin.from("users").delete().eq("id", cleanup.authUserId);
+      }
+
+      // Handle auth user
+      if (cleanup.authUserId) {
+        if (cleanup.authUserCreated) {
+          // Delete newly created auth user
+          console.log("Deleting auth user:", cleanup.authUserId);
+          await supabaseAdmin.auth.admin.deleteUser(cleanup.authUserId);
+        } else if (cleanup.isOtpUser && cleanup.originalAuthMetadata) {
+          // Revert OTP user's metadata changes
+          console.log("Reverting OTP user metadata:", cleanup.authUserId);
+          await supabaseAdmin.auth.admin.updateUserById(cleanup.authUserId, {
+            user_metadata: cleanup.originalAuthMetadata,
+          });
+        }
+      }
+    } catch (cleanupError) {
+      console.error("Cleanup error:", cleanupError);
+    }
+  };
 
   try {
     // 1. Get the request body
@@ -36,12 +104,6 @@ serve(async (req) => {
       );
     }
 
-    // 2. Create Supabase Service Role Client
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    );
-
     // 1.4 Validate Format
     const salonNameRegex = /^[a-zA-Z0-9_가-힣]+$/;
     if (!salonNameRegex.test(salonName)) {
@@ -50,7 +112,7 @@ serve(async (req) => {
       );
     }
 
-    // 1.5 Validate Duplicates
+    // 1.5 Validate Duplicates (before any mutations)
     const { data: existingShop } = await supabaseAdmin
       .from("salons")
       .select("id")
@@ -72,7 +134,7 @@ serve(async (req) => {
       throw new Error("이미 등록된 매장 전화번호입니다.");
     }
 
-    // Check Email (if creating new)
+    // Check Email
     const { data: existingUser } = await supabaseAdmin
       .from("users")
       .select("id")
@@ -80,8 +142,6 @@ serve(async (req) => {
       .maybeSingle();
 
     if (existingUser) {
-      // If we are updating an existing user (userId provided), this email check might trigger if we didn't change email yet.
-      // But usually we are setting NEW email.
       if (!userId || existingUser.id !== userId) {
         throw new Error("이미 가입된 아이디(이메일)입니다.");
       }
@@ -92,24 +152,15 @@ serve(async (req) => {
 
     if (userId) {
       // UPDATE existing user (likely verified via Phone OTP)
-      // We must ensure the user exists
+      cleanup.isOtpUser = true;
+      cleanup.authUserId = userId;
+
       const { data: uData, error: uError } =
         await supabaseAdmin.auth.admin.getUserById(userId);
       if (uError || !uData.user) throw new Error("Invalid User ID");
 
-      // 기존 사용자가 CUSTOMER로 생성되었을 수 있으므로 customer_profiles 삭제
-      // (휴대폰 인증 시 기본값 CUSTOMER로 생성되어 customer_profiles가 만들어짐)
-      const { error: deleteProfileError } = await supabaseAdmin
-        .from("customer_profiles")
-        .delete()
-        .eq("user_id", userId);
-
-      if (deleteProfileError) {
-        console.log(
-          "customer_profiles delete (may not exist):",
-          deleteProfileError.message,
-        );
-      }
+      // Store original metadata for rollback
+      cleanup.originalAuthMetadata = uData.user.user_metadata || {};
 
       // Update Email/Password/Metadata
       const { error: updateError } =
@@ -120,14 +171,14 @@ serve(async (req) => {
           user_metadata: {
             ...uData.user.user_metadata,
             name: name,
-            user_type: "ADMIN_USER",
+            user_type: "SALON",
             role: "ADMIN",
           },
         });
       if (updateError) throw updateError;
     } else {
       // CREATE new user (standard flow)
-      // Check Phone in users table only if creating new (to avoid duplicate)
+      // Check Phone in users table only if creating new
       const { data: existingPhoneUser } = await supabaseAdmin
         .from("users")
         .select("id")
@@ -147,14 +198,17 @@ serve(async (req) => {
           user_metadata: {
             name: name,
             phone: phone,
-            user_type: "ADMIN_USER",
+            user_type: "SALON",
             role: "ADMIN",
           },
         });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create auth user");
+
       targetUserId = authData.user.id;
+      cleanup.authUserCreated = true;
+      cleanup.authUserId = targetUserId;
     }
 
     const finalUserId = targetUserId;
@@ -174,15 +228,13 @@ serve(async (req) => {
       .single();
 
     if (salonError) {
-      // Rollback only if we created the user purely for this?
-      // If we updated existing user, rollback might break account?
-      // Strict transaction hard here.
-      // If new user -> delete. If existing -> We already updated email. Hard to revert perfectly.
-      // Best effort:
-      if (!userId) await supabaseAdmin.auth.admin.deleteUser(finalUserId);
-      throw salonError;
+      console.error("Salon creation error:", salonError);
+      await performCleanup();
+      throw new Error("매장 생성 실패: " + salonError.message);
     }
 
+    cleanup.salonCreated = true;
+    cleanup.salonId = salonData.id;
     const salonId = salonData.id;
 
     // 4.5 Insert Salon Industries
@@ -192,7 +244,6 @@ serve(async (req) => {
     if (reqBody.industryNames && Array.isArray(reqBody.industryNames)) {
       const industryNames = reqBody.industryNames;
 
-      // Get industry IDs for the names
       const { data: industriesData } = await supabaseAdmin
         .from("industries")
         .select("id, name")
@@ -204,7 +255,6 @@ serve(async (req) => {
           industry_id: ind.id,
         }));
 
-        // Check if hair industry is selected
         const hairIndustry = industriesData.find(
           (ind: any) => ind.name.toLowerCase() === "hair"
         );
@@ -219,18 +269,14 @@ serve(async (req) => {
 
         if (industriesError) {
           console.error("Error inserting industries:", industriesError);
-          // Rollback all
-          await supabaseAdmin.from("salons").delete().eq("id", salonId);
-          if (!userId) await supabaseAdmin.auth.admin.deleteUser(finalUserId);
-          throw new Error(
-            "Failed to save industries: " + industriesError.message,
-          );
+          await performCleanup();
+          throw new Error("업종 저장 실패: " + industriesError.message);
         }
       }
     }
 
     // 4.6 Create default service categories for Hair industry
-    if (hasHairIndustry) {
+    if (hasHairIndustry && hairIndustryId) {
       const defaultHairCategories = [
         { name: "Cut", name_en: "Cut", name_th: "ตัดผม", display_order: 1 },
         { name: "Perm", name_en: "Perm", name_th: "ดัดผม", display_order: 2 },
@@ -254,12 +300,11 @@ serve(async (req) => {
 
       if (categoriesError) {
         console.error("Error creating default categories:", categoriesError);
-        // Non-critical error, continue without rollback
+        // Non-critical, continue
       }
     }
 
-    // 5. Upsert User (base info only - salon_id is now in staff_profiles)
-    // 휴대폰 인증으로 생성된 경우 users 테이블에 행이 없을 수 있으므로 upsert 사용
+    // 5. Upsert User (base info only)
     const { error: userError } = await supabaseAdmin
       .from("users")
       .upsert({
@@ -268,23 +313,45 @@ serve(async (req) => {
         name: name,
         is_active: true,
         phone: phone,
-        user_type: "ADMIN_USER",
+        user_type: "SALON",
         role: "ADMIN",
       }, {
         onConflict: "id",
       });
 
     if (userError) {
-      // Rollback
-      await supabaseAdmin.from("salons").delete().eq("id", salonId);
-      if (!userId) await supabaseAdmin.auth.admin.deleteUser(finalUserId);
-      throw userError;
+      console.error("User record creation error:", userError);
+      await performCleanup();
+      throw new Error("사용자 정보 저장 실패: " + userError.message);
+    }
+
+    cleanup.userRecordCreated = true;
+
+    // 5.5 Create user_identity for EMAIL provider (optional - skip if table doesn't exist)
+    try {
+      const { error: identityError } = await supabaseAdmin
+        .from("user_identities")
+        .upsert({
+          user_id: finalUserId,
+          auth_id: finalUserId,
+          provider: "EMAIL",
+          provider_user_id: email,
+          profile: { email: email, name: name },
+          is_primary: true,
+        }, {
+          onConflict: "auth_id",
+        });
+
+      if (identityError) {
+        console.error("Error creating user identity (non-critical):", identityError);
+        // Non-critical - continue without failing
+      }
+    } catch (identityErr) {
+      console.error("user_identities table might not exist:", identityErr);
+      // Continue without failing
     }
 
     // 6. Upsert Staff Profile with salon_id, is_owner, and Permissions
-    // (휴대폰 인증 후 CUSTOMER로 생성된 경우 staff_profiles가 없으므로 upsert 사용)
-    // salon_id, is_owner, is_approved는 이제 staff_profiles에 저장
-    // work_schedule은 salon의 business_hours와 동일하게 설정
     const defaultWorkSchedule = {
       monday: { enabled: false, start: null, end: null },
       tuesday: { enabled: true, start: "10:00", end: "21:00" },
@@ -317,18 +384,15 @@ serve(async (req) => {
 
     if (profileError) {
       console.error("Error creating admin profile:", profileError);
-      // Rollback
-      await supabaseAdmin.from("salons").delete().eq("id", salonId);
-      if (!userId) await supabaseAdmin.auth.admin.deleteUser(finalUserId);
-      throw new Error("Failed to set permissions: " + profileError.message);
+      await performCleanup();
+      throw new Error("권한 설정 실패: " + profileError.message);
     }
 
-    // 7. Email is sent automatically by Supabase (via Dashboard SMTP settings)
-
+    // Success!
     return new Response(
       JSON.stringify({
         message: "Owner registered successfully (Verification email sent)",
-        user: { id: finalUserId }, // simplified return
+        user: { id: finalUserId },
         salonId: salonId,
       }),
       {
@@ -337,6 +401,7 @@ serve(async (req) => {
       },
     );
   } catch (error) {
+    console.error("Registration error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
