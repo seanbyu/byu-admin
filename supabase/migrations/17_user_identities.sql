@@ -374,12 +374,14 @@ BEGIN
   WHERE user_id = p_user_id AND provider = p_provider;
 
   IF v_is_primary THEN
-    -- 다른 identity를 primary로 설정
+    -- 다른 identity를 primary로 설정 (1개만)
     UPDATE user_identities
     SET is_primary = true
-    WHERE user_id = p_user_id
-      AND provider != p_provider
-    LIMIT 1;
+    WHERE id = (
+      SELECT id FROM user_identities
+      WHERE user_id = p_user_id AND provider != p_provider
+      LIMIT 1
+    );
   END IF;
 
   -- 삭제
