@@ -32,3 +32,9 @@ Thumbs.db
 !.vscode/settings.json
 !.vscode/tasks.json
 .idea
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
+
+# Claude Code
+.claude/
