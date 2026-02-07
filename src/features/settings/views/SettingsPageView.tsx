@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   useSettingsUIStore,
@@ -44,6 +45,10 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
   const { user, updateUser } = useAuthStore();
   const toast = useToast();
   const salonId = user?.salonId || '';
+
+  // 권한 체크
+  const { canWrite } = usePermission();
+  const canEditSettings = canWrite(PermissionModules.SETTINGS);
 
   // URL 기반 활성 탭
   const activeTab = initialTab;
@@ -204,6 +209,7 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
               onSave={handleStoreInfoSave}
               onUploadImage={handleImageUpload}
               onDeleteImage={handleImageDelete}
+              canEdit={canEditSettings}
             />
           )}
 
@@ -214,6 +220,7 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
               isLoading={plansQuery.isLoading || subscriptionQuery.isLoading}
               isUpgrading={subscriptionQuery.isUpgrading}
               onUpgrade={handlePlanUpgrade}
+              canEdit={canEditSettings}
             />
           )}
 

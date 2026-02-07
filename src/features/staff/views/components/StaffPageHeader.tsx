@@ -7,6 +7,8 @@ import { useTranslations } from 'next-intl';
 interface StaffPageHeaderProps {
   isAdmin: boolean;
   onInviteClick: () => void;
+  /** 직원 등록 권한 */
+  canAddStaff?: boolean;
 }
 
 // rendering-hoist-jsx: 가이드 메시지 키 호이스팅
@@ -16,8 +18,12 @@ const GUIDE_MESSAGE_KEYS = ['guide.line1', 'guide.line2', 'guide.line3'] as cons
 export const StaffPageHeader = memo(function StaffPageHeader({
   isAdmin,
   onInviteClick,
+  canAddStaff,
 }: StaffPageHeaderProps) {
   const t = useTranslations('staff');
+
+  // canAddStaff가 명시되지 않으면 isAdmin 사용 (하위 호환)
+  const showAddButton = canAddStaff ?? isAdmin;
 
   return (
     <div className="flex items-center justify-between">
@@ -31,7 +37,7 @@ export const StaffPageHeader = memo(function StaffPageHeader({
           ))}
         </div>
       </div>
-      {isAdmin && (
+      {showAddButton && (
         <Button variant="outline" onClick={onInviteClick}>
           {t('register')}
         </Button>

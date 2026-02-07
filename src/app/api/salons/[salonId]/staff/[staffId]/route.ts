@@ -19,8 +19,6 @@ export async function PATCH(
     const { salonId, staffId } = await params;
     const body = await req.json();
 
-    console.log(`Updating staff ${staffId} in salon ${salonId}`, body);
-
     const service = new StaffService(supabase);
     await service.updateStaff(salonId, staffId, body);
 

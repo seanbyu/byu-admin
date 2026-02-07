@@ -120,6 +120,8 @@ interface CustomerPageHeaderProps {
   onSortByChange: (sortBy: CustomerSortBy) => void;
   onSortOrderChange: (order: 'asc' | 'desc') => void;
   onAddCustomer: () => void;
+  /** 고객 등록 권한 */
+  canAddCustomer?: boolean;
 }
 
 export const CustomerPageHeader = memo(function CustomerPageHeader({
@@ -133,6 +135,7 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
   onSortByChange,
   onSortOrderChange,
   onAddCustomer,
+  canAddCustomer = true,
 }: CustomerPageHeaderProps) {
   const t = useTranslations();
 
@@ -178,10 +181,12 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
             {t('customer.pageDescription')}
           </p>
         </div>
-        <Button onClick={onAddCustomer} className="flex items-center space-x-2">
-          <Plus size={20} />
-          <span>{t('customer.addNew')}</span>
-        </Button>
+        {canAddCustomer && (
+          <Button onClick={onAddCustomer} className="flex items-center space-x-2">
+            <Plus size={20} />
+            <span>{t('customer.addNew')}</span>
+          </Button>
+        )}
       </div>
 
       {/* Filter Tabs */}

@@ -64,6 +64,10 @@ interface CustomerTableProps {
   totalCount: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  /** 수정/등록 권한 */
+  canEdit?: boolean;
+  /** 삭제 권한 */
+  canDelete?: boolean;
 }
 
 export const CustomerTable = memo(function CustomerTable({
@@ -74,15 +78,20 @@ export const CustomerTable = memo(function CustomerTable({
   totalCount,
   onPageChange,
   onPageSizeChange,
+  canEdit = true,
+  canDelete = false,
 }: CustomerTableProps) {
   const t = useTranslations();
 
   // advanced-event-handler-refs: 안정적인 이벤트 핸들러
+  // canEdit 권한이 있을 때만 클릭 허용
   const handleRowClick = useCallback(
     (customer: CustomerListItem) => {
-      onCustomerClick(customer.id);
+      if (canEdit) {
+        onCustomerClick(customer.id);
+      }
     },
-    [onCustomerClick]
+    [onCustomerClick, canEdit]
   );
 
   // 페이지네이션을 고려한 시작 번호
@@ -255,7 +264,7 @@ export const CustomerTable = memo(function CustomerTable({
       <Table
         data={customers}
         columns={columns}
-        onRowClick={handleRowClick}
+        onRowClick={canEdit ? handleRowClick : undefined}
         emptyMessage={t('customer.noCustomers')}
       />
 

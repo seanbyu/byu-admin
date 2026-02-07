@@ -55,6 +55,7 @@ export interface Staff {
   holidayEntries?: HolidayEntry[]; // DB 실제 구조
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date | null;  // 퇴사 예정일 (soft delete)
   phone?: string;
   email?: string;
   role?: UserRole;

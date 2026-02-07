@@ -4,6 +4,7 @@ import { memo } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { Layout } from '@/components/layout/Layout';
 import { useSalonMenusView } from '../hooks/useSalonMenusView';
 import { PageHeader } from './components/PageHeader';
@@ -37,6 +38,11 @@ export default function SalonMenusPageView() {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
+  // 권한 체크
+  const { canWrite, canDelete } = usePermission();
+  const canEditMenus = canWrite(PermissionModules.MENUS);
+  const canDeleteMenus = canDelete(PermissionModules.MENUS);
+
   // Custom Hook으로 모든 상태 및 로직 분리
   const {
     // 데이터
@@ -67,7 +73,7 @@ export default function SalonMenusPageView() {
       <div className="p-8 max-w-7xl mx-auto">
         {/* Header */}
         <PageHeader
-          onSettingsClick={toggleReorderSettings}
+          onSettingsClick={canEditMenus ? toggleReorderSettings : undefined}
           isSettingsActive={showReorderSettings}
         />
 
@@ -76,7 +82,7 @@ export default function SalonMenusPageView() {
           selectedTab={selectedTab}
           selectedIndustries={selectedIndustries}
           onSelectTab={setSelectedTab}
-          onAddIndustryClick={openIndustryModal}
+          onAddIndustryClick={canEditMenus ? openIndustryModal : undefined}
         />
 
         {/* Selected Industries Reordering Panel */}
@@ -105,6 +111,8 @@ export default function SalonMenusPageView() {
               salonId={salonId}
               orderedIndustries={selectedIndustries}
               selectedTab={selectedTab}
+              canEdit={canEditMenus}
+              canDelete={canDeleteMenus}
             />
           ) : (
             <NoSalonState />

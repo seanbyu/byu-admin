@@ -16,12 +16,16 @@ interface MenuListProps {
   salonId: string;
   orderedIndustries: SalonIndustry[];
   selectedTab: string;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 export default function MenuList({
   salonId,
   orderedIndustries = [],
   selectedTab,
+  canEdit = true,
+  canDelete = true,
 }: MenuListProps) {
   const t = useTranslations('menu');
   const {
@@ -156,14 +160,14 @@ export default function MenuList({
           orderedIndustries={orderedIndustries}
           selectedIndustryId={selectedTab}
           onSelectIndustry={() => {}} // This seems unused or implicitly handled via URL or parent
-          onAddCategory={(industryId) => {
+          onAddCategory={canEdit ? (industryId) => {
             setSelectedIndustryForCreate(industryId || '');
             setIsCreating(true);
-          }}
+          } : undefined}
           menuCounts={menuCounts}
           selectedCategoryId={selectedCategoryId}
           onSelectCategory={setSelectedCategoryId}
-          onReorderCategories={reorderCategories}
+          onReorderCategories={canEdit ? reorderCategories : undefined}
         />
       </div>
 
@@ -185,19 +189,21 @@ export default function MenuList({
         ) : categories.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border border-dashed border-gray-200">
             <p className="text-gray-500 mb-2">{t('noCategories')}</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // 첫 번째 업종을 기본값으로 설정
-                if (orderedIndustries.length > 0) {
-                  setSelectedIndustryForCreate(orderedIndustries[0].id);
-                }
-                setIsCreating(true);
-              }}
-            >
-              <Plus className="w-4 h-4 mr-2" /> {t('addCategory')}
-            </Button>
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // 첫 번째 업종을 기본값으로 설정
+                  if (orderedIndustries.length > 0) {
+                    setSelectedIndustryForCreate(orderedIndustries[0].id);
+                  }
+                  setIsCreating(true);
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" /> {t('addCategory')}
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-8">
@@ -228,8 +234,8 @@ export default function MenuList({
                     <CategoryItem
                       key={category.id}
                       category={category}
-                      onDelete={handleDeleteCategory}
-                      onEdit={handleStartEditCategory}
+                      onDelete={canDelete ? handleDeleteCategory : undefined}
+                      onEdit={canEdit ? handleStartEditCategory : undefined}
                       isEditing={editingCategoryId === category.id}
                       editName={editCategoryName}
                       onEditNameChange={setEditCategoryName}
@@ -241,10 +247,12 @@ export default function MenuList({
                         categoryId={category.id}
                         editingMenuId={editingMenuId}
                         editMenuData={editMenuData}
-                        onEditMenu={handleStartEditMenu}
+                        onEditMenu={canEdit ? handleStartEditMenu : undefined}
                         onEditMenuDataChange={setEditMenuData}
                         onSaveMenu={handleSaveMenu}
                         onCancelEditMenu={() => setEditingMenuId(null)}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
                       />
                     </CategoryItem>
                   ))}
@@ -278,8 +286,8 @@ export default function MenuList({
                     {otherCategories.map((category) => (
                       <CategoryItem
                         key={category.id}
-                        onDelete={handleDeleteCategory}
-                        onEdit={handleStartEditCategory}
+                        onDelete={canDelete ? handleDeleteCategory : undefined}
+                        onEdit={canEdit ? handleStartEditCategory : undefined}
                         isEditing={editingCategoryId === category.id}
                         editName={editCategoryName}
                         onEditNameChange={setEditCategoryName}
@@ -292,10 +300,12 @@ export default function MenuList({
                           categoryId={category.id}
                           editingMenuId={editingMenuId}
                           editMenuData={editMenuData}
-                          onEditMenu={handleStartEditMenu}
+                          onEditMenu={canEdit ? handleStartEditMenu : undefined}
                           onEditMenuDataChange={setEditMenuData}
                           onSaveMenu={handleSaveMenu}
                           onCancelEditMenu={() => setEditingMenuId(null)}
+                          canEdit={canEdit}
+                          canDelete={canDelete}
                         />
                       </CategoryItem>
                     ))}

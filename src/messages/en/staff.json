@@ -25,10 +25,17 @@
     "bookingAllowed": "Booking Allowed"
   },
   "actions": {
-    "resign": "Process Resignation",
+    "resign": "Resign",
+    "softResign": "Resign (1 week grace)",
+    "immediateResign": "Resign immediately",
+    "cancelResignation": "Cancel Resignation",
     "allPermissions": "All Permissions",
     "setPermissions": "Set Permissions",
+    "viewPermissions": "View Permissions",
     "editInfo": "Edit Info"
+  },
+  "status": {
+    "resignedDaysLeft": "Resigning (D-{days})"
   },
   "guide": {
     "line1": "Employees can be registered after signing up for salon store and applying to join the shop, followed by admin approval.",
@@ -38,10 +45,14 @@
   "roles": {
     "admin": "Admin",
     "manager": "Manager",
+    "artist": "Artist",
     "staff": "Staff"
   },
   "confirm": {
-    "resign": "Are you sure you want to process resignation?"
+    "resign": "Are you sure you want to process resignation?",
+    "softResign": "Process resignation with 1 week grace period? Can be cancelled within the grace period.",
+    "immediateResign": "Process immediate resignation? This action cannot be undone.",
+    "cancelResignation": "Cancel the scheduled resignation?"
   },
   "createModal": {
     "title": "Register Employee (Direct Creation)",
@@ -58,8 +69,9 @@
     "name": "Name",
     "namePlaceholder": "John Doe",
     "role": "Role",
-    "roleStaff": "Staff",
     "roleManager": "Manager",
+    "roleArtist": "Artist",
+    "roleStaff": "Staff",
     "roleAdmin": "Admin",
     "createAccount": "Create Account"
   },
@@ -165,9 +177,20 @@
     "resetToSalonDefaults": "Reset to Salon Defaults"
   },
   "errors": {
-    "updateFailed": "Update failed"
+    "updateFailed": "Update failed",
+    "createUserProfile": "Failed to create user profile.",
+    "createStaffProfile": "Failed to create staff profile.",
+    "createFailed": "Failed to register employee.",
+    "deleteFailed": "Failed to delete employee.",
+    "cancelFailed": "Failed to cancel resignation.",
+    "loginRequired": "Login required.",
+    "cannotDeleteSelf": "You cannot delete your own account.",
+    "cannotDeleteOwner": "Owner account cannot be deleted."
   },
   "success": {
-    "registered": "Employee has been registered!"
+    "registered": "Employee has been registered!",
+    "resigned": "Employee has been terminated.",
+    "softResigned": "Employee resignation scheduled. Will be deleted in 1 week.",
+    "resignationCancelled": "Resignation has been cancelled."
   }
 }

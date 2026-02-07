@@ -12,7 +12,7 @@ interface SortableMenuRowProps {
   menu: SalonMenu;
   editingMenuId: string | null;
   editMenuData: { name: string; price: string; duration: string };
-  onEditMenu: (menu: any) => void;
+  onEditMenu?: (menu: any) => void;
   onEditMenuDataChange: (data: {
     name: string;
     price: string;
@@ -20,7 +20,7 @@ interface SortableMenuRowProps {
   }) => void;
   onSaveMenu: () => void;
   onCancelEditMenu: () => void;
-  onDeleteMenu: (id: string) => void;
+  onDeleteMenu?: (id: string) => void;
 }
 
 export default function SortableMenuRow({
@@ -132,8 +132,8 @@ export default function SortableMenuRow({
         <>
           {/* Clickable area for editing */}
           <div
-            className="flex-1 flex items-center cursor-pointer"
-            onClick={() => onEditMenu(menu)}
+            className={`flex-1 flex items-center ${onEditMenu ? 'cursor-pointer' : ''}`}
+            onClick={onEditMenu ? () => onEditMenu(menu) : undefined}
           >
             <div className="flex-1 text-h4">{menu.name}</div>
 
@@ -149,22 +149,26 @@ export default function SortableMenuRow({
           </div>
 
           <div className="w-16 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteMenu(menu.id);
-              }}
-              className="p-1 text-gray-400 hover:text-red-500"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-            <button
-              {...attributes}
-              {...listeners}
-              className="p-1 text-gray-300 cursor-move hover:text-gray-600"
-            >
-              <GripVertical className="w-4 h-4" />
-            </button>
+            {onDeleteMenu && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteMenu(menu.id);
+                }}
+                className="p-1 text-gray-400 hover:text-red-500"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+            {onEditMenu && (
+              <button
+                {...attributes}
+                {...listeners}
+                className="p-1 text-gray-300 cursor-move hover:text-gray-600"
+              >
+                <GripVertical className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </>
       )}

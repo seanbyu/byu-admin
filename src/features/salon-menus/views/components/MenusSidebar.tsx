@@ -23,7 +23,7 @@ interface MenusSidebarProps {
   orderedIndustries: SalonIndustry[];
   selectedIndustryId: string | 'all';
   onSelectIndustry: (id: string | 'all') => void;
-  onAddCategory: (industryId?: string) => void;
+  onAddCategory?: (industryId?: string) => void;
   menuCounts: Record<string, number>;
   selectedCategoryId: string | null;
   onSelectCategory: (id: string | null) => void;
@@ -181,13 +181,15 @@ export default function MenusSidebar({
                   </div>
                 </SortableContext>
               </DndContext>
-              <button
-                onClick={() => onAddCategory(industry.id)}
-                className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <Plus className="w-3 h-3" />
-                그룹 추가
-              </button>
+              {onAddCategory && (
+                <button
+                  onClick={() => onAddCategory(industry.id)}
+                  className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  그룹 추가
+                </button>
+              )}
             </div>
           );
         })}

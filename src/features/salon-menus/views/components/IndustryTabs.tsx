@@ -9,7 +9,7 @@ interface IndustryTabsProps {
   selectedTab: string;
   selectedIndustries: SalonIndustry[];
   onSelectTab: (tab: string) => void;
-  onAddIndustryClick: () => void;
+  onAddIndustryClick?: () => void;
 }
 
 // rendering-hoist-jsx: 정적 클래스명 상수 호이스팅
@@ -68,14 +68,16 @@ export const IndustryTabs = memo(function IndustryTabs({
           onClick={() => onSelectTab(ind.id)}
         />
       ))}
-      <button
-        type="button"
-        onClick={onAddIndustryClick}
-        className={`${BASE_TAB_CLASS} ${INACTIVE_TAB_CLASS} flex items-center gap-1`}
-      >
-        <Plus className="w-3 h-3" />
-        {t('menu.addIndustry')}
-      </button>
+      {onAddIndustryClick && (
+        <button
+          type="button"
+          onClick={onAddIndustryClick}
+          className={`${BASE_TAB_CLASS} ${INACTIVE_TAB_CLASS} flex items-center gap-1`}
+        >
+          <Plus className="w-3 h-3" />
+          {t('menu.addIndustry')}
+        </button>
+      )}
     </div>
   );
 });

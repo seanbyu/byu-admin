@@ -26,9 +26,16 @@
   },
   "actions": {
     "resign": "ดำเนินการลาออก",
+    "softResign": "ลาออก (รอ 1 สัปดาห์)",
+    "immediateResign": "ลาออกทันที",
+    "cancelResignation": "ยกเลิกการลาออก",
     "allPermissions": "สิทธิ์ทั้งหมด",
     "setPermissions": "ตั้งค่าสิทธิ์",
+    "viewPermissions": "ดูสิทธิ์",
     "editInfo": "แก้ไขข้อมูล"
+  },
+  "status": {
+    "resignedDaysLeft": "กำลังลาออก (D-{days})"
   },
   "guide": {
     "line1": "พนักงานสามารถลงทะเบียนได้หลังจากสมัครสมาชิกและสมัครเข้าร่วมร้าน โดยต้องได้รับการอนุมัติจากผู้ดูแล",
@@ -38,10 +45,14 @@
   "roles": {
     "admin": "ผู้ดูแล",
     "manager": "ผู้จัดการ",
+    "artist": "ศิลปิน",
     "staff": "พนักงาน"
   },
   "confirm": {
-    "resign": "คุณต้องการดำเนินการลาออกหรือไม่?"
+    "resign": "คุณต้องการดำเนินการลาออกหรือไม่?",
+    "softResign": "ดำเนินการลาออกโดยรอ 1 สัปดาห์? สามารถยกเลิกได้ภายในระยะเวลานี้",
+    "immediateResign": "ดำเนินการลาออกทันที? การกระทำนี้ไม่สามารถยกเลิกได้",
+    "cancelResignation": "ยกเลิกการลาออกที่กำหนดไว้?"
   },
   "createModal": {
     "title": "ลงทะเบียนพนักงาน (สร้างโดยตรง)",
@@ -58,8 +69,9 @@
     "name": "ชื่อ",
     "namePlaceholder": "John Doe",
     "role": "บทบาท",
-    "roleStaff": "พนักงาน",
     "roleManager": "ผู้จัดการ",
+    "roleArtist": "ศิลปิน",
+    "roleStaff": "พนักงาน",
     "roleAdmin": "ผู้ดูแล",
     "createAccount": "สร้างบัญชี"
   },
@@ -165,9 +177,20 @@
     "resetToSalonDefaults": "รีเซ็ตเป็นค่าเริ่มต้นร้าน"
   },
   "errors": {
-    "updateFailed": "การอัปเดตล้มเหลว"
+    "updateFailed": "การอัปเดตล้มเหลว",
+    "createUserProfile": "ไม่สามารถสร้างโปรไฟล์ผู้ใช้ได้",
+    "createStaffProfile": "ไม่สามารถสร้างโปรไฟล์พนักงานได้",
+    "createFailed": "ไม่สามารถลงทะเบียนพนักงานได้",
+    "deleteFailed": "ไม่สามารถลบพนักงานได้",
+    "cancelFailed": "ไม่สามารถยกเลิกการลาออกได้",
+    "loginRequired": "กรุณาเข้าสู่ระบบ",
+    "cannotDeleteSelf": "ไม่สามารถลบบัญชีของตัวเองได้",
+    "cannotDeleteOwner": "ไม่สามารถลบบัญชีเจ้าของร้านได้"
   },
   "success": {
-    "registered": "ลงทะเบียนพนักงานเรียบร้อย!"
+    "registered": "ลงทะเบียนพนักงานเรียบร้อย!",
+    "resigned": "พนักงานถูกลบออกจากระบบแล้ว",
+    "softResigned": "กำหนดการลาออกเรียบร้อย จะถูกลบใน 1 สัปดาห์",
+    "resignationCancelled": "ยกเลิกการลาออกแล้ว"
   }
 }

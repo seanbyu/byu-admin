@@ -53,6 +53,7 @@ interface EditableFieldProps {
   onSave: () => void;
   onCancel: () => void;
   onTempValueChange: (value: string) => void;
+  canEdit?: boolean;
 }
 
 const EditableField = memo(function EditableField({
@@ -66,6 +67,7 @@ const EditableField = memo(function EditableField({
   onSave,
   onCancel,
   onTempValueChange,
+  canEdit = true,
 }: EditableFieldProps) {
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,12 +113,14 @@ const EditableField = memo(function EditableField({
         {icon}
         <span className="text-secondary-900">{value || '-'}</span>
       </div>
-      <button
-        onClick={onStartEdit}
-        className="p-1.5 text-secondary-500 hover:text-secondary-700 hover:bg-secondary-200 rounded-lg transition-colors"
-      >
-        <Pencil size={16} />
-      </button>
+      {canEdit && (
+        <button
+          onClick={onStartEdit}
+          className="p-1.5 text-secondary-500 hover:text-secondary-700 hover:bg-secondary-200 rounded-lg transition-colors"
+        >
+          <Pencil size={16} />
+        </button>
+      )}
     </div>
   );
 });
@@ -131,6 +135,7 @@ interface StoreImageSectionProps {
   isUploading: boolean;
   onUpload: (file: File) => Promise<void>;
   onDelete: () => Promise<void>;
+  canEdit?: boolean;
 }
 
 const StoreImageSection = memo(function StoreImageSection({
@@ -139,6 +144,7 @@ const StoreImageSection = memo(function StoreImageSection({
   isUploading,
   onUpload,
   onDelete,
+  canEdit = true,
 }: StoreImageSectionProps) {
   const t = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -165,8 +171,8 @@ const StoreImageSection = memo(function StoreImageSection({
     <Card title={t('settings.store.image')} padding="sm" className="sm:p-6">
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
         <div
-          className="w-24 h-24 sm:w-32 sm:h-32 bg-secondary-100 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer hover:bg-secondary-200 transition-colors flex-shrink-0"
-          onClick={handleImageClick}
+          className={`w-24 h-24 sm:w-32 sm:h-32 bg-secondary-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 ${canEdit ? 'cursor-pointer hover:bg-secondary-200 transition-colors' : ''}`}
+          onClick={canEdit ? handleImageClick : undefined}
         >
           {imageUrl ? (
             <img
@@ -191,26 +197,28 @@ const StoreImageSection = memo(function StoreImageSection({
           )}
         </div>
 
-        <div className="flex flex-col items-center sm:items-start space-y-2 w-full sm:w-auto">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleImageClick}
-              isLoading={isUploading}
-            >
-              {t('settings.store.changeImage')}
-            </Button>
-            {imageUrl && (
-              <Button variant="ghost" size="sm" onClick={onDelete}>
-                {t('common.delete')}
+        {canEdit && (
+          <div className="flex flex-col items-center sm:items-start space-y-2 w-full sm:w-auto">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleImageClick}
+                isLoading={isUploading}
+              >
+                {t('settings.store.changeImage')}
               </Button>
-            )}
+              {imageUrl && (
+                <Button variant="ghost" size="sm" onClick={onDelete}>
+                  {t('common.delete')}
+                </Button>
+              )}
+            </div>
+            <p className="text-xs sm:text-sm text-secondary-500 text-center sm:text-left">
+              {t('settings.store.imageHint')}
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-secondary-500 text-center sm:text-left">
-            {t('settings.store.imageHint')}
-          </p>
-        </div>
+        )}
 
         <input
           ref={fileInputRef}
@@ -236,6 +244,7 @@ interface StoreInfoTabProps {
   onSave: (data: Partial<StoreInfo>) => Promise<void>;
   onUploadImage: (file: File) => Promise<void>;
   onDeleteImage: () => Promise<void>;
+  canEdit?: boolean;
 }
 
 // ============================================
@@ -250,6 +259,7 @@ export function StoreInfoTab({
   onSave,
   onUploadImage,
   onDeleteImage,
+  canEdit = true,
 }: StoreInfoTabProps) {
   const t = useTranslations();
 
@@ -303,6 +313,7 @@ export function StoreInfoTab({
         isUploading={isUploadingImage}
         onUpload={onUploadImage}
         onDelete={onDeleteImage}
+        canEdit={canEdit}
       />
 
       {/* Basic Info Section */}
@@ -322,6 +333,7 @@ export function StoreInfoTab({
               onSave={handleSaveName}
               onCancel={actions.cancelEditing}
               onTempValueChange={actions.updateTempValue}
+              canEdit={canEdit}
             />
           </div>
 
@@ -341,6 +353,7 @@ export function StoreInfoTab({
               onSave={handleSaveAddress}
               onCancel={actions.cancelEditing}
               onTempValueChange={actions.updateTempValue}
+              canEdit={canEdit}
             />
           </div>
         </div>
@@ -368,6 +381,7 @@ export function StoreInfoTab({
               onSave={handleSaveInstagram}
               onCancel={actions.cancelEditing}
               onTempValueChange={actions.updateTempValue}
+              canEdit={canEdit}
             />
           </div>
         </div>

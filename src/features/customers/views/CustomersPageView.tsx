@@ -6,6 +6,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { CustomerPageHeader } from '../components/CustomerPageHeader';
 import { CustomerTable } from '../components/CustomerTable';
 import { CustomerChartModal } from '../components/CustomerChartModal';
@@ -111,6 +112,11 @@ export default function CustomersPageView() {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
+  // 권한 체크
+  const { canWrite, canDelete } = usePermission();
+  const canEditCustomer = canWrite(PermissionModules.CUSTOMERS);
+  const canDeleteCustomer = canDelete(PermissionModules.CUSTOMERS);
+
   // Zustand store (선택적 구독)
   const { activeFilter, searchQuery, sortBy, sortOrder } = useCustomerFilters();
   const { showChartModal, showEditModal, selectedCustomerId } = useCustomerModals();
@@ -187,7 +193,6 @@ export default function CustomersPageView() {
 
   const handleAddCustomer = useCallback(() => {
     // TODO: 신규 고객 등록 모달 구현
-    console.log('Add new customer');
   }, []);
 
   // js-early-exit: 로딩 상태 조기 반환
@@ -229,6 +234,7 @@ export default function CustomersPageView() {
           onSortByChange={actions.setSortBy}
           onSortOrderChange={actions.setSortOrder}
           onAddCustomer={handleAddCustomer}
+          canAddCustomer={canEditCustomer}
         />
 
         {/* Content */}
@@ -241,6 +247,8 @@ export default function CustomersPageView() {
             totalCount={totalCount}
             onPageChange={actions.setCurrentPage}
             onPageSizeChange={actions.setPageSize}
+            canEdit={canEditCustomer}
+            canDelete={canDeleteCustomer}
           />
         </Card>
       </div>

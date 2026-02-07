@@ -322,6 +322,7 @@ export interface StaffResponse {
   holidays: Holiday[];
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;        // 퇴사 예정일 (soft delete)
   phone: string | null;
   email: string;
   role: string;

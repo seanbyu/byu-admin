@@ -20,7 +20,8 @@ type AuthErrorCode =
   | 'SIGNUP_FAILED'
   | 'SIGNUP_ERROR'
   | 'SALON_PENDING_APPROVAL'
-  | 'SALON_REJECTED';
+  | 'SALON_REJECTED'
+  | 'STAFF_RESIGNED';
 
 interface AuthResponse {
   user: User | null;
@@ -58,6 +59,8 @@ export default function LoginPageView() {
         return t('errors.salonPendingApproval');
       case 'SALON_REJECTED':
         return t('errors.salonRejected');
+      case 'STAFF_RESIGNED':
+        return t('errors.staffResigned');
       case 'LOGIN_ERROR':
       default:
         return t('errors.loginError');

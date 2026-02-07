@@ -14,10 +14,35 @@ import {
 // 전화번호 포맷 정규식을 모듈 레벨로 호이스팅
 const PHONE_REGEX = /(\d{3})(\d{4})(\d{4})/;
 
+// 국제 전화번호 포맷 함수 (E.164 -> 현지 표시 형식)
+const formatInternationalPhone = (phone: string): string => {
+  // 태국 번호: +66XXXXXXXXX -> +66 0XX-XXX-XXXX
+  if (phone.startsWith('+66')) {
+    const localNumber = phone.slice(3);
+    if (localNumber.length === 9) {
+      return `+66 0${localNumber.slice(0, 2)}-${localNumber.slice(2, 5)}-${localNumber.slice(5)}`;
+    }
+  }
+
+  // 한국 번호: +82XXXXXXXXX -> +82 0XX-XXXX-XXXX
+  if (phone.startsWith('+82')) {
+    const localNumber = phone.slice(3);
+    if (localNumber.length === 10) {
+      return `+82 0${localNumber.slice(0, 2)}-${localNumber.slice(2, 6)}-${localNumber.slice(6)}`;
+    }
+    if (localNumber.length === 9) {
+      return `+82 0${localNumber.slice(0, 1)}-${localNumber.slice(1, 5)}-${localNumber.slice(5)}`;
+    }
+  }
+
+  return phone;
+};
+
 // 역할 키 매핑 (불변 객체)
 const ROLE_KEYS: Readonly<Record<string, string>> = {
   ADMIN: 'roles.admin',
   MANAGER: 'roles.manager',
+  ARTIST: 'roles.artist',
   STAFF: 'roles.staff',
 } as const;
 
@@ -62,6 +87,13 @@ export function useStaffPageState(): UseStaffPageStateReturn {
   // Utility functions - useCallback으로 안정적 참조 유지
   const formatPhone = useCallback((phone?: string): string => {
     if (!phone) return '-';
+
+    // 국제 형식 (+로 시작)인 경우
+    if (phone.startsWith('+')) {
+      return formatInternationalPhone(phone);
+    }
+
+    // 기본 포맷 (11자리 국내 번호)
     return phone.replace(PHONE_REGEX, '$1-$2-$3');
   }, []);
 

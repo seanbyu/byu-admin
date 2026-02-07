@@ -18,7 +18,8 @@ export type AuthErrorCode =
   | 'PASSWORD_RESET_ERROR'
   | 'PASSWORD_UPDATE_ERROR'
   | 'SALON_PENDING_APPROVAL'
-  | 'SALON_REJECTED';
+  | 'SALON_REJECTED'
+  | 'STAFF_RESIGNED';
 
 interface AuthResponse {
   user: User | null;
@@ -163,6 +164,18 @@ export async function signInWithEmail(
     // ========================================
     // users 테이블에 데이터가 있는 경우
     // ========================================
+
+    // 퇴사 처리된 유저 체크 (is_active=false, deleted_at 존재)
+    if (!userData.is_active && userData.deleted_at) {
+      await supabase.auth.signOut();
+      return {
+        user: null,
+        token: null,
+        error: 'Staff resignation in progress',
+        errorCode: 'STAFF_RESIGNED',
+      };
+    }
+
     const role = userData.role?.toUpperCase() || 'MANAGER';
     let salonId: string | undefined = undefined;
     let isOwner = false;
@@ -170,7 +183,7 @@ export async function signInWithEmail(
     let permissions: any[] = [];
 
     // staff_profiles에서 salon_id, is_owner, is_approved, permissions 조회
-    if (role === 'ADMIN' || role === 'MANAGER' || role === 'STAFF') {
+    if (role === 'ADMIN' || role === 'MANAGER' || role === 'ARTIST' || role === 'STAFF') {
       const { data: profileData, error: profileError } = await supabase
         .from('staff_profiles')
         .select('salon_id, is_owner, is_approved, permissions')
@@ -447,7 +460,7 @@ export async function getCurrentUser(): Promise<User | null> {
     let isApproved = true;
     let permissions: any[] = [];
 
-    if (role === 'ADMIN' || role === 'MANAGER' || role === 'STAFF') {
+    if (role === 'ADMIN' || role === 'MANAGER' || role === 'ARTIST' || role === 'STAFF') {
       const { data: profileData, error: profileError } = await supabase
         .from('staff_profiles')
         .select('salon_id, is_owner, is_approved, permissions')

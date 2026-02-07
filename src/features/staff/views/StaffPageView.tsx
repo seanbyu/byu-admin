@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Layout } from '@/components/layout/Layout';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useStaff } from '../hooks/useStaff';
 import { useStaffPageState, useStaffPermissions } from '../hooks/useStaffPageState';
 import { useStaffActions } from '../hooks/useStaffActions';
@@ -35,9 +36,14 @@ export default function StaffPageView() {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
+  // 권한 체크
+  const { canWrite, canDelete, isAdmin } = usePermission();
+  const canWriteStaff = canWrite(PermissionModules.STAFF);
+  const canDeleteStaff = canDelete(PermissionModules.STAFF);
+
   // Custom hooks로 상태 관리 분리 (Zustand 기반)
   const pageState = useStaffPageState();
-  const { isAdmin, canEdit } = useStaffPermissions(user?.id, user?.role);
+  const { canEdit } = useStaffPermissions(user?.id, user?.role);
 
   // 데이터 fetching (TanStack Query)
   const {
@@ -55,6 +61,7 @@ export default function StaffPageView() {
 
   // 비즈니스 로직 핸들러
   const staffActions = useStaffActions({
+    salonId,
     updateStaff,
     refetch,
     clearSelectedStaff: pageState.clearSelectedStaff,
@@ -94,6 +101,7 @@ export default function StaffPageView() {
         <StaffPageHeader
           isAdmin={isAdmin}
           onInviteClick={pageState.openInviteModal}
+          canAddStaff={canWriteStaff}
         />
 
         {/* Staff Table */}
@@ -104,9 +112,12 @@ export default function StaffPageView() {
           formatPhone={pageState.formatPhone}
           formatDate={pageState.formatDate}
           getRoleName={pageState.getRoleName}
-          onResign={staffActions.handleResign}
+          onSoftResign={canDeleteStaff ? staffActions.handleSoftResign : undefined}
+          onImmediateResign={canDeleteStaff ? staffActions.handleImmediateResign : undefined}
+          onCancelResignation={canWriteStaff ? staffActions.handleCancelResignation : undefined}
           onPermissionClick={pageState.selectStaffForPermission}
-          onProfileEdit={pageState.selectStaffForProfileEdit}
+          onProfileEdit={canWriteStaff ? pageState.selectStaffForProfileEdit : undefined}
+          onRoleChange={canWriteStaff ? staffActions.handleRoleChange : undefined}
         />
 
         {/* Modals - Suspense로 로딩 최적화 */}
@@ -127,6 +138,7 @@ export default function StaffPageView() {
               onClose={pageState.clearSelectedStaff}
               staff={pageState.selectedStaff}
               onSave={staffActions.handlePermissionSave}
+              readOnly={!isAdmin}
             />
           )}
 

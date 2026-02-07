@@ -70,6 +70,7 @@ interface PlanCardProps {
   isCurrent: boolean;
   isUpgrading: boolean;
   onUpgrade: (planId: string) => void;
+  canEdit?: boolean;
 }
 
 const PlanCard = memo(function PlanCard({
@@ -77,6 +78,7 @@ const PlanCard = memo(function PlanCard({
   isCurrent,
   isUpgrading,
   onUpgrade,
+  canEdit = true,
 }: PlanCardProps) {
   const t = useTranslations();
   const isEnterprise = plan.price === 0 && plan.maxStaff === -1;
@@ -141,7 +143,7 @@ const PlanCard = memo(function PlanCard({
             {t('settings.plan.currentPlan')}
           </Button>
         ) : isEnterprise ? (
-          <Button variant="outline" className="w-full" onClick={handleContactSales}>
+          <Button variant="outline" className="w-full" onClick={handleContactSales} disabled={!canEdit}>
             {t('settings.plan.contactSales')}
           </Button>
         ) : (
@@ -150,6 +152,7 @@ const PlanCard = memo(function PlanCard({
             className="w-full"
             onClick={handleUpgrade}
             isLoading={isUpgrading}
+            disabled={!canEdit}
           >
             {t('settings.plan.upgrade')}
           </Button>
@@ -214,6 +217,7 @@ interface PlanTabProps {
   isLoading: boolean;
   isUpgrading: boolean;
   onUpgrade: (planId: string) => Promise<void>;
+  canEdit?: boolean;
 }
 
 // ============================================
@@ -226,6 +230,7 @@ export function PlanTab({
   isLoading,
   isUpgrading,
   onUpgrade,
+  canEdit = true,
 }: PlanTabProps) {
   const t = useTranslations();
 
@@ -250,6 +255,7 @@ export function PlanTab({
               isCurrent={subscription?.planId === plan.id}
               isUpgrading={isUpgrading}
               onUpgrade={onUpgrade}
+              canEdit={canEdit}
             />
           ))}
         </div>

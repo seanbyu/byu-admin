@@ -118,8 +118,7 @@ export function usePlans() {
 }
 
 export function useSubscription(_salonId: string, _options?: { enabled?: boolean }) {
-  const upgradePlan = useCallback(async (planId: string) => {
-    console.log('Upgrade plan:', planId);
+  const upgradePlan = useCallback(async (_planId: string) => {
     // TODO: Implement real API call
   }, []);
 
@@ -177,14 +176,11 @@ export function usePhoneVerification() {
   const sendOtpMutation = useMutation({
     mutationFn: async (phone: string) => {
       const e164Phone = toE164(phone);
-      console.log('[OTP] Sending OTP to:', { original: phone, e164: e164Phone });
       // updateUser를 사용하면 새 전화번호로 인증 코드가 발송됨
       const { error } = await supabase.auth.updateUser({ phone: e164Phone });
       if (error) {
-        console.error('[OTP] Send error:', error);
         throw error;
       }
-      console.log('[OTP] OTP sent successfully');
       return { success: true, e164Phone };
     },
   });
@@ -193,17 +189,14 @@ export function usePhoneVerification() {
   const verifyOtpMutation = useMutation({
     mutationFn: async ({ phone, token }: { phone: string; token: string }) => {
       const e164Phone = toE164(phone);
-      console.log('[OTP] Verifying OTP:', { original: phone, e164: e164Phone, token });
       const { data, error } = await supabase.auth.verifyOtp({
         phone: e164Phone,
         token,
         type: 'sms', // 테스트 번호 호환을 위해 sms 타입 사용
       });
       if (error) {
-        console.error('[OTP] Verify error:', error);
         throw error;
       }
-      console.log('[OTP] Verification successful:', data.user);
       return { success: true, user: data.user };
     },
   });

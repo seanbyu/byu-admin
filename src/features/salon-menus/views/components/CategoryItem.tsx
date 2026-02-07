@@ -8,8 +8,8 @@ import { MenuCategory } from '../../types';
 
 interface CategoryItemProps {
   category: MenuCategory;
-  onDelete: (id: string) => void;
-  onEdit: (category: any) => void;
+  onDelete?: (id: string) => void;
+  onEdit?: (category: any) => void;
   isEditing: boolean;
   editName: string;
   onEditNameChange: (val: string) => void;
@@ -57,7 +57,7 @@ export default function CategoryItem({
           </h3>
         </div>
         <div className="flex items-center gap-2">
-          {!isEditing && (
+          {!isEditing && onEdit && (
             <Button
               variant="outline"
               size="sm"
@@ -67,15 +67,17 @@ export default function CategoryItem({
               {t('common.edit')}
             </Button>
           )}
-          <button
-            onClick={() => {
-              if (confirm(t('menu.category.deleteConfirm')))
-                onDelete(category.id);
-            }}
-            className="text-gray-300 hover:text-red-500 p-1"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          {onDelete && (
+            <button
+              onClick={() => {
+                if (confirm(t('menu.category.deleteConfirm')))
+                  onDelete(category.id);
+              }}
+              className="text-gray-300 hover:text-red-500 p-1"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 

@@ -19,6 +19,7 @@ import { useBookingsPageState, useBookingsData } from '../hooks/useBookingsPageS
 import { salonSettingsKeys, SALON_SETTINGS_QUERY_OPTIONS } from '../hooks/queries';
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { formatDate, formatPrice } from '@/lib/utils';
 import { Plus, Calendar as CalendarIcon, Filter, List } from 'lucide-react';
 import { salonsApi } from '@/features/salons/api';
@@ -183,6 +184,10 @@ export default function BookingsPageView() {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
+  // 권한 체크
+  const { canWrite } = usePermission();
+  const canCreateBooking = canWrite(PermissionModules.BOOKINGS);
+
   // Custom hooks로 상태 관리 분리 (Zustand 기반)
   const pageState = useBookingsPageState();
 
@@ -333,10 +338,12 @@ export default function BookingsPageView() {
               calendarLabel={t('common.calendar.view')}
               listLabel={t('common.calendar.list')}
             />
-            <Button variant="primary" onClick={pageState.openNewBookingModal}>
-              <Plus size={20} className="mr-2" />
-              {t('booking.new')}
-            </Button>
+            {canCreateBooking && (
+              <Button variant="primary" onClick={pageState.openNewBookingModal}>
+                <Plus size={20} className="mr-2" />
+                {t('booking.new')}
+              </Button>
+            )}
           </div>
         </div>
 

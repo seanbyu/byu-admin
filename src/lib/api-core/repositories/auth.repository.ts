@@ -40,12 +40,10 @@ export class AuthRepository extends BaseRepository {
       if (edgeFnError.context) {
         try {
           const text = await edgeFnError.context.text();
-          console.log("Edge Function Error Body:", text);
-
           const json = JSON.parse(text) as { error?: string };
           if (json?.error) throw new Error(json.error);
-        } catch (e) {
-          console.warn("Failed to parse error context:", e);
+        } catch {
+          // Failed to parse error context
         }
       }
       throw error;

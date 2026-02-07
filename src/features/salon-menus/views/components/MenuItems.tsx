@@ -28,7 +28,7 @@ interface MenuItemsProps {
   categoryId: string;
   editingMenuId: string | null;
   editMenuData: { name: string; price: string; duration: string };
-  onEditMenu: (menu: any) => void;
+  onEditMenu?: (menu: any) => void;
   onEditMenuDataChange: (data: {
     name: string;
     price: string;
@@ -36,6 +36,8 @@ interface MenuItemsProps {
   }) => void;
   onSaveMenu: () => void;
   onCancelEditMenu: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 export default function MenuItems({
@@ -47,6 +49,8 @@ export default function MenuItems({
   onEditMenuDataChange,
   onSaveMenu,
   onCancelEditMenu,
+  canEdit = true,
+  canDelete = true,
 }: MenuItemsProps) {
   const t = useTranslations('menu');
   const {
@@ -157,75 +161,77 @@ export default function MenuItems({
               menu={menu}
               editingMenuId={editingMenuId}
               editMenuData={editMenuData}
-              onEditMenu={onEditMenu}
+              onEditMenu={canEdit ? onEditMenu : undefined}
               onEditMenuDataChange={onEditMenuDataChange}
               onSaveMenu={onSaveMenu}
               onCancelEditMenu={onCancelEditMenu}
-              onDeleteMenu={handleDeleteMenu}
+              onDeleteMenu={canDelete ? handleDeleteMenu : undefined}
             />
           ))}
         </SortableContext>
       </DndContext>
 
       {/* Add New Menu Form */}
-      {isAdding ? (
-        <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-100 mt-2">
-          <input
-            className="flex-1 px-3 py-2 text-sm border rounded-md"
-            placeholder={t('menuNamePlaceholder')}
-            value={newMenu.name}
-            onChange={(e) => setNewMenu({ ...newMenu, name: e.target.value })}
-            autoFocus
-          />
-          <select
-            className="w-24 px-2 py-2 text-sm border rounded-md"
-            value={newMenu.duration}
-            onChange={(e) =>
-              setNewMenu({
-                ...newMenu,
-                duration: Number(e.target.value),
-              })
-            }
-          >
-            <option value={15}>{t('durations.15min')}</option>
-            <option value={30}>{t('durations.30min')}</option>
-            <option value={60}>{t('durations.60min')}</option>
-            <option value={90}>{t('durations.90min')}</option>
-            <option value={120}>{t('durations.120min')}</option>
-          </select>
-          <div className="flex items-center gap-1 w-28">
-            <span className="text-sm text-gray-500 whitespace-nowrap">{t('unit.currency')}</span>
+      {canEdit && (
+        isAdding ? (
+          <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-100 mt-2">
             <input
-              type="number"
-              className="w-full px-2 py-2 text-sm border rounded-md text-right"
-              placeholder="0"
-              value={newMenu.price}
-              onChange={(e) =>
-                setNewMenu({ ...newMenu, price: e.target.value })
-              }
+              className="flex-1 px-3 py-2 text-sm border rounded-md"
+              placeholder={t('menuNamePlaceholder')}
+              value={newMenu.name}
+              onChange={(e) => setNewMenu({ ...newMenu, name: e.target.value })}
+              autoFocus
             />
+            <select
+              className="w-24 px-2 py-2 text-sm border rounded-md"
+              value={newMenu.duration}
+              onChange={(e) =>
+                setNewMenu({
+                  ...newMenu,
+                  duration: Number(e.target.value),
+                })
+              }
+            >
+              <option value={15}>{t('durations.15min')}</option>
+              <option value={30}>{t('durations.30min')}</option>
+              <option value={60}>{t('durations.60min')}</option>
+              <option value={90}>{t('durations.90min')}</option>
+              <option value={120}>{t('durations.120min')}</option>
+            </select>
+            <div className="flex items-center gap-1 w-28">
+              <span className="text-sm text-gray-500 whitespace-nowrap">{t('unit.currency')}</span>
+              <input
+                type="number"
+                className="w-full px-2 py-2 text-sm border rounded-md text-right"
+                placeholder="0"
+                value={newMenu.price}
+                onChange={(e) =>
+                  setNewMenu({ ...newMenu, price: e.target.value })
+                }
+              />
+            </div>
+            <Button size="sm" onClick={handleAddMenu}>
+              {t('confirm')}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setIsAdding(false);
+                setNewMenu({ name: '', price: '', duration: 30 });
+              }}
+            >
+              {t('cancel')}
+            </Button>
           </div>
-          <Button size="sm" onClick={handleAddMenu}>
-            {t('confirm')}
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              setIsAdding(false);
-              setNewMenu({ name: '', price: '', duration: 30 });
-            }}
+        ) : (
+          <button
+            onClick={() => setIsAdding(true)}
+            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors"
           >
-            {t('cancel')}
-          </Button>
-        </div>
-      ) : (
-        <button
-          onClick={() => setIsAdding(true)}
-          className="w-full flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors"
-        >
-          <Plus className="w-4 h-4" /> {t('addMenu')}
-        </button>
+            <Plus className="w-4 h-4" /> {t('addMenu')}
+          </button>
+        )
       )}
     </div>
   );

@@ -9,6 +9,7 @@ interface StaffPermissionModalProps {
   onClose: () => void;
   staff: Staff | null;
   onSave: (staffId: string, permissions: StaffPermission[]) => Promise<void>;
+  readOnly?: boolean;
 }
 
 // 권한 모듈 키 (사이드바와 동기화)
@@ -63,6 +64,7 @@ export default function StaffPermissionModal({
   onClose,
   staff,
   onSave,
+  readOnly = false,
 }: StaffPermissionModalProps) {
   const t = useTranslations();
   const [permissions, setPermissions] = useState<StaffPermission[]>([]);
@@ -116,6 +118,9 @@ export default function StaffPermissionModal({
   // 권한 행 렌더링
   const renderPermissionRow = (moduleKey: string, isSubItem?: boolean) => {
     const permission = permissions.find((p) => p.module === moduleKey);
+    const checkboxClass = readOnly
+      ? 'h-4 w-4 text-primary-600 border-gray-300 rounded cursor-not-allowed opacity-60'
+      : 'h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer';
     return (
       <tr key={moduleKey} className={isSubItem ? 'bg-gray-50/50' : ''}>
         <td className={`px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${isSubItem ? 'pl-10' : ''}`}>
@@ -126,24 +131,27 @@ export default function StaffPermissionModal({
           <input
             type="checkbox"
             checked={permission?.canRead || false}
-            onChange={() => handleToggle(moduleKey, 'canRead')}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+            onChange={() => !readOnly && handleToggle(moduleKey, 'canRead')}
+            disabled={readOnly}
+            className={checkboxClass}
           />
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-center">
           <input
             type="checkbox"
             checked={permission?.canWrite || false}
-            onChange={() => handleToggle(moduleKey, 'canWrite')}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+            onChange={() => !readOnly && handleToggle(moduleKey, 'canWrite')}
+            disabled={readOnly}
+            className={checkboxClass}
           />
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-center">
           <input
             type="checkbox"
             checked={permission?.canDelete || false}
-            onChange={() => handleToggle(moduleKey, 'canDelete')}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+            onChange={() => !readOnly && handleToggle(moduleKey, 'canDelete')}
+            disabled={readOnly}
+            className={checkboxClass}
           />
         </td>
       </tr>
@@ -175,11 +183,13 @@ export default function StaffPermissionModal({
       footer={
         <div className="flex justify-end space-x-3">
           <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            {t('common.cancel')}
+            {readOnly ? t('common.close') : t('common.cancel')}
           </Button>
-          <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? t('common.saving') : t('common.save')}
-          </Button>
+          {!readOnly && (
+            <Button variant="primary" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? t('common.saving') : t('common.save')}
+            </Button>
+          )}
         </div>
       }
     >

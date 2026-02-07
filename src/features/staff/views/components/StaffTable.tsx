@@ -12,9 +12,12 @@ interface StaffTableProps {
   formatPhone: (phone?: string) => string;
   formatDate: (date: Date) => string;
   getRoleName: (role?: string) => string;
-  onResign: (staffId: string) => void;
+  onSoftResign?: (staffId: string) => void;
+  onImmediateResign?: (staffId: string) => void;
+  onCancelResignation?: (staffId: string) => void;
   onPermissionClick: (staff: Staff) => void;
-  onProfileEdit: (staff: Staff) => void;
+  onProfileEdit?: (staff: Staff) => void;
+  onRoleChange?: (staffId: string, userId: string, newRole: string) => void;
 }
 
 // rerender-memo: 테이블 컴포넌트 메모이제이션
@@ -25,9 +28,12 @@ export const StaffTable = memo(function StaffTable({
   formatPhone,
   formatDate,
   getRoleName,
-  onResign,
+  onSoftResign,
+  onImmediateResign,
+  onCancelResignation,
   onPermissionClick,
   onProfileEdit,
+  onRoleChange,
 }: StaffTableProps) {
   return (
     <div className="bg-white rounded-lg border border-secondary-200">
@@ -44,9 +50,12 @@ export const StaffTable = memo(function StaffTable({
               formatPhone={formatPhone}
               formatDate={formatDate}
               getRoleName={getRoleName}
-              onResign={onResign}
+              onSoftResign={onSoftResign}
+              onImmediateResign={onImmediateResign}
+              onCancelResignation={onCancelResignation}
               onPermissionClick={onPermissionClick}
               onProfileEdit={onProfileEdit}
+              onRoleChange={onRoleChange}
             />
           ))}
         </tbody>

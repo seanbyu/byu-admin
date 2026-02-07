@@ -26,9 +26,16 @@
   },
   "actions": {
     "resign": "퇴사 처리",
+    "softResign": "1주일 유예 퇴사",
+    "immediateResign": "즉시 퇴사",
+    "cancelResignation": "퇴사 취소",
     "allPermissions": "모든 권한",
     "setPermissions": "권한 설정",
+    "viewPermissions": "권한 보기",
     "editInfo": "정보 수정"
+  },
+  "status": {
+    "resignedDaysLeft": "퇴사 예정 (D-{days})"
   },
   "guide": {
     "line1": "직원 등록 방법은 직원이 salon store에 회원가입 후 샵 입사 신청을 하면, 관리자 승인 후 등록됩니다.",
@@ -38,10 +45,14 @@
   "roles": {
     "admin": "관리자",
     "manager": "매니저",
-    "staff": "담당자"
+    "artist": "아티스트",
+    "staff": "직원"
   },
   "confirm": {
-    "resign": "퇴사 처리하시겠습니까?"
+    "resign": "퇴사 처리하시겠습니까?",
+    "softResign": "1주일 유예 후 퇴사 처리하시겠습니까? 유예 기간 내 취소할 수 있습니다.",
+    "immediateResign": "즉시 퇴사 처리하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "cancelResignation": "퇴사 예정을 취소하시겠습니까?"
   },
   "createModal": {
     "title": "직원 등록 (직접 생성)",
@@ -58,8 +69,9 @@
     "name": "이름",
     "namePlaceholder": "홍길동",
     "role": "역할",
-    "roleStaff": "직원 (Staff)",
     "roleManager": "매니저 (Manager)",
+    "roleArtist": "아티스트 (Artist)",
+    "roleStaff": "직원 (Staff)",
     "roleAdmin": "관리자 (Admin)",
     "createAccount": "계정 생성"
   },
@@ -165,9 +177,20 @@
     "resetToSalonDefaults": "매장 기본값으로 초기화"
   },
   "errors": {
-    "updateFailed": "업데이트에 실패했습니다"
+    "updateFailed": "업데이트에 실패했습니다",
+    "createUserProfile": "사용자 프로필 생성에 실패했습니다.",
+    "createStaffProfile": "직원 프로필 생성에 실패했습니다.",
+    "createFailed": "직원 등록에 실패했습니다.",
+    "deleteFailed": "직원 삭제에 실패했습니다.",
+    "cancelFailed": "퇴사 취소에 실패했습니다.",
+    "loginRequired": "로그인이 필요합니다.",
+    "cannotDeleteSelf": "본인 계정은 삭제할 수 없습니다.",
+    "cannotDeleteOwner": "대표(오너) 계정은 삭제할 수 없습니다."
   },
   "success": {
-    "registered": "직원이 등록되었습니다!"
+    "registered": "직원이 등록되었습니다!",
+    "resigned": "직원이 퇴사 처리되었습니다.",
+    "softResigned": "직원이 퇴사 예정 처리되었습니다. 1주일 후 자동 삭제됩니다.",
+    "resignationCancelled": "퇴사 예정이 취소되었습니다."
   }
 }

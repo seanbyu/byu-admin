@@ -75,6 +75,7 @@ export class StaffRepository extends BaseRepository {
           role,
           profile_image,
           is_active,
+          deleted_at,
           created_at,
           updated_at
         )
@@ -92,12 +93,26 @@ export class StaffRepository extends BaseRepository {
       return [];
     }
 
-    // Filter by role and is_active from joined users table
+    // Filter by role from joined users table
+    // Include both active staff and resigned staff (within 7 days grace period)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
     const filteredProfiles = profiles.filter((p: any) => {
       const user = p.users;
-      return user &&
-        user.is_active &&
-        ["SUPER_ADMIN", "ADMIN", "MANAGER", "STAFF"].includes(user.role);
+      if (!user) return false;
+      if (!["SUPER_ADMIN", "ADMIN", "MANAGER", "ARTIST", "STAFF"].includes(user.role)) return false;
+
+      // Active staff
+      if (user.is_active) return true;
+
+      // Resigned staff within 7 days grace period
+      if (!user.is_active && user.deleted_at) {
+        const deletedDate = new Date(user.deleted_at);
+        return deletedDate >= sevenDaysAgo;
+      }
+
+      return false;
     });
 
     return filteredProfiles.map((profile: any) => this.transformProfileToStaff(profile));
@@ -237,6 +252,7 @@ export class StaffRepository extends BaseRepository {
       holidays: profile.holidays || [],
       createdAt: user.created_at,
       updatedAt: user.updated_at,
+      deletedAt: user.deleted_at || null,
       phone: user.phone,
       email: user.email,
       role: user.role as string,
