@@ -70,10 +70,54 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
     },
   });
 
+  // Display order mutation with optimistic updates
+  const displayOrderMutation = useMutation({
+    mutationFn: (staffOrders: { staffId: string; displayOrder: number }[]) =>
+      staffApi.updateDisplayOrder(salonId, staffOrders),
+
+    // Optimistic update
+    onMutate: async (staffOrders) => {
+      await queryClient.cancelQueries({ queryKey: staffKeys.list(salonId) });
+      const previousData = queryClient.getQueryData(staffKeys.list(salonId));
+
+      queryClient.setQueryData(staffKeys.list(salonId), (old: any) => {
+        if (!old?.data) return old;
+        const orderMap = new Map(staffOrders.map(o => [o.staffId, o.displayOrder]));
+        return {
+          ...old,
+          data: old.data
+            .map((staff: Staff) => ({
+              ...staff,
+              displayOrder: orderMap.get(staff.id) ?? staff.displayOrder,
+            }))
+            .sort((a: Staff, b: Staff) => a.displayOrder - b.displayOrder),
+        };
+      });
+
+      return { previousData };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(staffKeys.list(salonId), context.previousData);
+      }
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: staffKeys.list(salonId) });
+    },
+  });
+
   // Stable callback references
   const updateStaff = useCallback(
     (params: UpdateStaffParams) => updateMutation.mutateAsync(params),
     [updateMutation]
+  );
+
+  const updateDisplayOrder = useCallback(
+    (staffOrders: { staffId: string; displayOrder: number }[]) =>
+      displayOrderMutation.mutateAsync(staffOrders),
+    [displayOrderMutation]
   );
 
   const refetch = useCallback(() => query.refetch(), [query]);
@@ -91,7 +135,9 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
     // Actions
     refetch,
     updateStaff,
+    updateDisplayOrder,
     isUpdating: updateMutation.isPending,
+    isUpdatingOrder: displayOrderMutation.isPending,
   };
 }
 

@@ -48,6 +48,7 @@ export interface Staff {
   reviewCount: number;
   isActive: boolean;
   isBookingEnabled: boolean;
+  displayOrder: number;      // 예약 UI 표시 순서
   permissions: StaffPermission[];
   workHours?: BusinessHours[];
   workSchedule?: WorkSchedule; // DB 실제 구조

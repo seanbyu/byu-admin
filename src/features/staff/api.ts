@@ -39,6 +39,16 @@ export const staffApi = {
       updates,
     });
   },
+
+  // PUT: 직원 표시 순서 업데이트
+  updateDisplayOrder: (
+    salonId: string,
+    staffOrders: { staffId: string; displayOrder: number }[]
+  ): Promise<ApiResponse<{ success: boolean }>> => {
+    return apiClient.put(`${endpoints.salons.staff.path(salonId)}/display-order`, {
+      staffOrders,
+    });
+  },
 } as const;
 
 // ============================================

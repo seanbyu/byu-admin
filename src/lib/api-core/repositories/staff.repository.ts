@@ -27,6 +27,7 @@ interface ProfileTableUpdates {
   user_id?: string;
   permissions?: DBPermissions;
   is_booking_enabled?: boolean;
+  display_order?: number;
   bio?: string;
   years_of_experience?: number;
   specialties?: string[];
@@ -57,6 +58,7 @@ export class StaffRepository extends BaseRepository {
         social_links,
         permissions,
         is_booking_enabled,
+        display_order,
         work_schedule,
         holidays,
         position_id,
@@ -83,6 +85,7 @@ export class StaffRepository extends BaseRepository {
       )
       .eq("salon_id", salonId)
       .eq("is_approved", true)
+      .order("display_order", { ascending: true })
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -169,6 +172,11 @@ export class StaffRepository extends BaseRepository {
       profileUpdates.is_booking_enabled = updates.isBookingEnabled;
     }
 
+    // Handle displayOrder update
+    if (typeof updates.displayOrder !== "undefined") {
+      profileUpdates.display_order = updates.displayOrder;
+    }
+
     // Handle extended profile fields
     if (updates.description) profileUpdates.bio = updates.description;
     if (typeof updates.experience !== "undefined") {
@@ -247,6 +255,7 @@ export class StaffRepository extends BaseRepository {
       reviewCount: 0,
       isActive: user.is_active,
       isBookingEnabled: profile.is_booking_enabled ?? true,
+      displayOrder: profile.display_order ?? 0,
       permissions: this.transformPermissionsFromDB(profile.permissions),
       workHours: StaffRepository.transformWorkHoursFromDB(profile.work_schedule),
       holidays: profile.holidays || [],
@@ -285,6 +294,7 @@ export class StaffRepository extends BaseRepository {
       reviewCount: 0,
       isActive: user.is_active,
       isBookingEnabled: profile.is_booking_enabled ?? true,
+      displayOrder: (profile as any).display_order ?? 0,
       permissions: this.transformPermissionsFromDB(profile.permissions),
       workHours: StaffRepository.transformWorkHoursFromDB(profile.work_schedule),
       holidays: profile.holidays || [],
@@ -354,5 +364,33 @@ export class StaffRepository extends BaseRepository {
       closeTime: "20:00",
       isOpen: i !== 0,
     }));
+  }
+
+  /**
+   * Bulk update staff display order
+   * @param staffOrders Array of { staffId, displayOrder }
+   */
+  async updateStaffDisplayOrder(
+    staffOrders: { staffId: string; displayOrder: number }[]
+  ): Promise<{ success: boolean }> {
+    // Update each staff's display_order
+    const updates = staffOrders.map(({ staffId, displayOrder }) =>
+      this.supabase
+        .from("staff_profiles")
+        .update({ display_order: displayOrder })
+        .eq("user_id", staffId)
+    );
+
+    const results = await Promise.all(updates);
+
+    const hasError = results.some((result) => result.error);
+    if (hasError) {
+      const errors = results
+        .filter((r) => r.error)
+        .map((r) => r.error?.message);
+      throw new Error(`Failed to update display order: ${errors.join(", ")}`);
+    }
+
+    return { success: true };
   }
 }
