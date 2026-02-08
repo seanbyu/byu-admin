@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -41,12 +40,17 @@ export default function LoginPageView() {
   const t = useTranslations('auth.login');
   const { login } = useAuthStore();
   const [error, setError] = useState('');
+  const rememberMeRef = useRef(true); // 로그인 상태 유지 값 저장용
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>();
+  } = useForm<LoginForm>({
+    defaultValues: {
+      rememberMe: true, // 기본값: 체크됨
+    },
+  });
 
   // 에러 코드에 따른 번역 메시지 반환
   const getErrorMessage = (errorCode?: AuthErrorCode): string => {
@@ -70,20 +74,22 @@ export default function LoginPageView() {
   const loginMutation = useLogin({
     onSuccess: (response: AuthResponse) => {
       if (response.user && response.token) {
-        login(response.user, response.token);
+        // rememberMe 값을 login 함수에 전달
+        login(response.user, response.token, rememberMeRef.current);
         router.push('/dashboard');
       } else {
         setError(getErrorMessage(response.errorCode));
       }
     },
-    onError: (err: Error) => {
+    onError: () => {
       setError(t('errors.loginError'));
-      console.error('Login error:', err);
     },
   });
 
   const onSubmit = async (data: LoginForm) => {
     setError('');
+    // rememberMe 값을 ref에 저장 (onSuccess에서 사용)
+    rememberMeRef.current = data.rememberMe;
     loginMutation.mutate({ email: data.email, password: data.password });
   };
 
@@ -139,9 +145,10 @@ export default function LoginPageView() {
             />
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center">
+              <label className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  defaultChecked
                   {...register('rememberMe')}
                   className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
                 />
