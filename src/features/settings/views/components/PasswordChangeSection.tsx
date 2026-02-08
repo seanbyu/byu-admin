@@ -27,6 +27,7 @@ export const PasswordChangeSection = memo(function PasswordChangeSection({
   // 새 비밀번호 유효성 검사
   const validation = useMemo(() => validatePassword(newPassword), [newPassword]);
   const isPasswordMatch = newPassword === confirmPassword && confirmPassword !== '';
+  const isSameAsCurrent = currentPassword !== '' && currentPassword === newPassword;
 
   // 제출 버튼 활성화 조건
   const isDisabled =
@@ -34,11 +35,17 @@ export const PasswordChangeSection = memo(function PasswordChangeSection({
     !newPassword ||
     !confirmPassword ||
     !validation.isValid ||
-    !isPasswordMatch;
+    !isPasswordMatch ||
+    isSameAsCurrent;
 
   const handleSubmit = useCallback(async () => {
     if (!validation.isValid) {
       setError(t('common.password.invalid'));
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setError(t('settings.account.sameAsCurrent'));
       return;
     }
 
