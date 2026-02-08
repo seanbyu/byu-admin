@@ -59,9 +59,13 @@
     "verifyCodeError": "Verification code has expired or is invalid",
     "changePassword": "Change Password",
     "currentPassword": "Current Password",
+    "currentPasswordPlaceholder": "Enter current password",
     "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
     "confirmPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Re-enter new password",
     "updatePassword": "Update Password",
+    "changePasswordFailed": "Failed to change password",
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 8 characters"
   }

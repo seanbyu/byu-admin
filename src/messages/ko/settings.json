@@ -60,9 +60,13 @@
     "verifyCodeError": "인증번호가 만료되었거나 올바르지 않습니다",
     "changePassword": "비밀번호 변경",
     "currentPassword": "현재 비밀번호",
+    "currentPasswordPlaceholder": "현재 비밀번호를 입력하세요",
     "newPassword": "새 비밀번호",
+    "newPasswordPlaceholder": "새 비밀번호를 입력하세요",
     "confirmPassword": "새 비밀번호 확인",
+    "confirmPasswordPlaceholder": "새 비밀번호를 다시 입력하세요",
     "updatePassword": "비밀번호 변경",
+    "changePasswordFailed": "비밀번호 변경에 실패했습니다",
     "passwordMismatch": "비밀번호가 일치하지 않습니다",
     "passwordTooShort": "비밀번호는 8자 이상이어야 합니다"
   }
