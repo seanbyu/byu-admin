@@ -25,6 +25,7 @@ import { SettingsTabs } from './components/SettingsTabs';
 import { StoreInfoTab } from './components/StoreInfoTab';
 import { PlanTab } from './components/PlanTab';
 import { AccountTab } from './components/AccountTab';
+import { getErrorCode } from '@/lib/api/client';
 import { AccountInfo, SettingsTab, StoreInfo } from '../types';
 
 // ============================================
@@ -157,9 +158,16 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
 
       try {
         await passwordChange.changePassword({ userId: user.id, ...data });
-        toast.success(t('common.saved'));
-      } catch {
-        toast.error(t('common.error'));
+        toast.success(t('settings.account.changePasswordSuccess'));
+      } catch (error: unknown) {
+        // ApiError의 errorCode 확인
+        const errorCode = getErrorCode(error);
+        if (errorCode === 'INVALID_CURRENT_PASSWORD') {
+          toast.error(t('settings.account.invalidCurrentPassword'));
+        } else {
+          toast.error(t('settings.account.changePasswordFailed'));
+        }
+        throw error; // PasswordChangeSection에서 에러 처리할 수 있도록
       }
     },
     [user?.id, passwordChange, toast, t]

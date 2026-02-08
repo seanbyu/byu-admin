@@ -114,6 +114,7 @@ export const PasswordChangeSection = memo(function PasswordChangeSection({
           label={t('settings.account.newPassword')}
           placeholder={t('settings.account.newPasswordPlaceholder')}
           showValidationRules={true}
+          error={isSameAsCurrent ? t('settings.account.sameAsCurrent') : null}
         />
 
         {/* 비밀번호 확인 */}

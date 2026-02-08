@@ -3,6 +3,43 @@ import { ApiResponse } from '@/types';
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
+// API 에러 클래스
+export class ApiError extends Error {
+  errorCode?: string;
+  status?: number;
+
+  constructor(message: string, errorCode?: string, status?: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.errorCode = errorCode;
+    this.status = status;
+  }
+}
+
+// 에러 타입 가드
+export function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError;
+}
+
+// 에러에서 메시지 추출
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unknown error occurred';
+}
+
+// 에러에서 에러코드 추출
+export function getErrorCode(error: unknown): string | undefined {
+  if (isApiError(error)) {
+    return error.errorCode;
+  }
+  return undefined;
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -31,7 +68,11 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'An error occurred');
+        throw new ApiError(
+          data.error || data.message || 'An error occurred',
+          data.errorCode,
+          response.status
+        );
       }
 
       return data;

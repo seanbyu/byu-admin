@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { VerificationCodeInput } from '@/components/ui/VerificationCodeInput';
+import { getErrorMessage } from '@/lib/api/client';
 import { AccountFormSectionProps } from '../../types';
 
 export const AccountFormSection = memo(function AccountFormSection({
@@ -68,13 +69,14 @@ export const AccountFormSection = memo(function AccountFormSection({
       setSendCodeError(null);
       await onSendVerificationCode(formData.phone);
       onVerificationSentChange(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to send OTP:', error);
+      const message = getErrorMessage(error);
       // 이미 등록된 전화번호인 경우
-      if (error?.message?.includes('already been registered')) {
+      if (message.includes('already been registered')) {
         setSendCodeError(t('settings.account.phoneAlreadyRegistered'));
       } else {
-        setSendCodeError(error?.message || t('common.error'));
+        setSendCodeError(message || t('common.error'));
       }
     }
   }, [formData.phone, onSendVerificationCode, onVerificationSentChange, t]);
@@ -84,13 +86,14 @@ export const AccountFormSection = memo(function AccountFormSection({
       setVerifyError(null);
       await onVerifyCode(formData.phone, formData.verificationCode);
       onPhoneVerifiedChange(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to verify OTP:', error);
+      const message = getErrorMessage(error);
       // 에러 메시지 표시
-      if (error?.message?.includes('expired') || error?.message?.includes('invalid')) {
+      if (message.includes('expired') || message.includes('invalid')) {
         setVerifyError(t('settings.account.verifyCodeError'));
       } else {
-        setVerifyError(error?.message || t('common.error'));
+        setVerifyError(message || t('common.error'));
       }
     }
   }, [formData.phone, formData.verificationCode, onVerifyCode, onPhoneVerifiedChange, t]);

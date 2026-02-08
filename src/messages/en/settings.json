@@ -66,6 +66,8 @@
     "confirmPasswordPlaceholder": "Re-enter new password",
     "updatePassword": "Update Password",
     "changePasswordFailed": "Failed to change password",
+    "changePasswordSuccess": "Password changed successfully",
+    "invalidCurrentPassword": "Current password is incorrect",
     "sameAsCurrent": "New password must be different from current password",
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 8 characters"
