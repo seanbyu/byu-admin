@@ -21,6 +21,11 @@ interface CustomerWithStats extends DBCustomer {
   total_spent?: number;
   latest_booking_date?: string;
   latest_booking_artist?: string;
+  // Joined primary artist data
+  primary_artist_user?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 export class CustomerRepository extends BaseRepository {
@@ -53,11 +58,12 @@ export class CustomerRepository extends BaseRepository {
       offset = 0,
     } = params;
 
-    // Base query with bookings aggregation
+    // Base query with bookings aggregation and primary artist join
     let query = (this.supabase as any)
       .from('customers')
       .select(`
         *,
+        primary_artist_user:users!customers_primary_artist_id_fkey(id, name),
         bookings!left(
           id,
           booking_date,
@@ -97,15 +103,18 @@ export class CustomerRepository extends BaseRepository {
     };
   }
 
-  async getCustomer(id: string): Promise<DBCustomer> {
+  async getCustomer(id: string): Promise<DBCustomer & { primary_artist_user?: { id: string; name: string } | null }> {
     const { data, error } = await (this.supabase as any)
       .from("customers")
-      .select("*")
+      .select(`
+        *,
+        primary_artist_user:users!customers_primary_artist_id_fkey(id, name)
+      `)
       .eq("id", id)
       .single();
 
     if (error) throw error;
-    return data as DBCustomer;
+    return data as DBCustomer & { primary_artist_user?: { id: string; name: string } | null };
   }
 
   async findByPhone(salonId: string, phone: string): Promise<DBCustomer | null> {
@@ -153,6 +162,52 @@ export class CustomerRepository extends BaseRepository {
 
     if (error) throw error;
     return true;
+  }
+
+  /**
+   * 다음 고객번호 조회
+   * - 사용되지 않은 가장 작은 번호 반환 (빈 번호 채우기)
+   * - customer_number가 없는 고객도 고려하여 전체 고객 수 기준으로 계산
+   */
+  async getNextCustomerNumber(salonId: string): Promise<string> {
+    // 전체 고객 수와 customer_number가 있는 고객 목록을 함께 조회
+    const { data, error, count } = await (this.supabase as any)
+      .from('customers')
+      .select('customer_number', { count: 'exact' })
+      .eq('salon_id', salonId);
+
+    if (error) throw error;
+
+    // 사용 중인 번호 Set 생성
+    const usedNumbers = new Set<number>();
+    if (data && data.length > 0) {
+      for (const row of data) {
+        if (row.customer_number) {
+          const num = parseInt(row.customer_number, 10);
+          if (!isNaN(num) && num > 0) {
+            usedNumbers.add(num);
+          }
+        }
+      }
+    }
+
+    // 전체 고객 수
+    const totalCustomers = count || 0;
+
+    // 고객이 없으면 1 반환
+    if (totalCustomers === 0) {
+      return '1';
+    }
+
+    // 1부터 순차적으로 빈 번호 찾기
+    // 최소 totalCustomers + 1까지는 확인하여 모든 고객에게 번호가 있을 경우도 처리
+    let nextNumber = 1;
+    const maxCheck = Math.max(usedNumbers.size, totalCustomers) + 1;
+    while (nextNumber <= maxCheck && usedNumbers.has(nextNumber)) {
+      nextNumber++;
+    }
+
+    return nextNumber.toString();
   }
 
   /**

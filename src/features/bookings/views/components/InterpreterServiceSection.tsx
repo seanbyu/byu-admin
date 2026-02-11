@@ -3,10 +3,10 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
-import { useSalonSettings, useInterpreterSettingsMutation } from '../hooks/useSalonSettings';
-import { useSettingsFormStore } from '../stores/settingsStore';
+import { useSalonSettings, useInterpreterSettingsMutation } from '../../hooks/useSalonSettings';
+import { useSettingsFormStore } from '../../stores/settingsStore';
 import { InterpreterServiceCard } from './booking-settings';
-import { SupportedLanguage } from '../constants';
+import { SupportedLanguage } from '../../constants';
 
 interface InterpreterServiceSectionProps {
   salonId: string;

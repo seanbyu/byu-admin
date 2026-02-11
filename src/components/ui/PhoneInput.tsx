@@ -111,6 +111,51 @@ export const PhoneInput = memo(function PhoneInput({
   // 실제 표시할 국가코드 (value가 있으면 파싱된 값, 없으면 선택된 값)
   const displayCountry = value ? parsedCountry : selectedCountryCode;
 
+  // 전화번호 자동 포맷팅 함수
+  const formatPhoneWithDashes = useCallback((digits: string, countryCode: string): string => {
+    // 숫자만 추출
+    const numbers = digits.replace(/\D/g, '');
+
+    if (countryCode === '+82') {
+      // 한국: 010-XXXX-XXXX 또는 010-XXX-XXXX
+      if (numbers.length <= 3) {
+        return numbers;
+      } else if (numbers.length <= 7) {
+        return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+      } else if (numbers.length <= 10) {
+        // 10자리: 010-XXX-XXXX
+        return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6)}`;
+      } else {
+        // 11자리: 010-XXXX-XXXX
+        return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+      }
+    } else if (countryCode === '+66') {
+      // 태국: 0XX-XXX-XXXX (10자리)
+      if (numbers.length <= 3) {
+        return numbers;
+      } else if (numbers.length <= 6) {
+        return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+      } else {
+        return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
+      }
+    } else {
+      // 기타 국가: 기본 포맷
+      if (numbers.length <= 3) {
+        return numbers;
+      } else if (numbers.length <= 6) {
+        return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+      } else {
+        return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
+      }
+    }
+  }, []);
+
+  // 표시용 포맷팅된 로컬번호
+  const displayLocalNumber = useMemo(() => {
+    if (!localNumber) return '';
+    return formatPhoneWithDashes(localNumber, displayCountry.code);
+  }, [localNumber, displayCountry.code, formatPhoneWithDashes]);
+
   // 국가 선택 핸들러 - 국가코드 변경 시 전체 값 업데이트
   const handleCountrySelect = useCallback((country: CountryCode) => {
     setShowDropdown(false);
@@ -124,24 +169,24 @@ export const PhoneInput = memo(function PhoneInput({
 
   // 전화번호 입력 핸들러 - 선택된 국가코드 포함하여 저장
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    // 숫자와 하이픈만 허용
-    const rawValue = e.target.value.replace(/[^0-9-]/g, '');
-    // 숫자만 추출하여 길이 체크 (최대 12자리 - 0 포함)
-    const digitsOnly = rawValue.replace(/-/g, '');
-    if (digitsOnly.length > 12) {
-      return; // 12자리 초과 시 입력 무시
+    // 숫자만 추출
+    const digitsOnly = e.target.value.replace(/\D/g, '');
+    if (digitsOnly.length > 11) {
+      return; // 11자리 초과 시 입력 무시
     }
 
-    if (rawValue) {
+    if (digitsOnly) {
       // value가 있으면 기존 국가코드 유지, 없으면 선택된 국가코드 사용
       const countryCode = value ? parsedCountry.code : selectedCountryCode.code;
+      // 자동 포맷팅 적용
+      const formattedLocal = formatPhoneWithDashes(digitsOnly, countryCode);
       // 저장 시 앞의 0 제거 (태국 번호)
-      const formatted = formatForSave(countryCode, rawValue);
+      const formatted = formatForSave(countryCode, formattedLocal);
       onChange(formatted);
     } else {
       onChange('');
     }
-  }, [value, parsedCountry.code, selectedCountryCode.code, onChange]);
+  }, [value, parsedCountry.code, selectedCountryCode.code, onChange, formatPhoneWithDashes]);
 
   return (
     <div className="space-y-1">
@@ -189,10 +234,10 @@ export const PhoneInput = memo(function PhoneInput({
           )}
         </div>
 
-        {/* 전화번호 입력 - 로컬번호만 표시 */}
+        {/* 전화번호 입력 - 포맷팅된 로컬번호 표시 */}
         <input
           type="tel"
-          value={localNumber}
+          value={displayLocalNumber}
           onChange={handlePhoneChange}
           placeholder={placeholder}
           disabled={disabled}

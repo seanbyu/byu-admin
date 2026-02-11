@@ -102,6 +102,15 @@ export const customerApi = {
       id: customerId,
     });
   },
+
+  // GET: 다음 고객번호 조회
+  getNextCustomerNumber: async (
+    salonId: string
+  ): Promise<ApiResponse<{ nextNumber: string }>> => {
+    return apiClient.get(
+      `${endpoints.salons.customers.path(salonId)}?action=next_number`
+    );
+  },
 } as const;
 
 // ============================================

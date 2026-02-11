@@ -65,7 +65,10 @@
     "customerType": "ประเภทลูกค้า",
     "noShow": "ไม่มาตามนัด",
     "createdAt": "วันที่ลงทะเบียน",
-    "membership": "สมาชิก"
+    "membership": "สมาชิก",
+    "birthDate": "วันเกิด",
+    "occupation": "อาชีพ",
+    "group": "กลุ่ม"
   },
 
   "edit": {
@@ -74,6 +77,33 @@
     "phonePlaceholder": "กรอกหมายเลขโทรศัพท์",
     "emailPlaceholder": "กรอกอีเมล",
     "notesPlaceholder": "กรอกหมายเหตุ"
+  },
+
+  "create": {
+    "title": "เพิ่มลูกค้าใหม่",
+    "namePlaceholder": "กรอกชื่อลูกค้า",
+    "selectArtist": "เลือกพนักงาน",
+    "customerNumberPlaceholder": "กรอกหมายเลขลูกค้า",
+    "customerNumberHint": "กรอกได้เฉพาะตัวเลข หมายเลขถัดไปจากหมายเลขล่าสุดจะถูกกรอกอัตโนมัติ",
+    "occupationPlaceholder": "กรอกอาชีพ",
+    "year": "ปี",
+    "month": "เดือน",
+    "day": "วัน",
+    "error": {
+      "nameRequired": "กรุณากรอกชื่อ",
+      "phoneRequired": "กรุณากรอกหมายเลขโทรศัพท์",
+      "artistRequired": "กรุณาเลือกพนักงาน",
+      "customerNumberRequired": "กรุณากรอกหมายเลขลูกค้า"
+    }
+  },
+
+  "delete": {
+    "button": "ลบข้อมูลลูกค้า",
+    "title": "ลบลูกค้า",
+    "confirm": "คุณแน่ใจหรือไม่ว่าต้องการลบลูกค้านี้?",
+    "warning": "ข้อมูลลูกค้าที่ถูกลบไม่สามารถกู้คืนได้ ข้อมูลที่เกี่ยวข้อง เช่น ประวัติการบริการ จะถูกลบด้วย",
+    "success": "ลบลูกค้าเรียบร้อยแล้ว",
+    "error": "ไม่สามารถลบลูกค้าได้"
   },
 
   "stats": {
@@ -96,5 +126,32 @@
     "noHistory": "ไม่มีประวัติการบริการ",
     "customerNotes": "บันทึกจากลูกค้า",
     "staffNotes": "บันทึกจากพนักงาน"
+  },
+
+  "tabs": {
+    "sales": "ยอดขาย",
+    "service": "บริการ",
+    "product": "ผลิตภัณฑ์",
+    "reservation": "การจอง",
+    "membership": "สมาชิก",
+    "cancellationFee": "ค่าธรรมเนียมการยกเลิก"
+  },
+
+  "sales": {
+    "totalSummary": "ยอดขายรวม",
+    "history": "ประวัติยอดขาย",
+    "date": "วันที่",
+    "productName": "ชื่อสินค้า",
+    "staff": "พนักงาน",
+    "memo": "บันทึกยอดขาย",
+    "actualSales": "ยอดขายจริง",
+    "paymentMethod": "วิธีการชำระเงิน",
+    "receipt": "ใบเสร็จ",
+    "photo": "รูปภาพ",
+    "edit": "แก้ไข",
+    "membershipSales": "ยอดขายสมาชิก",
+    "ticketSales": "ยอดขายตั๋ว",
+    "cancellationFee": "ค่าธรรมเนียมการยกเลิก",
+    "noHistory": "ไม่มีประวัติยอดขาย"
   }
 }

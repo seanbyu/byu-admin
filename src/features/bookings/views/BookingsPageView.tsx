@@ -26,7 +26,7 @@ import { salonsApi } from '@/features/salons/api';
 
 // bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
 const NewBookingModal = dynamic(
-  () => import('../components/NewBookingModal'),
+  () => import('./components/NewBookingModal'),
   { ssr: false }
 );
 

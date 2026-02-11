@@ -131,6 +131,9 @@ export interface DBCustomer {
   notes: string | null;
   last_visit: string | null;
   total_visits: number;
+  customer_type?: 'local' | 'foreign';
+  customer_number?: string | null;
+  primary_artist_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -250,6 +253,9 @@ export interface UpdateCustomerDto {
   notes?: string;
   last_visit?: string;
   total_visits?: number;
+  customer_type?: 'local' | 'foreign';
+  customer_number?: string;
+  primary_artist_id?: string | null;
 }
 
 // Menu create DTO

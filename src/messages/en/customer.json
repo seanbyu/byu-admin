@@ -65,7 +65,10 @@
     "customerType": "Customer Type",
     "noShow": "No-Show",
     "createdAt": "Registered",
-    "membership": "Membership"
+    "membership": "Membership",
+    "birthDate": "Date of Birth",
+    "occupation": "Occupation",
+    "group": "Group"
   },
 
   "edit": {
@@ -74,6 +77,33 @@
     "phonePlaceholder": "Enter phone number",
     "emailPlaceholder": "Enter email address",
     "notesPlaceholder": "Enter notes"
+  },
+
+  "create": {
+    "title": "Add New Customer",
+    "namePlaceholder": "Enter customer name",
+    "selectArtist": "Select staff",
+    "customerNumberPlaceholder": "Enter customer number",
+    "customerNumberHint": "Numbers only. The next number after the last one is auto-filled.",
+    "occupationPlaceholder": "Enter occupation",
+    "year": "Year",
+    "month": "Month",
+    "day": "Day",
+    "error": {
+      "nameRequired": "Please enter a name",
+      "phoneRequired": "Please enter a phone number",
+      "artistRequired": "Please select a staff member",
+      "customerNumberRequired": "Please enter a customer number"
+    }
+  },
+
+  "delete": {
+    "button": "Delete Customer",
+    "title": "Delete Customer",
+    "confirm": "Are you sure you want to delete this customer?",
+    "warning": "Deleted customer data cannot be recovered. Related data such as service history will also be deleted.",
+    "success": "Customer has been deleted",
+    "error": "Failed to delete customer"
   },
 
   "stats": {
@@ -96,5 +126,32 @@
     "noHistory": "No service history",
     "customerNotes": "Customer Notes",
     "staffNotes": "Staff Notes"
+  },
+
+  "tabs": {
+    "sales": "Sales",
+    "service": "Service",
+    "product": "Product",
+    "reservation": "Reservation",
+    "membership": "Membership",
+    "cancellationFee": "Cancellation Fee"
+  },
+
+  "sales": {
+    "totalSummary": "Total Sales Summary",
+    "history": "Sales History",
+    "date": "Date",
+    "productName": "Product Name",
+    "staff": "Staff",
+    "memo": "Sales Note",
+    "actualSales": "Actual Sales",
+    "paymentMethod": "Payment Method",
+    "receipt": "Receipt",
+    "photo": "Photo",
+    "edit": "Edit",
+    "membershipSales": "Membership Sales",
+    "ticketSales": "Ticket Sales",
+    "cancellationFee": "Cancellation Fee",
+    "noHistory": "No sales history"
   }
 }

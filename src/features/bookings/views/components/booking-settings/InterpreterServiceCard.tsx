@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Globe, Check } from 'lucide-react';
-import { SUPPORTED_LANGUAGES, SupportedLanguage } from '../../constants';
+import { SUPPORTED_LANGUAGES, SupportedLanguage } from '../../../constants';
 
 interface InterpreterServiceCardProps {
   interpreterEnabled: boolean;

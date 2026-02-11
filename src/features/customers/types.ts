@@ -8,7 +8,24 @@ export type CustomerTag = 'VIP' | 'REGULAR' | 'NEW' | 'RETURNING' | 'DORMANT' | 
 
 export type CustomerSortBy = 'last_visit' | 'total_visits' | 'total_spent' | 'name' | 'created_at';
 
-export type CustomerFilterType = 'all' | 'new' | 'returning' | 'regular' | 'dormant' | 'vip';
+// Base filter types (기본 필터)
+export type CustomerBaseFilterType = 'all' | 'new' | 'returning' | 'regular' | 'dormant' | 'vip';
+
+// Artist filter type (담당자 필터) - 'artist:{artistId}' 형식
+export type CustomerArtistFilterType = `artist:${string}`;
+
+// Combined filter type
+export type CustomerFilterType = CustomerBaseFilterType | CustomerArtistFilterType;
+
+// Helper to check if filter is artist type
+export const isArtistFilter = (filter: CustomerFilterType): filter is CustomerArtistFilterType => {
+  return filter.startsWith('artist:');
+};
+
+// Helper to extract artist ID from filter
+export const getArtistIdFromFilter = (filter: CustomerArtistFilterType): string => {
+  return filter.replace('artist:', '');
+};
 
 // ============================================
 // Customer Base Interface
@@ -24,6 +41,8 @@ export interface Customer {
   phone?: string;
   email?: string;
   notes?: string; // Customer chart memo
+  customer_number?: string; // Custom customer number
+  primary_artist_id?: string; // 담당자 ID
 
   // Visit tracking
   last_visit?: Date | string | null;
@@ -194,6 +213,11 @@ export interface CreateCustomerDto {
   email?: string;
   notes?: string;
   customer_type?: CustomerType;
+  customer_number?: string;
+  primary_artist_id?: string;
+  birth_date?: string; // YYYY-MM-DD format
+  occupation?: string;
+  group_ids?: string[];
 }
 
 export interface UpdateCustomerDto {
@@ -202,6 +226,8 @@ export interface UpdateCustomerDto {
   email?: string;
   notes?: string;
   customer_type?: CustomerType;
+  customer_number?: string;
+  primary_artist_id?: string;
 }
 
 // ============================================

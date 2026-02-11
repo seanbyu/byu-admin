@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { CustomerType } from '../types';
-import { Booking } from '../../../types';
+import { Booking } from '../../../../types';
 
 interface UseBookingFormProps {
   editBooking?: Booking;

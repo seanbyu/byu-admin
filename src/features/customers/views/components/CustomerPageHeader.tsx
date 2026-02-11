@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/Button';
 import type {
   CustomerFilterType,
   CustomerSortBy,
-} from '../types';
+  CustomerBaseFilterType,
+} from '../../types';
 
 // ============================================
 // Filter Tab Component
@@ -106,13 +107,24 @@ const SortDropdown = memo(function SortDropdown({
 });
 
 // ============================================
+// Artist Filter Tab Interface
+// ============================================
+
+export interface ArtistFilterTab {
+  artistId: string;
+  artistName: string;
+  count: number;
+}
+
+// ============================================
 // Main Component
 // ============================================
 
 interface CustomerPageHeaderProps {
   activeFilter: CustomerFilterType;
   searchQuery: string;
-  filterCounts: Record<CustomerFilterType, number>;
+  filterCounts: Record<CustomerBaseFilterType, number>;
+  artistFilters?: ArtistFilterTab[];
   onFilterChange: (filter: CustomerFilterType) => void;
   onSearchChange: (query: string) => void;
   sortBy: CustomerSortBy;
@@ -128,6 +140,7 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
   activeFilter,
   searchQuery,
   filterCounts,
+  artistFilters = [],
   onFilterChange,
   onSearchChange,
   sortBy,
@@ -147,8 +160,8 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
     [onSearchChange]
   );
 
-  // rendering-hoist-jsx: 필터 탭 데이터를 메모이제이션
-  const filterTabs: FilterTab[] = [
+  // rendering-hoist-jsx: 기본 필터 탭 데이터
+  const baseFilterTabs: FilterTab[] = [
     { type: 'all', label: t('customer.filter.all'), count: filterCounts.all },
     { type: 'new', label: t('customer.filter.new'), count: filterCounts.new },
     {
@@ -168,6 +181,13 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
     },
     { type: 'vip', label: t('customer.filter.vip'), count: filterCounts.vip },
   ];
+
+  // 담당자별 필터 탭 데이터
+  const artistFilterTabs: FilterTab[] = artistFilters.map((artist) => ({
+    type: `artist:${artist.artistId}` as CustomerFilterType,
+    label: artist.artistName,
+    count: artist.count,
+  }));
 
   return (
     <div className="space-y-4">
@@ -189,12 +209,27 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
         )}
       </div>
 
-      {/* Filter Tabs */}
-      <FilterTabs
-        tabs={filterTabs}
-        activeFilter={activeFilter}
-        onFilterChange={onFilterChange}
-      />
+      {/* Filter Tabs - 기본 필터 + 담당자 필터 */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* 기본 필터 */}
+        <FilterTabs
+          tabs={baseFilterTabs}
+          activeFilter={activeFilter}
+          onFilterChange={onFilterChange}
+        />
+
+        {/* 담당자 필터 구분선 및 탭 */}
+        {artistFilterTabs.length > 0 && (
+          <>
+            <div className="h-8 w-px bg-secondary-300 mx-2" />
+            <FilterTabs
+              tabs={artistFilterTabs}
+              activeFilter={activeFilter}
+              onFilterChange={onFilterChange}
+            />
+          </>
+        )}
+      </div>
 
       {/* Search and Sort */}
       <div className="flex items-center space-x-4">

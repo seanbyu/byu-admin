@@ -88,28 +88,19 @@ export class CustomerService {
       // 태그 생성
       const tags = this.generateCustomerTags(customer, completedBookings);
 
-      // Primary artist (가장 많이 방문한 아티스트)
-      const artistCounts = new Map<string, { name: string; count: number }>();
-      completedBookings.forEach((b: any) => {
-        if (b.artist?.name) {
-          const current = artistCounts.get(b.artist.name) || { name: b.artist.name, count: 0 };
-          artistCounts.set(b.artist.name, { ...current, count: current.count + 1 });
-        }
-      });
+      // Primary artist - 저장된 담당자 정보 사용 (primary_artist_id 기반)
+      // primary_artist_user는 repository에서 join으로 가져온 데이터
+      const assignedPrimaryArtist = customer.primary_artist_user;
 
-      const primaryArtist = Array.from(artistCounts.values()).sort(
-        (a, b) => b.count - a.count
-      )[0];
-
-      // bookings 필드 제거하고 반환
-      const { bookings: _, ...customerWithoutBookings } = customer;
+      // bookings 필드와 primary_artist_user 필드 제거하고 반환
+      const { bookings: _, primary_artist_user: __, ...customerWithoutBookings } = customer;
 
       return {
         ...customerWithoutBookings,
         total_spent: totalSpent,
         tags,
-        primary_artist: primaryArtist
-          ? { id: '', name: primaryArtist.name }
+        primary_artist: assignedPrimaryArtist
+          ? { id: assignedPrimaryArtist.id, name: assignedPrimaryArtist.name }
           : undefined,
         latest_booking: latestBooking
           ? {
@@ -238,6 +229,14 @@ export class CustomerService {
   }
 
   /**
+   * 다음 고객번호 조회
+   * - 현재 최대 고객번호 + 1 반환
+   */
+  async getNextCustomerNumber(salonId: string): Promise<string> {
+    return this.repository.getNextCustomerNumber(salonId);
+  }
+
+  /**
    * 고객 차트 조회 (상세 정보 + 시술 이력 + 통계)
    * - async-parallel: 고객 정보와 예약 정보를 병렬 조회
    */
@@ -340,18 +339,19 @@ export class CustomerService {
         status: b.status,
       }));
 
-    // Primary artist 계산
-    const primaryArtistData = Array.from(artistCounts.values()).sort(
-      (a, b) => b.count - a.count
-    )[0];
+    // Primary artist - 저장된 담당자 정보 사용 (primary_artist_id 기반)
+    const assignedPrimaryArtist = (customer as any).primary_artist_user;
+
+    // primary_artist_user 필드 제거
+    const { primary_artist_user: _, ...customerData } = customer as any;
 
     return {
       customer: {
-        ...customer,
+        ...customerData,
         total_spent: totalSpent,
         tags,
-        primary_artist: primaryArtistData
-          ? { id: primaryArtistData.id, name: primaryArtistData.name }
+        primary_artist: assignedPrimaryArtist
+          ? { id: assignedPrimaryArtist.id, name: assignedPrimaryArtist.name }
           : undefined,
         favorite_service: favoriteServiceData
           ? { id: favoriteServiceData.id, name: favoriteServiceData.name }

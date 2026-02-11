@@ -65,7 +65,10 @@
     "customerType": "고객 유형",
     "noShow": "노쇼",
     "createdAt": "고객등록일",
-    "membership": "정액권"
+    "membership": "정액권",
+    "birthDate": "생년월일",
+    "occupation": "직업",
+    "group": "그룹"
   },
 
   "edit": {
@@ -74,6 +77,33 @@
     "phonePlaceholder": "전화번호를 입력하세요",
     "emailPlaceholder": "이메일을 입력하세요",
     "notesPlaceholder": "메모를 입력하세요"
+  },
+
+  "create": {
+    "title": "신규 고객 등록",
+    "namePlaceholder": "고객 이름을 입력하세요",
+    "selectArtist": "담당자를 선택하세요",
+    "customerNumberPlaceholder": "고객번호를 입력하세요",
+    "customerNumberHint": "숫자만 입력 가능합니다. 마지막 번호 다음이 자동으로 입력됩니다.",
+    "occupationPlaceholder": "직업을 입력하세요",
+    "year": "년",
+    "month": "월",
+    "day": "일",
+    "error": {
+      "nameRequired": "이름을 입력해주세요",
+      "phoneRequired": "연락처를 입력해주세요",
+      "artistRequired": "담당자를 선택해주세요",
+      "customerNumberRequired": "고객번호를 입력해주세요"
+    }
+  },
+
+  "delete": {
+    "button": "고객 데이터 삭제",
+    "title": "고객 삭제",
+    "confirm": "정말로 이 고객을 삭제하시겠습니까?",
+    "warning": "삭제된 고객 데이터는 복구할 수 없습니다. 시술 이력 등 관련 데이터도 함께 삭제됩니다.",
+    "success": "고객이 삭제되었습니다",
+    "error": "고객 삭제에 실패했습니다"
   },
 
   "stats": {
@@ -96,5 +126,32 @@
     "noHistory": "시술 이력이 없습니다",
     "customerNotes": "고객 요청사항",
     "staffNotes": "스태프 메모"
+  },
+
+  "tabs": {
+    "sales": "매출",
+    "service": "시술",
+    "product": "제품",
+    "reservation": "예약",
+    "membership": "정액권",
+    "cancellationFee": "예약 위약금"
+  },
+
+  "sales": {
+    "totalSummary": "실 매출 합계",
+    "history": "매출 내역",
+    "date": "날짜",
+    "productName": "상품명",
+    "staff": "담당자",
+    "memo": "매출 메모",
+    "actualSales": "실 매출",
+    "paymentMethod": "결제 수단",
+    "receipt": "영수증",
+    "photo": "사진",
+    "edit": "수정",
+    "membershipSales": "정액권 판매",
+    "ticketSales": "티켓 판매",
+    "cancellationFee": "예약 위약금",
+    "noHistory": "매출 내역이 없습니다"
   }
 }

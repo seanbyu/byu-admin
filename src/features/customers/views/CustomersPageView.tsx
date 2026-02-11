@@ -7,18 +7,22 @@ import { Card } from '@/components/ui/Card';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
-import { CustomerPageHeader } from '../components/CustomerPageHeader';
-import { CustomerTable } from '../components/CustomerTable';
-import { CustomerChartModal } from '../components/CustomerChartModal';
-import { EditCustomerModal } from '../components/EditCustomerModal';
+import { CustomerPageHeader } from './components/CustomerPageHeader';
+import { CustomerTable } from './components/CustomerTable';
+import { CustomerChartModal } from './components/CustomerChartModal';
+import { EditCustomerModal } from './components/EditCustomerModal';
+import { CreateCustomerModal } from './components/CreateCustomerModal';
 import {
   useCustomerFilters,
   useCustomerModals,
   useCustomerPagination,
+  useCustomerSelection,
   useCustomerUIActions,
 } from '../stores/customerStore';
 import { customerQueries } from '../hooks/queries';
-import type { CustomerListItem, CustomerFilterType } from '../types';
+import type { CustomerListItem, CustomerFilterType, CustomerBaseFilterType } from '../types';
+import { isArtistFilter, getArtistIdFromFilter } from '../types';
+import type { ArtistFilterTab } from './components/CustomerPageHeader';
 
 // ============================================
 // Helper Functions
@@ -34,23 +38,32 @@ const filterCustomers = (
 
   // 필터 적용
   if (activeFilter !== 'all') {
-    filtered = filtered.filter((customer) => {
-      const tags = customer.tags.map((tag) => tag.toLowerCase());
-      switch (activeFilter) {
-        case 'new':
-          return tags.includes('new');
-        case 'returning':
-          return tags.includes('returning');
-        case 'regular':
-          return tags.includes('regular');
-        case 'dormant':
-          return tags.includes('dormant');
-        case 'vip':
-          return tags.includes('vip');
-        default:
-          return true;
-      }
-    });
+    // 담당자 필터인 경우
+    if (isArtistFilter(activeFilter)) {
+      const artistId = getArtistIdFromFilter(activeFilter);
+      filtered = filtered.filter((customer) => {
+        return customer.primary_artist_id === artistId;
+      });
+    } else {
+      // 기본 태그 필터인 경우
+      filtered = filtered.filter((customer) => {
+        const tags = customer.tags.map((tag) => tag.toLowerCase());
+        switch (activeFilter) {
+          case 'new':
+            return tags.includes('new');
+          case 'returning':
+            return tags.includes('returning');
+          case 'regular':
+            return tags.includes('regular');
+          case 'dormant':
+            return tags.includes('dormant');
+          case 'vip':
+            return tags.includes('vip');
+          default:
+            return true;
+        }
+      });
+    }
   }
 
   // 검색 적용
@@ -119,9 +132,18 @@ export default function CustomersPageView() {
 
   // Zustand store (선택적 구독)
   const { activeFilter, searchQuery, sortBy, sortOrder } = useCustomerFilters();
-  const { showChartModal, showEditModal, selectedCustomerId } = useCustomerModals();
+  const { showChartModal, showEditModal, showCreateModal, selectedCustomerId } = useCustomerModals();
   const { currentPage, pageSize } = useCustomerPagination();
+  const { selectedCustomerIds } = useCustomerSelection();
   const actions = useCustomerUIActions();
+
+  // 선택된 고객 ID를 배열로 변환
+  const selectedIdsArray = useMemo(() => Array.from(selectedCustomerIds), [selectedCustomerIds]);
+
+  // 선택 변경 핸들러
+  const handleSelectionChange = useCallback((ids: string[]) => {
+    actions.setSelectedCustomerIds(ids);
+  }, [actions]);
 
   // TanStack Query: 고객 목록 조회
   const { data, isLoading, error } = useQuery(
@@ -153,7 +175,7 @@ export default function CustomersPageView() {
   const totalCount = filteredAndSortedCustomers.length;
 
   // 필터별 카운트 계산 (js-cache-function-results)
-  const filterCounts = useMemo(() => {
+  const filterCounts = useMemo((): Record<CustomerBaseFilterType, number> => {
     const counts = {
       all: customers.length,
       new: 0,
@@ -175,6 +197,34 @@ export default function CustomersPageView() {
     return counts;
   }, [customers]);
 
+  // 담당자별 필터 계산 (고객에게 할당된 담당자만 표시)
+  const artistFilters = useMemo((): ArtistFilterTab[] => {
+    const artistMap = new Map<string, { name: string; count: number }>();
+
+    customers.forEach((customer) => {
+      if (customer.primary_artist_id && customer.primary_artist?.name) {
+        const existing = artistMap.get(customer.primary_artist_id);
+        if (existing) {
+          existing.count++;
+        } else {
+          artistMap.set(customer.primary_artist_id, {
+            name: customer.primary_artist.name,
+            count: 1,
+          });
+        }
+      }
+    });
+
+    // Map을 배열로 변환하고 이름순으로 정렬
+    return Array.from(artistMap.entries())
+      .map(([artistId, data]) => ({
+        artistId,
+        artistName: data.name,
+        count: data.count,
+      }))
+      .sort((a, b) => a.artistName.localeCompare(b.artistName));
+  }, [customers]);
+
   // advanced-event-handler-refs: 안정적인 이벤트 핸들러
   const handleCustomerClick = useCallback(
     (customerId: string) => {
@@ -192,8 +242,12 @@ export default function CustomersPageView() {
   }, [actions]);
 
   const handleAddCustomer = useCallback(() => {
-    // TODO: 신규 고객 등록 모달 구현
-  }, []);
+    actions.openCreateModal();
+  }, [actions]);
+
+  const handleCloseCreateModal = useCallback(() => {
+    actions.closeCreateModal();
+  }, [actions]);
 
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
@@ -227,6 +281,7 @@ export default function CustomersPageView() {
           activeFilter={activeFilter}
           searchQuery={searchQuery}
           filterCounts={filterCounts}
+          artistFilters={artistFilters}
           onFilterChange={actions.setActiveFilter}
           onSearchChange={actions.setSearchQuery}
           sortBy={sortBy}
@@ -249,6 +304,8 @@ export default function CustomersPageView() {
             onPageSizeChange={actions.setPageSize}
             canEdit={canEditCustomer}
             canDelete={canDeleteCustomer}
+            selectedIds={selectedIdsArray}
+            onSelectionChange={handleSelectionChange}
           />
         </Card>
       </div>
@@ -269,6 +326,14 @@ export default function CustomersPageView() {
           isOpen={showEditModal}
           customer={customers.find((c) => c.id === selectedCustomerId) || null}
           onClose={handleCloseEditModal}
+        />
+      )}
+
+      {/* Create Customer Modal */}
+      {showCreateModal && (
+        <CreateCustomerModal
+          isOpen={showCreateModal}
+          onClose={handleCloseCreateModal}
         />
       )}
     </Layout>

@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useBookings } from '../../../hooks/useBookings';
+import { useBookings } from '../../../../hooks/useBookings';
 import { useCustomers } from '@/features/customers/hooks/useCustomers';
 import { BookingStatus } from '@/types';
-import { Booking } from '../../../types';
+import { Booking } from '../../../../types';
 import { CustomerType, ExistingCustomer } from '../types';
 
 interface ServiceInfo {

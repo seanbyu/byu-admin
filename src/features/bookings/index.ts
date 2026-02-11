@@ -77,7 +77,7 @@ export {
   HolidaySettingsCard,
   InterpreterServiceCard,
   StaffBookingCard,
-} from './components';
+} from './views/components';
 
 // Views
 export { default as BookingsPageView } from './views/BookingsPageView';

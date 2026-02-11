@@ -19,8 +19,8 @@ import {
   Clock,
   FileText,
 } from 'lucide-react';
-import { customerQueries } from '../hooks/queries';
-import type { CustomerTag, ServiceHistoryItem } from '../types';
+import { customerQueries } from '../../hooks/queries';
+import type { CustomerTag, ServiceHistoryItem } from '../../types';
 
 // ============================================
 // Helper Functions

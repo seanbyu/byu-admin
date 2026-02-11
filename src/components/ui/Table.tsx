@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 interface Column<T> {
   key: string;
-  header: string;
+  header: React.ReactNode;
   render?: (item: T, index: number) => React.ReactNode;
   width?: string;
   align?: 'left' | 'center' | 'right';

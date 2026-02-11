@@ -34,6 +34,7 @@ interface CustomerUIState {
   // Modals
   showChartModal: boolean;
   showEditModal: boolean;
+  showCreateModal: boolean;
   selectedCustomerId: string | null;
 }
 
@@ -54,6 +55,7 @@ interface CustomerUIActions {
   // Selection
   toggleCustomerSelection: (customerId: string) => void;
   selectAllCustomers: (customerIds: string[]) => void;
+  setSelectedCustomerIds: (customerIds: string[]) => void;
   clearSelection: () => void;
 
   // Chart modal
@@ -63,6 +65,10 @@ interface CustomerUIActions {
   // Edit modal
   openEditModal: (customerId: string) => void;
   closeEditModal: () => void;
+
+  // Create modal
+  openCreateModal: () => void;
+  closeCreateModal: () => void;
 
   // Reset
   reset: () => void;
@@ -80,6 +86,7 @@ const initialState: CustomerUIState = {
   selectedCustomerIds: new Set(),
   showChartModal: false,
   showEditModal: false,
+  showCreateModal: false,
   selectedCustomerId: null,
 };
 
@@ -142,6 +149,13 @@ export const useCustomerUIStore = create<CustomerUIStore>()(
           'selectAllCustomers'
         ),
 
+      setSelectedCustomerIds: (customerIds) =>
+        set(
+          { selectedCustomerIds: new Set(customerIds) },
+          false,
+          'setSelectedCustomerIds'
+        ),
+
       clearSelection: () =>
         set({ selectedCustomerIds: new Set() }, false, 'clearSelection'),
 
@@ -187,6 +201,21 @@ export const useCustomerUIStore = create<CustomerUIStore>()(
           'closeEditModal'
         ),
 
+      // Create modal actions
+      openCreateModal: () =>
+        set(
+          { showCreateModal: true },
+          false,
+          'openCreateModal'
+        ),
+
+      closeCreateModal: () =>
+        set(
+          { showCreateModal: false },
+          false,
+          'closeCreateModal'
+        ),
+
       // Reset
       reset: () =>
         set(
@@ -230,11 +259,14 @@ export const selectCustomerUIActions = (state: CustomerUIStore): CustomerUIActio
   setPageSize: state.setPageSize,
   toggleCustomerSelection: state.toggleCustomerSelection,
   selectAllCustomers: state.selectAllCustomers,
+  setSelectedCustomerIds: state.setSelectedCustomerIds,
   clearSelection: state.clearSelection,
   openChartModal: state.openChartModal,
   closeChartModal: state.closeChartModal,
   openEditModal: state.openEditModal,
   closeEditModal: state.closeEditModal,
+  openCreateModal: state.openCreateModal,
+  closeCreateModal: state.closeCreateModal,
   reset: state.reset,
 });
 
@@ -286,13 +318,14 @@ export function useCustomerSelection() {
 
 /**
  * 모달 상태만 구독하는 훅
- * @example const { showChartModal, showEditModal, selectedCustomerId } = useCustomerModals();
+ * @example const { showChartModal, showEditModal, showCreateModal, selectedCustomerId } = useCustomerModals();
  */
 export function useCustomerModals() {
   return useCustomerUIStore(
     useShallow((state) => ({
       showChartModal: state.showChartModal,
       showEditModal: state.showEditModal,
+      showCreateModal: state.showCreateModal,
       selectedCustomerId: state.selectedCustomerId,
     }))
   );

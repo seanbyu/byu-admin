@@ -13,6 +13,13 @@ export async function GET(
   try {
     const searchParams = req.nextUrl.searchParams;
     const id = searchParams.get('id');
+    const action = searchParams.get('action');
+
+    // 다음 고객번호 조회
+    if (action === 'next_number') {
+      const nextNumber = await service.getNextCustomerNumber(salonId);
+      return NextResponse.json({ success: true, data: { nextNumber } });
+    }
 
     // 개별 고객 조회
     if (id) {

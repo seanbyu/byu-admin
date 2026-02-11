@@ -3,10 +3,10 @@
 import { Layout } from '@/components/layout/Layout';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
-import { ShopSettingsSection } from '@/features/bookings/components/ShopSettingsSection';
-import { StaffBookingSection } from '@/features/bookings/components/StaffBookingSection';
-import { InterpreterServiceSection } from '@/features/bookings/components/InterpreterServiceSection';
-import { ContactChannelsSection } from '@/features/bookings/components/ContactChannelsSection';
+import { ShopSettingsSection } from '@/features/bookings/views/components/ShopSettingsSection';
+import { StaffBookingSection } from '@/features/bookings/views/components/StaffBookingSection';
+import { InterpreterServiceSection } from '@/features/bookings/views/components/InterpreterServiceSection';
+import { ContactChannelsSection } from '@/features/bookings/views/components/ContactChannelsSection';
 
 export default function OnlineBookingSettingsPage() {
   const t = useTranslations();

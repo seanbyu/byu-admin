@@ -7,7 +7,7 @@ import { Select } from '@/components/ui/Select';
 import { Card } from '@/components/ui/Card';
 import { BusinessHours } from '@/types';
 import { Check, Store } from 'lucide-react';
-import { DAY_KEYS, TIME_OPTIONS } from '../../constants';
+import { DAY_KEYS, TIME_OPTIONS } from '../../../constants';
 
 interface BusinessSettingsCardProps {
   businessHours: BusinessHours[];

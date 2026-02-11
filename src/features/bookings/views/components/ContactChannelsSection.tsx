@@ -3,8 +3,8 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
-import { useSalonSettings, useContactChannelsMutation } from '../hooks/useSalonSettings';
-import { useSettingsFormStore } from '../stores/settingsStore';
+import { useSalonSettings, useContactChannelsMutation } from '../../hooks/useSalonSettings';
+import { useSettingsFormStore } from '../../stores/settingsStore';
 import { ContactChannelsCard } from './booking-settings';
 
 interface ContactChannelsSectionProps {

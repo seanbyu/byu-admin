@@ -1,4 +1,4 @@
-import { Booking } from '../../types';
+import { Booking } from '../../../types';
 
 export type CustomerType = 'local' | 'foreign';
 

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { MessageCircle, Check } from 'lucide-react';
-import { ContactChannels } from '../../hooks/useSalonSettings';
+import { ContactChannels } from '../../../hooks/useSalonSettings';
 
 // LINE 아이콘 컴포넌트
 const LineIcon = ({ className }: { className?: string }) => (
