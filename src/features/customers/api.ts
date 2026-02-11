@@ -10,7 +10,13 @@ import type {
   GetCustomerChartResponse,
   CreateCustomerDto,
   UpdateCustomerDto,
+  CustomerGroup,
 } from './types';
+import type {
+  CustomFilter,
+  CreateCustomFilterDto,
+  UpdateCustomFilterDto,
+} from './types/filter.types';
 
 // ============================================
 // Customer API Functions
@@ -110,6 +116,74 @@ export const customerApi = {
     return apiClient.get(
       `${endpoints.salons.customers.path(salonId)}?action=next_number`
     );
+  },
+
+  // ============================================
+  // Customer Filter API
+  // ============================================
+
+  // GET: 커스텀 필터 목록 조회
+  getFilters: async (
+    salonId: string
+  ): Promise<ApiResponse<CustomFilter[]>> => {
+    return apiClient.get(`/salons/${salonId}/customer-filters`);
+  },
+
+  // POST: 새 필터 생성
+  createFilter: async (
+    salonId: string,
+    dto: CreateCustomFilterDto
+  ): Promise<ApiResponse<CustomFilter>> => {
+    return apiClient.post(`/salons/${salonId}/customer-filters`, {
+      action: 'create',
+      ...dto,
+    });
+  },
+
+  // POST: 필터 수정
+  updateFilter: async (
+    salonId: string,
+    filterId: string,
+    updates: UpdateCustomFilterDto
+  ): Promise<ApiResponse<CustomFilter>> => {
+    return apiClient.post(`/salons/${salonId}/customer-filters`, {
+      action: 'update',
+      id: filterId,
+      updates,
+    });
+  },
+
+  // POST: 필터 삭제
+  deleteFilter: async (
+    salonId: string,
+    filterId: string
+  ): Promise<ApiResponse<void>> => {
+    return apiClient.post(`/salons/${salonId}/customer-filters`, {
+      action: 'delete',
+      id: filterId,
+    });
+  },
+
+  // POST: 필터 순서 변경
+  reorderFilters: async (
+    salonId: string,
+    filters: { id: string; display_order: number }[]
+  ): Promise<ApiResponse<void>> => {
+    return apiClient.post(`/salons/${salonId}/customer-filters`, {
+      action: 'reorder',
+      filters,
+    });
+  },
+
+  // ============================================
+  // Customer Groups API
+  // ============================================
+
+  // GET: 고객 그룹 목록 조회
+  getGroups: async (
+    salonId: string
+  ): Promise<ApiResponse<CustomerGroup[]>> => {
+    return apiClient.get(`/salons/${salonId}/customer-groups`);
   },
 } as const;
 

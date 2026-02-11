@@ -20,6 +20,8 @@
   "select": "Select",
   "close": "Close",
   "complete": "Complete",
+  "yes": "Yes",
+  "no": "No",
   "days": "days",
   "times": "times",
   "sort": {

@@ -228,6 +228,31 @@ export interface UpdateCustomerDto {
   customer_type?: CustomerType;
   customer_number?: string;
   primary_artist_id?: string;
+  group_ids?: string[];
+}
+
+// ============================================
+// Customer Group Types
+// ============================================
+
+export type GroupType = 'MANUAL' | 'AUTO' | 'HYBRID';
+
+export interface CustomerGroup {
+  id: string;
+  salon_id: string;
+  name: string;
+  name_en?: string | null;
+  name_th?: string | null;
+  color: string;
+  icon?: string | null;
+  description?: string | null;
+  group_type: GroupType;
+  auto_assign_rules?: any;
+  auto_assign_enabled: boolean;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 // ============================================

@@ -36,7 +36,7 @@
     "totalVisits": "Total Visits",
     "totalSpent": "Total Spent",
     "name": "Name",
-    "createdAt": "Created At"
+    "createdAt": "Recent Registration"
   },
 
   "view": {
@@ -153,5 +153,43 @@
     "ticketSales": "Ticket Sales",
     "cancellationFee": "Cancellation Fee",
     "noHistory": "No sales history"
+  },
+
+  "group": {
+    "empty": "No groups registered"
+  },
+
+  "filterManagement": {
+    "title": "Filter Settings",
+    "dragHint": "Drag to reorder filters.",
+    "addFilter": "Add New Filter",
+    "editFilter": "Edit Filter",
+    "deleteFilter": "Delete Filter",
+    "deleteConfirm": "Are you sure you want to delete this filter?",
+    "systemFilterNotice": "System filters cannot be deleted",
+    "filterName": "Filter Name",
+    "filterKey": "Filter Key",
+    "conditions": "Conditions",
+    "addCondition": "Add Condition",
+    "removeCondition": "Remove Condition",
+    "conditionLogic": "Condition Logic",
+    "and": "And (AND)",
+    "or": "Or (OR)",
+    "fields": {
+      "totalVisits": "Total Visits",
+      "totalSpent": "Total Spent",
+      "daysSinceLastVisit": "Days Since Last Visit",
+      "daysSinceRegistration": "Days Since Registration",
+      "noShowCount": "No-Show Count",
+      "hasPrimaryArtist": "Has Assigned Staff"
+    },
+    "operators": {
+      "eq": "Equals",
+      "ne": "Not Equals",
+      "gt": "Greater Than",
+      "lt": "Less Than",
+      "gte": "Greater or Equal",
+      "lte": "Less or Equal"
+    }
   }
 }

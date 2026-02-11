@@ -36,7 +36,7 @@
     "totalVisits": "총 방문 횟수",
     "totalSpent": "총 지출액",
     "name": "이름",
-    "createdAt": "등록일"
+    "createdAt": "최근등록일"
   },
 
   "view": {
@@ -153,5 +153,43 @@
     "ticketSales": "티켓 판매",
     "cancellationFee": "예약 위약금",
     "noHistory": "매출 내역이 없습니다"
+  },
+
+  "group": {
+    "empty": "등록된 그룹이 없습니다"
+  },
+
+  "filterManagement": {
+    "title": "필터 설정",
+    "dragHint": "드래그하여 필터 순서를 변경할 수 있습니다.",
+    "addFilter": "새 필터 추가",
+    "editFilter": "필터 수정",
+    "deleteFilter": "필터 삭제",
+    "deleteConfirm": "이 필터를 삭제하시겠습니까?",
+    "systemFilterNotice": "시스템 필터는 삭제할 수 없습니다",
+    "filterName": "필터 이름",
+    "filterKey": "필터 키",
+    "conditions": "조건",
+    "addCondition": "조건 추가",
+    "removeCondition": "조건 삭제",
+    "conditionLogic": "조건 결합",
+    "and": "그리고 (AND)",
+    "or": "또는 (OR)",
+    "fields": {
+      "totalVisits": "총 방문 횟수",
+      "totalSpent": "총 지출액",
+      "daysSinceLastVisit": "마지막 방문 이후 일수",
+      "daysSinceRegistration": "고객 등록일",
+      "noShowCount": "노쇼 횟수",
+      "hasPrimaryArtist": "담당자 지정 여부"
+    },
+    "operators": {
+      "eq": "같음",
+      "ne": "같지 않음",
+      "gt": "초과",
+      "lt": "미만",
+      "gte": "이상",
+      "lte": "이하"
+    }
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
@@ -12,27 +12,36 @@ import { CustomerTable } from './components/CustomerTable';
 import { CustomerChartModal } from './components/CustomerChartModal';
 import { EditCustomerModal } from './components/EditCustomerModal';
 import { CreateCustomerModal } from './components/CreateCustomerModal';
+import { FilterSettingsModal } from './components/FilterSettingsModal';
 import {
-  useCustomerFilters,
+  useCustomerFilters as useCustomerFilterState,
   useCustomerModals,
   useCustomerPagination,
   useCustomerSelection,
   useCustomerUIActions,
 } from '../stores/customerStore';
+import { useCustomerFilters as useCustomerFiltersApi } from '../hooks/useCustomerFilters';
 import { customerQueries } from '../hooks/queries';
 import type { CustomerListItem, CustomerFilterType, CustomerBaseFilterType } from '../types';
 import { isArtistFilter, getArtistIdFromFilter } from '../types';
 import type { ArtistFilterTab } from './components/CustomerPageHeader';
+import type { CustomFilter } from '../types/filter.types';
+import {
+  createFilterFunction,
+  findFilterByKey,
+  calculateFilterCounts as calculateCustomFilterCounts,
+} from '../utils/filterUtils';
 
 // ============================================
 // Helper Functions
 // ============================================
 
 // rendering-hoist-jsx: 필터 로직을 외부 함수로 호이스팅
-const filterCustomers = (
+const filterCustomersWithCustomFilters = (
   customers: CustomerListItem[],
   activeFilter: CustomerFilterType,
-  searchQuery: string
+  searchQuery: string,
+  customFilters: CustomFilter[]
 ): CustomerListItem[] => {
   let filtered = customers;
 
@@ -45,24 +54,32 @@ const filterCustomers = (
         return customer.primary_artist_id === artistId;
       });
     } else {
-      // 기본 태그 필터인 경우
-      filtered = filtered.filter((customer) => {
-        const tags = customer.tags.map((tag) => tag.toLowerCase());
-        switch (activeFilter) {
-          case 'new':
-            return tags.includes('new');
-          case 'returning':
-            return tags.includes('returning');
-          case 'regular':
-            return tags.includes('regular');
-          case 'dormant':
-            return tags.includes('dormant');
-          case 'vip':
-            return tags.includes('vip');
-          default:
-            return true;
-        }
-      });
+      // 커스텀 필터 확인
+      const customFilter = findFilterByKey(customFilters, activeFilter);
+      if (customFilter && customFilter.conditions.length > 0) {
+        // 커스텀 필터 조건 적용
+        const filterFn = createFilterFunction(customFilter);
+        filtered = filtered.filter(filterFn);
+      } else {
+        // 기본 태그 필터인 경우
+        filtered = filtered.filter((customer) => {
+          const tags = customer.tags.map((tag) => tag.toLowerCase());
+          switch (activeFilter) {
+            case 'new':
+              return tags.includes('new');
+            case 'returning':
+              return tags.includes('returning');
+            case 'regular':
+              return tags.includes('regular');
+            case 'dormant':
+              return tags.includes('dormant');
+            case 'vip':
+              return tags.includes('vip');
+            default:
+              return true;
+          }
+        });
+      }
     }
   }
 
@@ -131,11 +148,17 @@ export default function CustomersPageView() {
   const canDeleteCustomer = canDelete(PermissionModules.CUSTOMERS);
 
   // Zustand store (선택적 구독)
-  const { activeFilter, searchQuery, sortBy, sortOrder } = useCustomerFilters();
+  const { activeFilter, searchQuery, sortBy, sortOrder } = useCustomerFilterState();
   const { showChartModal, showEditModal, showCreateModal, selectedCustomerId } = useCustomerModals();
   const { currentPage, pageSize } = useCustomerPagination();
   const { selectedCustomerIds } = useCustomerSelection();
   const actions = useCustomerUIActions();
+
+  // 필터 설정 모달 상태
+  const [showFilterSettingsModal, setShowFilterSettingsModal] = useState(false);
+
+  // 커스텀 필터 조회
+  const { filters: customFilters = [] } = useCustomerFiltersApi(salonId);
 
   // 선택된 고객 ID를 배열로 변환
   const selectedIdsArray = useMemo(() => Array.from(selectedCustomerIds), [selectedCustomerIds]);
@@ -161,9 +184,9 @@ export default function CustomersPageView() {
 
   // js-cache-function-results: 필터링/정렬/페이징을 메모이제이션
   const filteredAndSortedCustomers = useMemo(() => {
-    const filtered = filterCustomers(customers, activeFilter, searchQuery);
+    const filtered = filterCustomersWithCustomFilters(customers, activeFilter, searchQuery, customFilters);
     return sortCustomers(filtered, sortBy, sortOrder);
-  }, [customers, activeFilter, searchQuery, sortBy, sortOrder]);
+  }, [customers, activeFilter, searchQuery, sortBy, sortOrder, customFilters]);
 
   // 페이지네이션 적용
   const paginatedCustomers = useMemo(() => {
@@ -196,6 +219,11 @@ export default function CustomersPageView() {
 
     return counts;
   }, [customers]);
+
+  // 커스텀 필터 카운트 계산
+  const customFilterCounts = useMemo(() => {
+    return calculateCustomFilterCounts(customers, customFilters);
+  }, [customers, customFilters]);
 
   // 담당자별 필터 계산 (고객에게 할당된 담당자만 표시)
   const artistFilters = useMemo((): ArtistFilterTab[] => {
@@ -249,6 +277,14 @@ export default function CustomersPageView() {
     actions.closeCreateModal();
   }, [actions]);
 
+  const handleOpenFilterSettings = useCallback(() => {
+    setShowFilterSettingsModal(true);
+  }, []);
+
+  const handleCloseFilterSettings = useCallback(() => {
+    setShowFilterSettingsModal(false);
+  }, []);
+
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
     return (
@@ -290,6 +326,9 @@ export default function CustomersPageView() {
           onSortOrderChange={actions.setSortOrder}
           onAddCustomer={handleAddCustomer}
           canAddCustomer={canEditCustomer}
+          customFilters={customFilters}
+          customFilterCounts={customFilterCounts}
+          onOpenFilterSettings={handleOpenFilterSettings}
         />
 
         {/* Content */}
@@ -334,6 +373,15 @@ export default function CustomersPageView() {
         <CreateCustomerModal
           isOpen={showCreateModal}
           onClose={handleCloseCreateModal}
+        />
+      )}
+
+      {/* Filter Settings Modal */}
+      {showFilterSettingsModal && (
+        <FilterSettingsModal
+          isOpen={showFilterSettingsModal}
+          onClose={handleCloseFilterSettings}
+          salonId={salonId}
         />
       )}
     </Layout>

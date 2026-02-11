@@ -36,7 +36,7 @@
     "totalVisits": "จำนวนครั้งที่เข้ามา",
     "totalSpent": "ยอดใช้จ่ายทั้งหมด",
     "name": "ชื่อ",
-    "createdAt": "วันที่ลงทะเบียน"
+    "createdAt": "ลงทะเบียนล่าสุด"
   },
 
   "view": {
@@ -153,5 +153,43 @@
     "ticketSales": "ยอดขายตั๋ว",
     "cancellationFee": "ค่าธรรมเนียมการยกเลิก",
     "noHistory": "ไม่มีประวัติยอดขาย"
+  },
+
+  "group": {
+    "empty": "ไม่มีกลุ่มที่ลงทะเบียน"
+  },
+
+  "filterManagement": {
+    "title": "ตั้งค่าตัวกรอง",
+    "dragHint": "ลากเพื่อเปลี่ยนลำดับตัวกรอง",
+    "addFilter": "เพิ่มตัวกรองใหม่",
+    "editFilter": "แก้ไขตัวกรอง",
+    "deleteFilter": "ลบตัวกรอง",
+    "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบตัวกรองนี้?",
+    "systemFilterNotice": "ไม่สามารถลบตัวกรองระบบได้",
+    "filterName": "ชื่อตัวกรอง",
+    "filterKey": "คีย์ตัวกรอง",
+    "conditions": "เงื่อนไข",
+    "addCondition": "เพิ่มเงื่อนไข",
+    "removeCondition": "ลบเงื่อนไข",
+    "conditionLogic": "ตรรกะเงื่อนไข",
+    "and": "และ (AND)",
+    "or": "หรือ (OR)",
+    "fields": {
+      "totalVisits": "จำนวนครั้งที่เข้ามา",
+      "totalSpent": "ยอดใช้จ่ายทั้งหมด",
+      "daysSinceLastVisit": "จำนวนวันตั้งแต่เข้ามาล่าสุด",
+      "daysSinceRegistration": "วันที่ลงทะเบียน",
+      "noShowCount": "จำนวนครั้งที่ไม่มาตามนัด",
+      "hasPrimaryArtist": "มีพนักงานประจำ"
+    },
+    "operators": {
+      "eq": "เท่ากับ",
+      "ne": "ไม่เท่ากับ",
+      "gt": "มากกว่า",
+      "lt": "น้อยกว่า",
+      "gte": "มากกว่าหรือเท่ากับ",
+      "lte": "น้อยกว่าหรือเท่ากับ"
+    }
   }
 }

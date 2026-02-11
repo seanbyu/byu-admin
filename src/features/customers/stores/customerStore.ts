@@ -79,7 +79,7 @@ type CustomerUIStore = CustomerUIState & CustomerUIActions;
 const initialState: CustomerUIState = {
   activeFilter: 'all',
   searchQuery: '',
-  sortBy: 'last_visit',
+  sortBy: 'created_at',
   sortOrder: 'desc',
   currentPage: 1,
   pageSize: 10,

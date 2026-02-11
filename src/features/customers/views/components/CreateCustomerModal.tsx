@@ -1,10 +1,12 @@
 'use client';
 
 import { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { Spinner } from '@/components/ui/Spinner';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { useCustomers } from '../../hooks/useCustomers';
@@ -51,6 +53,14 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
   const { createCustomer, isCreating } = useCustomers({ salon_id: salonId });
   const { staffData, isLoading: isLoadingStaff } = useStaff(salonId);
 
+  // 다음 고객번호 자동 생성 (useQuery로 조회)
+  const { data: nextNumberData, isLoading: isLoadingNextNumber } = useQuery({
+    queryKey: ['nextCustomerNumber', salonId],
+    queryFn: () => customerApi.getNextCustomerNumber(salonId),
+    enabled: isOpen && !!salonId,
+    staleTime: 0, // 항상 새로운 번호 가져오기
+  });
+
   // 담당자 필터링 (ADMIN, ARTIST만)
   const eligibleStaff = useMemo(() => {
     return staffData.filter(
@@ -71,7 +81,6 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
     birth_month: '',
     birth_day: '',
     occupation: '',
-    group_ids: [] as string[],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -87,22 +96,16 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
     return Array.from({ length: 31 }, (_, i) => i + 1);
   }, [formData.birth_year, formData.birth_month]);
 
-  // 다음 고객번호 자동 생성 (API에서 조회)
+  // 다음 고객번호가 조회되면 formData에 설정
   useEffect(() => {
-    if (isOpen && salonId) {
-      customerApi.getNextCustomerNumber(salonId).then((res) => {
-        const nextNumber = res.data?.nextNumber;
-        if (res.success && nextNumber) {
-          setFormData((prev) => ({
-            ...prev,
-            customer_number: nextNumber,
-          }));
-        }
-      }).catch((err) => {
-        console.error('Failed to get next customer number:', err);
-      });
+    const nextNumber = nextNumberData?.data?.nextNumber;
+    if (nextNumber && !formData.customer_number) {
+      setFormData((prev) => ({
+        ...prev,
+        customer_number: nextNumber,
+      }));
     }
-  }, [isOpen, salonId]);
+  }, [nextNumberData, formData.customer_number]);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -116,7 +119,6 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
         birth_month: '',
         birth_day: '',
         occupation: '',
-        group_ids: [],
       });
       setErrors({});
     }
@@ -192,7 +194,6 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           customer_number: formData.customer_number || undefined,
           birth_date,
           occupation: formData.occupation || undefined,
-          group_ids: formData.group_ids.length > 0 ? formData.group_ids : undefined,
         };
 
         await createCustomer(dto);
@@ -204,8 +205,16 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
     [formData, salonId, validateForm, createCustomer, onClose]
   );
 
+  // 초기 데이터 로딩 상태
+  const isInitialLoading = isLoadingStaff || isLoadingNextNumber;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('customer.create.title')}>
+      {isInitialLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Spinner size="lg" />
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* 고객 이름 */}
         <div>
@@ -335,13 +344,6 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           />
         </div>
 
-        {/* TODO: 그룹 지정 - 그룹 API 구현 후 추가 */}
-        {/* <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">
-            {t('customer.field.group')}
-          </label>
-        </div> */}
-
         {/* Actions */}
         <div className="flex justify-end space-x-3 pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
@@ -352,6 +354,7 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           </Button>
         </div>
       </form>
+      )}
     </Modal>
   );
 });
