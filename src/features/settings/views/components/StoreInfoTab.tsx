@@ -269,10 +269,13 @@ export function StoreInfoTab({
   const actions = useSettingsUIStore(selectSettingsActions);
 
   // Server data
-  const { salonData, refetch } = useSalonData(salonId);
+  const { salonData, isLoading: isSalonDataLoading, refetch } = useSalonData(salonId);
 
   // Derived data
   const instagramUrl = salonData?.settings?.instagram_url || '';
+
+  // Combined loading state - 두 데이터 소스 모두 체크
+  const isDataLoading = isLoading || isSalonDataLoading;
 
   // Save handlers
   const handleSaveName = useCallback(async () => {
@@ -295,11 +298,20 @@ export function StoreInfoTab({
     actions.finishEditing();
   }, [tempValue, onSave, refetch, actions]);
 
-  // Loading state
-  if (isLoading) {
+  // Loading state - 두 데이터 소스 모두 로딩 완료될 때까지 대기
+  if (isDataLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-secondary-500">{t('common.loading')}</div>
+      </div>
+    );
+  }
+
+  // Error state - 데이터를 가져오지 못한 경우
+  if (!salonData) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-secondary-500">{t('common.error')}</div>
       </div>
     );
   }
