@@ -49,7 +49,9 @@
   "time": {
     "minutes": "นาที",
     "hours": "ชั่วโมง",
-    "ago": "ที่แล้ว"
+    "days": "วัน",
+    "ago": "ที่แล้ว",
+    "justNow": "เมื่อสักครู่"
   },
   "currency": {
     "won": "วอน",
@@ -57,9 +59,15 @@
   },
   "notifications": {
     "title": "การแจ้งเตือน",
-    "newBooking": "มีการจองใหม่",
-    "newReview": "มีรีวิวจากลูกค้า",
-    "cancelledBooking": "การจองถูกยกเลิก"
+    "newBooking": "มีคำขอจองใหม่",
+    "confirmedBooking": "การจองได้รับการยืนยันแล้ว",
+    "cancelledBooking": "การจองถูกยกเลิก",
+    "bookingReminder": "การแจ้งเตือนการจอง",
+    "completedBooking": "การจองเสร็จสมบูรณ์",
+    "noShowBooking": "บันทึกการไม่มาตามนัด",
+    "newReview": "มีรีวิวใหม่",
+    "noNotifications": "ไม่มีการแจ้งเตือนใหม่",
+    "viewAll": "ดูทั้งหมด"
   },
   "calendar": {
     "view": "ปฏิทิน",

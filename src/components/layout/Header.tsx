@@ -6,6 +6,14 @@ import { useUIStore } from '@/store/uiStore';
 import { useLogout } from '@/features/auth/hooks/useAuth';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/routing';
+import {
+  useNotifications,
+  useUnreadCount,
+  useMarkAsRead,
+  useMarkAllAsRead,
+  getRelativeTime,
+  getNotificationMessage,
+} from '@/features/notifications/hooks/useNotifications';
 
 export const Header: React.FC = () => {
   const { toggleSidebar } = useUIStore();
@@ -16,6 +24,12 @@ export const Header: React.FC = () => {
 
   const [showLangMenu, setShowLangMenu] = React.useState(false);
   const [showNotifications, setShowNotifications] = React.useState(false);
+
+  // 알림 데이터 조회
+  const { data: notifications = [], isLoading: notificationsLoading } = useNotifications(10);
+  const { data: unreadCount = 0 } = useUnreadCount();
+  const { mutate: markAsRead } = useMarkAsRead();
+  const { mutate: markAllAsRead } = useMarkAllAsRead();
 
   const languages = [
     { code: 'ko', name: '한국어' },
@@ -28,6 +42,15 @@ export const Header: React.FC = () => {
       router.push('/login');
     },
   });
+
+  // 알림 클릭 핸들러
+  const handleNotificationClick = (notificationId: string, bookingId: string | null) => {
+    markAsRead(notificationId);
+    if (bookingId) {
+      router.push(`/bookings/calendar`);
+    }
+    setShowNotifications(false);
+  };
 
   return (
     <header className="bg-white border-b border-secondary-200 h-16 flex items-center justify-between px-6">
@@ -81,36 +104,70 @@ export const Header: React.FC = () => {
             className="relative text-secondary-700 hover:text-secondary-900 transition-colors"
           >
             <Bell size={20} />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-error-500 rounded-full text-xs text-white flex items-center justify-center">
-              3
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-error-500 rounded-full text-xs text-white flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </button>
 
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-secondary-200 z-50">
-              <div className="px-4 py-3 border-b border-secondary-200">
+              <div className="px-4 py-3 border-b border-secondary-200 flex justify-between items-center">
                 <h3 className="font-semibold text-secondary-900">{t('common.notifications.title')}</h3>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={() => markAllAsRead()}
+                    className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                  >
+                    모두 읽음
+                  </button>
+                )}
               </div>
               <div className="max-h-96 overflow-y-auto">
-                <div className="px-4 py-3 hover:bg-secondary-50 cursor-pointer border-b border-secondary-100">
-                  <p className="text-sm text-secondary-900 font-medium">
-                    {t('common.notifications.newBooking')}
-                  </p>
-                  <p className="text-xs text-secondary-500 mt-1">5 {t('common.time.minutes')} {t('common.time.ago')}</p>
-                </div>
-                <div className="px-4 py-3 hover:bg-secondary-50 cursor-pointer border-b border-secondary-100">
-                  <p className="text-sm text-secondary-900 font-medium">
-                    {t('common.notifications.newReview')}
-                  </p>
-                  <p className="text-xs text-secondary-500 mt-1">1 {t('common.time.hours')} {t('common.time.ago')}</p>
-                </div>
-                <div className="px-4 py-3 hover:bg-secondary-50 cursor-pointer">
-                  <p className="text-sm text-secondary-900 font-medium">
-                    {t('common.notifications.cancelledBooking')}
-                  </p>
-                  <p className="text-xs text-secondary-500 mt-1">2 {t('common.time.hours')} {t('common.time.ago')}</p>
-                </div>
+                {notificationsLoading ? (
+                  <div className="px-4 py-8 text-center text-secondary-500">
+                    <p className="text-sm">{t('common.loading')}</p>
+                  </div>
+                ) : notifications.length === 0 ? (
+                  <div className="px-4 py-8 text-center text-secondary-500">
+                    <p className="text-sm">{t('common.notifications.noNotifications')}</p>
+                  </div>
+                ) : (
+                  notifications.map((notification, index) => (
+                    <div
+                      key={notification.id}
+                      onClick={() => handleNotificationClick(notification.id, notification.booking_id)}
+                      className={`px-4 py-3 hover:bg-secondary-50 cursor-pointer ${
+                        index !== notifications.length - 1 ? 'border-b border-secondary-100' : ''
+                      } ${!notification.read_at ? 'bg-primary-50' : ''}`}
+                    >
+                      <p className={`text-sm ${!notification.read_at ? 'font-semibold text-secondary-900' : 'text-secondary-700'}`}>
+                        {getNotificationMessage(notification, t)}
+                      </p>
+                      {notification.body && notification.title && (
+                        <p className="text-xs text-secondary-600 mt-1">{notification.body}</p>
+                      )}
+                      <p className="text-xs text-secondary-500 mt-1">
+                        {getRelativeTime(notification.created_at, t)}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
+              {notifications.length > 0 && (
+                <div className="px-4 py-3 border-t border-secondary-200 text-center">
+                  <button
+                    onClick={() => {
+                      router.push('/bookings/calendar');
+                      setShowNotifications(false);
+                    }}
+                    className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                  >
+                    {t('common.notifications.viewAll')}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

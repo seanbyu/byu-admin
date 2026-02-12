@@ -49,7 +49,9 @@
   "time": {
     "minutes": "min",
     "hours": "hours",
-    "ago": "ago"
+    "days": "days",
+    "ago": "ago",
+    "justNow": "just now"
   },
   "currency": {
     "won": "KRW",
@@ -57,9 +59,15 @@
   },
   "notifications": {
     "title": "Notifications",
-    "newBooking": "New booking received",
-    "newReview": "New customer review",
-    "cancelledBooking": "Booking cancelled"
+    "newBooking": "New booking request",
+    "confirmedBooking": "Booking confirmed",
+    "cancelledBooking": "Booking cancelled",
+    "bookingReminder": "Booking reminder",
+    "completedBooking": "Booking completed",
+    "noShowBooking": "No-show recorded",
+    "newReview": "New review posted",
+    "noNotifications": "No new notifications",
+    "viewAll": "View all"
   },
   "calendar": {
     "view": "Calendar",
