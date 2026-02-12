@@ -72,6 +72,15 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
     onSuccess: invalidateBookings,
   });
 
+  // Confirm booking
+  const confirmMutation = useMutation({
+    mutationFn: useCallback(
+      (id: string) => bookingsApi.confirmBooking(salonId, id),
+      [salonId]
+    ),
+    onSuccess: invalidateBookings,
+  });
+
   // Memoized data
   const bookings = useMemo(
     () => bookingsQuery.data || [],
@@ -101,6 +110,11 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
     [completeMutation]
   );
 
+  const confirmBooking = useCallback(
+    (id: string) => confirmMutation.mutateAsync(id),
+    [confirmMutation]
+  );
+
   const refetch = useCallback(() => bookingsQuery.refetch(), [bookingsQuery]);
 
   return useMemo(
@@ -115,10 +129,12 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
       updateBooking,
       cancelBooking,
       completeBooking,
+      confirmBooking,
       isCreating: createMutation.isPending,
       isUpdating: updateMutation.isPending,
       isCancelling: cancelMutation.isPending,
       isCompleting: completeMutation.isPending,
+      isConfirming: confirmMutation.isPending,
     }),
     [
       bookingsQuery.data,
@@ -131,10 +147,12 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
       updateBooking,
       cancelBooking,
       completeBooking,
+      confirmBooking,
       createMutation.isPending,
       updateMutation.isPending,
       cancelMutation.isPending,
       completeMutation.isPending,
+      confirmMutation.isPending,
     ]
   );
 };

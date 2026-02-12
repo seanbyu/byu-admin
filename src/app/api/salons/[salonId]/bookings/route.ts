@@ -49,6 +49,9 @@ export async function POST(
         case 'complete_booking':
           result = await service.completeBooking(data.id);
           break;
+        case 'confirm_booking':
+          result = await service.confirmBooking(data.id);
+          break;
         case 'update_booking': // If explicit update needed
           result = await service.updateBooking(data.id, data.updates);
           break;

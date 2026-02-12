@@ -121,4 +121,8 @@ export class BookingService {
   async completeBooking(id: string): Promise<DBBooking> {
     return this.repository.completeBooking(id);
   }
+
+  async confirmBooking(id: string): Promise<DBBooking> {
+    return this.repository.confirmBooking(id);
+  }
 }

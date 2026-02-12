@@ -2,6 +2,7 @@
   "title": "Booking Management",
   "new": "New Booking",
   "detail": "Booking Details",
+  "confirmBooking": "Confirm Booking",
   "status": "Status",
   "pending": "Pending",
   "confirmed": "Confirmed",

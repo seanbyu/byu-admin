@@ -86,7 +86,9 @@ export function useStaffPositions(
         return {
           ...old,
           data: old.data.map((pos: StaffPosition) =>
-            pos.id === positionId ? { ...pos, ...dto, updatedAt: new Date() } : pos
+            pos.id === positionId
+              ? { ...pos, ...dto, updatedAt: new Date() }
+              : pos
           ),
         };
       });

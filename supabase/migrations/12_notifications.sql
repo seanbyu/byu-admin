@@ -207,6 +207,12 @@ CREATE INDEX IF NOT EXISTS idx_bookings_confirmed ON bookings(confirmed_at) WHER
 -- ============================================
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
+-- 모든 사용자가 알림 조회 가능 (INSERT 후 SELECT 지원)
+CREATE POLICY "enable_select_for_all"
+  ON notifications FOR SELECT
+  TO public
+  USING (true);
+
 -- 살롱 스태프는 자기 살롱의 알림 조회 가능
 CREATE POLICY "Salon staff can view their notifications"
   ON notifications FOR SELECT
@@ -221,6 +227,12 @@ CREATE POLICY "Customers can view their own notifications"
     )
   );
 
+-- 인증된 사용자는 알림 생성 가능 (예약 시스템에서 자동 생성)
+CREATE POLICY "Allow authenticated users to insert notifications"
+  ON notifications FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
 -- 살롱 스태프는 알림 생성 가능
 CREATE POLICY "Salon staff can create notifications"
   ON notifications FOR INSERT
@@ -228,6 +240,13 @@ CREATE POLICY "Salon staff can create notifications"
     salon_id = get_my_salon_id() AND
     get_my_role() IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'STAFF')
   );
+
+-- 인증된 사용자는 알림 상태 업데이트 가능 (읽음 처리 등)
+CREATE POLICY "Allow authenticated users to update notifications"
+  ON notifications FOR UPDATE
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
 -- 시스템은 알림 상태 업데이트 가능 (service role 사용)
 -- 애플리케이션에서 service role로 처리

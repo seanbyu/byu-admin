@@ -2,6 +2,7 @@
   "title": "예약 관리",
   "new": "새 예약",
   "detail": "예약 상세정보",
+  "confirmBooking": "예약 확정",
   "status": "상태",
   "pending": "대기",
   "confirmed": "확인됨",

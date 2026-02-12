@@ -63,6 +63,10 @@ export class BookingRepository extends BaseRepository {
     return this.updateBooking(id, { status: "COMPLETED" });
   }
 
+  async confirmBooking(id: string): Promise<DBBooking> {
+    return this.updateBooking(id, { status: "CONFIRMED" });
+  }
+
   private transformBooking(booking: DBBookingWithRelations): BookingResponse {
     return {
       id: booking.id,

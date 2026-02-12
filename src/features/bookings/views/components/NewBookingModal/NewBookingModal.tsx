@@ -11,6 +11,7 @@ import { useAuthStore } from '@/store/authStore';
 import { ServiceSelector } from '../ServiceSelector';
 import { useCustomers } from '@/features/customers/hooks/useCustomers';
 import { useMenus } from '@/features/salon-menus/hooks/useSalonMenus';
+import { useBookings } from '../../../hooks/useBookings';
 import { NewBookingModalProps } from './types';
 import { useBookingForm, useCustomerSearch, useBookingSave } from './hooks';
 import { CustomerSection, NewCustomerConfirmModal } from './components';
@@ -33,10 +34,12 @@ function NewBookingModalComponent({
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
   const isEditMode = !!editBooking;
+  const isPendingBooking = isEditMode && editBooking?.status === 'PENDING';
 
   // Data hooks
   const { customers } = useCustomers({ salon_id: salonId });
   const { menus } = useMenus(salonId, undefined, { enabled: !!salonId });
+  const { confirmBooking, isConfirming } = useBookings(salonId);
 
   // Form hook
   const form = useBookingForm({
@@ -89,6 +92,17 @@ function NewBookingModalComponent({
     onClose();
   }, [form, customerSearch, onClose]);
 
+  // 예약 확정 핸들러
+  const handleConfirm = useCallback(async () => {
+    if (!editBooking?.id) return;
+    try {
+      await confirmBooking(editBooking.id);
+      handleClose();
+    } catch (error) {
+      console.error('Failed to confirm booking:', error);
+    }
+  }, [editBooking, confirmBooking, handleClose]);
+
   // Booking save hook
   const bookingSave = useBookingSave({
     salonId,
@@ -109,7 +123,7 @@ function NewBookingModalComponent({
     selectedCustomer: customerSearch.selectedCustomer,
   });
 
-  const isLoading = bookingSave.isCreating || bookingSave.isUpdating || bookingSave.isCreatingCustomer;
+  const isLoading = bookingSave.isCreating || bookingSave.isUpdating || bookingSave.isCreatingCustomer || isConfirming;
 
   return (
     <>
@@ -204,6 +218,16 @@ function NewBookingModalComponent({
             >
               {t('common.cancel')}
             </Button>
+            {isPendingBooking && (
+              <Button
+                variant="primary"
+                type="button"
+                onClick={handleConfirm}
+                disabled={isLoading}
+              >
+                {isConfirming ? t('common.saving') : t('booking.confirmBooking')}
+              </Button>
+            )}
             <Button variant="primary" type="submit" disabled={isLoading}>
               {isLoading ? t('common.saving') : t('common.save')}
             </Button>
