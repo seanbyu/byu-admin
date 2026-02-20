@@ -1,4 +1,6 @@
 import { ApiResponse } from '@/types';
+import { supabase } from '@/lib/supabase/client';
+import { useAuthStore } from '@/store/authStore';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
@@ -47,55 +49,126 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
+  private async getAccessToken(): Promise<string | null> {
+    if (typeof window === 'undefined') return null;
+
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error('Error getting session:', error.message);
+      return null;
+    }
+
+    return session?.access_token ?? null;
+  }
+
+  private async buildHeaders(
+    rawHeaders: HeadersInit | undefined,
+    addJsonContentType: boolean
+  ): Promise<Headers> {
+    const headers = new Headers(rawHeaders);
+    const token = await this.getAccessToken();
+
+    if (addJsonContentType && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return headers;
+  }
+
+  private async parseResponse(response: Response): Promise<any> {
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    const text = await response.text();
+    return text ? { message: text } : {};
+  }
+
+  private shouldRetryWithRefresh(status: number, data: any): boolean {
+    if (status !== 401) return false;
+
+    const message = String(data?.error || data?.message || '').toLowerCase();
+    const code = String(data?.errorCode || '').toLowerCase();
+
+    return (
+      message.includes('jwt expired') ||
+      code === 'jwt_expired' ||
+      code === 'token_expired'
+    );
+  }
+
+  private async tryRefreshSession(): Promise<boolean> {
+    if (typeof window === 'undefined') return false;
+
+    const { data, error } = await supabase.auth.refreshSession();
+
+    if (error || !data.session?.access_token) {
+      useAuthStore.getState().logout();
+      return false;
+    }
+
+    useAuthStore.getState().setToken(data.session.access_token);
+    return true;
+  }
+
+  private async performRequest<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    hasRetried = false,
+    addJsonContentType = true
+  ): Promise<ApiResponse<T>> {
+    const headers = await this.buildHeaders(options.headers, addJsonContentType);
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers,
+    });
+
+    const data = await this.parseResponse(response);
+
+    if (!response.ok) {
+      if (!hasRetried && this.shouldRetryWithRefresh(response.status, data)) {
+        const refreshed = await this.tryRefreshSession();
+        if (refreshed) {
+          return this.performRequest<T>(
+            endpoint,
+            options,
+            true,
+            addJsonContentType
+          );
+        }
+      }
+
+      throw new ApiError(
+        data?.error || data?.message || 'An error occurred',
+        data?.errorCode,
+        response.status
+      );
+    }
+
+    return data as ApiResponse<T>;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const token = this.getToken();
-
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    };
-
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        ...options,
-        headers,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new ApiError(
-          data.error || data.message || 'An error occurred',
-          data.errorCode,
-          response.status
-        );
-      }
-
-      return data;
+      return this.performRequest<T>(endpoint, options);
     } catch (error) {
       console.error('API request error:', error);
       throw error;
     }
-  }
-
-  private getToken(): string | null {
-    if (typeof window === 'undefined') return null;
-
-    try {
-      const authStorage = localStorage.getItem('auth-storage');
-      if (authStorage) {
-        const { state } = JSON.parse(authStorage);
-        return state?.token || null;
-      }
-    } catch (error) {
-      console.error('Error getting token:', error);
-    }
-
-    return null;
   }
 
   // GET request
@@ -167,26 +240,16 @@ class ApiClient {
     endpoint: string,
     formData: FormData
   ): Promise<ApiResponse<T>> {
-    const token = this.getToken();
-
-    const headers: HeadersInit = {
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
-
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        method: 'POST',
-        headers,
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Upload failed');
-      }
-
-      return data;
+      return this.performRequest<T>(
+        endpoint,
+        {
+          method: 'POST',
+          body: formData,
+        },
+        false,
+        false
+      );
     } catch (error) {
       console.error('Upload error:', error);
       throw error;

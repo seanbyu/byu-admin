@@ -38,6 +38,7 @@ interface AuthState {
   isAuthenticated: boolean;
   rememberMe: boolean;
   login: (user: User, token: string, rememberMe?: boolean) => void;
+  setToken: (token: string | null) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
   setRememberMe: (value: boolean) => void;
@@ -55,16 +56,27 @@ export const useAuthStore = create<AuthState>()(
       rememberMe: true, // 기본값: 로그인 상태 유지
       staffCache: null,
 
-      login: (user, token, rememberMe = true) => {
-        // rememberMe 설정 저장 (스토리지 선택에 사용)
-        localStorage.setItem(REMEMBER_ME_KEY, String(rememberMe));
+      login: (user, token, rememberMe) => {
+        set((state) => {
+          const resolvedRememberMe = rememberMe ?? state.rememberMe;
 
-        set({
-          user,
-          token,
-          isAuthenticated: true,
-          rememberMe,
+          // rememberMe 설정 저장 (스토리지 선택에 사용)
+          localStorage.setItem(REMEMBER_ME_KEY, String(resolvedRememberMe));
+
+          return {
+            user,
+            token,
+            isAuthenticated: true,
+            rememberMe: resolvedRememberMe,
+          };
         });
+      },
+
+      setToken: (token) => {
+        set((state) => ({
+          token,
+          isAuthenticated: Boolean(token && state.user),
+        }));
       },
 
       logout: () => {

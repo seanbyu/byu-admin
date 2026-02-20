@@ -6,7 +6,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { supabase } from '@/lib/supabase/client';
 
 export function AuthInitializer() {
-  const { login, logout } = useAuthStore();
+  const { login, setToken, logout } = useAuthStore();
 
   useEffect(() => {
     let mounted = true;
@@ -49,6 +49,11 @@ export function AuthInitializer() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'TOKEN_REFRESHED' && session?.access_token) {
+        setToken(session.access_token);
+        return;
+      }
+
       if (event === 'SIGNED_IN' && session) {
         const user = await getCurrentUser();
         if (user) login(user, session.access_token);
@@ -61,7 +66,7 @@ export function AuthInitializer() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [login, logout]);
+  }, [login, setToken, logout]);
 
   return null; // This component doesn't render anything
 }
