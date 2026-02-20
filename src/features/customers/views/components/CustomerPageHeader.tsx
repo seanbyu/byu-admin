@@ -16,7 +16,16 @@ import { FILTER_FIELD_META, OPERATOR_LABELS } from '../../types/filter.types';
 // Helper: 다국어 라벨 가져오기
 // ============================================
 
-function getLocalizedLabel(filter: CustomFilter, locale: string): string {
+function getLocalizedLabel(
+  filter: CustomFilter,
+  locale: string,
+  t: ReturnType<typeof useTranslations>
+): string {
+  // 시스템 필터는 i18n 번역 키 사용 (전체/신규/재방문/단골/휴면 등)
+  if (filter.is_system_filter) {
+    return t(`customer.filter.${filter.filter_key}`);
+  }
+  // 커스텀 필터는 locale별 라벨 사용
   switch (locale) {
     case 'en':
       return filter.label_en || filter.label;
@@ -444,7 +453,7 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
   const customFilterTabs: FilterTab[] = useCustomFilters
     ? customFilters.map((filter) => ({
         type: filter.filter_key as CustomerFilterType,
-        label: getLocalizedLabel(filter, locale),
+        label: getLocalizedLabel(filter, locale, t),
         count: customFilterCounts[filter.filter_key] ?? 0,
       }))
     : [];

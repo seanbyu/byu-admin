@@ -16,6 +16,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Plus, Menu } from 'lucide-react';
+import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { MenuCategory, SalonIndustry } from '../../types';
 
 interface MenusSidebarProps {
@@ -98,7 +100,18 @@ export default function MenusSidebar({
   onSelectCategory,
   onReorderCategories,
 }: MenusSidebarProps) {
+  const t = useTranslations('menu');
   const totalMenus = Object.values(menuCounts).reduce((a, b) => a + b, 0);
+  const addCategoryIndustryId =
+    selectedIndustryId === 'all' ? orderedIndustries[0]?.id : selectedIndustryId;
+
+  const filteredCategories = useMemo(() => {
+    const byIndustry =
+      selectedIndustryId === 'all'
+        ? categories
+        : categories.filter((category) => category.industry_id === selectedIndustryId);
+    return [...byIndustry].sort((a, b) => a.display_order - b.display_order);
+  }, [categories, selectedIndustryId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -130,9 +143,50 @@ export default function MenusSidebar({
   };
 
   return (
-    <div className="w-full h-full bg-white p-4">
-      <div className="space-y-6">
-        {/* All Menus Summary Card */}
+    <div className="w-full h-full bg-white p-2.5 sm:p-4">
+      <div className="xl:hidden space-y-2">
+        <button
+          type="button"
+          onClick={() => onSelectCategory(null)}
+          className={`w-full rounded-lg border px-2.5 py-1.5 text-left transition-colors ${
+            selectedCategoryId === null
+              ? 'bg-blue-500 border-blue-500 text-white'
+              : 'bg-white border-gray-200 text-gray-800'
+          }`}
+        >
+          <span className="text-xs sm:text-sm font-semibold">
+            {t('allMenus')} ({totalMenus})
+          </span>
+        </button>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          {filteredCategories.map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => onSelectCategory(category.id)}
+              className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] sm:text-xs font-medium transition-colors ${
+                selectedCategoryId === category.id
+                  ? 'bg-blue-50 text-blue-600 border-blue-200'
+                  : 'bg-white text-gray-600 border-gray-200'
+              }`}
+            >
+              {category.name} ({menuCounts[category.id] || 0})
+            </button>
+          ))}
+          {onAddCategory && (
+            <button
+              type="button"
+              onClick={() => onAddCategory(addCategoryIndustryId)}
+              className="shrink-0 rounded-full border border-dashed border-gray-300 px-2.5 py-1 text-[11px] sm:text-xs font-medium text-gray-500 hover:text-gray-700"
+            >
+              + {t('addGroup')}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="hidden xl:block space-y-6">
         <div
           onClick={() => onSelectCategory(null)}
           className={`p-4 rounded-lg cursor-pointer transition-colors ${
@@ -142,7 +196,7 @@ export default function MenusSidebar({
           }`}
         >
           <div className="font-bold text-lg mb-1">
-            전체 메뉴{' '}
+            {t('allMenus')}{' '}
             <span className={selectedCategoryId === null ? 'text-white' : ''}>
               {totalMenus}
             </span>
@@ -187,7 +241,7 @@ export default function MenusSidebar({
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <Plus className="w-3 h-3" />
-                  그룹 추가
+                  {t('addGroup')}
                 </button>
               )}
             </div>

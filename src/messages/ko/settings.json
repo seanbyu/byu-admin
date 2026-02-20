@@ -8,6 +8,7 @@
   "thai": "ภาษาไทย",
   "tabs": {
     "store": "매장 정보",
+    "line": "LINE 연동",
     "plan": "요금제",
     "account": "가입 정보"
   },
@@ -72,5 +73,36 @@
     "sameAsCurrent": "현재 비밀번호와 다른 비밀번호를 입력해주세요",
     "passwordMismatch": "비밀번호가 일치하지 않습니다",
     "passwordTooShort": "비밀번호는 8자 이상이어야 합니다"
+  },
+  "line": {
+    "title": "LINE 공식계정 연동",
+    "description": "살롱의 LINE 공식계정을 연동하여 고객에게 자동 알림을 발송합니다",
+    "statusNotConnected": "미연동",
+    "statusUnverified": "검증 필요",
+    "statusInactive": "비활성",
+    "statusConnected": "연동됨",
+    "notConnectedDescription": "LINE 공식계정을 연동하면 예약 알림, 재예약 리마인더 등을 자동으로 발송할 수 있습니다.",
+    "connectButton": "LINE 연동하기",
+    "editSettings": "설정 변경",
+    "verifyConnection": "연동 검증",
+    "activate": "활성화",
+    "deactivate": "비활성화",
+    "activated": "LINE 연동이 활성화되었습니다",
+    "deactivated": "LINE 연동이 비활성화되었습니다",
+    "disconnect": "연동 해제",
+    "disconnected": "LINE 연동이 해제되었습니다",
+    "deleteConfirm": "LINE 연동을 해제하면 모든 자동 알림 발송이 중지됩니다. 정말 해제하시겠습니까?",
+    "confirmDelete": "연동 해제",
+    "channelSettings": "LINE 채널 설정",
+    "requiredFieldsError": "Channel ID, Channel Secret, Access Token은 필수입니다",
+    "verifySuccess": "LINE 연동이 검증되었습니다",
+    "verifyFailed": "LINE 연동 검증에 실패했습니다",
+    "lastVerified": "마지막 검증: {date}",
+    "liffIdHint": "LIFF 앱을 사용하는 경우 입력하세요 (예약 웹앱용)",
+    "helpTitle": "LINE 연동 방법",
+    "helpStep1": "LINE Developers Console에서 Messaging API 채널을 생성합니다",
+    "helpStep2": "채널 기본 설정에서 Channel ID와 Channel Secret을 복사합니다",
+    "helpStep3": "Messaging API 설정에서 Channel Access Token을 발급받아 복사합니다",
+    "helpStep4": "위 정보를 입력하고 저장한 후 '연동 검증' 버튼으로 확인합니다"
   }
 }

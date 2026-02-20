@@ -152,9 +152,9 @@ export default function MenuList({
   );
 
   return (
-    <div className="flex w-full gap-6 items-start">
+    <div className="flex flex-col xl:flex-row w-full gap-2 sm:gap-3 md:gap-4 xl:gap-6 items-stretch xl:items-start p-2.5 sm:p-4 md:p-5 xl:p-6">
       {/* Left Sidebar - Treated as separate card */}
-      <div className="w-64 flex-shrink-0 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div className="w-full xl:w-64 xl:flex-shrink-0 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <MenusSidebar
           categories={categories}
           orderedIndustries={orderedIndustries}
@@ -172,7 +172,7 @@ export default function MenuList({
       </div>
 
       {/* Main Content - Treated as separate card */}
-      <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm p-6 min-h-[600px]">
+      <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm p-3 sm:p-4 md:p-5 xl:p-6 min-h-[420px] md:min-h-[480px] xl:min-h-[600px]">
         {isCreating && (
           <CreateCategoryForm
             categories={categories}
@@ -206,7 +206,7 @@ export default function MenuList({
             )}
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-5 md:space-y-6 xl:space-y-8">
             {orderedIndustries.map((industry) => {
               // Filter by tab
               if (selectedTab !== 'all' && selectedTab !== industry.id)
@@ -226,8 +226,8 @@ export default function MenuList({
               if (industryCategories.length === 0) return null;
 
               return (
-                <div key={industry.id} className="space-y-4 pt-4">
-                  <div className="text-section-header px-1 mb-2">
+                <div key={industry.id} className="space-y-3 md:space-y-4 pt-2 md:pt-3 xl:pt-4">
+                  <div className="text-section-header px-1 mb-1.5 sm:mb-2 text-xs sm:text-sm">
                     {industry.name}
                   </div>
                   {industryCategories.map((category) => (
@@ -279,8 +279,8 @@ export default function MenuList({
 
               if (otherCategories.length > 0) {
                 return (
-                  <div className="space-y-4">
-                    <div className="text-sm font-semibold text-gray-500">
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="text-xs sm:text-sm font-semibold text-gray-500">
                       {t('other')}
                     </div>
                     {otherCategories.map((category) => (

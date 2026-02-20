@@ -12,6 +12,7 @@ import { SettingsTab } from '../../types';
 
 const ALL_TABS: { key: SettingsTab; labelKey: string; ownerOnly?: boolean }[] = [
   { key: 'store', labelKey: 'settings.tabs.store', ownerOnly: true },
+  { key: 'line', labelKey: 'settings.tabs.line', ownerOnly: true },
   { key: 'plan', labelKey: 'settings.tabs.plan', ownerOnly: true },
   { key: 'account', labelKey: 'settings.tabs.account' },
 ];

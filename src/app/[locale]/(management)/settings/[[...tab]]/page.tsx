@@ -1,7 +1,7 @@
 import SettingsPageView from '@/features/settings/views/SettingsPageView';
 import { SettingsTab } from '@/features/settings/types';
 
-const VALID_TABS: SettingsTab[] = ['store', 'plan', 'account'];
+const VALID_TABS: SettingsTab[] = ['store', 'line', 'plan', 'account'];
 
 interface SettingsPageProps {
   params: Promise<{

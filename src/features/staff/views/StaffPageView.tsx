@@ -96,7 +96,7 @@ export default function StaffPageView() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-5 xl:space-y-6">
         {/* Header */}
         <StaffPageHeader
           isAdmin={isAdmin}

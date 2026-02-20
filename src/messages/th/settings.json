@@ -8,6 +8,7 @@
   "thai": "ภาษาไทย",
   "tabs": {
     "store": "ข้อมูลร้าน",
+    "line": "LINE",
     "plan": "แพ็คเกจ",
     "account": "ข้อมูลบัญชี"
   },
@@ -64,5 +65,36 @@
     "updatePassword": "อัพเดทรหัสผ่าน",
     "passwordMismatch": "รหัสผ่านไม่ตรงกัน",
     "passwordTooShort": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"
+  },
+  "line": {
+    "title": "บัญชี LINE Official",
+    "description": "เชื่อมต่อบัญชี LINE Official ของร้านเพื่อส่งการแจ้งเตือนอัตโนมัติให้ลูกค้า",
+    "statusNotConnected": "ยังไม่เชื่อมต่อ",
+    "statusUnverified": "ต้องยืนยัน",
+    "statusInactive": "ไม่ใช้งาน",
+    "statusConnected": "เชื่อมต่อแล้ว",
+    "notConnectedDescription": "เชื่อมต่อบัญชี LINE Official เพื่อส่งแจ้งเตือนการจอง รีมายด์การจองใหม่ และอื่นๆ โดยอัตโนมัติ",
+    "connectButton": "เชื่อมต่อ LINE",
+    "editSettings": "แก้ไขการตั้งค่า",
+    "verifyConnection": "ตรวจสอบการเชื่อมต่อ",
+    "activate": "เปิดใช้งาน",
+    "deactivate": "ปิดใช้งาน",
+    "activated": "เปิดใช้งานการเชื่อมต่อ LINE แล้ว",
+    "deactivated": "ปิดใช้งานการเชื่อมต่อ LINE แล้ว",
+    "disconnect": "ยกเลิกการเชื่อมต่อ",
+    "disconnected": "ยกเลิกการเชื่อมต่อ LINE แล้ว",
+    "deleteConfirm": "การยกเลิกการเชื่อมต่อ LINE จะหยุดการส่งแจ้งเตือนอัตโนมัติทั้งหมด คุณแน่ใจหรือไม่?",
+    "confirmDelete": "ยกเลิกการเชื่อมต่อ",
+    "channelSettings": "ตั้งค่าช่อง LINE",
+    "requiredFieldsError": "ต้องกรอก Channel ID, Channel Secret และ Access Token",
+    "verifySuccess": "ตรวจสอบการเชื่อมต่อ LINE สำเร็จ",
+    "verifyFailed": "ตรวจสอบการเชื่อมต่อ LINE ล้มเหลว",
+    "lastVerified": "ตรวจสอบล่าสุด: {date}",
+    "liffIdHint": "กรอกหากใช้แอป LIFF (สำหรับเว็บแอปจอง)",
+    "helpTitle": "วิธีเชื่อมต่อ LINE",
+    "helpStep1": "สร้างช่อง Messaging API ใน LINE Developers Console",
+    "helpStep2": "คัดลอก Channel ID และ Channel Secret จากการตั้งค่าพื้นฐานของช่อง",
+    "helpStep3": "ออกและคัดลอก Channel Access Token จากการตั้งค่า Messaging API",
+    "helpStep4": "กรอกข้อมูลข้างต้น บันทึก แล้วคลิก 'ตรวจสอบการเชื่อมต่อ' เพื่อยืนยัน"
   }
 }

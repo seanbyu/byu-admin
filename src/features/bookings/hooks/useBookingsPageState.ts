@@ -74,7 +74,7 @@ interface UseBookingsPageStateReturn {
   // View states (from Zustand)
   selectedDate: Date;
   statusFilter: string;
-  viewMode: 'calendar' | 'table';
+  viewMode: 'calendar' | 'table' | 'sheet';
   selectedTime: string;
   selectedStaffId: string;
   selectedServiceId: string;
@@ -89,7 +89,7 @@ interface UseBookingsPageStateReturn {
   closeStaffScheduleModal: () => void;
   setSelectedDate: (date: Date) => void;
   setStatusFilter: (status: string) => void;
-  setViewMode: (mode: 'calendar' | 'table') => void;
+  setViewMode: (mode: 'calendar' | 'table' | 'sheet') => void;
   setSelectedTime: (time: string) => void;
   setSelectedStaffId: (staffId: string) => void;
   setSelectedServiceId: (serviceId: string) => void;

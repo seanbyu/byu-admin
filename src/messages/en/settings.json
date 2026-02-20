@@ -8,6 +8,7 @@
   "thai": "ภาษาไทย",
   "tabs": {
     "store": "Store Info",
+    "line": "LINE",
     "plan": "Plan",
     "account": "Account"
   },
@@ -71,5 +72,36 @@
     "sameAsCurrent": "New password must be different from current password",
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 8 characters"
+  },
+  "line": {
+    "title": "LINE Official Account",
+    "description": "Connect your LINE Official Account to send automated notifications to customers",
+    "statusNotConnected": "Not Connected",
+    "statusUnverified": "Unverified",
+    "statusInactive": "Inactive",
+    "statusConnected": "Connected",
+    "notConnectedDescription": "Connect your LINE Official Account to automatically send booking reminders, rebooking alerts, and more.",
+    "connectButton": "Connect LINE",
+    "editSettings": "Edit Settings",
+    "verifyConnection": "Verify Connection",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "activated": "LINE integration activated",
+    "deactivated": "LINE integration deactivated",
+    "disconnect": "Disconnect",
+    "disconnected": "LINE integration disconnected",
+    "deleteConfirm": "Disconnecting LINE will stop all automated notifications. Are you sure?",
+    "confirmDelete": "Disconnect",
+    "channelSettings": "LINE Channel Settings",
+    "requiredFieldsError": "Channel ID, Channel Secret, and Access Token are required",
+    "verifySuccess": "LINE connection verified successfully",
+    "verifyFailed": "LINE connection verification failed",
+    "lastVerified": "Last verified: {date}",
+    "liffIdHint": "Enter if using a LIFF app (for booking web app)",
+    "helpTitle": "How to connect LINE",
+    "helpStep1": "Create a Messaging API channel in the LINE Developers Console",
+    "helpStep2": "Copy the Channel ID and Channel Secret from the channel basic settings",
+    "helpStep3": "Issue and copy the Channel Access Token from the Messaging API settings",
+    "helpStep4": "Enter the information above, save, and click 'Verify Connection' to confirm"
   }
 }

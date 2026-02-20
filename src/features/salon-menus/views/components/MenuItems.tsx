@@ -145,7 +145,7 @@ export default function MenuItems({
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5 md:space-y-1">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -174,16 +174,16 @@ export default function MenuItems({
       {/* Add New Menu Form */}
       {canEdit && (
         isAdding ? (
-          <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-100 mt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 md:gap-2 p-3 sm:p-4 md:p-4 bg-blue-50 rounded-lg border border-blue-100 mt-1.5 md:mt-2">
             <input
-              className="flex-1 px-3 py-2 text-sm border rounded-md"
+              className="w-full sm:flex-1 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs md:text-sm border rounded-md"
               placeholder={t('menuNamePlaceholder')}
               value={newMenu.name}
               onChange={(e) => setNewMenu({ ...newMenu, name: e.target.value })}
               autoFocus
             />
             <select
-              className="w-24 px-2 py-2 text-sm border rounded-md"
+              className="w-full sm:w-24 px-2 py-1.5 sm:py-2 text-xs md:text-sm border rounded-md"
               value={newMenu.duration}
               onChange={(e) =>
                 setNewMenu({
@@ -198,11 +198,11 @@ export default function MenuItems({
               <option value={90}>{t('durations.90min')}</option>
               <option value={120}>{t('durations.120min')}</option>
             </select>
-            <div className="flex items-center gap-1 w-28">
-              <span className="text-sm text-gray-500 whitespace-nowrap">{t('unit.currency')}</span>
+            <div className="flex items-center gap-1 w-full sm:w-28">
+              <span className="text-xs md:text-sm text-gray-500 whitespace-nowrap">{t('unit.currency')}</span>
               <input
                 type="number"
-                className="w-full px-2 py-2 text-sm border rounded-md text-right"
+                className="w-full px-2 py-1.5 sm:py-2 text-xs md:text-sm border rounded-md text-right"
                 placeholder="0"
                 value={newMenu.price}
                 onChange={(e) =>
@@ -210,24 +210,27 @@ export default function MenuItems({
                 }
               />
             </div>
-            <Button size="sm" onClick={handleAddMenu}>
-              {t('confirm')}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setIsAdding(false);
-                setNewMenu({ name: '', price: '', duration: 30 });
-              }}
-            >
-              {t('cancel')}
-            </Button>
+            <div className="flex items-center gap-1.5 md:gap-2 sm:ml-auto">
+              <Button size="sm" className="h-10 sm:h-9" onClick={handleAddMenu}>
+                {t('confirm')}
+              </Button>
+              <Button
+                size="sm"
+                className="h-10 sm:h-9"
+                variant="ghost"
+                onClick={() => {
+                  setIsAdding(false);
+                  setNewMenu({ name: '', price: '', duration: 30 });
+                }}
+              >
+                {t('cancel')}
+              </Button>
+            </div>
           </div>
         ) : (
           <button
             onClick={() => setIsAdding(true)}
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 md:gap-2 py-1.5 sm:py-2 text-xs md:text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors"
           >
             <Plus className="w-4 h-4" /> {t('addMenu')}
           </button>

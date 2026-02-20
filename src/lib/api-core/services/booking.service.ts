@@ -99,6 +99,10 @@ export class BookingService {
       endTime: 'end_time',
       price: 'total_price',
       notes: 'customer_notes',
+      paymentMethod: 'payment_method',
+      productId: 'product_id',
+      productAmount: 'product_amount',
+      storeSalesAmount: 'store_sales_amount',
     };
 
     const result: Record<string, any> = {};

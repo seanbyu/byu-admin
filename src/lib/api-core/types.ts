@@ -109,6 +109,10 @@ export interface DBBooking {
   cancelled_at: string | null;
   cancellation_reason: string | null;
   cancelled_by: string | null;
+  // 제품 관련 필드
+  product_id: string | null;
+  product_amount: number;
+  store_sales_amount: number;
   created_at: string;
   updated_at: string;
 }
@@ -117,6 +121,7 @@ export interface DBBookingWithRelations extends DBBooking {
   customer: { id: string; name: string; phone: string | null } | null;
   artist: { id: string; name: string } | null;
   service: { id: string; name: string; base_price: number } | null;
+  product: { id: string; name: string; price: number } | null;
 }
 
 // ============================================
@@ -216,6 +221,10 @@ export interface CreateBookingDto {
   service_price: number;
   total_price: number;
   customer_notes?: string;
+  payment_method?: string;
+  product_id?: string;
+  product_amount?: number;
+  store_sales_amount?: number;
 }
 
 // Booking update DTO
@@ -234,6 +243,9 @@ export interface UpdateBookingDto {
   payment_status?: string;
   payment_method?: string;
   paid_at?: string;
+  product_id?: string | null;
+  product_amount?: number;
+  store_sales_amount?: number;
 }
 
 // Customer create DTO
@@ -358,6 +370,11 @@ export interface BookingResponse {
   price: number;
   source: string;
   notes: string | null;
+  paymentMethod: string | null;
+  productId: string | null;
+  productName: string | null;
+  productAmount: number;
+  storeSalesAmount: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -23,6 +23,7 @@ import {
 } from '../hooks/useSettings';
 import { SettingsTabs } from './components/SettingsTabs';
 import { StoreInfoTab } from './components/StoreInfoTab';
+import { LineIntegrationTab } from './components/LineIntegrationTab';
 import { PlanTab } from './components/PlanTab';
 import { AccountTab } from './components/AccountTab';
 import { getErrorCode } from '@/lib/api/client';
@@ -63,7 +64,7 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
 
   // isOwner가 아닌 경우 account 탭으로 강제 리다이렉트
   useEffect(() => {
-    if (!user?.isOwner && (activeTab === 'store' || activeTab === 'plan')) {
+    if (!user?.isOwner && (activeTab === 'store' || activeTab === 'plan' || activeTab === 'line')) {
       router.replace('/settings/account');
     }
   }, [user?.isOwner, activeTab, router]);
@@ -217,6 +218,13 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
               onSave={handleStoreInfoSave}
               onUploadImage={handleImageUpload}
               onDeleteImage={handleImageDelete}
+              canEdit={canEditSettings}
+            />
+          )}
+
+          {activeTab === 'line' && (
+            <LineIntegrationTab
+              salonId={salonId}
               canEdit={canEditSettings}
             />
           )}

@@ -56,17 +56,17 @@ export default function SortableMenuRow({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg mb-1 last:mb-0 hover:bg-gray-100 transition-colors group ${
+      className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 md:gap-2 py-2.5 md:py-3 px-3 md:px-4 bg-gray-50 rounded-lg mb-0.5 md:mb-1 last:mb-0 hover:bg-gray-100 transition-colors group ${
         isDragging ? 'shadow-lg border-blue-200 border' : ''
       }`}
     >
       {currentlyEditing ? (
-        <div className="flex w-full items-center justify-between gap-0">
+        <div className="flex w-full flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 md:gap-2">
           {/* Name Input */}
-          <div className="flex-1 pr-4">
+          <div className="w-full sm:flex-1 sm:pr-4">
             <input
               type="text"
-              className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+              className="w-full px-2 py-1 border border-gray-300 rounded text-xs md:text-sm"
               placeholder={t('menu.name')}
               value={editMenuData.name}
               onChange={(e) =>
@@ -80,9 +80,9 @@ export default function SortableMenuRow({
           </div>
 
           {/* Duration Input */}
-          <div className="w-24 text-center pr-4">
+          <div className="w-full sm:w-24 text-left sm:text-center sm:pr-4">
             <select
-              className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+              className="w-full px-2 py-1 border border-gray-300 rounded text-xs md:text-sm"
               value={editMenuData.duration}
               onChange={(e) =>
                 onEditMenuDataChange({
@@ -100,12 +100,12 @@ export default function SortableMenuRow({
           </div>
 
           {/* Price Input */}
-          <div className="w-32 text-right pr-4">
-            <div className="flex items-center justify-end gap-1">
-              <span className="text-sm">{t('menu.unit.currency')}</span>
+          <div className="w-full sm:w-32 text-left sm:text-right sm:pr-4">
+            <div className="flex items-center justify-start sm:justify-end gap-1">
+              <span className="text-xs md:text-sm">{t('menu.unit.currency')}</span>
               <input
                 type="number"
-                className="w-20 px-2 py-1.5 border border-gray-300 rounded text-sm text-right"
+                className="w-20 px-2 py-1 border border-gray-300 rounded text-xs md:text-sm text-right"
                 placeholder={t('menu.price')}
                 value={editMenuData.price}
                 onChange={(e) =>
@@ -119,11 +119,11 @@ export default function SortableMenuRow({
           </div>
 
           {/* Actions */}
-          <div className="w-16 flex justify-end gap-1">
-            <Button size="sm" onClick={onSaveMenu}>
+          <div className="w-full sm:w-16 flex justify-end gap-1">
+            <Button size="sm" className="h-9 sm:h-8" onClick={onSaveMenu}>
               {t('common.save')}
             </Button>
-            <Button size="sm" variant="ghost" onClick={onCancelEditMenu}>
+            <Button size="sm" className="h-9 sm:h-8" variant="ghost" onClick={onCancelEditMenu}>
               {t('common.cancel')}
             </Button>
           </div>
@@ -132,23 +132,23 @@ export default function SortableMenuRow({
         <>
           {/* Clickable area for editing */}
           <div
-            className={`flex-1 flex items-center ${onEditMenu ? 'cursor-pointer' : ''}`}
+            className={`flex-1 flex flex-col sm:flex-row sm:items-center gap-0.5 md:gap-0 ${onEditMenu ? 'cursor-pointer' : ''}`}
             onClick={onEditMenu ? () => onEditMenu(menu) : undefined}
           >
-            <div className="flex-1 text-h4">{menu.name}</div>
+            <div className="flex-1 text-sm md:text-base font-semibold text-secondary-900">{menu.name}</div>
 
-            <div className="w-24 text-center text-body">
+            <div className="text-xs md:text-sm text-secondary-600 sm:w-24 sm:text-center">
               {menu.duration_minutes}{t('menu.unit.minutes')}
             </div>
 
-            <div className="w-32 text-right text-price">
+            <div className="text-sm md:text-base font-semibold text-secondary-900 sm:w-32 sm:text-right">
               {menu.pricing_type === 'FIXED'
                 ? `${t('menu.unit.currency')}${(menu.base_price || menu.price || 0).toLocaleString()}`
                 : t('common.currency.variable')}
             </div>
           </div>
 
-          <div className="w-16 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-full sm:w-16 flex justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             {onDeleteMenu && (
               <button
                 onClick={(e) => {

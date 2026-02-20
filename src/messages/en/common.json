@@ -15,6 +15,7 @@
   "noData": "No data available",
   "saving": "Saving...",
   "saved": "Saved",
+  "optional": "Optional",
   "creating": "Creating...",
   "all": "All",
   "select": "Select",
@@ -72,6 +73,7 @@
   "calendar": {
     "view": "Calendar",
     "list": "List",
+    "sheet": "Daily Sheet",
     "month": "Month",
     "day": "Day",
     "addBooking": "Add Booking",

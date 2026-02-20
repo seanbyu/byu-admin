@@ -16,7 +16,8 @@ export class BookingRepository extends BaseRepository {
         *,
         customer:customers!bookings_customer_id_fkey(id, name, phone),
         artist:users!bookings_artist_id_fkey(id, name),
-        service:services(id, name, base_price)
+        service:services(id, name, base_price),
+        product:salon_products(id, name, price)
       `)
       .eq("salon_id", salonId)
       .order("booking_date", { ascending: false });
@@ -24,7 +25,7 @@ export class BookingRepository extends BaseRepository {
     if (error) throw error;
 
     // Transform to frontend format
-    return (data || []).map((booking: DBBookingWithRelations) =>
+    return (data || []).map((booking: any) =>
       this.transformBooking(booking)
     );
   }
@@ -67,7 +68,7 @@ export class BookingRepository extends BaseRepository {
     return this.updateBooking(id, { status: "CONFIRMED" });
   }
 
-  private transformBooking(booking: DBBookingWithRelations): BookingResponse {
+  private transformBooking(booking: any): BookingResponse {
     return {
       id: booking.id,
       customerId: booking.customer_id,
@@ -84,7 +85,13 @@ export class BookingRepository extends BaseRepository {
       status: booking.status,
       price: Number(booking.total_price) || 0,
       source: "ONLINE",
-      notes: booking.customer_notes,
+      notes: booking.customer_notes ?? null,
+      paymentMethod: booking.payment_method ?? null,
+      // 아래 필드들은 migration 24_booking_products.sql 적용 후 실제 데이터 반영
+      productId: booking.product_id ?? null,
+      productName: booking.product?.name ?? null,
+      productAmount: Number(booking.product_amount) || 0,
+      storeSalesAmount: Number(booking.store_sales_amount) || 0,
       createdAt: booking.created_at,
       updatedAt: booking.updated_at,
     };

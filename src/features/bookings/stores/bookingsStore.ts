@@ -10,7 +10,7 @@ import { Booking } from '../types';
 // - UI 상태만 Zustand로 관리
 // ============================================
 
-type ViewMode = 'calendar' | 'table';
+type ViewMode = 'calendar' | 'table' | 'sheet';
 
 interface BookingsUIState {
   // Modal states

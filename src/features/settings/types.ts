@@ -39,7 +39,7 @@ export interface AccountInfo {
   email?: string;
 }
 
-export type SettingsTab = 'store' | 'plan' | 'account';
+export type SettingsTab = 'store' | 'plan' | 'account' | 'line';
 
 export interface AccountFormSectionProps {
   accountInfo: AccountInfo | null;

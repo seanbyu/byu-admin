@@ -26,19 +26,26 @@ export const StaffPageHeader = memo(function StaffPageHeader({
   const showAddButton = canAddStaff ?? isAdmin;
 
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-xl font-bold text-secondary-900">
+    <div className="flex flex-col gap-2 md:gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <h1 className="text-base sm:text-lg md:text-xl xl:text-xl font-bold text-secondary-900">
           {t('title')}
         </h1>
-        <div className="text-sm text-secondary-600 mt-2 space-y-1">
-          {GUIDE_MESSAGE_KEYS.map((key) => (
-            <p key={key}>• {t(key)}</p>
-          ))}
+        <div className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs md:text-sm text-secondary-600">
+          <p className="md:hidden">• {t(GUIDE_MESSAGE_KEYS[0])}</p>
+          <div className="hidden md:block space-y-1">
+            {GUIDE_MESSAGE_KEYS.map((key) => (
+              <p key={key}>• {t(key)}</p>
+            ))}
+          </div>
         </div>
       </div>
       {showAddButton && (
-        <Button variant="outline" onClick={onInviteClick}>
+        <Button
+          variant="outline"
+          className="w-full sm:w-auto h-10 md:h-10"
+          onClick={onInviteClick}
+        >
           {t('register')}
         </Button>
       )}

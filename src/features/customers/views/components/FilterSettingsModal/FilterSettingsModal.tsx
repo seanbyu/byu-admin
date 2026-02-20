@@ -21,7 +21,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { GripVertical, Pencil, Trash2, Plus, X, Lock } from 'lucide-react';
 import { useCustomerFilters } from '../../../hooks/useCustomerFilters';
 import type {
@@ -98,6 +98,17 @@ const SortableFilterItem = memo(function SortableFilterItem({
   isDeleting,
 }: SortableFilterItemProps) {
   const t = useTranslations();
+  const locale = useLocale();
+
+  // 시스템 필터는 번역 키 사용, 커스텀 필터는 locale별 라벨 사용
+  const displayLabel = filter.is_system_filter
+    ? t(`customer.filter.${filter.filter_key}`)
+    : locale === 'en'
+      ? filter.label_en || filter.label
+      : locale === 'th'
+        ? filter.label_th || filter.label
+        : filter.label;
+
   const {
     attributes,
     listeners,
@@ -133,10 +144,10 @@ const SortableFilterItem = memo(function SortableFilterItem({
         {filter.is_system_filter && (
           <Lock size={14} className="text-secondary-400" />
         )}
-        <span className="font-medium text-secondary-900">{filter.label}</span>
+        <span className="font-medium text-secondary-900">{displayLabel}</span>
         {filter.conditions.length > 0 && (
           <span className="text-xs text-secondary-500">
-            ({filter.conditions.length}개 조건)
+            ({t('customer.filterManagement.conditionCount', { count: filter.conditions.length })})
           </span>
         )}
       </div>

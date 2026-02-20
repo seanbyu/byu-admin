@@ -80,7 +80,9 @@ export const StaffTableRow = memo(function StaffTableRow({
 
   // 퇴사 예정 상태 확인
   const isResigned = !member.isActive && member.deletedAt;
-  const daysRemaining = isResigned ? getDaysUntilDeletion(member.deletedAt) : 0;
+  const daysRemaining = isResigned
+    ? getDaysUntilDeletion(member.deletedAt ?? null)
+    : 0;
 
   // 드롭다운 외부 클릭 감지
   useEffect(() => {

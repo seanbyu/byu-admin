@@ -9,23 +9,36 @@ export function AuthInitializer() {
   const { login, logout } = useAuthStore();
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      // 1. Check current session
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    let mounted = true;
 
-      if (session) {
-        // 2. Fetch fresh user data from DB
-        const user = await getCurrentUser();
-        if (user) {
-          // Update store with fresh data
-          // We use login here to fully reset state with fresh user/token
-          login(user, session.access_token);
-        } else {
-          // Session exists but user data fetch failed (e.g. deleted user)
-          logout();
+    const initializeAuth = async () => {
+      try {
+        // 1. Check current session
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!mounted) return;
+
+        if (session) {
+          // 2. Fetch fresh user data from DB
+          const user = await getCurrentUser();
+          if (!mounted) return;
+          if (user) {
+            // Update store with fresh data
+            // We use login here to fully reset state with fresh user/token
+            login(user, session.access_token);
+          } else {
+            // Session exists but user data fetch failed (e.g. deleted user)
+            logout();
+          }
         }
+      } catch (err) {
+        // Supabase internally uses navigator.locks.request() for session refresh.
+        // During page navigation, the lock's AbortController signal can be aborted,
+        // causing a benign AbortError. We safely ignore it here.
+        if (err instanceof Error && err.name === 'AbortError') return;
+        throw err;
       }
     };
 
@@ -45,6 +58,7 @@ export function AuthInitializer() {
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [login, logout]);

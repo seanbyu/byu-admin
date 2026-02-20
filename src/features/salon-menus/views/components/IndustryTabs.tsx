@@ -13,7 +13,7 @@ interface IndustryTabsProps {
 }
 
 // rendering-hoist-jsx: 정적 클래스명 상수 호이스팅
-const BASE_TAB_CLASS = 'px-4 py-2 rounded-full text-sm font-medium transition-colors';
+const BASE_TAB_CLASS = 'px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[11px] sm:text-xs md:text-sm font-medium transition-colors';
 const ACTIVE_TAB_CLASS = 'bg-blue-500 text-white';
 const INACTIVE_TAB_CLASS = 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50';
 
@@ -30,7 +30,7 @@ const TabButton = memo(function TabButton({ id, label, isActive, onClick }: TabB
     <button
       type="button"
       onClick={onClick}
-      className={`${BASE_TAB_CLASS} ${isActive ? ACTIVE_TAB_CLASS : INACTIVE_TAB_CLASS}`}
+      className={`${BASE_TAB_CLASS} ${isActive ? ACTIVE_TAB_CLASS : INACTIVE_TAB_CLASS} whitespace-nowrap shrink-0`}
     >
       {label}
     </button>
@@ -52,32 +52,34 @@ export const IndustryTabs = memo(function IndustryTabs({
   }, [onSelectTab]);
 
   return (
-    <div className="flex items-center gap-2 mb-8">
-      <TabButton
-        id="all"
-        label={t('common.all')}
-        isActive={selectedTab === 'all'}
-        onClick={handleAllTabClick}
-      />
-      {selectedIndustries.map((ind) => (
+    <div className="mb-4 md:mb-6 xl:mb-8 overflow-x-auto">
+      <div className="flex items-center gap-1.5 md:gap-2 min-w-max pb-1">
         <TabButton
-          key={ind.id}
-          id={ind.id}
-          label={ind.name || ''}
-          isActive={selectedTab === ind.id}
-          onClick={() => onSelectTab(ind.id)}
+          id="all"
+          label={t('common.all')}
+          isActive={selectedTab === 'all'}
+          onClick={handleAllTabClick}
         />
-      ))}
-      {onAddIndustryClick && (
-        <button
-          type="button"
-          onClick={onAddIndustryClick}
-          className={`${BASE_TAB_CLASS} ${INACTIVE_TAB_CLASS} flex items-center gap-1`}
-        >
-          <Plus className="w-3 h-3" />
-          {t('menu.addIndustry')}
-        </button>
-      )}
+        {selectedIndustries.map((ind) => (
+          <TabButton
+            key={ind.id}
+            id={ind.id}
+            label={ind.name || ''}
+            isActive={selectedTab === ind.id}
+            onClick={() => onSelectTab(ind.id)}
+          />
+        ))}
+        {onAddIndustryClick && (
+          <button
+            type="button"
+            onClick={onAddIndustryClick}
+            className={`${BASE_TAB_CLASS} ${INACTIVE_TAB_CLASS} flex items-center gap-1 whitespace-nowrap shrink-0`}
+          >
+            <Plus className="w-3 h-3" />
+            {t('menu.addIndustry')}
+          </button>
+        )}
+      </div>
     </div>
   );
 });

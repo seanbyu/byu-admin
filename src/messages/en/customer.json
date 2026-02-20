@@ -170,6 +170,7 @@
     "filterName": "Filter Name",
     "filterKey": "Filter Key",
     "conditions": "Conditions",
+    "conditionCount": "{count} condition(s)",
     "addCondition": "Add Condition",
     "removeCondition": "Remove Condition",
     "conditionLogic": "Condition Logic",

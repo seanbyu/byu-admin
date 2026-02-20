@@ -170,6 +170,7 @@
     "filterName": "필터 이름",
     "filterKey": "필터 키",
     "conditions": "조건",
+    "conditionCount": "{count}개 조건",
     "addCondition": "조건 추가",
     "removeCondition": "조건 삭제",
     "conditionLogic": "조건 결합",

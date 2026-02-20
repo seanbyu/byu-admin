@@ -170,6 +170,7 @@
     "filterName": "ชื่อตัวกรอง",
     "filterKey": "คีย์ตัวกรอง",
     "conditions": "เงื่อนไข",
+    "conditionCount": "{count} เงื่อนไข",
     "addCondition": "เพิ่มเงื่อนไข",
     "removeCondition": "ลบเงื่อนไข",
     "conditionLogic": "ตรรกะเงื่อนไข",

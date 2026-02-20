@@ -109,6 +109,8 @@ export function useBookingSave({
         price: servicePrice,
         source: 'WALK_IN',
         notes: notes.trim() || undefined,
+        productAmount: 0,
+        storeSalesAmount: 0,
       });
 
       onClose();

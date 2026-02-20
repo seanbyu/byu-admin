@@ -86,9 +86,13 @@ src/
 ```text
 supabase/
 ├── functions/            # Edge Functions
+│   ├── _shared/          # 공용 모듈 (CORS, LINE 템플릿)
 │   ├── check-duplicate/
+│   ├── enqueue-message-jobs/   # LINE Push 발송 큐 적재 (매일 실행)
 │   ├── invite-staff/
-│   └── register-owner/
+│   ├── register-owner/
+│   ├── send-message-jobs/      # LINE Push 발송 처리 (5분마다 실행)
+│   └── track-message-event/    # 클릭/전환 이벤트 기록
 ├── migrations/           # DB 마이그레이션
 └── src/                  # Supabase 관련 TS 코드
 ```
@@ -108,6 +112,123 @@ INSTAGRAM_APP_SECRET=
 INSTAGRAM_REDIRECT_URI=
 NEXT_PUBLIC_INSTARGRAM_ACCESS_TOKEN=
 ```
+
+## LINE Push 자동화 (재예약 + 노쇼 방지 + 휴면 복귀)
+
+### 개요
+
+고객의 시술 완료 이력을 기반으로 자동 LINE Push 알림을 발송합니다.
+
+| job_type | 설명 | 발송 시점 |
+|---|---|---|
+| `rebook_due` | 재예약 알림 | next_due_at - 3일 |
+| `rebook_overdue` | 휴면 복귀 | next_due_at + 7일 ~ +21일 |
+| `reminder_24h` | 예약 리마인더 | 예약 24시간 전 |
+| `reminder_3h` | 예약 리마인더 | 예약 3시간 전 |
+
+### 데이터 흐름
+
+```
+1. 예약 COMPLETED → Trigger → customer_cycles.next_due_at 자동 계산
+2. enqueue-message-jobs (매일) → 대상 고객 산출 → message_jobs 적재
+3. send-message-jobs (5분마다) → pending jobs → LINE Push 발송 → 상태 갱신
+4. track-message-event → 클릭/전환 이벤트 기록 → 대시보드 지표
+```
+
+### 스킵 조건
+
+- 동일 customer + job_type 14일 내 sent 이력 있으면 스킵
+- rebook_* 타입: 미래 예약(PENDING/CONFIRMED)이 있으면 스킵
+- opt_out=true이면 스킵
+- line_user_id가 없으면 스킵
+- 살롱이 비활성(is_active=false)이면 스킵
+
+### DB 변경 (Migration: 23_line_automation.sql)
+
+**기존 테이블 필드 추가:**
+- `services.default_cycle_days` (INTEGER) - 시술 권장 재방문 주기
+- `bookings.completed_at` (TIMESTAMPTZ) - 시술 완료 시각
+- `customers.opt_out` (BOOLEAN) - 마케팅 수신 거부
+
+**신규 테이블:**
+- `customer_cycles` - 고객별 시술 주기 관리
+- `message_jobs` - LINE Push 발송 큐
+- `message_events` - 발송/클릭/전환 이벤트 로그
+
+**뷰:**
+- `v_message_job_stats` - 살롱별/타입별/일별 발송 지표
+
+### Edge Functions
+
+| 함수 | 스케줄 | 설명 |
+|---|---|---|
+| `enqueue-message-jobs` | 매일 09:00 (Asia/Bangkok) | 대상 산출 및 message_jobs 적재 |
+| `send-message-jobs` | 5분마다 | pending jobs를 LINE Push로 발송 |
+| `track-message-event` | On-demand | 클릭/전환 이벤트 기록 |
+
+### 환경변수 (Edge Functions)
+
+```bash
+SUPABASE_URL=             # 자동 설정
+SUPABASE_SERVICE_ROLE_KEY= # 자동 설정
+BOOKING_BASE_URL=          # 예약 웹앱 URL (예: https://booking.salon.com)
+```
+
+LINE 채널 토큰은 `salon_line_settings` 테이블에 살롱별로 저장됩니다.
+
+### 로컬 테스트
+
+```bash
+# 1. 마이그레이션 적용
+supabase db reset
+
+# 2. Edge Function 로컬 실행
+supabase functions serve enqueue-message-jobs --env-file supabase/functions/.env.example
+supabase functions serve send-message-jobs --env-file supabase/functions/.env.example
+
+# 3. 테스트 시나리오
+# a) 예약 상태를 COMPLETED로 변경 → customer_cycles 자동 생성 확인
+# b) enqueue-message-jobs 호출 → message_jobs 생성 확인
+# c) send-message-jobs 호출 → status 변경 확인 (LINE 토큰 없으면 skipped)
+```
+
+### Supabase Scheduled Triggers 설정 (프로덕션)
+
+Supabase Dashboard > Database > Extensions에서 `pg_cron` 활성화 후:
+
+```sql
+-- enqueue: 매일 09:00 Asia/Bangkok (= 02:00 UTC)
+SELECT cron.schedule(
+  'enqueue-message-jobs',
+  '0 2 * * *',
+  $$SELECT net.http_post(
+    url := 'https://YOUR_PROJECT.supabase.co/functions/v1/enqueue-message-jobs',
+    headers := jsonb_build_object(
+      'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key')
+    )
+  );$$
+);
+
+-- send: 5분마다
+SELECT cron.schedule(
+  'send-message-jobs',
+  '*/5 * * * *',
+  $$SELECT net.http_post(
+    url := 'https://YOUR_PROJECT.supabase.co/functions/v1/send-message-jobs',
+    headers := jsonb_build_object(
+      'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key')
+    )
+  );$$
+);
+```
+
+### 가정 사항
+
+1. 고객의 `line_user_id`는 LINE 로그인/연동 시점에 이미 저장되어 있음
+2. 살롱의 LINE 채널 설정은 `salon_line_settings` 테이블에 저장됨
+3. 메시지 언어는 `salons.settings.locale`을 기본으로 사용 (없으면 영어)
+4. `services.default_cycle_days`는 살롱에서 서비스별로 직접 설정 (미설정시 30일 기본값)
+5. reminder 타입은 rebook과 달리 booking_id 기준으로 중복 방지
 
 ## 비고
 

@@ -53,19 +53,19 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white border-b border-secondary-200 h-16 flex items-center justify-between px-6">
+    <header className="bg-white border-b border-secondary-200 h-16 flex items-center justify-between px-3 sm:px-4 md:px-5 xl:px-6">
       {/* Left side */}
       <div className="flex items-center">
         <button
           onClick={toggleSidebar}
-          className="lg:hidden text-secondary-700 hover:text-secondary-900 mr-4"
+          className="xl:hidden text-secondary-700 hover:text-secondary-900 mr-3 sm:mr-4"
         >
-          <Menu size={24} />
+          <Menu size={22} />
         </button>
       </div>
 
       {/* Right side */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
         {/* Language selector */}
         <div className="relative">
           <button

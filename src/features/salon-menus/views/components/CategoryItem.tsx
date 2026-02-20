@@ -31,23 +31,23 @@ export default function CategoryItem({
 }: CategoryItemProps) {
   const t = useTranslations();
   return (
-    <div className="mb-6">
-      <div className="flex items-end justify-between mb-3 pb-2 border-b border-gray-200">
+    <div className="mb-4 md:mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1.5 md:gap-2 mb-2.5 md:mb-3 pb-1.5 md:pb-2 border-b border-gray-200">
         <div>
-          <h3 className="text-h3">
+          <h3 className="text-base md:text-lg font-semibold text-secondary-900">
             {isEditing ? (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 md:gap-2">
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => onEditNameChange(e.target.value)}
-                  className="px-2 py-1 border border-gray-300 rounded text-xl font-bold"
+                  className="px-2 py-1 border border-gray-300 rounded text-sm md:text-base font-semibold"
                   autoFocus
                 />
-                <Button size="sm" onClick={onSaveEdit}>
+                <Button size="sm" className="h-10 sm:h-9" onClick={onSaveEdit}>
                   {t('common.save')}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={onCancelEdit}>
+                <Button size="sm" className="h-10 sm:h-9" variant="ghost" onClick={onCancelEdit}>
                   {t('common.cancel')}
                 </Button>
               </div>
@@ -56,7 +56,7 @@ export default function CategoryItem({
             )}
           </h3>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2 self-end sm:self-auto">
           {!isEditing && onEdit && (
             <Button
               variant="outline"
@@ -82,7 +82,7 @@ export default function CategoryItem({
       </div>
 
       {/* Menus List Content */}
-      <div className="pl-1">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }

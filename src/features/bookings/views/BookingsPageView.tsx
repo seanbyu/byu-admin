@@ -21,8 +21,9 @@ import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { formatDate, formatPrice } from '@/lib/utils';
-import { Plus, Calendar as CalendarIcon, Filter, List } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, Filter, List, LayoutList } from 'lucide-react';
 import { salonsApi } from '@/features/salons/api';
+import { StaffDaySheetView } from './components/StaffDaySheetView';
 
 // bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
 const NewBookingModal = dynamic(
@@ -55,14 +56,18 @@ const ViewModeToggle = memo(function ViewModeToggle({
   viewMode,
   onCalendarClick,
   onTableClick,
+  onSheetClick,
   calendarLabel,
   listLabel,
+  sheetLabel,
 }: {
-  viewMode: 'calendar' | 'table';
+  viewMode: 'calendar' | 'table' | 'sheet';
   onCalendarClick: () => void;
   onTableClick: () => void;
+  onSheetClick: () => void;
   calendarLabel: string;
   listLabel: string;
+  sheetLabel: string;
 }) {
   return (
     <div className="flex border border-secondary-200 rounded-lg overflow-hidden">
@@ -80,7 +85,19 @@ const ViewModeToggle = memo(function ViewModeToggle({
       </button>
       <button
         type="button"
-        className={`px-4 py-2 flex items-center space-x-2 transition-colors ${
+        className={`px-4 py-2 flex items-center space-x-2 transition-colors border-l border-secondary-200 ${
+          viewMode === 'sheet'
+            ? 'bg-primary-500 text-white'
+            : 'bg-white text-secondary-600 hover:bg-secondary-50'
+        }`}
+        onClick={onSheetClick}
+      >
+        <LayoutList size={18} />
+        <span>{sheetLabel}</span>
+      </button>
+      <button
+        type="button"
+        className={`px-4 py-2 flex items-center space-x-2 transition-colors border-l border-secondary-200 ${
           viewMode === 'table'
             ? 'bg-primary-500 text-white'
             : 'bg-white text-secondary-600 hover:bg-secondary-50'
@@ -192,7 +209,7 @@ export default function BookingsPageView() {
   const pageState = useBookingsPageState();
 
   // 데이터 fetching (TanStack Query)
-  const { bookings, isLoading } = useBookings(salonId, {
+  const { bookings, isLoading, updateBooking } = useBookings(salonId, {
     enabled: !!salonId,
   });
 
@@ -306,6 +323,28 @@ export default function BookingsPageView() {
     pageState.setViewMode('table');
   }, [pageState.setViewMode]);
 
+  const handleViewModeSheet = useCallback(() => {
+    pageState.setViewMode('sheet');
+  }, [pageState.setViewMode]);
+
+  // 시트 뷰에서 가격 인라인 수정
+  const handleSheetUpdateBooking = useCallback(
+    (id: string, updates: { price: number }) => {
+      updateBooking({ id, updates });
+    },
+    [updateBooking]
+  );
+
+  // 시트 뷰에서 직원 + 시간 선택 시 예약 추가
+  const handleSheetAddBooking = useCallback(
+    (staffId: string, time?: string) => {
+      pageState.setSelectedStaffId(staffId);
+      if (time) pageState.setSelectedTime(time);
+      pageState.openNewBookingModal();
+    },
+    [pageState.setSelectedStaffId, pageState.setSelectedTime, pageState.openNewBookingModal]
+  );
+
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
     return (
@@ -335,8 +374,10 @@ export default function BookingsPageView() {
               viewMode={pageState.viewMode}
               onCalendarClick={handleViewModeCalendar}
               onTableClick={handleViewModeTable}
+              onSheetClick={handleViewModeSheet}
               calendarLabel={t('common.calendar.view')}
               listLabel={t('common.calendar.list')}
+              sheetLabel={t('common.calendar.sheet')}
             />
             {canCreateBooking && (
               <Button variant="primary" onClick={pageState.openNewBookingModal}>
@@ -359,8 +400,8 @@ export default function BookingsPageView() {
           t={t}
         />
 
-        {/* Calendar or Table View - rendering-conditional-render: 삼항 연산자 사용 */}
-        {pageState.viewMode === 'calendar' ? (
+        {/* View 렌더링 */}
+        {pageState.viewMode === 'calendar' && (
           <Calendar
             selectedDate={pageState.selectedDate}
             onDateSelect={pageState.setSelectedDate}
@@ -371,7 +412,22 @@ export default function BookingsPageView() {
             slotDuration={slotDuration}
             salonBusinessHours={businessHours}
           />
-        ) : (
+        )}
+        {pageState.viewMode === 'sheet' && (
+          <Card>
+            <StaffDaySheetView
+              bookings={bookings}
+              staffMembers={staffMembers}
+              selectedDate={pageState.selectedDate}
+              businessHours={businessHours}
+              slotDuration={slotDuration}
+              onBookingClick={pageState.openBookingDetailModal}
+              onAddBooking={handleSheetAddBooking}
+              onUpdateBooking={handleSheetUpdateBooking}
+            />
+          </Card>
+        )}
+        {pageState.viewMode === 'table' && (
           <Card>
             <Table data={bookings} columns={columns} onRowClick={handleRowClick} />
           </Card>

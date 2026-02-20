@@ -29,9 +29,15 @@ import { supabase } from '@/lib/supabase/client';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { isSidebarOpen, toggleSidebar } = useUIStore();
+  const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore();
   const { user } = useAuthStore();
   const t = useTranslations();
+
+  // Responsive standard: desktop(xl+) fixed open, tablet/mobile drawer closed by default
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setSidebarOpen(window.innerWidth >= 1280);
+  }, [setSidebarOpen]);
 
   const { data: salon } = useQuery<{ name: string } | null>({
     queryKey: ['salon', user?.salonId],
@@ -209,12 +215,18 @@ export const Sidebar: React.FC = () => {
 
   const filteredMenuItems = filterMenuItems(menuItems);
 
+  const handleNavLinkClick = React.useCallback(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+      setSidebarOpen(false);
+    }
+  }, [setSidebarOpen]);
+
   return (
     <>
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 xl:hidden"
           onClick={toggleSidebar}
         />
       )}
@@ -222,31 +234,35 @@ export const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-screen bg-white border-r border-secondary-200 transition-transform duration-300 lg:relative',
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          'fixed top-0 left-0 z-50 h-screen bg-white border-r border-secondary-200 transition-transform duration-300 xl:relative',
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'
         )}
-        style={{ width: 'var(--sidebar-width)' }}
+        style={{ width: 'clamp(220px, 78vw, var(--sidebar-width))' }}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200">
-            <Link href="/dashboard" className="flex items-center">
-              <Scissors className="w-8 h-8 text-primary-600" />
-              <span className="ml-2 text-xl font-bold text-secondary-900">
+          <div className="flex items-center justify-between px-3 md:px-4 xl:px-5 py-3 md:py-3.5 xl:py-4 border-b border-secondary-200">
+            <Link
+              href="/dashboard"
+              onClick={handleNavLinkClick}
+              className="flex items-center min-w-0"
+            >
+              <Scissors className="w-5 h-5 md:w-6 md:h-6 xl:w-7 xl:h-7 text-primary-600 shrink-0" />
+              <span className="ml-2 text-sm md:text-base xl:text-lg font-bold text-secondary-900 truncate">
                 {salon?.name || 'Salon Admin'}
               </span>
             </Link>
             <button
               onClick={toggleSidebar}
-              className="lg:hidden text-secondary-500 hover:text-secondary-700"
+              className="xl:hidden text-secondary-500 hover:text-secondary-700 p-1"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 overflow-y-auto">
-            <ul className="space-y-2">
+          <nav className="flex-1 px-2.5 md:px-3 xl:px-4 py-3 md:py-4 xl:py-5 overflow-y-auto">
+            <ul className="space-y-1.5 md:space-y-2">
               {filteredMenuItems.map((item) => {
                 const Icon = item.icon;
 
@@ -264,25 +280,27 @@ export const Sidebar: React.FC = () => {
                       <button
                         onClick={() => item.id && toggleSubmenu(item.id)}
                         className={cn(
-                          'flex items-center w-full px-4 py-3 rounded-lg transition-colors justify-between',
+                          'flex items-center w-full px-2.5 md:px-3.5 xl:px-4 py-2 md:py-2.5 rounded-lg transition-colors justify-between',
                           isChildActive
                             ? 'bg-primary-50 text-primary-700'
                             : 'text-secondary-700 hover:bg-secondary-100'
                         )}
                       >
                         <div className="flex items-center">
-                          <Icon size={20} className="mr-3" />
-                          <span className="font-medium">{item.name}</span>
+                          <Icon size={17} className="mr-2 md:mr-2.5 xl:mr-3 shrink-0" />
+                          <span className="font-medium text-[13px] md:text-sm xl:text-[15px] truncate">
+                            {item.name}
+                          </span>
                         </div>
                         {isOpen ? (
-                          <ChevronDown size={16} />
+                          <ChevronDown size={15} />
                         ) : (
-                          <ChevronRight size={16} />
+                          <ChevronRight size={15} />
                         )}
                       </button>
 
                       {isOpen && (
-                        <ul className="mt-1 ml-4 space-y-1 border-l-2 border-secondary-100 pl-2">
+                        <ul className="mt-1 ml-2.5 md:ml-3.5 space-y-1 border-l-2 border-secondary-100 pl-2">
                           {item.subItems.map((subItem) => {
                             const isSubActive = pathname === subItem.href;
                             const SubIcon = subItem.icon;
@@ -290,14 +308,15 @@ export const Sidebar: React.FC = () => {
                               <li key={subItem.href}>
                                 <Link
                                   href={subItem.href || '#'}
+                                  onClick={handleNavLinkClick}
                                   className={cn(
-                                    'flex items-center px-4 py-2.5 rounded-lg transition-colors text-sm',
+                                    'flex items-center px-2.5 md:px-3.5 xl:px-4 py-1.5 md:py-2 rounded-lg transition-colors text-[11px] md:text-xs xl:text-sm',
                                     isSubActive
                                       ? 'text-primary-700 font-medium bg-primary-50'
                                       : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
                                   )}
                                 >
-                                  <SubIcon size={18} className="mr-3" />
+                                  <SubIcon size={15} className="mr-2 md:mr-2.5 xl:mr-3 shrink-0" />
                                   <span>{subItem.name}</span>
                                 </Link>
                               </li>
@@ -314,15 +333,18 @@ export const Sidebar: React.FC = () => {
                   <li key={item.href}>
                     <Link
                       href={item.href || '#'}
+                      onClick={handleNavLinkClick}
                       className={cn(
-                        'flex items-center px-4 py-3 rounded-lg transition-colors',
+                        'flex items-center px-2.5 md:px-3.5 xl:px-4 py-2 md:py-2.5 rounded-lg transition-colors',
                         isActive
                           ? 'bg-primary-50 text-primary-700'
                           : 'text-secondary-700 hover:bg-secondary-100'
                       )}
                     >
-                      <Icon size={20} className="mr-3" />
-                      <span className="font-medium">{item.name}</span>
+                      <Icon size={17} className="mr-2 md:mr-2.5 xl:mr-3 shrink-0" />
+                      <span className="font-medium text-[13px] md:text-sm xl:text-[15px] truncate">
+                        {item.name}
+                      </span>
                     </Link>
                   </li>
                 );
@@ -331,18 +353,20 @@ export const Sidebar: React.FC = () => {
           </nav>
 
           {/* User info */}
-          <div className="px-6 py-4 border-t border-secondary-200">
+          <div className="px-3 md:px-4 xl:px-5 py-3 md:py-3.5 xl:py-4 border-t border-secondary-200">
             <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                <span className="text-primary-700 font-semibold">
+              <div className="w-8 h-8 md:w-9 md:h-9 xl:w-10 xl:h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                <span className="text-primary-700 font-semibold text-xs md:text-sm">
                   {user?.name?.[0]?.toUpperCase()}
                 </span>
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-secondary-900">
+              <div className="ml-2.5 md:ml-3 min-w-0">
+                <p className="text-xs md:text-sm font-medium text-secondary-900 truncate">
                   {user?.name}
                 </p>
-                <p className="text-xs text-secondary-500">{user?.email}</p>
+                <p className="text-[10px] md:text-[11px] xl:text-xs text-secondary-500 truncate">
+                  {user?.email}
+                </p>
               </div>
             </div>
           </div>
