@@ -21,7 +21,12 @@ import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { formatDate, formatPrice } from '@/lib/utils';
-import { Plus, Calendar as CalendarIcon, Filter, List, LayoutList } from 'lucide-react';
+import {
+  Plus,
+  Calendar as CalendarIcon,
+  List,
+  LayoutList,
+} from 'lucide-react';
 import { salonsApi } from '@/features/salons/api';
 import { StaffDaySheetView } from './components/StaffDaySheetView';
 
@@ -70,42 +75,42 @@ const ViewModeToggle = memo(function ViewModeToggle({
   sheetLabel: string;
 }) {
   return (
-    <div className="flex border border-secondary-200 rounded-lg overflow-hidden">
+    <div className="flex w-full md:w-auto border border-secondary-200 rounded-lg overflow-hidden">
       <button
         type="button"
-        className={`px-4 py-2 flex items-center space-x-2 transition-colors ${
+        className={`flex-1 md:flex-none px-2.5 sm:px-3 md:px-4 py-2 flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm transition-colors ${
           viewMode === 'calendar'
             ? 'bg-primary-500 text-white'
             : 'bg-white text-secondary-600 hover:bg-secondary-50'
         }`}
         onClick={onCalendarClick}
       >
-        <CalendarIcon size={18} />
-        <span>{calendarLabel}</span>
+        <CalendarIcon size={16} />
+        <span className="truncate">{calendarLabel}</span>
       </button>
       <button
         type="button"
-        className={`px-4 py-2 flex items-center space-x-2 transition-colors border-l border-secondary-200 ${
+        className={`flex-1 md:flex-none px-2.5 sm:px-3 md:px-4 py-2 flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm transition-colors border-l border-secondary-200 ${
           viewMode === 'sheet'
             ? 'bg-primary-500 text-white'
             : 'bg-white text-secondary-600 hover:bg-secondary-50'
         }`}
         onClick={onSheetClick}
       >
-        <LayoutList size={18} />
-        <span>{sheetLabel}</span>
+        <LayoutList size={16} />
+        <span className="truncate">{sheetLabel}</span>
       </button>
       <button
         type="button"
-        className={`px-4 py-2 flex items-center space-x-2 transition-colors border-l border-secondary-200 ${
+        className={`flex-1 md:flex-none px-2.5 sm:px-3 md:px-4 py-2 flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm transition-colors border-l border-secondary-200 ${
           viewMode === 'table'
             ? 'bg-primary-500 text-white'
             : 'bg-white text-secondary-600 hover:bg-secondary-50'
         }`}
         onClick={onTableClick}
       >
-        <List size={18} />
-        <span>{listLabel}</span>
+        <List size={16} />
+        <span className="truncate">{listLabel}</span>
       </button>
     </div>
   );
@@ -155,16 +160,9 @@ const BookingFilters = memo(function BookingFilters({
     [onStatusChange]
   );
 
-  const handleStaffChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      onStaffChange(e.target.value);
-    },
-    [onStaffChange]
-  );
-
   return (
-    <Card>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <Card className="sticky top-[72px] z-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           type="date"
           label={t('booking.date')}
@@ -178,18 +176,37 @@ const BookingFilters = memo(function BookingFilters({
           onChange={handleStatusChange}
           showPlaceholder={false}
         />
-        <Select
-          label={t('booking.designer')}
-          options={[{ value: '', label: t('common.all') }, ...designers]}
-          value={selectedStaffId}
-          onChange={handleStaffChange}
-          showPlaceholder={false}
-        />
-        <div className="flex items-end">
-          <Button variant="outline" className="w-full">
-            <Filter size={20} className="mr-2" />
-            {t('common.actions.applyFilter')}
-          </Button>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-secondary-700 mb-2">
+            {t('booking.designer')}
+          </label>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <button
+              type="button"
+              onClick={() => onStaffChange('')}
+              className={`px-3 py-1.5 rounded-lg border text-sm whitespace-nowrap transition-colors ${
+                selectedStaffId === ''
+                  ? 'bg-primary-500 text-white border-primary-500'
+                  : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
+              }`}
+            >
+              {t('common.all')}
+            </button>
+            {designers.map((designer) => (
+              <button
+                key={designer.value}
+                type="button"
+                onClick={() => onStaffChange(designer.value)}
+                className={`px-3 py-1.5 rounded-lg border text-sm whitespace-nowrap transition-colors ${
+                  selectedStaffId === designer.value
+                    ? 'bg-primary-500 text-white border-primary-500'
+                    : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
+                }`}
+              >
+                {designer.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </Card>
@@ -235,9 +252,29 @@ export default function BookingsPageView() {
     [settingsResponse?.data?.businessHours]
   );
 
+  const filteredBookingsByStaffAndStatus = useMemo(() => {
+    return bookings.filter((booking) => {
+      if (pageState.statusFilter && booking.status !== pageState.statusFilter) {
+        return false;
+      }
+      if (pageState.selectedStaffId && booking.staffId !== pageState.selectedStaffId) {
+        return false;
+      }
+      return true;
+    });
+  }, [bookings, pageState.statusFilter, pageState.selectedStaffId]);
+
+  const filteredBookingsByDate = useMemo(() => {
+    const selectedDateStr = formatDate(pageState.selectedDate, 'yyyy-MM-dd');
+    return filteredBookingsByStaffAndStatus.filter((booking) => {
+      const bookingDateStr = formatDate(booking.date, 'yyyy-MM-dd');
+      return bookingDateStr === selectedDateStr;
+    });
+  }, [filteredBookingsByStaffAndStatus, pageState.selectedDate]);
+
   // 데이터 변환 (useMemo 내부에서 처리)
   const { designers, calendarResources, calendarEvents } = useBookingsData(
-    bookings,
+    filteredBookingsByStaffAndStatus,
     staffMembers,
     pageState.getStatusColor
   );
@@ -358,18 +395,18 @@ export default function BookingsPageView() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-secondary-900">
+            <h1 className="text-2xl md:text-3xl font-bold text-secondary-900">
               {t('booking.title')}
             </h1>
-            <p className="text-secondary-600 mt-1">
+            <p className="text-sm md:text-base text-secondary-600 mt-1">
               {t('booking.pageDescription')}
             </p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <ViewModeToggle
               viewMode={pageState.viewMode}
               onCalendarClick={handleViewModeCalendar}
@@ -380,9 +417,13 @@ export default function BookingsPageView() {
               sheetLabel={t('common.calendar.sheet')}
             />
             {canCreateBooking && (
-              <Button variant="primary" onClick={pageState.openNewBookingModal}>
-                <Plus size={20} className="mr-2" />
-                {t('booking.new')}
+              <Button
+                variant="primary"
+                onClick={pageState.openNewBookingModal}
+                className="text-sm px-3 py-2 md:px-4 md:py-2.5"
+              >
+                <Plus size={18} className="mr-1.5 md:mr-2" />
+                <span className="hidden sm:inline">{t('booking.new')}</span>
               </Button>
             )}
           </div>
@@ -416,9 +457,11 @@ export default function BookingsPageView() {
         {pageState.viewMode === 'sheet' && (
           <Card>
             <StaffDaySheetView
-              bookings={bookings}
+              bookings={filteredBookingsByDate}
               staffMembers={staffMembers}
               selectedDate={pageState.selectedDate}
+              selectedStaffId={pageState.selectedStaffId}
+              onDateChange={pageState.setSelectedDate}
               businessHours={businessHours}
               slotDuration={slotDuration}
               onBookingClick={pageState.openBookingDetailModal}
@@ -429,7 +472,11 @@ export default function BookingsPageView() {
         )}
         {pageState.viewMode === 'table' && (
           <Card>
-            <Table data={bookings} columns={columns} onRowClick={handleRowClick} />
+            <Table
+              data={filteredBookingsByDate}
+              columns={columns}
+              onRowClick={handleRowClick}
+            />
           </Card>
         )}
       </div>

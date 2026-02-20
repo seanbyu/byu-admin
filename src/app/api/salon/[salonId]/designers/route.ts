@@ -74,22 +74,25 @@ export async function GET(
     }
 
     // 응답 형식 변환
-    const result = (designers || []).map(d => {
-      const user = d.users as { id: string; name: string; profile_image: string | null };
+    const result = (designers || [])
+      .map((d) => {
+        const rawUser = Array.isArray(d.users) ? d.users[0] : d.users;
+        if (!rawUser) return null;
 
-      return {
-        id: user.id,
-        name: user.name,
-        profileImage: user.profile_image,
-        bio: d.bio,
-        specialties: d.specialties,
-        yearsOfExperience: d.years_of_experience,
-        socialLinks: d.social_links,
-        isOwner: d.is_owner,
-        displayOrder: d.display_order,
-        portfolio: includePortfolio ? (portfolioMap[d.user_id] || []) : undefined,
-      };
-    });
+        return {
+          id: rawUser.id,
+          name: rawUser.name,
+          profileImage: rawUser.profile_image,
+          bio: d.bio,
+          specialties: d.specialties,
+          yearsOfExperience: d.years_of_experience,
+          socialLinks: d.social_links,
+          isOwner: d.is_owner,
+          displayOrder: d.display_order,
+          portfolio: includePortfolio ? (portfolioMap[d.user_id] || []) : undefined,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
 
     return NextResponse.json({
       success: true,

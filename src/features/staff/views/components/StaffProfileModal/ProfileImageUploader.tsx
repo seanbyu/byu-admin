@@ -94,12 +94,14 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
           });
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading avatar:', error);
-      if (error.name === 'AbortError') {
+      if (error instanceof DOMException && error.name === 'AbortError') {
         alert(t('staff.profileModal.uploadTimeout') || '업로드 시간이 초과되었습니다.');
+      } else if (error instanceof Error) {
+        alert(error.message || t('staff.profileModal.uploadFailed'));
       } else {
-        alert(error?.message || t('staff.profileModal.uploadFailed'));
+        alert(t('staff.profileModal.uploadFailed'));
       }
     } finally {
       // 미리보기 URL 정리 및 상태 초기화

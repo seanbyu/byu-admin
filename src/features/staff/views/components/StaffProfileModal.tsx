@@ -22,7 +22,7 @@ interface StaffProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   staff: Staff;
-  onSave: (staffId: string, updates: Partial<Staff>) => Promise<void>;
+  onSave: (staffId: string, updates: Partial<Staff> & { password?: string }) => Promise<void>;
 }
 
 interface ProfileFormData {
@@ -87,7 +87,7 @@ export default function StaffProfileModal({
         .map((s) => s.trim())
         .filter(Boolean);
 
-      await onSave(staff.id, {
+      const updates: Partial<Staff> & { password?: string } = {
         name: data.name,
         password: data.password || undefined,
         phone: data.phone,
@@ -96,7 +96,9 @@ export default function StaffProfileModal({
         specialties: specialtiesArray,
         profileImage: data.profileImage,
         socialLinks: data.socialLinks,
-      } as any);
+      };
+
+      await onSave(staff.id, updates);
       onClose();
     } catch (error) {
       console.error('Failed to update profile:', error);

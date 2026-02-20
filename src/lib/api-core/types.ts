@@ -21,6 +21,7 @@ export interface DBUser {
   salon_id: string | null;
   profile_image: string | null;
   is_active: boolean;
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -34,9 +35,21 @@ export interface DBStaffProfile {
   social_links: DBSocialLinks | null;
   permissions: DBPermissions | null;
   is_booking_enabled: boolean | null;
+  display_order?: number | null;
   work_schedule: DBWorkSchedule | null;
   holidays: Holiday[] | null;
   position_id: string | null; // staff_positions 참조
+  staff_positions?: {
+    id: string;
+    name: string | null;
+    name_en: string | null;
+    name_th: string | null;
+  } | Array<{
+    id: string;
+    name: string | null;
+    name_en: string | null;
+    name_th: string | null;
+  }> | null;
 }
 
 // Work schedule in DB format (JSONB)

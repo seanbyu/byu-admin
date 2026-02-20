@@ -34,6 +34,19 @@
   "phone": "전화",
   "walkIn": "직접 방문",
   "pageDescription": "예약을 관리하고 새로운 예약을 추가하세요",
+  "previousDay": "이전 날짜",
+  "nextDay": "다음 날짜",
+  "sheetDateHeader": "{year}년 {month}월 {day}일 ({weekday})",
+  "sheetDateChip": "{day}일({weekday})",
+  "dayShort": {
+    "sun": "일",
+    "mon": "월",
+    "tue": "화",
+    "wed": "수",
+    "thu": "목",
+    "fri": "금",
+    "sat": "토"
+  },
   "shopSettings": "샵 설정",
   "staffSchedule": "직원 스케줄",
   "shopSettingsModal": {

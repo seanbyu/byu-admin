@@ -1,4 +1,5 @@
 import { Staff, StaffPosition } from '../../../types';
+import { ApiResponse } from '@/types';
 
 export interface StaffProfileModalProps {
   isOpen: boolean;
@@ -26,9 +27,13 @@ export interface PositionSelectorProps {
   positions: StaffPosition[];
   selectedPositionId: string | null;
   onSelect: (positionId: string | null) => void;
-  onCreatePosition: (data: { name: string; name_en: string; name_th: string; rank: number }) => Promise<any>;
-  onUpdatePosition: (data: { positionId: string; dto: { name?: string; name_en?: string; name_th?: string } }) => Promise<any>;
-  onDeletePosition: (positionId: string) => Promise<any>;
+  onCreatePosition: (
+    data: { name: string; name_en: string; name_th: string; rank: number }
+  ) => Promise<ApiResponse<StaffPosition>>;
+  onUpdatePosition: (
+    data: { positionId: string; dto: { name?: string; name_en?: string; name_th?: string } }
+  ) => Promise<ApiResponse<StaffPosition>>;
+  onDeletePosition: (positionId: string) => Promise<ApiResponse<void>>;
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;

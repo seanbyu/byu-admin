@@ -45,11 +45,11 @@ export function useStaffPositions(
 
     onMutate: async (newPosition) => {
       await queryClient.cancelQueries({ queryKey });
-      const previousData = queryClient.getQueryData(queryKey);
+      const previousData = queryClient.getQueryData<StaffPosition[]>(queryKey);
 
       // Optimistic: 임시 ID로 추가
-      queryClient.setQueryData(queryKey, (old: any) => {
-        if (!old?.data) return old;
+      queryClient.setQueryData<StaffPosition[]>(queryKey, (old) => {
+        if (!old) return old;
         const tempPosition: StaffPosition = {
           id: `temp-${Date.now()}`,
           salonId,
@@ -57,7 +57,7 @@ export function useStaffPositions(
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        return { ...old, data: [...old.data, tempPosition] };
+        return [...old, tempPosition];
       });
 
       return { previousData };
@@ -79,18 +79,15 @@ export function useStaffPositions(
 
     onMutate: async ({ positionId, dto }) => {
       await queryClient.cancelQueries({ queryKey });
-      const previousData = queryClient.getQueryData(queryKey);
+      const previousData = queryClient.getQueryData<StaffPosition[]>(queryKey);
 
-      queryClient.setQueryData(queryKey, (old: any) => {
-        if (!old?.data) return old;
-        return {
-          ...old,
-          data: old.data.map((pos: StaffPosition) =>
-            pos.id === positionId
-              ? { ...pos, ...dto, updatedAt: new Date() }
-              : pos
-          ),
-        };
+      queryClient.setQueryData<StaffPosition[]>(queryKey, (old) => {
+        if (!old) return old;
+        return old.map((pos) =>
+          pos.id === positionId
+            ? { ...pos, ...dto, updatedAt: new Date() }
+            : pos
+        );
       });
 
       return { previousData };
@@ -111,14 +108,11 @@ export function useStaffPositions(
 
     onMutate: async (positionId) => {
       await queryClient.cancelQueries({ queryKey });
-      const previousData = queryClient.getQueryData(queryKey);
+      const previousData = queryClient.getQueryData<StaffPosition[]>(queryKey);
 
-      queryClient.setQueryData(queryKey, (old: any) => {
-        if (!old?.data) return old;
-        return {
-          ...old,
-          data: old.data.filter((pos: StaffPosition) => pos.id !== positionId),
-        };
+      queryClient.setQueryData<StaffPosition[]>(queryKey, (old) => {
+        if (!old) return old;
+        return old.filter((pos) => pos.id !== positionId);
       });
 
       return { previousData };

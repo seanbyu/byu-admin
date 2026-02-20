@@ -41,17 +41,14 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
       await queryClient.cancelQueries({ queryKey: staffKeys.list(salonId) });
 
       // 이전 데이터 스냅샷
-      const previousData = queryClient.getQueryData(staffKeys.list(salonId));
+      const previousData = queryClient.getQueryData<Staff[]>(staffKeys.list(salonId));
 
       // 낙관적 업데이트
-      queryClient.setQueryData(staffKeys.list(salonId), (old: any) => {
-        if (!old?.data) return old;
-        return {
-          ...old,
-          data: old.data.map((staff: Staff) =>
-            staff.id === staffId ? { ...staff, ...updates } : staff
-          ),
-        };
+      queryClient.setQueryData<Staff[]>(staffKeys.list(salonId), (old) => {
+        if (!old) return old;
+        return old.map((staff) =>
+          staff.id === staffId ? { ...staff, ...updates } : staff
+        );
       });
 
       return { previousData };
@@ -78,20 +75,17 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
     // Optimistic update
     onMutate: async (staffOrders) => {
       await queryClient.cancelQueries({ queryKey: staffKeys.list(salonId) });
-      const previousData = queryClient.getQueryData(staffKeys.list(salonId));
+      const previousData = queryClient.getQueryData<Staff[]>(staffKeys.list(salonId));
 
-      queryClient.setQueryData(staffKeys.list(salonId), (old: any) => {
-        if (!old?.data) return old;
-        const orderMap = new Map(staffOrders.map(o => [o.staffId, o.displayOrder]));
-        return {
-          ...old,
-          data: old.data
-            .map((staff: Staff) => ({
-              ...staff,
-              displayOrder: orderMap.get(staff.id) ?? staff.displayOrder,
-            }))
-            .sort((a: Staff, b: Staff) => a.displayOrder - b.displayOrder),
-        };
+      queryClient.setQueryData<Staff[]>(staffKeys.list(salonId), (old) => {
+        if (!old) return old;
+        const orderMap = new Map(staffOrders.map((o) => [o.staffId, o.displayOrder]));
+        return old
+          .map((staff) => ({
+            ...staff,
+            displayOrder: orderMap.get(staff.id) ?? staff.displayOrder,
+          }))
+          .sort((a, b) => a.displayOrder - b.displayOrder);
       });
 
       return { previousData };
@@ -125,7 +119,7 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
   return {
     // Data
     staffData: query.data ?? [],
-    rawResponse: queryClient.getQueryData(staffKeys.list(salonId)),
+    rawResponse: queryClient.getQueryData<Staff[]>(staffKeys.list(salonId)),
 
     // Query state
     isLoading: query.isLoading,

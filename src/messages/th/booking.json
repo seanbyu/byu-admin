@@ -34,6 +34,19 @@
   "phone": "โทรศัพท์",
   "walkIn": "เดินเข้ามา",
   "pageDescription": "จัดการการจองและเพิ่มการจองใหม่",
+  "previousDay": "วันก่อนหน้า",
+  "nextDay": "วันถัดไป",
+  "sheetDateHeader": "{day}/{month}/{year} ({weekday})",
+  "sheetDateChip": "{day} ({weekday})",
+  "dayShort": {
+    "sun": "อา.",
+    "mon": "จ.",
+    "tue": "อ.",
+    "wed": "พ.",
+    "thu": "พฤ.",
+    "fri": "ศ.",
+    "sat": "ส."
+  },
   "shopSettings": "ตั้งค่าร้าน",
   "staffSchedule": "ตารางพนักงาน",
   "shopSettingsModal": {

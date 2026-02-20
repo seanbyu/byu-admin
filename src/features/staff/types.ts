@@ -60,7 +60,7 @@ export interface Staff {
   phone?: string;
   email?: string;
   role?: UserRole;
-  positionId?: string;       // staff_positions 테이블 참조
+  positionId?: string | null;       // staff_positions 테이블 참조
   positionTitle?: string;    // 직급/호칭 (한국어) - 조회용
   positionTitle_en?: string; // 직급/호칭 (영어) - 조회용
   positionTitle_th?: string; // 직급/호칭 (태국어) - 조회용

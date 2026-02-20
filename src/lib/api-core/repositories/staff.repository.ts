@@ -37,6 +37,36 @@ interface ProfileTableUpdates {
   position_id?: string | null;
 }
 
+interface StaffPositionRow {
+  id: string;
+  name: string | null;
+  name_en: string | null;
+  name_th: string | null;
+}
+
+interface StaffUserRow {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+  profile_image: string | null;
+  is_active: boolean;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface StaffProfileWithUser extends DBStaffProfile {
+  salon_id: string | null;
+  is_owner: boolean;
+  is_approved: boolean;
+  display_order: number | null;
+  created_at: string;
+  staff_positions: StaffPositionRow | null;
+  users: StaffUserRow | null;
+}
+
 export class StaffRepository extends BaseRepository {
   async getStaffList(salonId: string): Promise<StaffResponse[]> {
     if (!salonId) {
@@ -101,8 +131,10 @@ export class StaffRepository extends BaseRepository {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const filteredProfiles = profiles.filter((p: any) => {
-      const user = p.users;
+    const typedProfiles = profiles as StaffProfileWithUser[];
+
+    const filteredProfiles = typedProfiles.filter((profile) => {
+      const user = profile.users;
       if (!user) return false;
       if (!["SUPER_ADMIN", "ADMIN", "MANAGER", "ARTIST", "STAFF"].includes(user.role)) return false;
 
@@ -118,7 +150,7 @@ export class StaffRepository extends BaseRepository {
       return false;
     });
 
-    return filteredProfiles.map((profile: any) => this.transformProfileToStaff(profile));
+    return filteredProfiles.map((profile) => this.transformProfileToStaff(profile));
   }
 
   async getStaffCount(salonId: string): Promise<number> {
@@ -236,9 +268,13 @@ export class StaffRepository extends BaseRepository {
   }
 
   // Transform from staff_profiles query result (profile with nested user)
-  private transformProfileToStaff(profile: any): StaffResponse {
+  private transformProfileToStaff(profile: StaffProfileWithUser): StaffResponse {
     const user = profile.users;
     const position = profile.staff_positions;
+
+    if (!user) {
+      throw new Error("Invalid staff profile: missing user relation");
+    }
 
     return {
       id: user.id,
@@ -278,6 +314,9 @@ export class StaffRepository extends BaseRepository {
     const profile: Partial<DBStaffProfile> = Array.isArray(profileData)
       ? profileData[0] || {}
       : profileData || {};
+    const position = Array.isArray(profile.staff_positions)
+      ? profile.staff_positions[0]
+      : profile.staff_positions;
 
     return {
       id: user.id,
@@ -294,19 +333,20 @@ export class StaffRepository extends BaseRepository {
       reviewCount: 0,
       isActive: user.is_active,
       isBookingEnabled: profile.is_booking_enabled ?? true,
-      displayOrder: (profile as any).display_order ?? 0,
+      displayOrder: profile.display_order ?? 0,
       permissions: this.transformPermissionsFromDB(profile.permissions),
       workHours: StaffRepository.transformWorkHoursFromDB(profile.work_schedule),
       holidays: profile.holidays || [],
       createdAt: user.created_at,
       updatedAt: user.updated_at,
+      deletedAt: user.deleted_at || null,
       phone: user.phone,
       email: user.email,
       role: user.role as string,
-      positionId: (profile as any).position_id || null,
-      positionTitle: (profile as any).staff_positions?.name || null,
-      positionTitle_en: (profile as any).staff_positions?.name_en || null,
-      positionTitle_th: (profile as any).staff_positions?.name_th || null,
+      positionId: profile.position_id || null,
+      positionTitle: position?.name || null,
+      positionTitle_en: position?.name_en || null,
+      positionTitle_th: position?.name_th || null,
     };
   }
 
@@ -377,7 +417,7 @@ export class StaffRepository extends BaseRepository {
     const updates = staffOrders.map(({ staffId, displayOrder }) =>
       this.supabase
         .from("staff_profiles")
-        .update({ display_order: displayOrder })
+        .update({ display_order: displayOrder } as never)
         .eq("user_id", staffId)
     );
 

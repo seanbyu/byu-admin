@@ -65,7 +65,7 @@ export async function markAsRead(notificationId: string): Promise<void> {
 
   const { error } = await supabase
     .from("notifications")
-    .update({ read_at: new Date().toISOString() })
+    .update({ read_at: new Date().toISOString() } as never)
     .eq("id", notificationId);
 
   if (error) {
@@ -81,7 +81,7 @@ export async function markAllAsRead(salonId: string): Promise<void> {
 
   const { error } = await supabase
     .from("notifications")
-    .update({ read_at: new Date().toISOString() })
+    .update({ read_at: new Date().toISOString() } as never)
     .eq("salon_id", salonId)
     .eq("recipient_type", "ADMIN")
     .eq("channel", "IN_APP") // 인앱 알림만 업데이트

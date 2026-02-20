@@ -34,6 +34,19 @@
   "phone": "Phone",
   "walkIn": "Walk-in",
   "pageDescription": "Manage bookings and add new reservations",
+  "previousDay": "Previous day",
+  "nextDay": "Next day",
+  "sheetDateHeader": "{month}/{day}/{year} ({weekday})",
+  "sheetDateChip": "{day} ({weekday})",
+  "dayShort": {
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
+  },
   "shopSettings": "Shop Settings",
   "staffSchedule": "Staff Schedule",
   "shopSettingsModal": {

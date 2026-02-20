@@ -194,7 +194,7 @@ export function useStaffActions({
         // users 테이블의 role 업데이트
         const { error } = await supabase
           .from('users')
-          .update({ role: newRole })
+          .update({ role: newRole } as never)
           .eq('id', userId);
 
         if (error) {

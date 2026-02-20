@@ -101,7 +101,7 @@ function StaffProfileModal({
         specialties: specialtiesArray,
         profileImage: data.profileImage,
         socialLinks: socialLinks, // controlled state 사용
-      } as any);
+      });
       onClose();
     } catch (error) {
       console.error('Failed to update profile:', error);
