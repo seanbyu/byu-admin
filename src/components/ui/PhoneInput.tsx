@@ -51,8 +51,10 @@ const formatForSave = (countryCode: string, localNumber: string): string => {
   if (!localNumber) return '';
 
   let formatted = localNumber;
-  // 태국 번호의 경우 앞의 0 제거
-  if (countryCode === '+66' && formatted.startsWith('0')) {
+  // 태국 번호의 경우 저장 시 앞의 0 제거
+  // 단, 첫 글자 입력 단계("0")는 유지해야 입력이 사라지지 않음
+  const digitCount = formatted.replace(/\D/g, '').length;
+  if (countryCode === '+66' && formatted.startsWith('0') && digitCount > 1) {
     formatted = formatted.slice(1);
   }
 
@@ -62,6 +64,7 @@ const formatForSave = (countryCode: string, localNumber: string): string => {
 interface PhoneInputProps {
   value: string;
   onChange: (value: string) => void;
+  onFocus?: () => void;
   label?: string;
   placeholder?: string;
   error?: string;
@@ -72,6 +75,7 @@ interface PhoneInputProps {
 export const PhoneInput = memo(function PhoneInput({
   value,
   onChange,
+  onFocus,
   label,
   placeholder = '010-0000-0000',
   error,
@@ -191,31 +195,35 @@ export const PhoneInput = memo(function PhoneInput({
   return (
     <div className="space-y-1">
       {label && (
-        <label className="block text-sm font-medium text-secondary-700">
+        <label className="block text-sm font-medium text-secondary-800">
           {label}
         </label>
       )}
-      <div className="flex">
+      <div
+        className={`flex rounded-md border transition-colors ${
+          error ? 'border-error-500 focus-within:ring-2 focus-within:ring-error-500' : 'border-secondary-300 focus-within:ring-2 focus-within:ring-[#3B82F6]'
+        } ${disabled ? 'bg-secondary-100 opacity-60' : 'bg-white'} focus-within:border-transparent`}
+      >
         {/* 국가 코드 선택기 */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative shrink-0" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => !disabled && setShowDropdown(!showDropdown)}
             disabled={disabled}
-            className={`flex items-center gap-1 px-3 py-2 border border-r-0 border-secondary-300 rounded-l-md transition-colors min-w-[90px] ${
+            className={`flex items-center gap-1 px-3 py-2 border-r border-secondary-300 rounded-l-md transition-colors min-w-[90px] ${
               disabled
-                ? 'bg-secondary-100 cursor-not-allowed opacity-60'
+                ? 'bg-secondary-100 cursor-not-allowed'
                 : 'bg-secondary-50 hover:bg-secondary-100'
             }`}
           >
             <span className="text-lg">{displayCountry.flag}</span>
-            <span className={`text-sm ${disabled ? 'text-secondary-400' : 'text-secondary-600'}`}>{displayCountry.code}</span>
+            <span className={`text-sm ${disabled ? 'text-secondary-400' : 'text-secondary-700'}`}>{displayCountry.code}</span>
             <ChevronDown size={14} className="text-secondary-400" />
           </button>
 
           {/* 드롭다운 */}
           {showDropdown && (
-            <div className="absolute z-20 top-full left-0 mt-1 bg-white border border-secondary-200 rounded-md shadow-lg min-w-[140px]">
+            <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-secondary-200 rounded-md shadow-lg min-w-[140px]">
               {COUNTRY_CODES.map((country) => (
                 <button
                   key={country.code}
@@ -239,11 +247,12 @@ export const PhoneInput = memo(function PhoneInput({
           type="tel"
           value={displayLocalNumber}
           onChange={handlePhoneChange}
+          onFocus={onFocus}
           placeholder={placeholder}
           disabled={disabled}
-          className={`flex-1 px-3 py-2 border border-secondary-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-            error ? 'border-red-500' : ''
-          } ${disabled ? 'bg-secondary-100 cursor-not-allowed opacity-60' : ''}`}
+          className={`flex-1 min-w-0 px-3 py-2 border-0 rounded-r-md bg-white text-secondary-900 placeholder:text-secondary-500 focus:outline-none ${
+            disabled ? 'bg-secondary-100 cursor-not-allowed' : ''
+          }`}
         />
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}

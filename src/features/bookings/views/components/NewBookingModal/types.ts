@@ -1,4 +1,5 @@
 import { Booking } from '../../../types';
+import { BusinessHours } from '@/types';
 
 export type CustomerType = 'local' | 'foreign';
 
@@ -13,6 +14,8 @@ export interface NewBookingModalProps {
   onClose: () => void;
   selectedDate: Date;
   selectedTime: string;
+  slotDuration: number;
+  businessHours: BusinessHours[];
   selectedStaffId: string;
   selectedServiceId: string;
   designers: Array<{ value: string; label: string }>;
@@ -51,5 +54,6 @@ export interface CustomerSearchActions {
   handleSelectCustomer: (customer: ExistingCustomer) => void;
   handleClearCustomer: () => void;
   handlePhoneChange: (value: string) => void;
+  handlePhoneFocus: () => void;
   setShowCustomerDropdown: (show: boolean) => void;
 }

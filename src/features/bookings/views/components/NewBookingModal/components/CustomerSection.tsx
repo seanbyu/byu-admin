@@ -26,6 +26,7 @@ interface CustomerSectionProps {
   onSelectCustomer: (customer: ExistingCustomer) => void;
   onClearCustomer: () => void;
   onClearErrors: (field: string) => void;
+  onPhoneFocus: () => void;
 }
 
 function CustomerSectionComponent({
@@ -43,6 +44,7 @@ function CustomerSectionComponent({
   onSelectCustomer,
   onClearCustomer,
   onClearErrors,
+  onPhoneFocus,
 }: CustomerSectionProps) {
   const t = useTranslations();
 
@@ -64,13 +66,14 @@ function CustomerSectionComponent({
           value={customerName}
           onChange={(e) => onNameChange(e.target.value)}
           error={errors.customerName}
+          className="text-secondary-900 placeholder:text-secondary-500 focus:ring-[#3B82F6]"
         />
       </div>
 
       {/* 전화번호 + 내국인/외국인 선택 */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="block text-sm font-medium text-secondary-700">
+          <label className="block text-sm font-medium text-secondary-800">
             {t('customer.phone')}{' '}
             {customerType === 'local' && <span className="text-red-500">*</span>}
           </label>
@@ -81,8 +84,8 @@ function CustomerSectionComponent({
               className={cn(
                 'px-3 py-1 text-xs rounded-full transition-colors',
                 customerType === 'local'
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-secondary-100 text-secondary-600 hover:bg-secondary-200'
+                  ? 'bg-[#3B82F6] text-white'
+                  : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
               )}
             >
               {t('booking.customerType.local')}
@@ -93,8 +96,8 @@ function CustomerSectionComponent({
               className={cn(
                 'px-3 py-1 text-xs rounded-full transition-colors',
                 customerType === 'foreign'
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-secondary-100 text-secondary-600 hover:bg-secondary-200'
+                  ? 'bg-[#3B82F6] text-white'
+                  : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
               )}
             >
               {t('booking.customerType.foreign')}
@@ -104,18 +107,18 @@ function CustomerSectionComponent({
 
         {/* 선택된 고객 표시 */}
         {selectedCustomer && (
-          <div className="mb-2 p-2 bg-primary-50 border border-primary-200 rounded-md flex items-center justify-between">
+          <div className="mb-2 p-2 bg-[#EFF6FF] border border-[#BFDBFE] rounded-md flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-primary-600" />
-              <span className="text-sm font-medium text-primary-700">
+              <User className="w-4 h-4 text-[#1E40AF]" />
+              <span className="text-sm font-medium text-[#1E40AF]">
                 {selectedCustomer.name}
               </span>
-              <span className="text-xs text-primary-500">{selectedCustomer.phone}</span>
+              <span className="text-xs text-[#3B82F6]">{selectedCustomer.phone}</span>
             </div>
             <button
               type="button"
               onClick={onClearCustomer}
-              className="text-xs text-primary-600 hover:text-primary-800"
+              className="text-xs text-[#2563EB] hover:text-[#1D4ED8]"
             >
               {t('common.cancel')}
             </button>
@@ -127,6 +130,7 @@ function CustomerSectionComponent({
           <PhoneInput
             value={customerPhone}
             onChange={onPhoneChange}
+            onFocus={onPhoneFocus}
             defaultCountryCode="+66"
             placeholder="012-345-6789"
             error={errors.customerPhone}
@@ -134,9 +138,9 @@ function CustomerSectionComponent({
           />
 
           {/* 고객 검색 드롭다운 */}
-          {showCustomerDropdown && matchingCustomers.length > 0 && (
+          {customerType === 'local' && showCustomerDropdown && matchingCustomers.length > 0 && (
             <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white border border-secondary-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-              <div className="p-2 text-xs text-secondary-500 bg-secondary-50 border-b">
+              <div className="p-2 text-xs text-secondary-600 bg-[#F8FAFC] border-b">
                 {t('booking.existingCustomers') || '기존 고객'}
               </div>
               {matchingCustomers.map((customer) => (

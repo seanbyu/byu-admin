@@ -5,6 +5,7 @@ interface UseCustomerSearchProps {
   customerPhone: string;
   customers: any[] | undefined;
   onPhoneChange: (phone: string) => void;
+  onNameChange: (name: string) => void;
 }
 
 interface UseCustomerSearchReturn {
@@ -15,48 +16,87 @@ interface UseCustomerSearchReturn {
   handleSelectCustomer: (customer: any) => void;
   handleClearCustomer: () => void;
   handlePhoneChange: (value: string) => void;
+  handlePhoneFocus: () => void;
   setSelectedCustomer: React.Dispatch<React.SetStateAction<ExistingCustomer | null>>;
   setShowCustomerDropdown: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+const toDigits = (value: string) => value.replace(/\D/g, '');
+
+const buildSearchVariants = (phone: string): string[] => {
+  const digits = toDigits(phone);
+  if (!digits) return [];
+
+  const variants = new Set<string>();
+
+  // Raw digits
+  variants.add(digits);
+
+  // Country code stripped variants (+66, +82, +1)
+  if (digits.startsWith('66') && digits.length > 2) {
+    variants.add(digits.slice(2));
+  } else if (digits.startsWith('82') && digits.length > 2) {
+    variants.add(digits.slice(2));
+  } else if (digits.startsWith('1') && digits.length > 1) {
+    variants.add(digits.slice(1));
+  }
+
+  // Leading zero-agnostic variants
+  Array.from(variants).forEach((v) => {
+    variants.add(v.replace(/^0+/, ''));
+  });
+
+  return Array.from(variants).filter(Boolean);
+};
 
 export function useCustomerSearch({
   customerPhone,
   customers,
   onPhoneChange,
+  onNameChange,
 }: UseCustomerSearchProps): UseCustomerSearchReturn {
   const [selectedCustomer, setSelectedCustomer] = useState<ExistingCustomer | null>(null);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 전화번호로 고객 검색
   const matchingCustomers = useMemo(() => {
-    if (!customerPhone || customerPhone.length < 4 || !customers) return [];
+    if (!customers) return [];
 
-    const phoneDigits = customerPhone.replace(/[^0-9]/g, '');
+    const queryVariants = buildSearchVariants(customerPhone);
+    const customersWithPhone = customers.filter((customer: any) => !!customer.phone);
 
-    return customers
+    // 입력 전 포커스 상태에서는 빠른 선택을 위해 상위 5명 노출
+    if (queryVariants.length === 0) {
+      return customersWithPhone.slice(0, 5);
+    }
+
+    return customersWithPhone
       .filter((customer: any) => {
-        if (!customer.phone) return false;
-        const customerDigits = customer.phone.replace(/[^0-9]/g, '');
-        return customerDigits.includes(phoneDigits);
+        const customerVariants = buildSearchVariants(customer.phone);
+        return queryVariants.some((query) =>
+          customerVariants.some((target) => target.includes(query))
+        );
       })
       .slice(0, 5);
   }, [customerPhone, customers]);
 
-  // 전화번호 변경 시 드롭다운 표시
+  // 포커스 + 검색 결과 존재 시 드롭다운 표시
   useEffect(() => {
-    if (matchingCustomers.length > 0 && !selectedCustomer) {
+    if (isPhoneInputFocused && matchingCustomers.length > 0 && !selectedCustomer) {
       setShowCustomerDropdown(true);
     } else {
       setShowCustomerDropdown(false);
     }
-  }, [matchingCustomers, selectedCustomer]);
+  }, [isPhoneInputFocused, matchingCustomers, selectedCustomer]);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowCustomerDropdown(false);
+        setIsPhoneInputFocused(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -70,9 +110,11 @@ export function useCustomerSearch({
       name: customer.name,
       phone: customer.phone,
     });
+    onNameChange(customer.name);
     onPhoneChange(customer.phone);
     setShowCustomerDropdown(false);
-  }, [onPhoneChange]);
+    setIsPhoneInputFocused(false);
+  }, [onNameChange, onPhoneChange]);
 
   // 선택 해제 (새 고객으로 전환)
   const handleClearCustomer = useCallback(() => {
@@ -90,6 +132,10 @@ export function useCustomerSearch({
     [selectedCustomer, onPhoneChange]
   );
 
+  const handlePhoneFocus = useCallback(() => {
+    setIsPhoneInputFocused(true);
+  }, []);
+
   return {
     selectedCustomer,
     showCustomerDropdown,
@@ -98,6 +144,7 @@ export function useCustomerSearch({
     handleSelectCustomer,
     handleClearCustomer,
     handlePhoneChange,
+    handlePhoneFocus,
     setSelectedCustomer,
     setShowCustomerDropdown,
   };

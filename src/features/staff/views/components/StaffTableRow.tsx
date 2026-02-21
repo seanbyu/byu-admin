@@ -1,10 +1,9 @@
 'use client';
 
-import { memo, useCallback, useState, useRef, useEffect } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { ChevronDown } from 'lucide-react';
 import { Staff } from '../../types';
 
 export interface StaffTableRowProps {
@@ -73,40 +72,13 @@ export const StaffTableRow = memo(function StaffTableRow({
   onRoleChange,
 }: StaffTableRowProps) {
   const t = useTranslations('staff');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const roleDropdownRef = useRef<HTMLDivElement>(null);
+  const [resignAction, setResignAction] = useState('');
 
   // 퇴사 예정 상태 확인
   const isResigned = !member.isActive && member.deletedAt;
   const daysRemaining = isResigned
     ? getDaysUntilDeletion(member.deletedAt ?? null)
     : 0;
-
-  // 드롭다운 외부 클릭 감지
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
-        setIsRoleDropdownOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSoftResignClick = useCallback(() => {
-    setIsDropdownOpen(false);
-    onSoftResign?.(member.id);
-  }, [member.id, onSoftResign]);
-
-  const handleImmediateResignClick = useCallback(() => {
-    setIsDropdownOpen(false);
-    onImmediateResign?.(member.id);
-  }, [member.id, onImmediateResign]);
 
   const handleCancelResignationClick = useCallback(() => {
     onCancelResignation?.(member.id);
@@ -120,16 +92,20 @@ export const StaffTableRow = memo(function StaffTableRow({
     onProfileEdit?.(member);
   }, [member, onProfileEdit]);
 
-  const toggleDropdown = useCallback(() => {
-    setIsDropdownOpen(prev => !prev);
-  }, []);
-
-  const toggleRoleDropdown = useCallback(() => {
-    setIsRoleDropdownOpen(prev => !prev);
-  }, []);
+  const handleResignActionChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const action = e.target.value;
+      setResignAction('');
+      if (action === 'soft') {
+        void onSoftResign?.(member.id);
+      } else if (action === 'immediate') {
+        void onImmediateResign?.(member.id);
+      }
+    },
+    [member.id, onSoftResign, onImmediateResign]
+  );
 
   const handleRoleSelect = useCallback((newRole: string) => {
-    setIsRoleDropdownOpen(false);
     if (member.role !== newRole) {
       onRoleChange?.(member.id, member.userId, newRole);
     }
@@ -205,38 +181,22 @@ export const StaffTableRow = memo(function StaffTableRow({
               <span className="text-secondary-400">-</span>
             )
           ) : onSoftResign || onImmediateResign ? (
-            // 일반 직원: 퇴사 드롭다운 메뉴
-            <div className="relative inline-block" ref={dropdownRef}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-red-500 border-red-200 hover:bg-red-50 h-8 px-3 text-xs"
-                onClick={toggleDropdown}
-              >
+            // 일반 직원: 네이티브 셀렉트로 퇴사 처리 (overflow 스크롤 이슈 방지)
+            <select
+              value={resignAction}
+              onChange={handleResignActionChange}
+              className="h-8 min-w-[120px] px-2 text-xs border border-red-200 rounded-md bg-white text-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+            >
+              <option value="" disabled>
                 {t('actions.resign')}
-                <ChevronDown className="w-3 h-3 ml-1" />
-              </Button>
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-                  {onSoftResign && (
-                    <button
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-md"
-                      onClick={handleSoftResignClick}
-                    >
-                      {t('actions.softResign')}
-                    </button>
-                  )}
-                  {onImmediateResign && (
-                    <button
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 last:rounded-b-md border-t border-gray-100"
-                      onClick={handleImmediateResignClick}
-                    >
-                      {t('actions.immediateResign')}
-                    </button>
-                  )}
-                </div>
+              </option>
+              {onSoftResign && (
+                <option value="soft">{t('actions.softResign')}</option>
               )}
-            </div>
+              {onImmediateResign && (
+                <option value="immediate">{t('actions.immediateResign')}</option>
+              )}
+            </select>
           ) : (
             <span className="text-secondary-400">-</span>
           )
@@ -303,31 +263,18 @@ export const StaffTableRow = memo(function StaffTableRow({
           // SUPER_ADMIN, ADMIN은 변경 불가
           <span>{getRoleName(member.role)}</span>
         ) : isAdmin && !isResigned && onRoleChange ? (
-          // Admin 유저: 드롭다운으로 역할 변경 가능
-          <div className="relative inline-block" ref={roleDropdownRef}>
-            <button
-              onClick={toggleRoleDropdown}
-              className="inline-flex items-center text-sm text-secondary-600 hover:text-secondary-900"
-            >
-              {getRoleName(member.role)}
-              <ChevronDown className="w-3 h-3 ml-1" />
-            </button>
-            {isRoleDropdownOpen && (
-              <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-                {ROLE_OPTIONS.map((role) => (
-                  <button
-                    key={role}
-                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 first:rounded-t-md last:rounded-b-md ${
-                      member.role === role ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-700'
-                    }`}
-                    onClick={() => handleRoleSelect(role)}
-                  >
-                    {getRoleName(role)}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          // Admin 유저: 네이티브 셀렉트로 역할 변경 (overflow 스크롤 이슈 방지)
+          <select
+            value={member.role}
+            onChange={(e) => handleRoleSelect(e.target.value)}
+            className="text-sm text-secondary-600 bg-transparent border-0 focus:outline-none focus:ring-0 pr-5 cursor-pointer"
+          >
+            {ROLE_OPTIONS.map((role) => (
+              <option key={role} value={role}>
+                {getRoleName(role)}
+              </option>
+            ))}
+          </select>
         ) : (
           // 일반 유저: 정적 표시
           <span>{getRoleName(member.role)}</span>

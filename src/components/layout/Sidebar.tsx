@@ -14,6 +14,7 @@ import {
   Briefcase,
   Menu,
   X,
+  LogOut,
   ChevronDown,
   ChevronRight,
   LucideIcon,
@@ -21,17 +22,24 @@ import {
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
+import { useLogout } from '@/features/auth/hooks/useAuth';
 import { useTranslations } from 'next-intl';
-import { Link, usePathname } from '@/i18n/routing';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { UserRole } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore();
   const { user } = useAuthStore();
   const t = useTranslations();
+  const { logout } = useLogout({
+    onLogout: () => {
+      router.push('/login');
+    },
+  });
 
   // Responsive standard: desktop(xl+) fixed open, tablet/mobile drawer closed by default
   React.useEffect(() => {
@@ -338,23 +346,15 @@ export const Sidebar: React.FC = () => {
             </ul>
           </nav>
 
-          {/* User info */}
+          {/* Logout */}
           <div className="px-3 md:px-4 xl:px-5 py-3 md:py-3.5 xl:py-4 border-t border-sidebar-border">
-            <div className="flex items-center">
-              <div className="w-8 h-8 md:w-9 md:h-9 xl:w-10 xl:h-10 rounded-full bg-sidebar-avatar-bg flex items-center justify-center">
-                <span className="text-sidebar-avatar-text font-semibold text-xs md:text-sm">
-                  {user?.name?.[0]?.toUpperCase()}
-                </span>
-              </div>
-              <div className="ml-2.5 md:ml-3 min-w-0">
-                <p className="text-xs md:text-sm font-medium text-sidebar-text truncate">
-                  {user?.name}
-                </p>
-                <p className="text-[10px] md:text-[11px] xl:text-xs text-sidebar-text-subtle truncate">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
+            <button
+              onClick={logout}
+              className="w-full flex items-center justify-center xl:justify-start gap-2 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-hover-text transition-colors"
+            >
+              <LogOut size={18} />
+              <span className="text-sm font-medium">{t('auth.logout')}</span>
+            </button>
           </div>
         </div>
       </aside>

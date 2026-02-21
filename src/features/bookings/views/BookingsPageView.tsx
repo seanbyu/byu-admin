@@ -34,6 +34,12 @@ const STATUS_OPTIONS = [
   { value: BookingStatus.CANCELLED, label: 'booking.cancelled' },
 ] as const;
 
+const parseLocalDate = (value: Date | string): Date => {
+  if (value instanceof Date) return value;
+  const [year, month, day] = value.slice(0, 10).split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
 // 필터 섹션
 const BookingFilters = memo(function BookingFilters({
   statusFilter,
@@ -246,6 +252,8 @@ export default function BookingsPageView() {
           onClose={pageState.closeNewBookingModal}
           selectedDate={pageState.selectedDate}
           selectedTime={pageState.selectedTime}
+          slotDuration={slotDuration}
+          businessHours={businessHours}
           selectedStaffId={pageState.selectedStaffId}
           selectedServiceId={pageState.selectedServiceId}
           designers={designers}
@@ -261,8 +269,10 @@ export default function BookingsPageView() {
         <NewBookingModal
           isOpen={pageState.showBookingDetailModal}
           onClose={pageState.closeBookingDetailModal}
-          selectedDate={new Date(pageState.selectedBooking.date)}
+          selectedDate={parseLocalDate(pageState.selectedBooking.date)}
           selectedTime={pageState.selectedBooking.startTime}
+          slotDuration={slotDuration}
+          businessHours={businessHours}
           selectedStaffId={pageState.selectedBooking.staffId}
           selectedServiceId={pageState.selectedBooking.serviceId}
           designers={designers}

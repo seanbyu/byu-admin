@@ -6,15 +6,15 @@ import { cn } from '@/lib/utils';
 
 interface ServiceSelectorProps {
   salonId: string;
-  selectedServiceId: string;
-  onServiceChange: (serviceId: string) => void;
+  selectedServiceIds: string[];
+  onServiceAdd: (serviceId: string) => void;
   isLoading?: boolean;
 }
 
 function ServiceSelectorComponent({
   salonId,
-  selectedServiceId,
-  onServiceChange,
+  selectedServiceIds,
+  onServiceAdd,
 }: ServiceSelectorProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 
@@ -67,12 +67,21 @@ function ServiceSelectorComponent({
 
   // 서비스 선택 핸들러
   const handleServiceClick = useCallback((serviceId: string) => {
-    onServiceChange(serviceId);
-  }, [onServiceChange]);
+    onServiceAdd(serviceId);
+  }, [onServiceAdd]);
+
+  const selectedCounts = useMemo(
+    () =>
+      selectedServiceIds.reduce<Record<string, number>>((acc, serviceId) => {
+        acc[serviceId] = (acc[serviceId] || 0) + 1;
+        return acc;
+      }, {}),
+    [selectedServiceIds]
+  );
 
   if (isCategoriesLoading || isMenusLoading) {
     return (
-      <div className="border border-secondary-200 rounded-lg p-4 text-center text-secondary-500">
+      <div className="border border-secondary-200 rounded-lg p-4 text-center text-secondary-600 bg-white">
         Loading...
       </div>
     );
@@ -80,17 +89,17 @@ function ServiceSelectorComponent({
 
   if (visibleCategories.length === 0) {
     return (
-      <div className="border border-secondary-200 rounded-lg p-4 text-center text-secondary-500">
+      <div className="border border-secondary-200 rounded-lg p-4 text-center text-secondary-600 bg-white">
         등록된 서비스가 없습니다
       </div>
     );
   }
 
   return (
-    <div className="border border-secondary-200 rounded-lg overflow-hidden">
+    <div className="border border-secondary-200 rounded-lg overflow-hidden bg-white">
       <div className="flex h-[240px]">
         {/* 카테고리 목록 (왼쪽) */}
-        <div className="w-1/3 border-r border-secondary-200 overflow-y-auto bg-secondary-50">
+        <div className="w-1/3 border-r border-secondary-200 overflow-y-auto bg-[#F8FAFC]">
           {visibleCategories.map((category) => (
             <button
               key={category.id}
@@ -99,8 +108,8 @@ function ServiceSelectorComponent({
               className={cn(
                 'w-full px-4 py-3 text-left text-sm font-medium transition-colors border-l-2',
                 selectedCategoryId === category.id
-                  ? 'bg-primary-50 text-primary-700 border-l-primary-500'
-                  : 'bg-white text-secondary-700 border-l-transparent hover:bg-secondary-50'
+                  ? 'bg-[#DBEAFE] text-[#1E40AF] border-l-[#3B82F6]'
+                  : 'bg-white text-secondary-800 border-l-transparent hover:bg-secondary-50'
               )}
             >
               {category.name}
@@ -117,25 +126,32 @@ function ServiceSelectorComponent({
               onClick={() => handleServiceClick(menu.id)}
               className={cn(
                 'w-full px-4 py-3 text-left border-b border-secondary-100 last:border-b-0 transition-colors',
-                selectedServiceId === menu.id
-                  ? 'bg-primary-50'
+                (selectedCounts[menu.id] || 0) > 0
+                  ? 'bg-[#DBEAFE]'
                   : 'hover:bg-secondary-50'
               )}
             >
               <div className="flex items-center justify-between">
                 <span
                   className={cn(
-                    'text-sm',
-                    selectedServiceId === menu.id
-                      ? 'text-primary-700 font-medium'
-                      : 'text-secondary-700'
+                    'text-sm font-medium',
+                    (selectedCounts[menu.id] || 0) > 0
+                      ? 'text-[#1E40AF]'
+                      : 'text-secondary-800'
                   )}
                 >
                   {menu.name}
                 </span>
-                <span className="text-xs text-secondary-500">
-                  {menu.duration_minutes ?? 0}min / ฿{(menu.base_price || menu.price || 0).toLocaleString()}
-                </span>
+                <div className="flex items-center gap-2">
+                  {(selectedCounts[menu.id] || 0) > 0 && (
+                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#3B82F6] px-1.5 text-[10px] font-semibold text-white">
+                      x{selectedCounts[menu.id]}
+                    </span>
+                  )}
+                  <span className="text-xs text-secondary-600">
+                    {menu.duration_minutes ?? 0}min / ฿{(menu.base_price || menu.price || 0).toLocaleString()}
+                  </span>
+                </div>
               </div>
             </button>
           ))}

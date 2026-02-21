@@ -3,6 +3,21 @@ import { useTranslations } from 'next-intl';
 import { CustomerType } from '../types';
 import { Booking } from '../../../../types';
 
+const parseLocalDate = (value: string): Date => {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const toDateInputValue = (date: Date | string): string => {
+  if (typeof date === 'string') {
+    return date.slice(0, 10);
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface UseBookingFormProps {
   editBooking?: Booking;
   selectedDate: Date;
@@ -41,7 +56,8 @@ interface UseBookingFormReturn {
   setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   // Handlers
   handleDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleTimeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleTimeChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  setTime: (time: string) => void;
   handleStaffChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleServiceChange: (serviceId: string) => void;
   // Actions
@@ -88,7 +104,7 @@ export function useBookingForm({
     setCustomerName(booking.customerName || '');
     setCustomerPhone(booking.customerPhone || '');
     setNotes(booking.notes || '');
-    setInternalDate(new Date(booking.date));
+    setInternalDate(parseLocalDate(toDateInputValue(booking.date)));
     setInternalTime(booking.startTime);
     setInternalStaffId(booking.staffId);
     setInternalServiceId(booking.serviceId);
@@ -104,7 +120,7 @@ export function useBookingForm({
   // 이벤트 핸들러
   const handleDateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newDate = new Date(e.target.value);
+      const newDate = parseLocalDate(e.target.value);
       if (isEditMode) {
         setInternalDate(newDate);
       } else {
@@ -115,8 +131,19 @@ export function useBookingForm({
   );
 
   const handleTimeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const newTime = e.target.value;
+      if (isEditMode) {
+        setInternalTime(newTime);
+      } else {
+        onTimeChange(newTime);
+      }
+    },
+    [isEditMode, onTimeChange]
+  );
+
+  const setTime = useCallback(
+    (newTime: string) => {
       if (isEditMode) {
         setInternalTime(newTime);
       } else {
@@ -207,6 +234,7 @@ export function useBookingForm({
     setErrors,
     handleDateChange,
     handleTimeChange,
+    setTime,
     handleStaffChange,
     handleServiceChange,
     resetForm,

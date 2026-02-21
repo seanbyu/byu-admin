@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { staffApi } from '../api';
 import { Staff } from '../types';
 import { staffKeys, staffQueries } from './queries';
+import { ApiResponse } from '@/types';
 
 // ============================================
 // useStaff Hook
@@ -21,8 +22,31 @@ interface UpdateStaffParams {
   updates: Partial<Staff>;
 }
 
+type StaffListCache = ApiResponse<Staff[]> | Staff[] | undefined;
+
+const mapStaffListCache = (
+  cache: StaffListCache,
+  mapper: (list: Staff[]) => Staff[]
+): StaffListCache => {
+  if (!cache) return cache;
+
+  if (Array.isArray(cache)) {
+    return mapper(cache);
+  }
+
+  if (Array.isArray(cache.data)) {
+    return {
+      ...cache,
+      data: mapper(cache.data),
+    };
+  }
+
+  return cache;
+};
+
 export function useStaff(salonId: string, options?: UseStaffOptions) {
   const queryClient = useQueryClient();
+  const listQueryKey = staffKeys.list(salonId);
 
   // staffQueries.list()의 select 옵션으로 데이터가 자동 변환됨
   const query = useQuery({
@@ -38,18 +62,19 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
     // Optimistic update: 서버 응답 전에 UI 먼저 업데이트
     onMutate: async ({ staffId, updates }) => {
       // 진행 중인 refetch 취소
-      await queryClient.cancelQueries({ queryKey: staffKeys.list(salonId) });
+      await queryClient.cancelQueries({ queryKey: listQueryKey });
 
       // 이전 데이터 스냅샷
-      const previousData = queryClient.getQueryData<Staff[]>(staffKeys.list(salonId));
+      const previousData = queryClient.getQueryData<StaffListCache>(listQueryKey);
 
       // 낙관적 업데이트
-      queryClient.setQueryData<Staff[]>(staffKeys.list(salonId), (old) => {
-        if (!old) return old;
-        return old.map((staff) =>
-          staff.id === staffId ? { ...staff, ...updates } : staff
-        );
-      });
+      queryClient.setQueryData<StaffListCache>(listQueryKey, (old) =>
+        mapStaffListCache(old, (list) =>
+          list.map((staff) =>
+            staff.id === staffId ? { ...staff, ...updates } : staff
+          )
+        )
+      );
 
       return { previousData };
     },
@@ -57,13 +82,13 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
     // 에러 시 롤백
     onError: (_err, _variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(staffKeys.list(salonId), context.previousData);
+        queryClient.setQueryData(listQueryKey, context.previousData);
       }
     },
 
     // 성공/실패 후 무효화로 서버 데이터와 동기화
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: staffKeys.list(salonId) });
+      queryClient.invalidateQueries({ queryKey: listQueryKey });
     },
   });
 
@@ -74,31 +99,32 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
 
     // Optimistic update
     onMutate: async (staffOrders) => {
-      await queryClient.cancelQueries({ queryKey: staffKeys.list(salonId) });
-      const previousData = queryClient.getQueryData<Staff[]>(staffKeys.list(salonId));
+      await queryClient.cancelQueries({ queryKey: listQueryKey });
+      const previousData = queryClient.getQueryData<StaffListCache>(listQueryKey);
 
-      queryClient.setQueryData<Staff[]>(staffKeys.list(salonId), (old) => {
-        if (!old) return old;
-        const orderMap = new Map(staffOrders.map((o) => [o.staffId, o.displayOrder]));
-        return old
-          .map((staff) => ({
-            ...staff,
-            displayOrder: orderMap.get(staff.id) ?? staff.displayOrder,
-          }))
-          .sort((a, b) => a.displayOrder - b.displayOrder);
-      });
+      queryClient.setQueryData<StaffListCache>(listQueryKey, (old) =>
+        mapStaffListCache(old, (list) => {
+          const orderMap = new Map(staffOrders.map((o) => [o.staffId, o.displayOrder]));
+          return list
+            .map((staff) => ({
+              ...staff,
+              displayOrder: orderMap.get(staff.id) ?? staff.displayOrder,
+            }))
+            .sort((a, b) => a.displayOrder - b.displayOrder);
+        })
+      );
 
       return { previousData };
     },
 
     onError: (_err, _variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(staffKeys.list(salonId), context.previousData);
+        queryClient.setQueryData(listQueryKey, context.previousData);
       }
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: staffKeys.list(salonId) });
+      queryClient.invalidateQueries({ queryKey: listQueryKey });
     },
   });
 
@@ -119,7 +145,7 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
   return {
     // Data
     staffData: query.data ?? [],
-    rawResponse: queryClient.getQueryData<Staff[]>(staffKeys.list(salonId)),
+    rawResponse: queryClient.getQueryData<StaffListCache>(listQueryKey),
 
     // Query state
     isLoading: query.isLoading,

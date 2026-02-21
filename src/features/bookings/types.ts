@@ -25,7 +25,7 @@ export interface Booking {
   staffName: string;
   serviceId: string;
   serviceName: string;
-  date: Date;
+  date: Date | string;
   startTime: string;
   endTime: string;
   status: BookingStatus;

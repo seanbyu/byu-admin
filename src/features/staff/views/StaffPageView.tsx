@@ -24,7 +24,7 @@ const StaffPermissionModal = dynamic(
 );
 
 const StaffProfileModal = dynamic(
-  () => import('./components/StaffProfileModal'),
+  () => import('./components/StaffProfileModal/index'),
   { ssr: false }
 );
 

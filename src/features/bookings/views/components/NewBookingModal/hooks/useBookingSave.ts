@@ -27,10 +27,9 @@ interface UseBookingSaveProps {
   currentDate: Date;
   currentTime: string;
   currentStaffId: string;
-  currentServiceId: string;
   selectedStaffName: string;
   // Service info
-  selectedService: ServiceInfo | null;
+  selectedServices: ServiceInfo[];
   // Callbacks
   onClose: () => void;
   validateForm: () => boolean;
@@ -48,6 +47,15 @@ interface UseBookingSaveReturn {
   handleConfirmNewCustomer: () => Promise<void>;
 }
 
+// Date 객체를 UTC 변환 없이 로컬 기준 YYYY-MM-DD 문자열로 직렬화
+// (JSON.stringify 시 UTC로 변환되어 날짜가 하루 밀리는 버그 방지)
+function toLocalDateStr(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function useBookingSave({
   salonId,
   editBooking,
@@ -59,9 +67,8 @@ export function useBookingSave({
   currentDate,
   currentTime,
   currentStaffId,
-  currentServiceId,
   selectedStaffName,
-  selectedService,
+  selectedServices,
   onClose,
   validateForm,
   selectedCustomer,
@@ -84,14 +91,56 @@ export function useBookingSave({
     []
   );
 
+  const buildServiceSummary = useCallback((services: ServiceInfo[]) => {
+    const grouped = services.reduce<Map<string, { name: string; count: number }>>(
+      (acc, service) => {
+        const current = acc.get(service.id);
+        if (current) {
+          current.count += 1;
+        } else {
+          acc.set(service.id, { name: service.name, count: 1 });
+        }
+        return acc;
+      },
+      new Map()
+    );
+
+    return Array.from(grouped.values())
+      .map((item) => `${item.name} x${item.count}`)
+      .join(', ');
+  }, []);
+
+  const mergeNotesWithServices = useCallback(
+    (baseNotes: string, services: ServiceInfo[]) => {
+      const trimmedNotes = baseNotes.trim();
+      if (services.length <= 1) {
+        return trimmedNotes || undefined;
+      }
+
+      const summaryLine = `[Services] ${buildServiceSummary(services)}`;
+      if (!trimmedNotes) return summaryLine;
+      if (trimmedNotes.includes(summaryLine)) return trimmedNotes;
+      return `${trimmedNotes}\n${summaryLine}`;
+    },
+    [buildServiceSummary]
+  );
+
   // 실제 예약 저장 로직
   const saveBooking = useCallback(
     async (customerId: string) => {
-      if (!selectedService) return;
+      if (selectedServices.length === 0) return;
 
-      const durationMinutes = selectedService.duration_minutes || 60;
-      const servicePrice = selectedService.base_price || selectedService.price || 0;
+      const primaryService = selectedServices[0];
+      const durationMinutes = selectedServices.reduce(
+        (sum, service) => sum + (service.duration_minutes || 60),
+        0
+      );
+      const servicePrice = selectedServices.reduce(
+        (sum, service) => sum + (service.base_price || service.price || 0),
+        0
+      );
       const endTime = calculateEndTime(currentTime, durationMinutes);
+      const mergedNotes = mergeNotesWithServices(notes, selectedServices);
 
       await createBooking({
         salonId,
@@ -100,15 +149,15 @@ export function useBookingSave({
         customerPhone: customerType === 'foreign' ? '' : customerPhone.trim(),
         staffId: currentStaffId,
         staffName: selectedStaffName,
-        serviceId: currentServiceId,
-        serviceName: selectedService.name,
-        date: currentDate,
+        serviceId: primaryService.id,
+        serviceName: primaryService.name,
+        date: toLocalDateStr(currentDate),
         startTime: currentTime,
         endTime,
         status: BookingStatus.CONFIRMED,
         price: servicePrice,
         source: 'WALK_IN',
-        notes: notes.trim() || undefined,
+        notes: mergedNotes,
         productAmount: 0,
         storeSalesAmount: 0,
       });
@@ -116,7 +165,7 @@ export function useBookingSave({
       onClose();
     },
     [
-      selectedService,
+      selectedServices,
       calculateEndTime,
       currentTime,
       createBooking,
@@ -126,45 +175,53 @@ export function useBookingSave({
       customerPhone,
       currentStaffId,
       selectedStaffName,
-      currentServiceId,
       currentDate,
       notes,
+      mergeNotesWithServices,
       onClose,
     ]
   );
 
   // 예약 수정 로직
   const handleUpdateBooking = useCallback(async () => {
-    if (!editBooking || !selectedService) return;
+    if (!editBooking || selectedServices.length === 0) return;
 
-    const durationMinutes = selectedService.duration_minutes || 60;
-    const servicePrice = selectedService.base_price || selectedService.price || 0;
+    const primaryService = selectedServices[0];
+    const durationMinutes = selectedServices.reduce(
+      (sum, service) => sum + (service.duration_minutes || 60),
+      0
+    );
+    const servicePrice = selectedServices.reduce(
+      (sum, service) => sum + (service.base_price || service.price || 0),
+      0
+    );
     const endTime = calculateEndTime(currentTime, durationMinutes);
+    const mergedNotes = mergeNotesWithServices(notes, selectedServices);
 
     await updateBooking({
       id: editBooking.id,
       updates: {
         staffId: currentStaffId,
-        serviceId: currentServiceId,
-        date: currentDate,
+        serviceId: primaryService.id,
+        date: toLocalDateStr(currentDate),
         startTime: currentTime,
         endTime,
         price: servicePrice,
-        notes: notes.trim() || undefined,
+        notes: mergedNotes,
       },
     });
 
     onClose();
   }, [
     editBooking,
-    selectedService,
+    selectedServices,
     calculateEndTime,
     currentTime,
     updateBooking,
     currentStaffId,
-    currentServiceId,
     currentDate,
     notes,
+    mergeNotesWithServices,
     onClose,
   ]);
 
@@ -199,7 +256,7 @@ export function useBookingSave({
         return;
       }
 
-      if (!selectedService) {
+      if (selectedServices.length === 0) {
         alert(t('booking.errors.serviceRequired'));
         return;
       }
@@ -228,7 +285,7 @@ export function useBookingSave({
     },
     [
       validateForm,
-      selectedService,
+      selectedServices,
       isEditMode,
       handleUpdateBooking,
       selectedCustomer,

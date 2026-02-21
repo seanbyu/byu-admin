@@ -141,7 +141,7 @@ export interface Booking {
   staffId: string;
   serviceId: string;
   serviceName: string;
-  date: Date;
+  date: Date | string;
   startTime: string;
   endTime: string;
   status: BookingStatus;

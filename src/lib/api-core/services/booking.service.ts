@@ -57,9 +57,7 @@ export class BookingService {
 
     // camelCase → snake_case 변환
     const camelInput = input as CreateBookingInput;
-    const bookingDate = camelInput.date instanceof Date
-      ? camelInput.date.toISOString().split('T')[0]
-      : String(camelInput.date).split('T')[0];
+    const bookingDate = this.toLocalDateString(camelInput.date);
 
     return {
       salon_id: salonId,
@@ -109,13 +107,24 @@ export class BookingService {
     for (const [key, value] of Object.entries(updates)) {
       const newKey = keyMap[key] || key;
       // date를 문자열로 변환
-      if (key === 'date' && value instanceof Date) {
-        result[newKey] = value.toISOString().split('T')[0];
+      if (key === 'date') {
+        result[newKey] = this.toLocalDateString(value);
       } else {
         result[newKey] = value;
       }
     }
     return result as UpdateBookingDto;
+  }
+
+  // Date 객체를 UTC가 아닌 로컬 기준 yyyy-MM-dd로 직렬화
+  private toLocalDateString(value: Date | string): string {
+    if (value instanceof Date) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return String(value).split('T')[0];
   }
 
   async cancelBooking(id: string): Promise<DBBooking> {

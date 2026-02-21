@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Menu, Bell, Globe, LogOut } from 'lucide-react';
+import { Menu, Bell, Globe } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';
-import { useLogout } from '@/features/auth/hooks/useAuth';
+import { useAuthStore } from '@/store/authStore';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/routing';
 import {
@@ -17,6 +17,7 @@ import {
 
 export const Header: React.FC = () => {
   const { toggleSidebar } = useUIStore();
+  const { user } = useAuthStore();
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
@@ -36,12 +37,6 @@ export const Header: React.FC = () => {
     { code: 'en', name: 'English' },
     { code: 'th', name: 'ภาษาไทย' },
   ];
-
-  const { logout } = useLogout({
-    onLogout: () => {
-      router.push('/login');
-    },
-  });
 
   // 알림 클릭 핸들러
   const handleNotificationClick = (notificationId: string, bookingId: string | null) => {
@@ -70,7 +65,7 @@ export const Header: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setShowLangMenu(!showLangMenu)}
-            className="flex items-center space-x-2 text-secondary-700 hover:text-secondary-900 transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
           >
             <Globe size={20} />
           </button>
@@ -101,11 +96,11 @@ export const Header: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative text-secondary-700 hover:text-secondary-900 transition-colors"
+            className="relative flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
           >
-            <Bell size={20} />
+            <Bell size={20} className="-translate-y-px" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-error-500 rounded-full text-xs text-white flex items-center justify-center">
+              <span className="absolute top-0.5 right-0.5 min-w-4 h-4 px-1 bg-error-500 rounded-full text-[10px] leading-none text-white flex items-center justify-center">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -172,16 +167,22 @@ export const Header: React.FC = () => {
           )}
         </div>
 
-        {/* Logout */}
-        <button
-          onClick={logout}
-          className="flex items-center space-x-2 text-secondary-700 hover:text-error-600 transition-colors"
-        >
-          <LogOut size={20} />
-          <span className="hidden sm:inline text-sm font-medium">
-            {t('auth.logout')}
-          </span>
-        </button>
+        {/* User info (moved from sidebar) */}
+        <div className="flex items-center pl-1 sm:pl-2 min-w-0">
+          <div className="w-8 h-8 rounded-full bg-secondary-100 flex items-center justify-center shrink-0">
+            <span className="text-secondary-700 font-semibold text-sm">
+              {user?.name?.[0]?.toUpperCase() ?? '?'}
+            </span>
+          </div>
+          <div className="ml-2 min-w-0 hidden md:block">
+            <p className="text-sm font-medium text-secondary-900 truncate max-w-[140px] lg:max-w-[200px]">
+              {user?.name}
+            </p>
+            <p className="text-xs text-secondary-500 truncate max-w-[140px] lg:max-w-[200px]">
+              {user?.email}
+            </p>
+          </div>
+        </div>
       </div>
     </header>
   );
