@@ -81,6 +81,10 @@
     "title": "신규 고객",
     "message": "신규 고객입니다. 저장하시겠습니까?"
   },
+  "deleteConfirm": {
+    "title": "예약을 삭제하시겠습니까?",
+    "description": "삭제된 예약은 복구할 수 없습니다."
+  },
   "errors": {
     "nameRequired": "이름을 입력해주세요",
     "phoneRequired": "전화번호를 입력해주세요",

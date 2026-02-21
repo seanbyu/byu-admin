@@ -86,19 +86,11 @@ export const Sidebar: React.FC = () => {
       permissionKey: 'dashboard',
     },
     {
-      id: 'booking-management',
       name: t('nav.bookings'),
       icon: Calendar,
+      href: '/bookings',
       roles: [UserRole.MANAGER, UserRole.ARTIST, UserRole.STAFF, UserRole.ADMIN],
-      subItems: [
-        {
-          name: t('nav.bookingCalendar'),
-          icon: Calendar,
-          href: '/bookings/calendar',
-          roles: [UserRole.MANAGER, UserRole.ARTIST, UserRole.STAFF, UserRole.ADMIN],
-          permissionKey: 'bookings',
-        },
-      ],
+      permissionKey: 'bookings',
     },
     {
       id: 'customer-management',
@@ -234,27 +226,27 @@ export const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-screen bg-white border-r border-secondary-200 transition-transform duration-300 xl:relative',
+          'fixed top-0 left-0 z-50 h-screen bg-sidebar-bg border-r border-sidebar-border transition-transform duration-300 xl:relative',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'
         )}
         style={{ width: 'clamp(220px, 78vw, var(--sidebar-width))' }}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between px-3 md:px-4 xl:px-5 py-3 md:py-3.5 xl:py-4 border-b border-secondary-200">
+          <div className="flex items-center justify-between px-3 md:px-4 xl:px-5 py-3 md:py-3.5 xl:py-4 border-b border-sidebar-border">
             <Link
               href="/dashboard"
               onClick={handleNavLinkClick}
               className="flex items-center min-w-0"
             >
-              <Scissors className="w-5 h-5 md:w-6 md:h-6 xl:w-7 xl:h-7 text-primary-600 shrink-0" />
-              <span className="ml-2 text-sm md:text-base xl:text-lg font-bold text-secondary-900 truncate">
+              <Scissors className="w-5 h-5 md:w-6 md:h-6 xl:w-7 xl:h-7 text-sidebar-accent shrink-0" />
+              <span className="ml-2 text-sm md:text-base xl:text-lg font-bold text-sidebar-text truncate">
                 {salon?.name || 'Salon Admin'}
               </span>
             </Link>
             <button
               onClick={toggleSidebar}
-              className="xl:hidden text-secondary-500 hover:text-secondary-700 p-1"
+              className="xl:hidden text-sidebar-text-subtle hover:text-sidebar-text p-1"
             >
               <X size={20} />
             </button>
@@ -270,10 +262,6 @@ export const Sidebar: React.FC = () => {
                   const isOpen = item.id
                     ? openSubmenus.includes(item.id)
                     : false;
-                  // Check if any subitem is active to highlight parent
-                  const isChildActive = item.subItems.some(
-                    (sub) => pathname === sub.href
-                  );
 
                   return (
                     <li key={item.name}>
@@ -281,9 +269,7 @@ export const Sidebar: React.FC = () => {
                         onClick={() => item.id && toggleSubmenu(item.id)}
                         className={cn(
                           'flex items-center w-full px-2.5 md:px-3.5 xl:px-4 py-2 md:py-2.5 rounded-lg transition-colors justify-between',
-                          isChildActive
-                            ? 'bg-primary-50 text-primary-700'
-                            : 'text-secondary-700 hover:bg-secondary-100'
+                          'text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-hover-text'
                         )}
                       >
                         <div className="flex items-center">
@@ -300,7 +286,7 @@ export const Sidebar: React.FC = () => {
                       </button>
 
                       {isOpen && (
-                        <ul className="mt-1 ml-2.5 md:ml-3.5 space-y-1 border-l-2 border-secondary-100 pl-2">
+                        <ul className="mt-1 ml-2.5 md:ml-3.5 space-y-1 border-l-2 border-sidebar-sub-border pl-2">
                           {item.subItems.map((subItem) => {
                             const isSubActive = pathname === subItem.href;
                             const SubIcon = subItem.icon;
@@ -312,8 +298,8 @@ export const Sidebar: React.FC = () => {
                                   className={cn(
                                     'flex items-center px-2.5 md:px-3.5 xl:px-4 py-1.5 md:py-2 rounded-lg transition-colors text-[11px] md:text-xs xl:text-sm',
                                     isSubActive
-                                      ? 'text-primary-700 font-medium bg-primary-50'
-                                      : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
+                                      ? 'text-sidebar-active-text font-medium bg-sidebar-active'
+                                      : 'text-sidebar-text-muted hover:bg-sidebar-hover hover:text-sidebar-hover-text'
                                   )}
                                 >
                                   <SubIcon size={15} className="mr-2 md:mr-2.5 xl:mr-3 shrink-0" />
@@ -337,8 +323,8 @@ export const Sidebar: React.FC = () => {
                       className={cn(
                         'flex items-center px-2.5 md:px-3.5 xl:px-4 py-2 md:py-2.5 rounded-lg transition-colors',
                         isActive
-                          ? 'bg-primary-50 text-primary-700'
-                          : 'text-secondary-700 hover:bg-secondary-100'
+                          ? 'bg-sidebar-active text-sidebar-active-text'
+                          : 'text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-hover-text'
                       )}
                     >
                       <Icon size={17} className="mr-2 md:mr-2.5 xl:mr-3 shrink-0" />
@@ -353,18 +339,18 @@ export const Sidebar: React.FC = () => {
           </nav>
 
           {/* User info */}
-          <div className="px-3 md:px-4 xl:px-5 py-3 md:py-3.5 xl:py-4 border-t border-secondary-200">
+          <div className="px-3 md:px-4 xl:px-5 py-3 md:py-3.5 xl:py-4 border-t border-sidebar-border">
             <div className="flex items-center">
-              <div className="w-8 h-8 md:w-9 md:h-9 xl:w-10 xl:h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                <span className="text-primary-700 font-semibold text-xs md:text-sm">
+              <div className="w-8 h-8 md:w-9 md:h-9 xl:w-10 xl:h-10 rounded-full bg-sidebar-avatar-bg flex items-center justify-center">
+                <span className="text-sidebar-avatar-text font-semibold text-xs md:text-sm">
                   {user?.name?.[0]?.toUpperCase()}
                 </span>
               </div>
               <div className="ml-2.5 md:ml-3 min-w-0">
-                <p className="text-xs md:text-sm font-medium text-secondary-900 truncate">
+                <p className="text-xs md:text-sm font-medium text-sidebar-text truncate">
                   {user?.name}
                 </p>
-                <p className="text-[10px] md:text-[11px] xl:text-xs text-secondary-500 truncate">
+                <p className="text-[10px] md:text-[11px] xl:text-xs text-sidebar-text-subtle truncate">
                   {user?.email}
                 </p>
               </div>

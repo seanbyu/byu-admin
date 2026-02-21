@@ -58,6 +58,10 @@ export async function POST(
         case 'create_booking':
           result = await service.createBooking(salonId, data);
           break;
+        case 'delete_booking':
+          await service.deleteBooking(data.id);
+          result = null;
+          break;
         default:
           return NextResponse.json(
             { success: false, message: 'Invalid action' },

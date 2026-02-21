@@ -24,6 +24,8 @@ export const formatPrice = (price: number, currency: string = 'THB') => {
   return new Intl.NumberFormat('th-TH', {
     style: 'currency',
     currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(price);
 };
 

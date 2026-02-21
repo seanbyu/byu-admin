@@ -6,27 +6,16 @@ import dynamic from 'next/dynamic';
 import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Table } from '@/components/ui/Table';
-import { Badge } from '@/components/ui/Badge';
-import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { Calendar } from '@/components/ui/Calendar';
 import { useTranslations } from 'next-intl';
 import { BookingStatus } from '@/types';
-import { Booking } from '../types';
 import { useBookings } from '../hooks/useBookings';
 import { useBookingsPageState, useBookingsData } from '../hooks/useBookingsPageState';
 import { salonSettingsKeys, SALON_SETTINGS_QUERY_OPTIONS } from '../hooks/queries';
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
-import { formatDate, formatPrice } from '@/lib/utils';
-import {
-  Plus,
-  Calendar as CalendarIcon,
-  List,
-  LayoutList,
-} from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { salonsApi } from '@/features/salons/api';
 import { StaffDaySheetView } from './components/StaffDaySheetView';
 
@@ -45,112 +34,25 @@ const STATUS_OPTIONS = [
   { value: BookingStatus.CANCELLED, label: 'booking.cancelled' },
 ] as const;
 
-// rerender-memo: 비싼 렌더링 작업을 메모이제이션
-const StatusBadge = memo(function StatusBadge({
-  variant,
-  label,
-}: {
-  variant: 'warning' | 'info' | 'success' | 'danger' | 'default';
-  label: string;
-}) {
-  return <Badge variant={variant}>{label}</Badge>;
-});
-
-// ViewModeToggle을 별도 컴포넌트로 분리 (rerender-memo)
-const ViewModeToggle = memo(function ViewModeToggle({
-  viewMode,
-  onCalendarClick,
-  onTableClick,
-  onSheetClick,
-  calendarLabel,
-  listLabel,
-  sheetLabel,
-}: {
-  viewMode: 'calendar' | 'table' | 'sheet';
-  onCalendarClick: () => void;
-  onTableClick: () => void;
-  onSheetClick: () => void;
-  calendarLabel: string;
-  listLabel: string;
-  sheetLabel: string;
-}) {
-  return (
-    <div className="flex w-full md:w-auto border border-secondary-200 rounded-lg overflow-hidden">
-      <button
-        type="button"
-        className={`flex-1 md:flex-none px-2.5 sm:px-3 md:px-4 py-2 flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm transition-colors ${
-          viewMode === 'calendar'
-            ? 'bg-primary-500 text-white'
-            : 'bg-white text-secondary-600 hover:bg-secondary-50'
-        }`}
-        onClick={onCalendarClick}
-      >
-        <CalendarIcon size={16} />
-        <span className="truncate">{calendarLabel}</span>
-      </button>
-      <button
-        type="button"
-        className={`flex-1 md:flex-none px-2.5 sm:px-3 md:px-4 py-2 flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm transition-colors border-l border-secondary-200 ${
-          viewMode === 'sheet'
-            ? 'bg-primary-500 text-white'
-            : 'bg-white text-secondary-600 hover:bg-secondary-50'
-        }`}
-        onClick={onSheetClick}
-      >
-        <LayoutList size={16} />
-        <span className="truncate">{sheetLabel}</span>
-      </button>
-      <button
-        type="button"
-        className={`flex-1 md:flex-none px-2.5 sm:px-3 md:px-4 py-2 flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm transition-colors border-l border-secondary-200 ${
-          viewMode === 'table'
-            ? 'bg-primary-500 text-white'
-            : 'bg-white text-secondary-600 hover:bg-secondary-50'
-        }`}
-        onClick={onTableClick}
-      >
-        <List size={16} />
-        <span className="truncate">{listLabel}</span>
-      </button>
-    </div>
-  );
-});
-
-// 필터 섹션 분리 (rerender-memo)
+// 필터 섹션
 const BookingFilters = memo(function BookingFilters({
-  selectedDate,
   statusFilter,
   selectedStaffId,
   designers,
-  onDateChange,
   onStatusChange,
   onStaffChange,
   t,
 }: {
-  selectedDate: Date;
   statusFilter: string;
   selectedStaffId: string;
   designers: Array<{ value: string; label: string }>;
-  onDateChange: (date: Date) => void;
   onStatusChange: (status: string) => void;
   onStaffChange: (id: string) => void;
   t: (key: string) => string;
 }) {
-  // useMemo로 상태 옵션 번역 (js-cache-function-results)
   const translatedStatusOptions = useMemo(
-    () =>
-      STATUS_OPTIONS.map((opt) => ({
-        value: opt.value,
-        label: t(opt.label),
-      })),
+    () => STATUS_OPTIONS.map((opt) => ({ value: opt.value, label: t(opt.label) })),
     [t]
-  );
-
-  const handleDateChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onDateChange(new Date(e.target.value));
-    },
-    [onDateChange]
   );
 
   const handleStatusChange = useCallback(
@@ -161,22 +63,18 @@ const BookingFilters = memo(function BookingFilters({
   );
 
   return (
-    <Card className="sticky top-[72px] z-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          type="date"
-          label={t('booking.date')}
-          value={formatDate(selectedDate, 'yyyy-MM-dd')}
-          onChange={handleDateChange}
-        />
-        <Select
-          label={t('booking.status')}
-          options={translatedStatusOptions}
-          value={statusFilter}
-          onChange={handleStatusChange}
-          showPlaceholder={false}
-        />
-        <div className="md:col-span-2">
+    <Card>
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="w-48">
+          <Select
+            label={t('booking.status')}
+            options={translatedStatusOptions}
+            value={statusFilter}
+            onChange={handleStatusChange}
+            showPlaceholder={false}
+          />
+        </div>
+        <div className="flex-1">
           <label className="block text-sm font-medium text-secondary-700 mb-2">
             {t('booking.designer')}
           </label>
@@ -218,14 +116,11 @@ export default function BookingsPageView() {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
-  // 권한 체크
   const { canWrite } = usePermission();
   const canCreateBooking = canWrite(PermissionModules.BOOKINGS);
 
-  // Custom hooks로 상태 관리 분리 (Zustand 기반)
   const pageState = useBookingsPageState();
 
-  // 데이터 fetching (TanStack Query)
   const { bookings, isLoading, updateBooking } = useBookings(salonId, {
     enabled: !!salonId,
   });
@@ -234,7 +129,6 @@ export default function BookingsPageView() {
     enabled: !!salonId,
   });
 
-  // slotDuration 설정 로드 (TanStack Query with optimized options)
   const { data: settingsResponse } = useQuery({
     queryKey: salonSettingsKeys.detail(salonId),
     queryFn: () => salonsApi.getSettings(salonId),
@@ -252,119 +146,21 @@ export default function BookingsPageView() {
     [settingsResponse?.data?.businessHours]
   );
 
-  const filteredBookingsByStaffAndStatus = useMemo(() => {
+  // 상태·직원 필터만 적용 (날짜 필터는 현황판 내부에서 처리)
+  const filteredBookings = useMemo(() => {
     return bookings.filter((booking) => {
-      if (pageState.statusFilter && booking.status !== pageState.statusFilter) {
-        return false;
-      }
-      if (pageState.selectedStaffId && booking.staffId !== pageState.selectedStaffId) {
-        return false;
-      }
+      if (pageState.statusFilter && booking.status !== pageState.statusFilter) return false;
+      if (pageState.selectedStaffId && booking.staffId !== pageState.selectedStaffId) return false;
       return true;
     });
   }, [bookings, pageState.statusFilter, pageState.selectedStaffId]);
 
-  const filteredBookingsByDate = useMemo(() => {
-    const selectedDateStr = formatDate(pageState.selectedDate, 'yyyy-MM-dd');
-    return filteredBookingsByStaffAndStatus.filter((booking) => {
-      const bookingDateStr = formatDate(booking.date, 'yyyy-MM-dd');
-      return bookingDateStr === selectedDateStr;
-    });
-  }, [filteredBookingsByStaffAndStatus, pageState.selectedDate]);
-
-  // 데이터 변환 (useMemo 내부에서 처리)
-  const { designers, calendarResources, calendarEvents } = useBookingsData(
-    filteredBookingsByStaffAndStatus,
+  const { designers } = useBookingsData(
+    filteredBookings,
     staffMembers,
     pageState.getStatusColor
   );
 
-  // 테이블 컬럼 정의 (useMemo로 메모이제이션)
-  const columns = useMemo(
-    () => [
-      {
-        key: 'customerName',
-        header: t('booking.customer'),
-        render: (booking: Booking) => (
-          <div>
-            <p className="font-medium">{booking.customerName}</p>
-            <p className="text-xs text-secondary-500">{booking.customerPhone}</p>
-          </div>
-        ),
-      },
-      {
-        key: 'serviceName',
-        header: t('booking.service'),
-      },
-      {
-        key: 'date',
-        header: t('booking.date'),
-        render: (booking: Booking) => formatDate(booking.date, 'yyyy-MM-dd'),
-      },
-      {
-        key: 'time',
-        header: t('booking.time'),
-        render: (booking: Booking) => `${booking.startTime} - ${booking.endTime}`,
-      },
-      {
-        key: 'price',
-        header: t('booking.price'),
-        render: (booking: Booking) => formatPrice(booking.price),
-      },
-      {
-        key: 'status',
-        header: t('booking.status'),
-        render: (booking: Booking) => (
-          <StatusBadge
-            variant={pageState.getStatusBadgeVariant(booking.status)}
-            label={t(`booking.${booking.status.toLowerCase()}`)}
-          />
-        ),
-      },
-      {
-        key: 'source',
-        header: t('booking.source'),
-        render: (booking: Booking) => {
-          const sourceLabels: Record<string, string> = {
-            ONLINE: t('booking.online'),
-            PHONE: t('booking.phone'),
-            WALK_IN: t('booking.walkIn'),
-          };
-          return sourceLabels[booking.source] || booking.source;
-        },
-      },
-    ],
-    [t, pageState.getStatusBadgeVariant]
-  );
-
-  // 이벤트 핸들러 (useCallback으로 안정적 참조)
-  const handleEventClick = useCallback(
-    (event: { id: string }) => {
-      const booking = bookings.find((b: Booking) => b.id === event.id);
-      if (booking) {
-        pageState.openBookingDetailModal(booking);
-      }
-    },
-    [bookings, pageState.openBookingDetailModal]
-  );
-
-  const handleRowClick = useCallback((booking: Booking) => {
-    pageState.openBookingDetailModal(booking);
-  }, [pageState.openBookingDetailModal]);
-
-  const handleViewModeCalendar = useCallback(() => {
-    pageState.setViewMode('calendar');
-  }, [pageState.setViewMode]);
-
-  const handleViewModeTable = useCallback(() => {
-    pageState.setViewMode('table');
-  }, [pageState.setViewMode]);
-
-  const handleViewModeSheet = useCallback(() => {
-    pageState.setViewMode('sheet');
-  }, [pageState.setViewMode]);
-
-  // 시트 뷰에서 가격 인라인 수정
   const handleSheetUpdateBooking = useCallback(
     (id: string, updates: { price: number }) => {
       updateBooking({ id, updates });
@@ -372,7 +168,6 @@ export default function BookingsPageView() {
     [updateBooking]
   );
 
-  // 시트 뷰에서 직원 + 시간 선택 시 예약 추가
   const handleSheetAddBooking = useCallback(
     (staffId: string, time?: string) => {
       pageState.setSelectedStaffId(staffId);
@@ -382,7 +177,6 @@ export default function BookingsPageView() {
     [pageState.setSelectedStaffId, pageState.setSelectedTime, pageState.openNewBookingModal]
   );
 
-  // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
     return (
       <Layout>
@@ -396,7 +190,7 @@ export default function BookingsPageView() {
   return (
     <Layout>
       <div className="space-y-4 md:space-y-6">
-        {/* Header */}
+        {/* 헤더 */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-secondary-900">
@@ -406,82 +200,46 @@ export default function BookingsPageView() {
               {t('booking.pageDescription')}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <ViewModeToggle
-              viewMode={pageState.viewMode}
-              onCalendarClick={handleViewModeCalendar}
-              onTableClick={handleViewModeTable}
-              onSheetClick={handleViewModeSheet}
-              calendarLabel={t('common.calendar.view')}
-              listLabel={t('common.calendar.list')}
-              sheetLabel={t('common.calendar.sheet')}
-            />
-            {canCreateBooking && (
-              <Button
-                variant="primary"
-                onClick={pageState.openNewBookingModal}
-                className="text-sm px-3 py-2 md:px-4 md:py-2.5"
-              >
-                <Plus size={18} className="mr-1.5 md:mr-2" />
-                <span className="hidden sm:inline">{t('booking.new')}</span>
-              </Button>
-            )}
-          </div>
+          {canCreateBooking && (
+            <Button
+              variant="primary"
+              onClick={pageState.openNewBookingModal}
+              className="text-sm px-3 py-2 md:px-4 md:py-2.5"
+            >
+              <Plus size={18} className="mr-1.5 md:mr-2" />
+              <span className="hidden sm:inline">{t('booking.new')}</span>
+            </Button>
+          )}
         </div>
 
-        {/* Filters */}
+        {/* 필터 */}
         <BookingFilters
-          selectedDate={pageState.selectedDate}
           statusFilter={pageState.statusFilter}
           selectedStaffId={pageState.selectedStaffId}
           designers={designers}
-          onDateChange={pageState.setSelectedDate}
           onStatusChange={pageState.setStatusFilter}
           onStaffChange={pageState.setSelectedStaffId}
           t={t}
         />
 
-        {/* View 렌더링 */}
-        {pageState.viewMode === 'calendar' && (
-          <Calendar
+        {/* 현황판 */}
+        <Card>
+          <StaffDaySheetView
+            bookings={filteredBookings}
+            staffMembers={staffMembers}
             selectedDate={pageState.selectedDate}
-            onDateSelect={pageState.setSelectedDate}
-            events={calendarEvents}
-            resources={calendarResources}
-            onEventClick={handleEventClick}
-            onTimeSlotClick={pageState.handleTimeSlotClick}
+            selectedStaffId={pageState.selectedStaffId}
+            onDateChange={pageState.setSelectedDate}
+            businessHours={businessHours}
             slotDuration={slotDuration}
-            salonBusinessHours={businessHours}
+            onBookingClick={pageState.openBookingDetailModal}
+            onAddBooking={handleSheetAddBooking}
+            onUpdateBooking={handleSheetUpdateBooking}
           />
-        )}
-        {pageState.viewMode === 'sheet' && (
-          <Card>
-            <StaffDaySheetView
-              bookings={filteredBookingsByDate}
-              staffMembers={staffMembers}
-              selectedDate={pageState.selectedDate}
-              selectedStaffId={pageState.selectedStaffId}
-              onDateChange={pageState.setSelectedDate}
-              businessHours={businessHours}
-              slotDuration={slotDuration}
-              onBookingClick={pageState.openBookingDetailModal}
-              onAddBooking={handleSheetAddBooking}
-              onUpdateBooking={handleSheetUpdateBooking}
-            />
-          </Card>
-        )}
-        {pageState.viewMode === 'table' && (
-          <Card>
-            <Table
-              data={filteredBookingsByDate}
-              columns={columns}
-              onRowClick={handleRowClick}
-            />
-          </Card>
-        )}
+        </Card>
       </div>
 
-      {/* Modals - bundle-conditional: 조건부 렌더링으로 번들 최적화 */}
+      {/* 새 예약 모달 */}
       {pageState.showNewBookingModal && (
         <NewBookingModal
           isOpen={pageState.showNewBookingModal}
@@ -498,7 +256,7 @@ export default function BookingsPageView() {
         />
       )}
 
-      {/* 예약 상세 모달 (수정용) */}
+      {/* 예약 상세 모달 */}
       {pageState.showBookingDetailModal && pageState.selectedBooking && (
         <NewBookingModal
           isOpen={pageState.showBookingDetailModal}

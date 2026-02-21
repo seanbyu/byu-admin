@@ -1,11 +1,12 @@
 'use client';
 
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { formatDate } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import { ServiceSelector } from '../ServiceSelector';
@@ -39,7 +40,8 @@ function NewBookingModalComponent({
   // Data hooks
   const { customers } = useCustomers({ salon_id: salonId });
   const { menus } = useMenus(salonId, undefined, { enabled: !!salonId });
-  const { confirmBooking, isConfirming } = useBookings(salonId);
+  const { confirmBooking, isConfirming, deleteBooking, isDeleting } = useBookings(salonId);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Form hook
   const form = useBookingForm({
@@ -123,7 +125,19 @@ function NewBookingModalComponent({
     selectedCustomer: customerSearch.selectedCustomer,
   });
 
-  const isLoading = bookingSave.isCreating || bookingSave.isUpdating || bookingSave.isCreatingCustomer || isConfirming;
+  // 예약 삭제 핸들러
+  const handleDelete = useCallback(async () => {
+    if (!editBooking?.id) return;
+    try {
+      await deleteBooking(editBooking.id);
+      setShowDeleteConfirm(false);
+      handleClose();
+    } catch (error) {
+      console.error('Failed to delete booking:', error);
+    }
+  }, [editBooking, deleteBooking, handleClose]);
+
+  const isLoading = bookingSave.isCreating || bookingSave.isUpdating || bookingSave.isCreatingCustomer || isConfirming || isDeleting;
 
   return (
     <>
@@ -209,28 +223,43 @@ function NewBookingModalComponent({
           />
 
           {/* 버튼 */}
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={handleClose}
-              disabled={isLoading}
-            >
-              {t('common.cancel')}
-            </Button>
-            {isPendingBooking && (
+          <div className="flex items-center justify-between pt-4">
+            {/* 삭제 버튼 (수정 모드에서만 표시) */}
+            <div>
+              {isEditMode && (
+                <Button
+                  variant="danger"
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isLoading}
+                >
+                  {t('common.delete')}
+                </Button>
+              )}
+            </div>
+            <div className="flex space-x-3">
               <Button
-                variant="primary"
+                variant="outline"
                 type="button"
-                onClick={handleConfirm}
+                onClick={handleClose}
                 disabled={isLoading}
               >
-                {isConfirming ? t('common.saving') : t('booking.confirmBooking')}
+                {t('common.cancel')}
               </Button>
-            )}
-            <Button variant="primary" type="submit" disabled={isLoading}>
-              {isLoading ? t('common.saving') : t('common.save')}
-            </Button>
+              {isPendingBooking && (
+                <Button
+                  variant="primary"
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={isLoading}
+                >
+                  {isConfirming ? t('common.saving') : t('booking.confirmBooking')}
+                </Button>
+              )}
+              <Button variant="primary" type="submit" disabled={isLoading}>
+                {isLoading ? t('common.saving') : t('common.save')}
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>
@@ -243,6 +272,17 @@ function NewBookingModalComponent({
         customerName={form.customerName}
         customerPhone={form.customerPhone}
         isLoading={isLoading}
+      />
+
+      {/* 예약 삭제 확인 다이얼로그 */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title={t('booking.deleteConfirm.title')}
+        description={t('booking.deleteConfirm.description')}
+        variant="destructive"
+        isLoading={isDeleting}
       />
     </>
   );

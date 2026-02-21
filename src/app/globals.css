@@ -47,6 +47,21 @@ html {
     --secondary-800: #333d4b;
     --secondary-900: #191f28;
 
+    /* ----- Sidebar Colors (Semantic) ----- */
+    --sidebar-bg: #111827;
+    --sidebar-border: #1f2937;
+    --sidebar-sub-border: #374151;
+    --sidebar-text: #e5e7eb;
+    --sidebar-text-muted: #d1d5db;
+    --sidebar-text-subtle: #9ca3af;
+    --sidebar-hover-bg: #1f2937;
+    --sidebar-hover-text: #f3f4f6;
+    --sidebar-active-bg: #3b82f6;
+    --sidebar-active-text: #ffffff;
+    --sidebar-accent: #93c5fd;
+    --sidebar-avatar-bg: #1f2937;
+    --sidebar-avatar-text: #bfdbfe;
+
     /* ----- Semantic Colors ----- */
     /* Success (Green) */
     --success-50: #ecfdf5;

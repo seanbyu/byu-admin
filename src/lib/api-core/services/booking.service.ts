@@ -129,4 +129,8 @@ export class BookingService {
   async confirmBooking(id: string): Promise<DBBooking> {
     return this.repository.confirmBooking(id);
   }
+
+  async deleteBooking(id: string): Promise<void> {
+    return this.repository.deleteBooking(id);
+  }
 }

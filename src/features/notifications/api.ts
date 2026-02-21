@@ -30,6 +30,8 @@ export async function getNotifications(salonId: string, limit = 10): Promise<Not
     .limit(limit);
 
   if (error) {
+    // AbortError: auth 세션 갱신 시 Supabase가 요청을 중단하는 정상 동작
+    if (error.message?.includes('AbortError')) return [];
     console.error("Failed to fetch notifications:", error);
     throw error;
   }

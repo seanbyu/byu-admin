@@ -10,8 +10,6 @@ import { Booking } from '../types';
 // - UI 상태만 Zustand로 관리
 // ============================================
 
-type ViewMode = 'calendar' | 'table' | 'sheet';
-
 interface BookingsUIState {
   // Modal states
   showNewBookingModal: boolean;
@@ -25,7 +23,6 @@ interface BookingsUIState {
   // View states
   selectedDate: Date;
   statusFilter: string;
-  viewMode: ViewMode;
   selectedTime: string;
   selectedStaffId: string;
   selectedServiceId: string;
@@ -43,13 +40,9 @@ interface BookingsUIState {
   // View actions
   setSelectedDate: (date: Date) => void;
   setStatusFilter: (status: string) => void;
-  setViewMode: (mode: ViewMode) => void;
   setSelectedTime: (time: string) => void;
   setSelectedStaffId: (staffId: string) => void;
   setSelectedServiceId: (serviceId: string) => void;
-
-  // Combined action
-  handleTimeSlotClick: (date: Date, time: string, resourceId?: string) => void;
 
   // Reset
   reset: () => void;
@@ -63,7 +56,6 @@ const initialState = {
   selectedBooking: null as Booking | null,
   selectedDate: new Date(),
   statusFilter: '',
-  viewMode: 'calendar' as ViewMode,
   selectedTime: '',
   selectedStaffId: '',
   selectedServiceId: '',
@@ -74,7 +66,6 @@ export const useBookingsUIStore = create<BookingsUIState>()(
     (set) => ({
       ...initialState,
 
-      // Modal actions
       openNewBookingModal: () =>
         set({ showNewBookingModal: true }, false, 'openNewBookingModal'),
 
@@ -103,15 +94,11 @@ export const useBookingsUIStore = create<BookingsUIState>()(
       closeStaffScheduleModal: () =>
         set({ showStaffScheduleModal: false }, false, 'closeStaffScheduleModal'),
 
-      // View actions
       setSelectedDate: (date) =>
         set({ selectedDate: date }, false, 'setSelectedDate'),
 
       setStatusFilter: (status) =>
         set({ statusFilter: status }, false, 'setStatusFilter'),
-
-      setViewMode: (mode) =>
-        set({ viewMode: mode }, false, 'setViewMode'),
 
       setSelectedTime: (time) =>
         set({ selectedTime: time }, false, 'setSelectedTime'),
@@ -122,20 +109,6 @@ export const useBookingsUIStore = create<BookingsUIState>()(
       setSelectedServiceId: (serviceId) =>
         set({ selectedServiceId: serviceId }, false, 'setSelectedServiceId'),
 
-      // Combined action for time slot click
-      handleTimeSlotClick: (date, time, resourceId) =>
-        set(
-          {
-            selectedDate: date,
-            selectedTime: time,
-            selectedStaffId: resourceId || '',
-            showNewBookingModal: true,
-          },
-          false,
-          'handleTimeSlotClick'
-        ),
-
-      // Reset all state
       reset: () => set(initialState, false, 'reset'),
     }),
     { name: 'bookings-ui-store' }
@@ -143,7 +116,7 @@ export const useBookingsUIStore = create<BookingsUIState>()(
 );
 
 // ============================================
-// Selectors (메모이제이션을 위한 셀렉터)
+// Selectors
 // ============================================
 export const selectShowNewBookingModal = (state: BookingsUIState) => state.showNewBookingModal;
 export const selectShowBookingDetailModal = (state: BookingsUIState) => state.showBookingDetailModal;
@@ -152,27 +125,6 @@ export const selectShowShopSettingsModal = (state: BookingsUIState) => state.sho
 export const selectShowStaffScheduleModal = (state: BookingsUIState) => state.showStaffScheduleModal;
 export const selectSelectedDate = (state: BookingsUIState) => state.selectedDate;
 export const selectStatusFilter = (state: BookingsUIState) => state.statusFilter;
-export const selectViewMode = (state: BookingsUIState) => state.viewMode;
 export const selectSelectedTime = (state: BookingsUIState) => state.selectedTime;
 export const selectSelectedStaffId = (state: BookingsUIState) => state.selectedStaffId;
 export const selectSelectedServiceId = (state: BookingsUIState) => state.selectedServiceId;
-
-// Actions selector
-export const selectBookingsUIActions = (state: BookingsUIState) => ({
-  openNewBookingModal: state.openNewBookingModal,
-  closeNewBookingModal: state.closeNewBookingModal,
-  openBookingDetailModal: state.openBookingDetailModal,
-  closeBookingDetailModal: state.closeBookingDetailModal,
-  openShopSettingsModal: state.openShopSettingsModal,
-  closeShopSettingsModal: state.closeShopSettingsModal,
-  openStaffScheduleModal: state.openStaffScheduleModal,
-  closeStaffScheduleModal: state.closeStaffScheduleModal,
-  setSelectedDate: state.setSelectedDate,
-  setStatusFilter: state.setStatusFilter,
-  setViewMode: state.setViewMode,
-  setSelectedTime: state.setSelectedTime,
-  setSelectedStaffId: state.setSelectedStaffId,
-  setSelectedServiceId: state.setSelectedServiceId,
-  handleTimeSlotClick: state.handleTimeSlotClick,
-  reset: state.reset,
-});

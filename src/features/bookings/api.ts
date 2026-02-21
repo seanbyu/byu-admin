@@ -41,5 +41,11 @@ export const createBookingsApi = (client?: SupabaseClient<any>) => {
         action: 'confirm_booking',
         id,
       }),
+
+    deleteBooking: (salonId: string, id: string) =>
+      apiClient.post(endpoints.salons.bookings.path(salonId), {
+        action: 'delete_booking',
+        id,
+      }),
   };
 };

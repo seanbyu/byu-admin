@@ -68,6 +68,15 @@ export class BookingRepository extends BaseRepository {
     return this.updateBooking(id, { status: "CONFIRMED" });
   }
 
+  async deleteBooking(id: string): Promise<void> {
+    const { error } = await (this.supabase as any)
+      .from("bookings")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  }
+
   private transformBooking(booking: any): BookingResponse {
     return {
       id: booking.id,

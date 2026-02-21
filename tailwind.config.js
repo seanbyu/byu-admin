@@ -39,6 +39,22 @@ module.exports = {
           800: 'var(--secondary-800)',
           900: 'var(--secondary-900)',
         },
+        // Sidebar (Semantic)
+        sidebar: {
+          bg: 'var(--sidebar-bg)',
+          border: 'var(--sidebar-border)',
+          'sub-border': 'var(--sidebar-sub-border)',
+          text: 'var(--sidebar-text)',
+          'text-muted': 'var(--sidebar-text-muted)',
+          'text-subtle': 'var(--sidebar-text-subtle)',
+          hover: 'var(--sidebar-hover-bg)',
+          'hover-text': 'var(--sidebar-hover-text)',
+          active: 'var(--sidebar-active-bg)',
+          'active-text': 'var(--sidebar-active-text)',
+          accent: 'var(--sidebar-accent)',
+          'avatar-bg': 'var(--sidebar-avatar-bg)',
+          'avatar-text': 'var(--sidebar-avatar-text)',
+        },
         // Semantic Colors
         success: {
           50: 'var(--success-50)',

@@ -81,6 +81,10 @@
     "title": "New Customer",
     "message": "This is a new customer. Save and continue?"
   },
+  "deleteConfirm": {
+    "title": "Delete this booking?",
+    "description": "This action cannot be undone."
+  },
   "errors": {
     "nameRequired": "Please enter a name",
     "phoneRequired": "Please enter a phone number",
