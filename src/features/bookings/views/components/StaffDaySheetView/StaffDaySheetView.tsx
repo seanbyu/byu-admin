@@ -21,6 +21,7 @@ export interface StaffDaySheetViewProps {
   onBookingClick: (booking: Booking) => void;
   onAddBooking: (staffId: string, time?: string) => void;
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
+  highlightedBookingId?: string | null;
 }
 
 export const StaffDaySheetView = memo(function StaffDaySheetView({
@@ -34,6 +35,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
   onBookingClick,
   onAddBooking,
   onUpdateBooking,
+  highlightedBookingId,
 }: StaffDaySheetViewProps) {
   const t = useTranslations();
 
@@ -233,6 +235,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
           onBookingClick={onBookingClick}
           onAddBooking={onAddBooking}
           onUpdateBooking={onUpdateBooking}
+          highlightedBookingId={highlightedBookingId}
         />
       ))}
     </div>

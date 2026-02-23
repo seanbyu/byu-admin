@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { Booking } from '../../../types';
@@ -15,6 +15,7 @@ export interface StaffAccordionItemProps {
   onBookingClick: (booking: Booking) => void;
   onAddBooking: (staffId: string, time?: string) => void;
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
+  highlightedBookingId?: string | null;
 }
 
 export const StaffAccordionItem = memo(function StaffAccordionItem({
@@ -24,9 +25,22 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
   onBookingClick,
   onAddBooking,
   onUpdateBooking,
+  highlightedBookingId,
 }: StaffAccordionItemProps) {
   const t = useTranslations();
   const [isOpen, setIsOpen] = useState(true);
+
+  // 하이라이트된 예약이 이 스태프에 속하면 아코디언 자동 펼침
+  const hasHighlightedBooking = highlightedBookingId
+    ? Object.values(bookingsByTime).some((b) => b.id === highlightedBookingId)
+    : false;
+
+  useEffect(() => {
+    if (hasHighlightedBooking && !isOpen) {
+      setIsOpen(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasHighlightedBooking]);
 
   const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
@@ -100,6 +114,7 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
             onBookingClick={onBookingClick}
             onAddBooking={handleAddAtTime}
             onUpdateBooking={onUpdateBooking}
+            highlightedBookingId={highlightedBookingId}
           />
         </div>
       )}

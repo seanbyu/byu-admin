@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import '../globals.css';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AuthInitializer } from '@/components/auth/AuthInitializer';
+import { BookingRealtimeListener } from '@/components/realtime/BookingRealtimeListener';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -38,6 +39,7 @@ export default async function RootLayout({
           <QueryProvider>
             <ToastProvider>
               <AuthInitializer />
+              <BookingRealtimeListener />
               {children}
             </ToastProvider>
           </QueryProvider>

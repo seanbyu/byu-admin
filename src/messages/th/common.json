@@ -29,6 +29,11 @@
     "asc": "น้อยไปมาก",
     "desc": "มากไปน้อย"
   },
+  "languageNames": {
+    "ko": "เกาหลี",
+    "en": "อังกฤษ",
+    "th": "ไทย"
+  },
   "dayNames": {
     "sunday": "วันอาทิตย์",
     "monday": "วันจันทร์",
@@ -68,7 +73,9 @@
     "noShowBooking": "บันทึกการไม่มาตามนัด",
     "newReview": "มีรีวิวใหม่",
     "noNotifications": "ไม่มีการแจ้งเตือนใหม่",
-    "viewAll": "ดูทั้งหมด"
+    "viewAll": "ดูทั้งหมด",
+    "markAllRead": "อ่านทั้งหมด",
+    "pendingStatus": "รอดำเนินการ"
   },
   "calendar": {
     "view": "ปฏิทิน",

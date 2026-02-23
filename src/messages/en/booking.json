@@ -10,6 +10,7 @@
   "completed": "Completed",
   "cancelled": "Cancelled",
   "noShow": "No Show",
+  "newBookingAlert": "A new online booking has been received!",
   "customer": "Customer",
   "designer": "Designer",
   "service": "Service",

@@ -4,6 +4,14 @@
 
 import { supabase } from "@/lib/supabase/client";
 
+export interface NotificationMetadata {
+  artist_name?: string;
+  customer_name?: string;
+  service_name?: string | null;
+  booking_date?: string;
+  start_time?: string;
+}
+
 export interface Notification {
   id: string;
   title: string | null;
@@ -13,6 +21,7 @@ export interface Notification {
   created_at: string;
   read_at: string | null;
   booking_id: string | null;
+  metadata: NotificationMetadata | null;
 }
 
 /**
@@ -25,7 +34,8 @@ export async function getNotifications(salonId: string, limit = 10): Promise<Not
     .select("*")
     .eq("salon_id", salonId)
     .eq("recipient_type", "ADMIN")
-    .eq("channel", "IN_APP") // 인앱 알림만 조회
+    .eq("channel", "IN_APP")
+    .neq("status", "FAILED") // soft-deleted 제외
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -49,7 +59,8 @@ export async function getUnreadCount(salonId: string): Promise<number> {
     .select("*", { count: "exact", head: true })
     .eq("salon_id", salonId)
     .eq("recipient_type", "ADMIN")
-    .eq("channel", "IN_APP") // 인앱 알림만 카운트
+    .eq("channel", "IN_APP")
+    .neq("status", "FAILED") // soft-deleted 제외
     .is("read_at", null);
 
   if (error) {
@@ -93,4 +104,37 @@ export async function markAllAsRead(salonId: string): Promise<void> {
     console.error("Failed to mark all notifications as read:", error);
     throw error;
   }
+}
+
+/**
+ * 알림 삭제 (실제 DELETE - RLS DELETE 정책 적용)
+ */
+export async function deleteNotification(notificationId: string): Promise<void> {
+  const { error } = await supabase
+    .from("notifications")
+    .delete()
+    .eq("id", notificationId);
+
+  if (error) {
+    console.error("Failed to delete notification:", error);
+    throw error;
+  }
+}
+
+/**
+ * 예약 정보 조회 (알림 클릭 시 해당 날짜/직원으로 이동용)
+ */
+export interface BookingInfo {
+  booking_date: string;
+  artist_id: string;
+}
+
+export async function getBookingInfo(bookingId: string): Promise<BookingInfo | null> {
+  const { data } = await supabase
+    .from("bookings")
+    .select("booking_date, artist_id")
+    .eq("id", bookingId)
+    .single();
+
+  return (data as BookingInfo | null) || null;
 }

@@ -12,5 +12,6 @@
   "settings": "설정",
   "users": "사용자 관리",
   "staff": "직원 관리",
-  "salons": "살롱 관리"
+  "salons": "살롱 관리",
+  "notifications": "알림"
 }

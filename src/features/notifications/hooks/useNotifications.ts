@@ -9,6 +9,7 @@ import {
   getUnreadCount,
   markAsRead,
   markAllAsRead,
+  deleteNotification,
   type Notification,
 } from "../api";
 
@@ -79,6 +80,23 @@ export function useMarkAllAsRead() {
 }
 
 /**
+ * 알림 삭제 훅
+ */
+export function useDeleteNotification() {
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const salonId = user?.salonId;
+
+  return useMutation({
+    mutationFn: deleteNotification,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications", salonId] });
+      queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count", salonId] });
+    },
+  });
+}
+
+/**
  * 상대 시간 표시 유틸
  */
 export function getRelativeTime(date: string, t: (key: string) => string): string {
@@ -101,20 +119,14 @@ export function getRelativeTime(date: string, t: (key: string) => string): strin
 }
 
 /**
- * 알림 타입별 메시지 생성
+ * 알림 타입별 제목 생성
  */
-export function getNotificationMessage(
+export function getNotificationTitle(
   notification: Notification,
   t: (key: string) => string
 ): string {
   const type = notification.notification_type;
 
-  // 제목이 있으면 제목 사용
-  if (notification.title) {
-    return notification.title;
-  }
-
-  // 타입별 기본 메시지
   switch (type) {
     case "BOOKING_REQUEST":
       return t("common.notifications.newBooking");
@@ -131,6 +143,47 @@ export function getNotificationMessage(
     case "REVIEW_RECEIVED":
       return t("common.notifications.newReview");
     default:
-      return notification.body;
+      return notification.title || notification.body;
   }
 }
+
+/**
+ * 알림 메타데이터에서 상세 정보 생성
+ * 예: "2월 24일 (화) 18:00" / "tiw | cut"
+ */
+export function getNotificationDetail(
+  notification: Notification,
+  t: (key: string) => string,
+  locale: string
+): { dateTime: string | null; staffService: string | null } {
+  const meta = notification.metadata;
+  if (!meta) return { dateTime: null, staffService: null };
+
+  // 날짜 + 시간
+  let dateTime: string | null = null;
+  if (meta.booking_date && meta.start_time) {
+    const date = new Date(meta.booking_date + 'T00:00:00');
+    const formatted = date.toLocaleDateString(locale === 'th' ? 'th-TH' : locale === 'en' ? 'en-US' : 'ko-KR', {
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short',
+    });
+    dateTime = `${formatted} ${meta.start_time}`;
+  }
+
+  // 직원 | 서비스
+  let staffService: string | null = null;
+  const parts: string[] = [];
+  if (meta.artist_name) parts.push(meta.artist_name);
+  if (meta.service_name) parts.push(meta.service_name);
+  if (parts.length > 0) {
+    staffService = parts.join(' | ') + ' ' + t('common.notifications.pendingStatus');
+  }
+
+  return { dateTime, staffService };
+}
+
+/**
+ * @deprecated Use getNotificationTitle instead
+ */
+export const getNotificationMessage = getNotificationTitle;

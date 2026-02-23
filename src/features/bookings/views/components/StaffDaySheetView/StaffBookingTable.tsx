@@ -4,7 +4,7 @@ import { memo, useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Booking } from '../../../types';
 import { BookingStatus } from '@/types';
-import { formatPrice } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import {
   addMinutes,
   stripCountryCode,
@@ -21,6 +21,7 @@ export interface StaffBookingTableProps {
   onBookingClick: (booking: Booking) => void;
   onAddBooking: (time: string) => void;
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
+  highlightedBookingId?: string | null;
 }
 
 export const StaffBookingTable = memo(function StaffBookingTable({
@@ -29,6 +30,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
   onBookingClick,
   onAddBooking,
   onUpdateBooking,
+  highlightedBookingId,
 }: StaffBookingTableProps) {
   const t = useTranslations();
 
@@ -76,6 +78,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
         onBookingClick={onBookingClick}
         onAddBooking={onAddBooking}
         onUpdateBooking={onUpdateBooking}
+        highlightedBookingId={highlightedBookingId}
       />
 
       <div className="hidden md:block overflow-x-auto">
@@ -130,7 +133,11 @@ export const StaffBookingTable = memo(function StaffBookingTable({
               >
                 {booking ? (
                   <tr
-                    className="hover:bg-primary-50 cursor-pointer transition-colors"
+                    data-booking-id={booking.id}
+                    className={cn(
+                      'hover:bg-primary-50 cursor-pointer transition-colors',
+                      highlightedBookingId === booking.id && 'booking-highlight'
+                    )}
                     onClick={() => onBookingClick(booking)}
                   >
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-700 font-medium">

@@ -17,6 +17,7 @@ import {
   selectSelectedTime,
   selectSelectedStaffId,
   selectSelectedServiceId,
+  selectHighlightedBookingId,
 } from '../stores/bookingsStore';
 
 // 상수를 모듈 레벨로 호이스팅
@@ -47,6 +48,7 @@ interface UseBookingsPageStateReturn {
   selectedTime: string;
   selectedStaffId: string;
   selectedServiceId: string;
+  highlightedBookingId: string | null;
   // Actions
   openNewBookingModal: () => void;
   closeNewBookingModal: () => void;
@@ -61,6 +63,7 @@ interface UseBookingsPageStateReturn {
   setSelectedTime: (time: string) => void;
   setSelectedStaffId: (staffId: string) => void;
   setSelectedServiceId: (serviceId: string) => void;
+  setHighlightedBookingId: (id: string | null) => void;
   // Utilities
   getStatusColor: (status: BookingStatus) => string;
 }
@@ -76,6 +79,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
   const selectedTime = useBookingsUIStore(selectSelectedTime);
   const selectedStaffId = useBookingsUIStore(selectSelectedStaffId);
   const selectedServiceId = useBookingsUIStore(selectSelectedServiceId);
+  const highlightedBookingId = useBookingsUIStore(selectHighlightedBookingId);
 
   const actions = useBookingsUIStore(
     useShallow((state) => ({
@@ -92,6 +96,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       setSelectedTime: state.setSelectedTime,
       setSelectedStaffId: state.setSelectedStaffId,
       setSelectedServiceId: state.setSelectedServiceId,
+      setHighlightedBookingId: state.setHighlightedBookingId,
     }))
   );
 
@@ -111,6 +116,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       selectedTime,
       selectedStaffId,
       selectedServiceId,
+      highlightedBookingId,
       ...actions,
       getStatusColor,
     }),
@@ -125,6 +131,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       selectedTime,
       selectedStaffId,
       selectedServiceId,
+      highlightedBookingId,
       actions,
       getStatusColor,
     ]

@@ -29,6 +29,11 @@
     "asc": "Ascending",
     "desc": "Descending"
   },
+  "languageNames": {
+    "ko": "Korean",
+    "en": "English",
+    "th": "Thai"
+  },
   "dayNames": {
     "sunday": "Sunday",
     "monday": "Monday",
@@ -68,7 +73,9 @@
     "noShowBooking": "No-show recorded",
     "newReview": "New review posted",
     "noNotifications": "No new notifications",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "markAllRead": "Mark all read",
+    "pendingStatus": "Pending"
   },
   "calendar": {
     "view": "Calendar",

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback, memo } from 'react';
+import { useMemo, useCallback, useEffect, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { Layout } from '@/components/layout/Layout';
@@ -176,6 +176,33 @@ export default function BookingsPageView() {
     [updateBooking]
   );
 
+  // 알림 클릭 → 스크롤 + 하이라이트 해제
+  const highlightedBookingId = pageState.highlightedBookingId;
+  const setHighlightedBookingId = pageState.setHighlightedBookingId;
+  useEffect(() => {
+    if (!highlightedBookingId) return;
+
+    // 페이지 이동 후 데이터 로딩 완료까지 대기하며 스크롤 시도
+    let attempts = 0;
+    const maxAttempts = 10;
+    const tryScroll = () => {
+      const el = document.querySelector(`[data-booking-id="${highlightedBookingId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        scrollRetry = setTimeout(tryScroll, 300);
+      }
+    };
+    let scrollRetry = setTimeout(tryScroll, 300);
+
+    const clearTimer = setTimeout(() => {
+      setHighlightedBookingId(null);
+    }, 5000);
+
+    return () => { clearTimeout(scrollRetry); clearTimeout(clearTimer); };
+  }, [highlightedBookingId, setHighlightedBookingId]);
+
   const handleSheetAddBooking = useCallback(
     (staffId: string, time?: string) => {
       pageState.setSelectedStaffId(staffId);
@@ -243,6 +270,7 @@ export default function BookingsPageView() {
             onBookingClick={pageState.openBookingDetailModal}
             onAddBooking={handleSheetAddBooking}
             onUpdateBooking={handleSheetUpdateBooking}
+            highlightedBookingId={highlightedBookingId}
           />
         </Card>
       </div>

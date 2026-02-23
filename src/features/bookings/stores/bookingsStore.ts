@@ -26,6 +26,7 @@ interface BookingsUIState {
   selectedTime: string;
   selectedStaffId: string;
   selectedServiceId: string;
+  highlightedBookingId: string | null;
 
   // Modal actions
   openNewBookingModal: () => void;
@@ -43,6 +44,7 @@ interface BookingsUIState {
   setSelectedTime: (time: string) => void;
   setSelectedStaffId: (staffId: string) => void;
   setSelectedServiceId: (serviceId: string) => void;
+  setHighlightedBookingId: (id: string | null) => void;
 
   // Reset
   reset: () => void;
@@ -59,6 +61,7 @@ const initialState = {
   selectedTime: '',
   selectedStaffId: '',
   selectedServiceId: '',
+  highlightedBookingId: null as string | null,
 };
 
 export const useBookingsUIStore = create<BookingsUIState>()(
@@ -109,6 +112,9 @@ export const useBookingsUIStore = create<BookingsUIState>()(
       setSelectedServiceId: (serviceId) =>
         set({ selectedServiceId: serviceId }, false, 'setSelectedServiceId'),
 
+      setHighlightedBookingId: (id) =>
+        set({ highlightedBookingId: id }, false, 'setHighlightedBookingId'),
+
       reset: () => set(initialState, false, 'reset'),
     }),
     { name: 'bookings-ui-store' }
@@ -128,3 +134,4 @@ export const selectStatusFilter = (state: BookingsUIState) => state.statusFilter
 export const selectSelectedTime = (state: BookingsUIState) => state.selectedTime;
 export const selectSelectedStaffId = (state: BookingsUIState) => state.selectedStaffId;
 export const selectSelectedServiceId = (state: BookingsUIState) => state.selectedServiceId;
+export const selectHighlightedBookingId = (state: BookingsUIState) => state.highlightedBookingId;

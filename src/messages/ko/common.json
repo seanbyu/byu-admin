@@ -29,6 +29,11 @@
     "asc": "오름차순",
     "desc": "내림차순"
   },
+  "languageNames": {
+    "ko": "한국어",
+    "en": "영어",
+    "th": "태국어"
+  },
   "dayNames": {
     "sunday": "일요일",
     "monday": "월요일",
@@ -68,7 +73,9 @@
     "noShowBooking": "노쇼 처리되었습니다",
     "newReview": "새로운 리뷰가 등록되었습니다",
     "noNotifications": "새로운 알림이 없습니다",
-    "viewAll": "모두 보기"
+    "viewAll": "모두 보기",
+    "markAllRead": "모두 읽음",
+    "pendingStatus": "예약 대기"
   },
   "calendar": {
     "view": "캘린더",

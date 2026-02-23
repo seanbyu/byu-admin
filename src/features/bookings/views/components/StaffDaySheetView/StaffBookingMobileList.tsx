@@ -4,6 +4,7 @@ import { memo, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Booking } from '../../../types';
 import { BookingStatus } from '@/types';
+import { cn } from '@/lib/utils';
 import { stripCountryCode, PAYMENT_METHOD_KEYS, isKnownPaymentMethod } from './utils';
 import { InlineStatusSelect } from './InlineStatusSelect';
 import { InlinePriceCell } from './InlinePriceCell';
@@ -14,6 +15,7 @@ export interface StaffBookingMobileListProps {
   onBookingClick: (booking: Booking) => void;
   onAddBooking: (time: string) => void;
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
+  highlightedBookingId?: string | null;
 }
 
 export const StaffBookingMobileList = memo(function StaffBookingMobileList({
@@ -22,6 +24,7 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
   onBookingClick,
   onAddBooking,
   onUpdateBooking,
+  highlightedBookingId,
 }: StaffBookingMobileListProps) {
   const t = useTranslations();
 
@@ -56,13 +59,17 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
           {sortedBookings.map((booking) => (
             <div
               key={booking.id}
+              data-booking-id={booking.id}
               role="button"
               tabIndex={0}
               onClick={() => onBookingClick(booking)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') onBookingClick(booking);
               }}
-              className="w-full text-left px-3 py-3 bg-white hover:bg-secondary-50 transition-colors"
+              className={cn(
+                'w-full text-left px-3 py-3 bg-white hover:bg-secondary-50 transition-colors',
+                highlightedBookingId === booking.id && 'booking-highlight'
+              )}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
