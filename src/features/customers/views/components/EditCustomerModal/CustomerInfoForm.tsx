@@ -60,46 +60,47 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
   );
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-5 sm:space-y-4">
       {/* Name */}
       <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-1">
-          {t('customer.field.name')} <span className="text-red-500">*</span>
+        <label className="block text-base sm:text-sm font-semibold text-secondary-700 mb-2 sm:mb-1">
+          {t('customer.field.name')} <span className="text-error-500">*</span>
         </label>
         <Input
           value={formData.name}
           onChange={handleChange('name')}
           placeholder={t('customer.edit.namePlaceholder')}
+          className="h-12 sm:h-10 text-base sm:text-sm"
           required
         />
       </div>
 
       {/* Customer Number */}
       <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-1">
+        <label className="block text-base sm:text-sm font-semibold text-secondary-700 mb-2 sm:mb-1">
           {t('customer.field.customerNumber')}
         </label>
         <Input
           value={formData.customer_number}
           onChange={handleChange('customer_number')}
           placeholder={t('customer.create.customerNumberPlaceholder')}
-          className="font-mono"
+          className="h-12 sm:h-10 text-base sm:text-sm font-mono"
         />
-        <p className="text-xs text-secondary-500 mt-1">
+        <p className="text-sm sm:text-xs text-secondary-500 mt-2 sm:mt-1">
           {t('customer.create.customerNumberHint')}
         </p>
       </div>
 
       {/* Customer Type */}
       <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-2">
+        <label className="block text-base sm:text-sm font-semibold text-secondary-700 mb-2">
           {t('customer.field.customerType')}
         </label>
-        <div className="flex space-x-4">
+        <div className="flex space-x-2">
           <button
             type="button"
             onClick={() => handleCustomerTypeChange('local')}
-            className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
+            className={`flex-1 h-10 px-3 rounded-lg border text-base sm:text-sm font-medium transition-colors ${
               formData.customer_type === 'local'
                 ? 'bg-primary-500 text-white border-primary-500'
                 : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
@@ -110,7 +111,7 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
           <button
             type="button"
             onClick={() => handleCustomerTypeChange('foreign')}
-            className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
+            className={`flex-1 h-10 px-3 rounded-lg border text-base sm:text-sm font-medium transition-colors ${
               formData.customer_type === 'foreign'
                 ? 'bg-primary-500 text-white border-primary-500'
                 : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
@@ -123,13 +124,13 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
 
       {/* Primary Artist */}
       <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-1">
+        <label className="block text-base sm:text-sm font-semibold text-secondary-700 mb-2 sm:mb-1">
           {t('customer.field.primaryArtist')}
         </label>
         <select
           value={formData.primary_artist_id}
           onChange={handleStaffChange}
-          className="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full h-12 sm:h-10 px-3 text-base sm:text-sm border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           disabled={isLoadingStaff}
         >
           <option value="">{t('customer.create.selectArtist')}</option>
@@ -154,7 +155,7 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
 
       {/* Email */}
       <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-1">
+        <label className="block text-base sm:text-sm font-semibold text-secondary-700 mb-2 sm:mb-1">
           {t('customer.field.email')}
         </label>
         <Input
@@ -162,12 +163,13 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
           value={formData.email}
           onChange={handleChange('email')}
           placeholder={t('customer.edit.emailPlaceholder')}
+          className="h-12 sm:h-10 text-base sm:text-sm"
         />
       </div>
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-1">
+        <label className="block text-base sm:text-sm font-semibold text-secondary-700 mb-2 sm:mb-1">
           {t('customer.field.notes')}
         </label>
         <textarea
@@ -175,34 +177,36 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
           onChange={handleChange('notes')}
           placeholder={t('customer.edit.notesPlaceholder')}
           rows={3}
-          className="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full px-3 py-3 text-base sm:text-sm border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
       </div>
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm font-medium text-red-800 mb-1">
+        <div className="bg-error-50 border border-error-200 rounded-lg p-4">
+          <p className="text-base sm:text-sm font-semibold text-error-800 mb-1">
             {t('customer.delete.confirm')}
           </p>
-          <p className="text-xs text-red-600 mb-3">
+          <p className="text-sm sm:text-xs text-error-600 mb-3">
             {t('customer.delete.warning')}
           </p>
           <div className="flex space-x-2">
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="md"
               onClick={() => onShowDeleteConfirm(false)}
+              className="h-11 px-4 text-base sm:text-sm"
             >
               {t('common.cancel')}
             </Button>
             <Button
               type="button"
               variant="danger"
-              size="sm"
+              size="md"
               isLoading={isDeleting}
               onClick={onDelete}
+              className="h-11 px-4 text-base sm:text-sm"
             >
               {t('customer.delete.button')}
             </Button>
@@ -211,22 +215,31 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
       )}
 
       {/* Actions */}
-      <div className="flex justify-between pt-4">
+      <div className="flex items-center justify-between pt-4">
         <Button
           type="button"
           variant="ghost"
           onClick={() => onShowDeleteConfirm(true)}
           disabled={showDeleteConfirm}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="h-11 px-3 text-base sm:text-sm text-error-600 hover:text-error-700 hover:bg-error-50"
         >
-          <Trash2 className="w-4 h-4 mr-1" />
+          <Trash2 className="w-4 h-4 mr-1.5" />
           {t('customer.delete.button')}
         </Button>
-        <div className="flex space-x-3">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="flex space-x-2 sm:space-x-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="h-11 min-w-[84px] text-base sm:text-sm"
+          >
             {t('common.cancel')}
           </Button>
-          <Button type="submit" isLoading={isUpdating}>
+          <Button
+            type="submit"
+            isLoading={isUpdating}
+            className="h-11 min-w-[84px] text-base sm:text-sm"
+          >
             {t('common.save')}
           </Button>
         </div>

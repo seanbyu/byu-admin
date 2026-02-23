@@ -28,6 +28,7 @@ import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { UserRole } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
@@ -66,6 +67,7 @@ export const Sidebar: React.FC = () => {
     'salon-management',
     'customer-management',
   ]);
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
   const toggleSubmenu = (name: string) => {
     setOpenSubmenus((prev) =>
@@ -349,7 +351,7 @@ export const Sidebar: React.FC = () => {
           {/* Logout */}
           <div className="px-3 md:px-4 xl:px-5 py-3 md:py-3.5 xl:py-4 border-t border-sidebar-border">
             <button
-              onClick={logout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="w-full flex items-center justify-center xl:justify-start gap-2 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-hover-text transition-colors"
             >
               <LogOut size={18} />
@@ -358,6 +360,17 @@ export const Sidebar: React.FC = () => {
           </div>
         </div>
       </aside>
+
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={async () => {
+          setShowLogoutConfirm(false);
+          await logout();
+        }}
+        title={t('auth.logoutConfirm.title')}
+        description={t('auth.logoutConfirm.description')}
+      />
     </>
   );
 };

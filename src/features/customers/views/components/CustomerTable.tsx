@@ -1,10 +1,11 @@
 'use client';
 
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useMemo, useCallback, useState } from 'react';
 import { Table } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
 import { useTranslations } from 'next-intl';
-import { formatDate, formatPrice } from '@/lib/utils';
+import { formatDate, formatPrice, formatPhoneDisplay as formatPhoneUtil } from '@/lib/utils';
+import { ChevronDown } from 'lucide-react';
 import type { CustomerListItem, CustomerTag } from '../../types';
 
 // ============================================
@@ -33,23 +34,10 @@ const getTagVariant = (
   }
 };
 
-// 전화번호 표시 형식 변환 (+66 제거, 0으로 시작)
+// 전화번호 표시 형식 변환 (공통 유틸 사용, null 반환 유지)
 const formatPhoneDisplay = (phone: string | undefined): string | null => {
   if (!phone) return null;
-
-  // +66으로 시작하면 제거하고 0 추가
-  if (phone.startsWith('+66')) {
-    const localNumber = phone.slice(3).replace(/^-/, ''); // +66 제거, 앞의 - 제거
-    return '0' + localNumber;
-  }
-
-  // +82로 시작하면 제거하고 0 추가
-  if (phone.startsWith('+82')) {
-    const localNumber = phone.slice(3).replace(/^-/, '');
-    return '0' + localNumber;
-  }
-
-  return phone;
+  return formatPhoneUtil(phone) || phone;
 };
 
 // ============================================
@@ -67,6 +55,21 @@ const CustomerTags = memo(function CustomerTags({ tags }: { tags: CustomerTag[] 
           {tag}
         </Badge>
       ))}
+    </div>
+  );
+});
+
+const MobileCustomerMeta = memo(function MobileCustomerMeta({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="text-[11px] text-secondary-500">{label}</p>
+      <p className="text-sm font-medium text-secondary-800 truncate">{value}</p>
     </div>
   );
 });
@@ -107,6 +110,7 @@ export const CustomerTable = memo(function CustomerTable({
   onSelectionChange,
 }: CustomerTableProps) {
   const t = useTranslations();
+  const [expandedCustomerIds, setExpandedCustomerIds] = useState<Set<string>>(new Set());
 
   // advanced-event-handler-refs: 안정적인 이벤트 핸들러
   // canEdit 권한이 있을 때만 클릭 허용
@@ -150,7 +154,7 @@ export const CustomerTable = memo(function CustomerTable({
 
   // 체크박스: 개별 선택/해제
   const handleSelectOne = useCallback(
-    (customerId: string, e: React.MouseEvent) => {
+    (customerId: string, e: React.SyntheticEvent) => {
       e.stopPropagation(); // 행 클릭 이벤트 전파 방지
       if (!onSelectionChange) return;
 
@@ -162,6 +166,18 @@ export const CustomerTable = memo(function CustomerTable({
     },
     [selectedIds, onSelectionChange]
   );
+
+  const handleToggleDetails = useCallback((customerId: string) => {
+    setExpandedCustomerIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(customerId)) {
+        next.delete(customerId);
+      } else {
+        next.add(customerId);
+      }
+      return next;
+    });
+  }, []);
 
   // 페이지네이션을 고려한 시작 번호
   const startNumber = (currentPage - 1) * pageSize;
@@ -366,86 +382,249 @@ export const CustomerTable = memo(function CustomerTable({
 
   return (
     <div className="space-y-4">
-      <Table
-        data={customers}
-        columns={columns}
-        onRowClick={canEdit ? handleRowClick : undefined}
-        emptyMessage={t('customer.noCustomers')}
-      />
+      {/* Mobile: 카드 리스트 */}
+      <div className="md:hidden space-y-3">
+        {customers.length === 0 ? (
+          <div className="rounded-lg border border-secondary-200 bg-white py-10 text-center text-sm text-secondary-500">
+            {t('customer.noCustomers')}
+          </div>
+        ) : (
+          customers.map((customer, index) => {
+            const displayPhone = formatPhoneDisplay(customer.phone) ?? '-';
+            const customerNumber = customer.customer_number || startNumber + index + 1;
+            const lastVisit = customer.last_visit
+              ? formatDate(new Date(customer.last_visit), 'yyyy-MM-dd')
+              : t('customer.noVisit');
+            const isExpanded = expandedCustomerIds.has(customer.id);
+
+            return (
+              <div
+                key={customer.id}
+                className="rounded-xl border border-secondary-200 bg-white p-3"
+              >
+                <div className="flex items-start gap-3">
+                  <button
+                    type="button"
+                    disabled={!canEdit}
+                    onClick={() => handleRowClick(customer)}
+                    className="flex-1 min-w-0 text-left disabled:cursor-default"
+                  >
+                    <p className="text-base font-semibold text-secondary-900 truncate">
+                      {customer.name}
+                    </p>
+                    <p className="mt-0.5 text-sm text-secondary-700">{displayPhone}</p>
+                  </button>
+
+                  {onSelectionChange && (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(customer.id)}
+                      onClick={(e) => handleSelectOne(customer.id, e)}
+                      onChange={() => {}} // onClick에서 처리
+                      className="mt-1 h-5 w-5 rounded border-secondary-300 text-primary-500 focus:ring-primary-500 cursor-pointer"
+                      aria-label={`${customer.name} ${t('common.select')}`}
+                    />
+                  )}
+                </div>
+
+                <div className="mt-2.5">
+                  <MobileCustomerMeta
+                    label={t('customer.field.lastVisit')}
+                    value={lastVisit}
+                  />
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-secondary-100">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleDetails(customer.id)}
+                    className="w-full flex items-center justify-between text-sm font-medium text-primary-600"
+                  >
+                    <span>
+                      {isExpanded
+                        ? t('common.actions.hideDetails')
+                        : t('common.actions.showDetails')}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                </div>
+
+                {isExpanded && (
+                  <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
+                    <MobileCustomerMeta
+                      label={t('customer.field.customerNumber')}
+                      value={customerNumber}
+                    />
+                    <MobileCustomerMeta
+                      label={t('customer.field.primaryArtist')}
+                      value={customer.primary_artist?.name || '-'}
+                    />
+                    <MobileCustomerMeta
+                      label={t('customer.field.totalVisits')}
+                      value={customer.total_visits}
+                    />
+                    <MobileCustomerMeta
+                      label={t('customer.field.totalSpent')}
+                      value={formatPrice(customer.total_spent)}
+                    />
+                    <MobileCustomerMeta
+                      label={t('customer.field.createdAt')}
+                      value={formatDate(new Date(customer.created_at), 'yyyy-MM-dd')}
+                    />
+                    <MobileCustomerMeta
+                      label={t('customer.field.notes')}
+                      value={customer.notes || '-'}
+                    />
+                    {customer.customer_type === 'foreign' && (
+                      <MobileCustomerMeta
+                        label={t('customer.field.customerType')}
+                        value={t('customer.type.foreign')}
+                      />
+                    )}
+
+                    {customer.tags.length > 0 && (
+                      <div className="col-span-2 mt-1">
+                        <CustomerTags tags={customer.tags} />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop: 테이블 */}
+      <div className="hidden md:block">
+        <Table
+          data={customers}
+          columns={columns}
+          onRowClick={canEdit ? handleRowClick : undefined}
+          emptyMessage={t('customer.noCustomers')}
+        />
+      </div>
 
       {/* Pagination */}
       {totalCount > 0 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-secondary-200">
-          {/* Left: Info */}
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-secondary-600">
-              {t('common.pagination.showing', {
-                start: startIndex,
-                end: endIndex,
-                total: totalCount,
-              })}
-            </span>
+        <>
+          <div className="hidden md:flex items-center justify-between px-4 py-3 border-t border-secondary-200">
+            {/* Left: Info */}
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-secondary-600">
+                {t('common.pagination.showing', {
+                  start: startIndex,
+                  end: endIndex,
+                  total: totalCount,
+                })}
+              </span>
 
-            {/* Page size selector */}
-            <select
-              value={pageSize}
-              onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="px-2 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value={10}>10 / {t('common.pagination.page')}</option>
-              <option value={20}>20 / {t('common.pagination.page')}</option>
-              <option value={50}>50 / {t('common.pagination.page')}</option>
-              <option value={100}>100 / {t('common.pagination.page')}</option>
-            </select>
-          </div>
-
-          {/* Right: Page navigation */}
-          <div className="flex items-center space-x-2">
-            {/* Previous button */}
-            <button
-              type="button"
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('common.pagination.previous')}
-            </button>
-
-            {/* Page numbers */}
-            <div className="flex items-center space-x-1">
-              {getPageNumbers().map((page, idx) =>
-                page === '...' ? (
-                  <span key={`ellipsis-${idx}`} className="px-2 text-secondary-400">
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => onPageChange(page as number)}
-                    className={`px-3 py-1 text-sm rounded-lg ${
-                      currentPage === page
-                        ? 'bg-primary-500 text-white font-medium'
-                        : 'bg-white text-secondary-700 hover:bg-secondary-50 border border-secondary-200'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
+              {/* Page size selector */}
+              <select
+                value={pageSize}
+                onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                className="px-2 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value={10}>10 / {t('common.pagination.page')}</option>
+                <option value={20}>20 / {t('common.pagination.page')}</option>
+                <option value={50}>50 / {t('common.pagination.page')}</option>
+                <option value={100}>100 / {t('common.pagination.page')}</option>
+              </select>
             </div>
 
-            {/* Next button */}
-            <button
-              type="button"
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('common.pagination.next')}
-            </button>
+            {/* Right: Page navigation */}
+            <div className="flex items-center space-x-2">
+              {/* Previous button */}
+              <button
+                type="button"
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('common.pagination.previous')}
+              </button>
+
+              {/* Page numbers */}
+              <div className="flex items-center space-x-1">
+                {getPageNumbers().map((page, idx) =>
+                  page === '...' ? (
+                    <span key={`ellipsis-${idx}`} className="px-2 text-secondary-400">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => onPageChange(page as number)}
+                      className={`px-3 py-1 text-sm rounded-lg ${
+                        currentPage === page
+                          ? 'bg-primary-500 text-white font-medium'
+                          : 'bg-white text-secondary-700 hover:bg-secondary-50 border border-secondary-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+              </div>
+
+              {/* Next button */}
+              <button
+                type="button"
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('common.pagination.next')}
+              </button>
+            </div>
           </div>
-        </div>
+
+          <div className="md:hidden border-t border-secondary-200 px-1 pt-3 pb-1 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-secondary-600">
+                {startIndex}-{endIndex} / {totalCount}
+              </span>
+              <select
+                value={pageSize}
+                onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                className="h-9 px-2 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value={10}>10 / {t('common.pagination.page')}</option>
+                <option value={20}>20 / {t('common.pagination.page')}</option>
+                <option value={50}>50 / {t('common.pagination.page')}</option>
+                <option value={100}>100 / {t('common.pagination.page')}</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="h-10 rounded-lg border border-secondary-200 bg-white text-sm text-secondary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('common.pagination.previous')}
+              </button>
+
+              <div className="h-10 rounded-lg border border-primary-200 bg-primary-50 text-primary-700 text-sm font-medium flex items-center justify-center">
+                {currentPage} / {totalPages}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="h-10 rounded-lg border border-secondary-200 bg-white text-sm text-secondary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('common.pagination.next')}
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

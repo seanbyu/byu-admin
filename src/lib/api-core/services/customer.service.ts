@@ -207,8 +207,9 @@ export class CustomerService {
     if (customer.phone) {
       const existing = await this.repository.findByPhone(salonId, customer.phone);
       if (existing) {
-        // 이름이 다르면 업데이트
+        // 이름이 다르면 이력 기록 후 업데이트
         if (existing.name !== customer.name) {
+          await this.repository.logNameChange(existing.id, existing.name, customer.name, 'admin');
           return this.repository.updateCustomer(existing.id, { name: customer.name });
         }
         return existing;
@@ -241,10 +242,11 @@ export class CustomerService {
    * - async-parallel: 고객 정보와 예약 정보를 병렬 조회
    */
   async getCustomerChart(salonId: string, customerId: string) {
-    // 고객 정보와 예약 정보를 병렬 조회
-    const [customer, bookingsData] = await Promise.all([
+    // 고객 정보, 예약 정보, 이름 변경 이력을 병렬 조회
+    const [customer, bookingsData, nameHistory] = await Promise.all([
       this.repository.getCustomer(customerId),
       this.repository.getCustomerBookings(customerId),
+      this.repository.getNameHistory(customerId),
     ]);
 
     const bookings = bookingsData || [];
@@ -374,6 +376,7 @@ export class CustomerService {
           visitDates.length > 0 ? new Date(visitDates[visitDates.length - 1]) : null,
       },
       service_history: serviceHistory,
+      name_history: nameHistory,
     };
   }
 }

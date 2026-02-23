@@ -1,10 +1,11 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Booking } from '../../../types';
+import { BookingStatus } from '@/types';
 import { stripCountryCode, PAYMENT_METHOD_KEYS, isKnownPaymentMethod } from './utils';
-import { StatusBadge } from './StatusBadge';
+import { InlineStatusSelect } from './InlineStatusSelect';
 import { InlinePriceCell } from './InlinePriceCell';
 
 export interface StaffBookingMobileListProps {
@@ -12,7 +13,7 @@ export interface StaffBookingMobileListProps {
   bookingsByTime: Record<string, Booking>;
   onBookingClick: (booking: Booking) => void;
   onAddBooking: (time: string) => void;
-  onUpdateBooking: (id: string, updates: { price: number }) => void;
+  onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
 }
 
 export const StaffBookingMobileList = memo(function StaffBookingMobileList({
@@ -23,6 +24,13 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
   onUpdateBooking,
 }: StaffBookingMobileListProps) {
   const t = useTranslations();
+
+  const handleStatusChange = useCallback(
+    (id: string, status: BookingStatus) => {
+      onUpdateBooking(id, { status });
+    },
+    [onUpdateBooking]
+  );
 
   const sortedBookings = useMemo(
     () =>
@@ -68,9 +76,10 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
                       : ''}
                   </p>
                 </div>
-                <StatusBadge
+                <InlineStatusSelect
+                  bookingId={booking.id}
                   status={booking.status}
-                  label={t(`booking.${booking.status.toLowerCase()}`)}
+                  onUpdate={handleStatusChange}
                 />
               </div>
 
@@ -109,7 +118,7 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
 
       {availableSlots.length > 0 && (
         <div className="border-t border-secondary-100 bg-secondary-50 px-3 py-2">
-          <p className="text-[11px] font-medium text-secondary-500 mb-2">
+          <p className="text-xs font-medium text-secondary-500 mb-2">
             {t('booking.addBooking')}
           </p>
           <div className="flex flex-wrap gap-1.5">

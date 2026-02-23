@@ -21,7 +21,7 @@ export const StaffTableHeader = memo(function StaffTableHeader() {
   const t = useTranslations('staff');
 
   return (
-    <thead className="bg-gray-50 border-b border-secondary-200">
+    <thead className="bg-secondary-50 border-b border-secondary-200">
       <tr>
         {TABLE_HEADER_KEYS.map((key) => (
           <th

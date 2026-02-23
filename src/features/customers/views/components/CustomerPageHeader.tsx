@@ -46,33 +46,65 @@ interface FilterTab {
   count: number;
 }
 
+const STAFF_FILTER_PALETTE = [
+  {
+    active: 'bg-info-500 text-white',
+    inactive: 'bg-info-50 text-info-700 hover:bg-info-100',
+  },
+  {
+    active: 'bg-success-500 text-white',
+    inactive: 'bg-success-50 text-success-700 hover:bg-success-100',
+  },
+  {
+    active: 'bg-warning-500 text-white',
+    inactive: 'bg-warning-50 text-warning-700 hover:bg-warning-100',
+  },
+  {
+    active: 'bg-primary-500 text-white',
+    inactive: 'bg-primary-50 text-primary-700 hover:bg-primary-100',
+  },
+] as const;
+
 // rerender-memo: 필터 탭을 별도 컴포넌트로 분리
 const FilterTabs = memo(function FilterTabs({
   tabs,
   activeFilter,
   onFilterChange,
+  variant = 'default',
 }: {
   tabs: FilterTab[];
   activeFilter: CustomerFilterType;
   onFilterChange: (filter: CustomerFilterType) => void;
+  variant?: 'default' | 'staff';
 }) {
   return (
     <div className="flex space-x-2 overflow-x-auto pb-2">
-      {tabs.map((tab) => (
-        <button
-          key={tab.type}
-          type="button"
-          className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
-            activeFilter === tab.type
+      {tabs.map((tab, index) => {
+        const isActive = activeFilter === tab.type;
+        const staffPalette = STAFF_FILTER_PALETTE[index % STAFF_FILTER_PALETTE.length];
+        const stateClass =
+          variant === 'staff'
+            ? isActive
+              ? staffPalette.active
+              : staffPalette.inactive
+            : isActive
               ? 'bg-primary-500 text-white'
-              : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
-          }`}
-          onClick={() => onFilterChange(tab.type)}
-        >
-          {tab.label}
-          <span className="ml-2 text-sm opacity-75">({tab.count})</span>
-        </button>
-      ))}
+              : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200';
+
+        return (
+          <button
+            key={tab.type}
+            type="button"
+            className={`px-4 py-2 rounded-lg whitespace-nowrap border transition-colors ${
+              isActive ? 'border-transparent' : 'border-secondary-200'
+            } ${stateClass}`}
+            onClick={() => onFilterChange(tab.type)}
+          >
+            {tab.label}
+            <span className="ml-2 text-sm opacity-75">({tab.count})</span>
+          </button>
+        );
+      })}
     </div>
   );
 });
@@ -350,11 +382,11 @@ const SortDropdown = memo(function SortDropdown({
   }, [sortOrder, onSortOrderChange]);
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center gap-2 w-full sm:w-auto">
       <select
         value={sortBy}
         onChange={handleSortChange}
-        className="px-3 py-2 border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+        className="h-11 flex-1 sm:flex-none px-3 text-sm sm:text-base border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
       >
         <option value="last_visit">{t('customer.sort.lastVisit')}</option>
         <option value="total_visits">{t('customer.sort.totalVisits')}</option>
@@ -364,7 +396,7 @@ const SortDropdown = memo(function SortDropdown({
       </select>
       <button
         type="button"
-        className={`p-2 border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 transition-transform ${
+        className={`h-11 w-11 flex items-center justify-center border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 transition-transform ${
           sortOrder === 'desc' ? 'rotate-180' : ''
         }`}
         onClick={handleToggleOrder}
@@ -492,17 +524,20 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
   return (
     <div className="space-y-4">
       {/* Title and Add Button */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-secondary-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900">
             {t('customer.title')}
           </h1>
-          <p className="text-secondary-600 mt-1">
+          <p className="text-sm sm:text-base text-secondary-600 mt-1">
             {t('customer.pageDescription')}
           </p>
         </div>
         {canAddCustomer && (
-          <Button onClick={onAddCustomer} className="flex items-center space-x-2">
+          <Button
+            onClick={onAddCustomer}
+            className="h-11 px-4 text-sm sm:text-base flex items-center justify-center gap-2 shrink-0"
+          >
             <Plus size={20} />
             <span>{t('customer.addNew')}</span>
           </Button>
@@ -537,6 +572,7 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
               tabs={artistFilterTabs}
               activeFilter={activeFilter}
               onFilterChange={onFilterChange}
+              variant="staff"
             />
           </>
         )}
@@ -563,19 +599,19 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
       )}
 
       {/* Search and Sort */}
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="flex-1">
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400"
-              size={20}
+              size={18}
             />
             <input
               type="text"
               placeholder={t('customer.search.placeholder')}
               value={searchQuery}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full h-11 pl-10 pr-4 text-sm sm:text-base border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
         </div>

@@ -64,7 +64,7 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
         </div>
         <div className="flex items-center gap-2">
           {saveSuccess && (
-            <span className="flex items-center gap-1 text-xs text-green-600">
+            <span className="flex items-center gap-1 text-xs text-success-600">
               <Check size={14} />
             </span>
           )}
@@ -83,14 +83,14 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
         <div className="p-4 bg-secondary-50 rounded-lg">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <LineIcon className="text-[#06C755]" />
+              <LineIcon className="text-social-line" />
               <span className="text-sm font-medium text-secondary-900">LINE</span>
             </div>
             <button
               type="button"
               onClick={() => onToggleChannel('line')}
               className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
-                contactChannels.line?.enabled ? 'bg-[#06C755]' : 'bg-secondary-300'
+                contactChannels.line?.enabled ? 'bg-social-line' : 'bg-secondary-300'
               }`}
             >
               <span
@@ -120,14 +120,14 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
         <div className="p-4 bg-secondary-50 rounded-lg">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <InstagramIcon className="text-[#E4405F]" />
+              <InstagramIcon className="text-social-instagram" />
               <span className="text-sm font-medium text-secondary-900">Instagram</span>
             </div>
             <button
               type="button"
               onClick={() => onToggleChannel('instagram')}
               className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
-                contactChannels.instagram?.enabled ? 'bg-[#E4405F]' : 'bg-secondary-300'
+                contactChannels.instagram?.enabled ? 'bg-social-instagram' : 'bg-secondary-300'
               }`}
             >
               <span

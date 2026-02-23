@@ -68,7 +68,7 @@ export const TimeSlotSelector = memo(function TimeSlotSelector({
       {label && (
         <label className="block text-sm font-medium text-secondary-800 mb-2">
           {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
+          {required && <span className="text-error-500 ml-0.5">*</span>}
         </label>
       )}
 
@@ -79,7 +79,7 @@ export const TimeSlotSelector = memo(function TimeSlotSelector({
           <span>휴무일 — 예약 불가</span>
         </div>
       ) : (
-        <div className="rounded-lg border border-secondary-200 bg-[#F8FAFC] p-2">
+        <div className="rounded-lg border border-secondary-200 bg-secondary-50 p-2">
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 max-h-44 overflow-y-auto pr-0.5">
             {slots.map((slot) => (
               <button
@@ -104,7 +104,7 @@ export const TimeSlotSelector = memo(function TimeSlotSelector({
         </div>
       )}
 
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-error-500">{error}</p>}
     </div>
   );
 });

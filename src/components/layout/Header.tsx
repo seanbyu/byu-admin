@@ -55,7 +55,7 @@ export const Header: React.FC = () => {
           onClick={toggleSidebar}
           className="xl:hidden text-secondary-700 hover:text-secondary-900 mr-3 sm:mr-4"
         >
-          <Menu size={22} />
+          <Menu size={20} className="sm:w-[22px] sm:h-[22px]" />
         </button>
       </div>
 
@@ -67,7 +67,7 @@ export const Header: React.FC = () => {
             onClick={() => setShowLangMenu(!showLangMenu)}
             className="flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
           >
-            <Globe size={20} />
+            <Globe size={18} className="sm:w-5 sm:h-5" />
           </button>
 
           {showLangMenu && (
@@ -98,7 +98,7 @@ export const Header: React.FC = () => {
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
           >
-            <Bell size={20} className="-translate-y-px" />
+            <Bell size={18} className="-translate-y-px sm:w-5 sm:h-5" />
             {unreadCount > 0 && (
               <span className="absolute top-0.5 right-0.5 min-w-4 h-4 px-1 bg-error-500 rounded-full text-[10px] leading-none text-white flex items-center justify-center">
                 {unreadCount > 9 ? '9+' : unreadCount}

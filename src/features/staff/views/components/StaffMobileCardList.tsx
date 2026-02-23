@@ -134,7 +134,7 @@ function StaffMobileActionSheet({
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-11 text-blue-600 border-blue-200 hover:bg-blue-50"
+                  className="w-full h-11 text-primary-600 border-primary-200 hover:bg-primary-50"
                   onClick={handleCancelResignation}
                 >
                   {t('staff.actions.cancelResignation')}
@@ -155,7 +155,7 @@ function StaffMobileActionSheet({
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full h-11 text-red-600 border-red-200 hover:bg-red-50"
+                      className="w-full h-11 text-error-600 border-error-200 hover:bg-error-50"
                       onClick={handleImmediateResign}
                     >
                       {t('staff.actions.immediateResign')}
@@ -238,7 +238,7 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
             <article
               key={member.id}
               className={`rounded-xl border bg-white p-2.5 sm:p-4 ${
-                isResigned ? 'border-red-200 bg-red-50/20' : 'border-secondary-200'
+                isResigned ? 'border-error-200 bg-error-50' : 'border-secondary-200'
               }`}
             >
               <div className="flex items-start gap-2 sm:gap-3">
@@ -247,9 +247,9 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
                     <img
                       src={member.profileImage}
                       alt=""
-                      className={`h-12 w-12 rounded-full object-cover border ${
+                        className={`h-12 w-12 rounded-full object-cover border ${
                         isResigned
-                          ? 'border-red-300 opacity-70'
+                          ? 'border-error-300 opacity-70'
                           : 'border-secondary-200'
                       }`}
                     />
@@ -257,7 +257,7 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
                     <div
                       className={`h-12 w-12 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium border ${
                         isResigned
-                          ? 'bg-red-100 border-red-200 text-red-500'
+                          ? 'bg-error-100 border-error-200 text-error-500'
                           : 'bg-secondary-100 border-secondary-200 text-secondary-500'
                       }`}
                     >
@@ -267,10 +267,10 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
                   <span
                     className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${
                       isResigned
-                        ? 'bg-red-500'
+                        ? 'bg-error-500'
                         : member.isActive
-                          ? 'bg-green-500'
-                          : 'bg-gray-300'
+                          ? 'bg-success-500'
+                          : 'bg-secondary-300'
                     }`}
                   />
                 </div>
@@ -278,8 +278,8 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <p
-                      className={`truncate text-[13px] sm:text-sm font-semibold ${
-                        isResigned ? 'text-red-600' : 'text-secondary-900'
+                      className={`truncate text-sm font-semibold ${
+                        isResigned ? 'text-error-600' : 'text-secondary-900'
                       }`}
                     >
                       {member.name}
@@ -287,11 +287,11 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
                     <Badge size="sm">{getRoleName(member.role)}</Badge>
                   </div>
                   {isResigned ? (
-                    <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-red-500">
+                    <p className="mt-0.5 sm:mt-1 text-xs text-error-500">
                       {t('staff.status.resignedDaysLeft', { days: daysRemaining })}
                     </p>
                   ) : (
-                    <p className="mt-0.5 sm:mt-1 truncate text-[11px] sm:text-xs text-secondary-500">
+                    <p className="mt-0.5 sm:mt-1 truncate text-xs text-secondary-500">
                       {member.email || '-'}
                     </p>
                   )}
@@ -311,7 +311,7 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
                 )}
               </div>
 
-              <div className="mt-2.5 sm:mt-3 grid grid-cols-2 gap-x-2.5 sm:gap-x-3 gap-y-1.5 sm:gap-y-2 text-[11px] sm:text-xs">
+              <div className="mt-2.5 sm:mt-3 grid grid-cols-2 gap-x-2.5 sm:gap-x-3 gap-y-1.5 sm:gap-y-2 text-xs">
                 <div>
                   <p className="text-secondary-500">{t('staff.table.phone')}</p>
                   <p className="mt-0.5 text-secondary-800">
@@ -330,7 +330,7 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
 
               <div className="mt-2.5 sm:mt-3 flex flex-wrap gap-1.5 sm:gap-2">
                 {member.role === 'SUPER_ADMIN' || member.role === 'ADMIN' ? (
-                  <Badge className="bg-gray-100 text-gray-500 font-normal">
+                  <Badge className="bg-secondary-100 text-secondary-500 font-normal">
                     {t('staff.actions.allPermissions')}
                   </Badge>
                 ) : !isResigned ? (
@@ -338,7 +338,7 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className={isAdmin ? 'bg-gray-800 text-white hover:bg-gray-700 border-transparent' : ''}
+                    className={isAdmin ? 'bg-secondary-800 text-white hover:bg-secondary-700 border-transparent' : ''}
                     onClick={() => onPermissionClick(member)}
                   >
                     {isAdmin

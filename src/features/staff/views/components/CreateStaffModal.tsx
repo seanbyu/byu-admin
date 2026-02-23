@@ -218,12 +218,12 @@ function CreateStaffModal({
       size="md"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-700 mb-4">
+        <div className="bg-primary-50 p-3 rounded-md text-sm text-primary-700 mb-4">
           <p className="font-semibold">
             {t('staff.createModal.currentCount')}: {currentStaffCount} / {MAX_FREE_STAFF}
           </p>
           {isLimitReached ? (
-            <p className="text-red-600 mt-1">
+            <p className="text-error-600 mt-1">
               {t('staff.createModal.limitReached')}
             </p>
           ) : (
@@ -237,7 +237,7 @@ function CreateStaffModal({
         <div className="space-y-2">
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-secondary-700"
           >
             {t('staff.createModal.email')}
           </label>
@@ -254,7 +254,7 @@ function CreateStaffModal({
               })}
               onChange={handleEmailChange}
               className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                errors.email ? 'border-red-500' : emailCheckStatus === 'available' ? 'border-green-500' : 'border-gray-300'
+                errors.email ? 'border-error-500' : emailCheckStatus === 'available' ? 'border-success-500' : 'border-secondary-300'
               }`}
               placeholder="example@email.com"
               disabled={isLimitReached}
@@ -263,7 +263,7 @@ function CreateStaffModal({
               type="button"
               onClick={handleCheckEmail}
               disabled={isLimitReached || emailCheckMutation.isPending || !email || !EMAIL_REGEX.test(email)}
-              className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="px-3 py-2 text-sm border border-secondary-300 rounded-md hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {emailCheckMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -273,13 +273,13 @@ function CreateStaffModal({
             </button>
           </div>
           {errors.email ? (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
+            <p className="text-sm text-error-500">{errors.email.message}</p>
           ) : emailCheckMessage ? (
-            <p className={`text-sm ${emailCheckStatus === 'available' ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm ${emailCheckStatus === 'available' ? 'text-success-600' : 'text-error-600'}`}>
               {emailCheckMessage}
             </p>
           ) : (
-            <p className="text-xs text-gray-500">{t('staff.createModal.emailHint')}</p>
+            <p className="text-xs text-secondary-500">{t('staff.createModal.emailHint')}</p>
           )}
         </div>
 
@@ -308,14 +308,14 @@ function CreateStaffModal({
         <div className="space-y-2">
           <label
             htmlFor="role"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-secondary-700"
           >
             {t('staff.createModal.role')}
           </label>
           <select
             id="role"
             {...register('role')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2 border border-secondary-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             disabled={isLimitReached}
           >
             <option value="MANAGER">{t('staff.createModal.roleManager')}</option>
@@ -326,7 +326,7 @@ function CreateStaffModal({
 
         {/* 에러 메시지 */}
         {submitError && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+          <div className="bg-error-50 text-error-600 p-3 rounded-md text-sm">
             {submitError}
           </div>
         )}

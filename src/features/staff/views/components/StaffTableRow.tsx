@@ -113,8 +113,8 @@ export const StaffTableRow = memo(function StaffTableRow({
 
   // 퇴사 예정 직원은 다른 스타일로 표시
   const rowClassName = isResigned
-    ? 'hover:bg-red-50 bg-red-50/30'
-    : 'hover:bg-gray-50';
+    ? 'hover:bg-error-50 bg-error-50'
+    : 'hover:bg-secondary-50';
 
   return (
     <tr className={rowClassName}>
@@ -128,10 +128,10 @@ export const StaffTableRow = memo(function StaffTableRow({
               <img
                 src={member.profileImage}
                 alt=""
-                className={`w-10 h-10 rounded-full object-cover border ${isResigned ? 'border-red-300 opacity-60' : 'border-secondary-200'}`}
+                className={`w-10 h-10 rounded-full object-cover border ${isResigned ? 'border-error-300 opacity-60' : 'border-secondary-200'}`}
               />
             ) : (
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${isResigned ? 'bg-red-100 border-red-200 text-red-400' : 'bg-secondary-100 border-secondary-200 text-secondary-400'}`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${isResigned ? 'bg-error-100 border-error-200 text-error-400' : 'bg-secondary-100 border-secondary-200 text-secondary-400'}`}>
                 <span className="text-xs font-medium">
                   {member.name[0]}
                 </span>
@@ -139,16 +139,16 @@ export const StaffTableRow = memo(function StaffTableRow({
             )}
             <span
               className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                isResigned ? 'bg-red-500' : member.isActive ? 'bg-green-500' : 'bg-gray-300'
+                isResigned ? 'bg-error-500' : member.isActive ? 'bg-success-500' : 'bg-secondary-300'
               }`}
             />
           </div>
           <div className="flex flex-col items-start">
-            <span className={`text-sm font-medium ${isResigned ? 'text-red-600' : 'text-secondary-900'}`}>
+            <span className={`text-sm font-medium ${isResigned ? 'text-error-600' : 'text-secondary-900'}`}>
               {member.name}
             </span>
             {isResigned && (
-              <span className="text-xs text-red-500">
+              <span className="text-xs text-error-500">
                 {t('status.resignedDaysLeft', { days: daysRemaining })}
               </span>
             )}
@@ -172,7 +172,7 @@ export const StaffTableRow = memo(function StaffTableRow({
               <Button
                 variant="outline"
                 size="sm"
-                className="text-blue-500 border-blue-200 hover:bg-blue-50 h-8 px-3 text-xs"
+                className="text-primary-500 border-primary-200 hover:bg-primary-50 h-8 px-3 text-xs"
                 onClick={handleCancelResignationClick}
               >
                 {t('actions.cancelResignation')}
@@ -185,7 +185,7 @@ export const StaffTableRow = memo(function StaffTableRow({
             <select
               value={resignAction}
               onChange={handleResignActionChange}
-              className="h-8 min-w-[120px] px-2 text-xs border border-red-200 rounded-md bg-white text-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+              className="h-8 min-w-[120px] px-2 text-xs border border-error-200 rounded-md bg-white text-error-500 focus:outline-none focus:ring-2 focus:ring-error-200"
             >
               <option value="" disabled>
                 {t('actions.resign')}
@@ -208,7 +208,7 @@ export const StaffTableRow = memo(function StaffTableRow({
         {member.role === 'SUPER_ADMIN' || member.role === 'ADMIN' ? (
           <Badge
             variant="default"
-            className="bg-gray-100 text-gray-500 font-normal"
+            className="bg-secondary-100 text-secondary-500 font-normal"
           >
             {t('actions.allPermissions')}
           </Badge>
@@ -217,7 +217,7 @@ export const StaffTableRow = memo(function StaffTableRow({
             <Button
               variant="outline"
               size="sm"
-              className="bg-gray-800 text-white hover:bg-gray-700 h-8 px-3 text-xs rounded-full border-transparent"
+              className="bg-secondary-800 text-white hover:bg-secondary-700 h-8 px-3 text-xs rounded-full border-transparent"
               onClick={handlePermissionClick}
             >
               {t('actions.setPermissions')}
@@ -253,7 +253,7 @@ export const StaffTableRow = memo(function StaffTableRow({
             className={`w-8 h-8 rounded-full ${isResigned ? 'opacity-60' : ''}`}
           />
         ) : (
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isResigned ? 'bg-red-100 text-red-400' : 'bg-gray-200 text-gray-400'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isResigned ? 'bg-error-100 text-error-400' : 'bg-secondary-200 text-secondary-400'}`}>
             <DefaultProfileIcon />
           </div>
         )}

@@ -278,7 +278,7 @@ export const PositionSelector = memo(function PositionSelector({
                           <button
                             type="button"
                             onClick={(e) => handleDeleteClick(e, position)}
-                            className="p-1 text-secondary-400 hover:text-red-500 hover:bg-red-50 rounded"
+                            className="p-1 text-secondary-400 hover:text-error-500 hover:bg-error-50 rounded"
                             title={t('staff.profileModal.position.delete')}
                           >
                             <Trash2 size={14} />

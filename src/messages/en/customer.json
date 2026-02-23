@@ -155,6 +155,17 @@
     "noHistory": "No sales history"
   },
 
+  "existingCustomer": "Existing",
+  "newCustomer": "New",
+  "nameHistory": {
+    "title": "Name Change History",
+    "changedBy": {
+      "web_booking": "Web Booking",
+      "admin": "Admin",
+      "line_sync": "LINE Sync"
+    }
+  },
+
   "group": {
     "empty": "No groups registered"
   },

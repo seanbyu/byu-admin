@@ -24,11 +24,8 @@ export function isKnownPaymentMethod(method: string): method is PaymentMethodCod
   return Object.prototype.hasOwnProperty.call(PAYMENT_METHOD_KEYS, method);
 }
 
-export function stripCountryCode(phone: string): string {
-  if (!phone) return phone;
-  // +66-95-559-7077 → 095-559-7077 / +82 10-1234-5678 → 010-1234-5678
-  return phone.replace(/^\+\d{1,4}[-\s]?/, '0');
-}
+import { formatPhoneDisplay } from '@/lib/utils';
+export const stripCountryCode = (phone: string): string => formatPhoneDisplay(phone) || phone;
 
 export function generateTimeSlots(
   openTime: string,

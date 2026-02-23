@@ -87,7 +87,7 @@ export class BookingRepository extends BaseRepository {
       staffId: booking.artist_id,
       staffName: booking.artist?.name || "",
       serviceId: booking.service_id,
-      serviceName: booking.service?.name || "",
+      serviceName: booking.booking_meta?.category_name || booking.service?.name || "",
       date: booking.booking_date,
       startTime: booking.start_time?.slice(0, 5) || "",
       endTime: booking.end_time?.slice(0, 5) || "",

@@ -155,6 +155,17 @@
     "noHistory": "매출 내역이 없습니다"
   },
 
+  "existingCustomer": "기존 고객",
+  "newCustomer": "신규",
+  "nameHistory": {
+    "title": "이름 변경 이력",
+    "changedBy": {
+      "web_booking": "웹 예약",
+      "admin": "어드민",
+      "line_sync": "LINE 동기화"
+    }
+  },
+
   "group": {
     "empty": "등록된 그룹이 없습니다"
   },

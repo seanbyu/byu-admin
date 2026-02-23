@@ -19,8 +19,9 @@ export type Locale = 'ko' | 'en' | 'th';
 export enum BookingStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
-  CANCELLED = 'CANCELLED',
+  IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
   NO_SHOW = 'NO_SHOW',
 }
 

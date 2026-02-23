@@ -29,20 +29,28 @@ export const formatPrice = (price: number, currency: string = 'THB') => {
   }).format(price);
 };
 
-// 전화번호 포맷팅
-export const formatPhoneNumber = (phone: string) => {
-  // Remove all non-numeric characters
-  const cleaned = phone.replace(/\D/g, '');
-  
-  // Format: 02-123-4567 or 081-234-5678
-  if (cleaned.length === 9) {
-    return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 5)}-${cleaned.slice(5)}`;
-  } else if (cleaned.length === 10) {
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+// 전화번호 표시용 포맷팅 (숫자 → 대시 추가, 기존 국제 형식도 하위 호환)
+export const formatPhoneDisplay = (phone: string | undefined | null): string => {
+  if (!phone) return '';
+
+  let digits = phone;
+  // 기존 국제 형식 하위 호환
+  if (phone.startsWith('+66')) {
+    digits = '0' + phone.slice(3).replace(/\D/g, '');
+  } else if (phone.startsWith('+82')) {
+    digits = '0' + phone.slice(3).replace(/\D/g, '');
+  } else {
+    digits = phone.replace(/\D/g, '');
   }
-  
+
+  if (digits.length === 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  if (digits.length === 11) return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  if (digits.length === 9) return `${digits.slice(0, 2)}-${digits.slice(2, 5)}-${digits.slice(5)}`;
   return phone;
 };
+
+// 전화번호 포맷팅 (레거시 - formatPhoneDisplay 사용 권장)
+export const formatPhoneNumber = formatPhoneDisplay;
 
 // 고객 번호 생성
 export const generateCustomerNumber = (lastNumber: string): string => {

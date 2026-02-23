@@ -86,7 +86,7 @@ export default function StaffPageView() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-          <div className="text-red-500">
+          <div className="text-error-500">
             {t('common.error')}: {(error as Error).message}
           </div>
         </div>

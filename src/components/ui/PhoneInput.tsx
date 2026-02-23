@@ -25,40 +25,32 @@ const parsePhoneNumber = (phone: string, defaultCode: string = '+82'): { country
     return { countryCode: defaultCountry, localNumber: '' };
   }
 
-  // 국가코드 순서대로 매칭 시도 (긴 코드부터 체크)
-  const sortedCodes = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length);
+  // 기존 국제 형식 (+로 시작) - 하위 호환
+  if (phone.startsWith('+')) {
+    const sortedCodes = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length);
 
-  for (const country of sortedCodes) {
-    if (phone.startsWith(country.code)) {
-      // 국가코드 뒤의 구분자(-, 공백) 제거 후 로컬번호 추출
-      let localNumber = phone.slice(country.code.length).replace(/^[-\s]/, '');
+    for (const country of sortedCodes) {
+      if (phone.startsWith(country.code)) {
+        let localNumber = phone.slice(country.code.length).replace(/^[-\s]/, '');
 
-      // 태국 번호의 경우 표시용으로 앞에 0 추가 (저장된 값에는 0이 없음)
-      if (country.code === '+66' && localNumber && !localNumber.startsWith('0')) {
-        localNumber = '0' + localNumber;
+        // 태국 번호의 경우 표시용으로 앞에 0 추가 (저장된 값에는 0이 없음)
+        if (country.code === '+66' && localNumber && !localNumber.startsWith('0')) {
+          localNumber = '0' + localNumber;
+        }
+
+        return { countryCode: country, localNumber };
       }
-
-      return { countryCode: country, localNumber };
     }
   }
 
-  // 국가코드가 없으면 기본값과 전체 번호 반환
+  // 숫자만 있는 형식 - 기본 국가코드 사용
   return { countryCode: defaultCountry, localNumber: phone };
 };
 
-// 저장할 때 로컬번호에서 앞의 0 제거 (태국 번호용)
-const formatForSave = (countryCode: string, localNumber: string): string => {
+// 숫자만 추출하여 저장 (국가코드/대시 제외, 웹과 동일한 형식)
+const formatForSave = (_countryCode: string, localNumber: string): string => {
   if (!localNumber) return '';
-
-  let formatted = localNumber;
-  // 태국 번호의 경우 저장 시 앞의 0 제거
-  // 단, 첫 글자 입력 단계("0")는 유지해야 입력이 사라지지 않음
-  const digitCount = formatted.replace(/\D/g, '').length;
-  if (countryCode === '+66' && formatted.startsWith('0') && digitCount > 1) {
-    formatted = formatted.slice(1);
-  }
-
-  return `${countryCode}-${formatted}`;
+  return localNumber.replace(/\D/g, '');
 };
 
 interface PhoneInputProps {
@@ -201,7 +193,7 @@ export const PhoneInput = memo(function PhoneInput({
       )}
       <div
         className={`flex rounded-md border transition-colors ${
-          error ? 'border-error-500 focus-within:ring-2 focus-within:ring-error-500' : 'border-secondary-300 focus-within:ring-2 focus-within:ring-[#3B82F6]'
+          error ? 'border-error-500 focus-within:ring-2 focus-within:ring-error-500' : 'border-secondary-300 focus-within:ring-2 focus-within:ring-primary-500'
         } ${disabled ? 'bg-secondary-100 opacity-60' : 'bg-white'} focus-within:border-transparent`}
       >
         {/* 국가 코드 선택기 */}
@@ -255,7 +247,7 @@ export const PhoneInput = memo(function PhoneInput({
           }`}
         />
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-error-500">{error}</p>}
     </div>
   );
 });

@@ -104,6 +104,11 @@ module.exports = {
           800: 'var(--info-800)',
           900: 'var(--info-900)',
         },
+        // External brand channels
+        social: {
+          line: 'var(--social-line)',
+          instagram: 'var(--social-instagram)',
+        },
       },
 
       /* ===================================

@@ -301,7 +301,7 @@ export default function CustomersPageView() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-          <div className="text-red-500">
+          <div className="text-error-500">
             {t('common.error')}: {error.message}
           </div>
         </div>
@@ -332,7 +332,7 @@ export default function CustomersPageView() {
         />
 
         {/* Content */}
-        <Card>
+        <Card padding="sm">
           <CustomerTable
             customers={paginatedCustomers}
             onCustomerClick={handleCustomerClick}

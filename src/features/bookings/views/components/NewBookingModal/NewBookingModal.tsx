@@ -293,24 +293,24 @@ function NewBookingModalComponent({
               value={form.currentStaffId}
               onChange={form.handleStaffChange}
               error={form.errors.staff}
-              className="text-secondary-900 focus:ring-[#3B82F6]"
+              className="text-secondary-900 focus:ring-primary-500"
             />
           </div>
 
           {/* 서비스 선택 */}
-          <div className="rounded-xl border border-secondary-200 bg-[#F8FAFC] p-3 md:p-4">
+          <div className="rounded-xl border border-secondary-200 bg-secondary-50 p-3 md:p-4">
             <label className="block text-sm font-medium text-secondary-800 mb-2">
-              {t('booking.service')} <span className="text-red-500">*</span>
+              {t('booking.service')} <span className="text-error-500">*</span>
             </label>
             {selectedServiceGroups.length > 0 && (
-              <div className="mb-3 space-y-1.5 rounded-lg border border-[#BFDBFE] bg-white p-2.5">
+              <div className="mb-3 space-y-1.5 rounded-lg border border-primary-200 bg-white p-2.5">
                 {selectedServiceGroups.map((service) => (
                   <div
                     key={service.id}
-                    className="flex items-center justify-between rounded-md bg-[#EFF6FF] px-2.5 py-2"
+                    className="flex items-center justify-between rounded-md bg-primary-50 px-2.5 py-2"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-[#1E40AF] truncate">
+                      <p className="text-sm font-medium text-primary-700 truncate">
                         {service.name} x{service.count}
                       </p>
                       <p className="text-xs text-secondary-600">
@@ -321,7 +321,7 @@ function NewBookingModalComponent({
                       <button
                         type="button"
                         onClick={() => handleServiceAdd(service.id)}
-                        className="h-7 w-7 rounded-md border border-[#93C5FD] bg-white text-[#1D4ED8] text-sm font-semibold hover:bg-[#DBEAFE]"
+                        className="h-7 w-7 rounded-md border border-primary-300 bg-white text-primary-600 text-sm font-semibold hover:bg-primary-100"
                         aria-label="Add one more service"
                       >
                         +
@@ -329,7 +329,7 @@ function NewBookingModalComponent({
                       <button
                         type="button"
                         onClick={() => handleRemoveService(service.id)}
-                        className="h-7 w-7 rounded-md border border-[#93C5FD] bg-white text-[#1D4ED8] text-sm font-semibold hover:bg-[#DBEAFE]"
+                        className="h-7 w-7 rounded-md border border-primary-300 bg-white text-primary-600 text-sm font-semibold hover:bg-primary-100"
                         aria-label="Remove one service"
                       >
                         -
@@ -337,7 +337,7 @@ function NewBookingModalComponent({
                       <button
                         type="button"
                         onClick={() => handleRemoveAllService(service.id)}
-                        className="h-7 w-7 rounded-md border border-[#93C5FD] bg-white text-[#1D4ED8] hover:bg-[#DBEAFE] flex items-center justify-center"
+                        className="h-7 w-7 rounded-md border border-primary-300 bg-white text-primary-600 hover:bg-primary-100 flex items-center justify-center"
                         aria-label="Delete selected service item"
                       >
                         <X size={14} />
@@ -345,7 +345,7 @@ function NewBookingModalComponent({
                     </div>
                   </div>
                 ))}
-                <div className="flex items-center justify-between border-t border-[#DBEAFE] pt-2 text-xs text-secondary-700">
+                <div className="flex items-center justify-between border-t border-primary-100 pt-2 text-xs text-secondary-700">
                   <span>총 {selectedServices.length}개 서비스</span>
                   <span>
                     {totalServiceDuration}min / ฿{totalServicePrice.toLocaleString()}
@@ -359,7 +359,7 @@ function NewBookingModalComponent({
               onServiceAdd={handleServiceAdd}
             />
             {form.errors.service && (
-              <p className="mt-1 text-xs text-red-500">{form.errors.service}</p>
+              <p className="mt-1 text-xs text-error-500">{form.errors.service}</p>
             )}
           </div>
 
@@ -370,7 +370,7 @@ function NewBookingModalComponent({
             required
             value={formatDate(form.currentDate, 'yyyy-MM-dd')}
             onChange={form.handleDateChange}
-            className="text-secondary-900 placeholder:text-secondary-500 focus:ring-[#3B82F6]"
+            className="text-secondary-900 placeholder:text-secondary-500 focus:ring-primary-500"
           />
 
           {/* 시간 선택 (어드민: 항상 30분 단위, 영업시간 기반) */}
@@ -390,7 +390,7 @@ function NewBookingModalComponent({
             placeholder={t('booking.placeholders.notesPlaceholder')}
             value={form.notes}
             onChange={(e) => form.setNotes(e.target.value)}
-            className="text-secondary-900 placeholder:text-secondary-500 focus:ring-[#3B82F6]"
+            className="text-secondary-900 placeholder:text-secondary-500 focus:ring-primary-500"
           />
 
           {/* 버튼 */}

@@ -88,7 +88,9 @@
     "reason": "사유"
   },
   "actions": {
-    "applyFilter": "필터 적용"
+    "applyFilter": "필터 적용",
+    "showDetails": "상세보기",
+    "hideDetails": "접기"
   },
   "comingSoon": "준비 중입니다",
   "verificationCode": "인증번호",

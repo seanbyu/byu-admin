@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { useTranslations } from 'next-intl';
 import { BookingStatus } from '@/types';
+import { Booking } from '../types';
 import { useBookings } from '../hooks/useBookings';
 import { useBookingsPageState, useBookingsData } from '../hooks/useBookingsPageState';
 import { salonSettingsKeys, SALON_SETTINGS_QUERY_OPTIONS } from '../hooks/queries';
@@ -30,6 +31,7 @@ const STATUS_OPTIONS = [
   { value: '', label: 'common.all' },
   { value: BookingStatus.PENDING, label: 'booking.pending' },
   { value: BookingStatus.CONFIRMED, label: 'booking.confirmed' },
+  { value: BookingStatus.IN_PROGRESS, label: 'booking.inProgress' },
   { value: BookingStatus.COMPLETED, label: 'booking.completed' },
   { value: BookingStatus.CANCELLED, label: 'booking.cancelled' },
 ] as const;
@@ -168,7 +170,7 @@ export default function BookingsPageView() {
   );
 
   const handleSheetUpdateBooking = useCallback(
-    (id: string, updates: { price: number }) => {
+    (id: string, updates: Partial<Booking>) => {
       updateBooking({ id, updates });
     },
     [updateBooking]

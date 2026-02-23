@@ -99,7 +99,7 @@ function ServiceSelectorComponent({
     <div className="border border-secondary-200 rounded-lg overflow-hidden bg-white">
       <div className="flex h-[240px]">
         {/* 카테고리 목록 (왼쪽) */}
-        <div className="w-1/3 border-r border-secondary-200 overflow-y-auto bg-[#F8FAFC]">
+        <div className="w-1/3 border-r border-secondary-200 overflow-y-auto bg-secondary-50">
           {visibleCategories.map((category) => (
             <button
               key={category.id}
@@ -108,7 +108,7 @@ function ServiceSelectorComponent({
               className={cn(
                 'w-full px-4 py-3 text-left text-sm font-medium transition-colors border-l-2',
                 selectedCategoryId === category.id
-                  ? 'bg-[#DBEAFE] text-[#1E40AF] border-l-[#3B82F6]'
+                  ? 'bg-primary-100 text-primary-700 border-l-primary-500'
                   : 'bg-white text-secondary-800 border-l-transparent hover:bg-secondary-50'
               )}
             >
@@ -127,7 +127,7 @@ function ServiceSelectorComponent({
               className={cn(
                 'w-full px-4 py-3 text-left border-b border-secondary-100 last:border-b-0 transition-colors',
                 (selectedCounts[menu.id] || 0) > 0
-                  ? 'bg-[#DBEAFE]'
+                  ? 'bg-primary-100'
                   : 'hover:bg-secondary-50'
               )}
             >
@@ -136,7 +136,7 @@ function ServiceSelectorComponent({
                   className={cn(
                     'text-sm font-medium',
                     (selectedCounts[menu.id] || 0) > 0
-                      ? 'text-[#1E40AF]'
+                      ? 'text-primary-700'
                       : 'text-secondary-800'
                   )}
                 >
@@ -144,7 +144,7 @@ function ServiceSelectorComponent({
                 </span>
                 <div className="flex items-center gap-2">
                   {(selectedCounts[menu.id] || 0) > 0 && (
-                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#3B82F6] px-1.5 text-[10px] font-semibold text-white">
+                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-500 px-1.5 text-xs font-semibold text-white">
                       x{selectedCounts[menu.id]}
                     </span>
                   )}

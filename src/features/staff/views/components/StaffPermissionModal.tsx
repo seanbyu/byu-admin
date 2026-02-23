@@ -119,12 +119,12 @@ export default function StaffPermissionModal({
   const renderPermissionRow = (moduleKey: string, isSubItem?: boolean) => {
     const permission = permissions.find((p) => p.module === moduleKey);
     const checkboxClass = readOnly
-      ? 'h-4 w-4 text-primary-600 border-gray-300 rounded cursor-not-allowed opacity-60'
-      : 'h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer';
+      ? 'h-4 w-4 text-primary-600 border-secondary-300 rounded cursor-not-allowed opacity-60'
+      : 'h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded cursor-pointer';
     return (
-      <tr key={moduleKey} className={isSubItem ? 'bg-gray-50/50' : ''}>
-        <td className={`px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900 ${isSubItem ? 'pl-10' : ''}`}>
-          {isSubItem && <span className="text-gray-300 mr-2">└</span>}
+      <tr key={moduleKey} className={isSubItem ? 'bg-secondary-50' : ''}>
+        <td className={`px-6 py-3 whitespace-nowrap text-sm font-medium text-secondary-900 ${isSubItem ? 'pl-10' : ''}`}>
+          {isSubItem && <span className="text-secondary-300 mr-2">└</span>}
           {t(`staff.permissionLabels.${moduleKey}`)}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-center">
@@ -193,40 +193,40 @@ export default function StaffPermissionModal({
         </div>
       }
     >
-      <div className="mb-4 text-sm text-gray-500">
+      <div className="mb-4 text-sm text-secondary-500">
         {t('staff.permissionModal.description', { name: staff.name })}
       </div>
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="border border-secondary-200 rounded-lg overflow-hidden">
+        <table className="min-w-full divide-y divide-secondary-200">
+          <thead className="bg-secondary-50">
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider"
               >
                 {t('staff.permissionModal.feature')}
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20"
+                className="px-6 py-3 text-center text-xs font-medium text-secondary-500 uppercase tracking-wider w-20"
               >
                 {t('staff.permissionModal.view')}
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24"
+                className="px-6 py-3 text-center text-xs font-medium text-secondary-500 uppercase tracking-wider w-24"
               >
                 {t('staff.permissionModal.edit')}
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20"
+                className="px-6 py-3 text-center text-xs font-medium text-secondary-500 uppercase tracking-wider w-20"
               >
                 {t('staff.permissionModal.delete')}
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-secondary-200">
             {MENU_STRUCTURE.map((entry) => {
               if (isMenuGroup(entry)) {
                 return (

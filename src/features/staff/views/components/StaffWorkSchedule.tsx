@@ -79,7 +79,7 @@ export function StaffWorkSchedule({ workSchedule, salonHours, onChange }: StaffW
                   type="button"
                   onClick={() => toggleDay(dayName)}
                   className={`relative w-10 h-5 rounded-full transition-colors ${
-                    isOn ? 'bg-blue-500' : 'bg-gray-300'
+                    isOn ? 'bg-primary-500' : 'bg-secondary-300'
                   }`}
                 >
                   <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${

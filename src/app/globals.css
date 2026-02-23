@@ -111,6 +111,10 @@ html {
     --info-800: #155e75;
     --info-900: #164e63;
 
+    /* ----- Social Channel Colors ----- */
+    --social-line: #06c755;
+    --social-instagram: #e4405f;
+
     /* ----- Font Sizes ----- */
     --font-size-xs: 0.75rem; /* 12px */
     --font-size-sm: 0.875rem; /* 14px */

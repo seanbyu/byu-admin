@@ -64,15 +64,21 @@ const StatCard = memo(function StatCard({
   subtext?: string;
 }) {
   return (
-    <div className="bg-secondary-50 rounded-lg p-4">
-      <div className="flex items-center space-x-3">
-        <div className="p-2 bg-primary-100 rounded-lg">
-          <Icon size={20} className="text-primary-600" />
+    <div className="bg-secondary-50 rounded-lg p-3 sm:p-4">
+      <div className="flex items-start sm:items-center gap-2 sm:gap-3">
+        <div className="p-1.5 sm:p-2 bg-primary-100 rounded-lg">
+          <Icon size={18} className="text-primary-600 sm:w-5 sm:h-5" />
         </div>
         <div className="flex-1">
-          <div className="text-xs text-secondary-500 mb-1">{label}</div>
-          <div className="text-xl font-bold text-secondary-900">{value}</div>
-          {subtext && <div className="text-xs text-secondary-500 mt-1">{subtext}</div>}
+          <div className="text-[11px] sm:text-xs text-secondary-500 mb-1">{label}</div>
+          <div className="text-base sm:text-xl font-bold text-secondary-900 leading-tight">
+            {value}
+          </div>
+          {subtext && (
+            <div className="text-[11px] sm:text-xs text-secondary-500 mt-1">
+              {subtext}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -90,12 +96,14 @@ const InfoRow = memo(function InfoRow({
   value: string | React.ReactNode;
 }) {
   return (
-    <div className="flex items-start py-3 border-b border-secondary-100 last:border-0">
-      <div className="flex items-center min-w-[140px] text-sm text-secondary-500">
-        <Icon size={16} className="mr-2" />
+    <div className="flex items-start py-2.5 sm:py-3 border-b border-secondary-100 last:border-0 gap-2">
+      <div className="flex items-center min-w-[108px] sm:min-w-[140px] text-xs sm:text-sm text-secondary-500">
+        <Icon size={14} className="mr-1.5 sm:mr-2 sm:w-4 sm:h-4" />
         {label}
       </div>
-      <div className="flex-1 text-sm text-secondary-900 font-medium">{value}</div>
+      <div className="flex-1 text-sm sm:text-base text-secondary-900 font-medium break-words">
+        {value}
+      </div>
     </div>
   );
 });
@@ -109,31 +117,33 @@ const ServiceHistoryCard = memo(function ServiceHistoryCard({
   t: (key: string) => string;
 }) {
   return (
-    <div className="border border-secondary-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-3">
+    <div className="border border-secondary-200 rounded-lg p-3 sm:p-4 sm:hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-3 gap-3">
         <div className="flex-1">
-          <h4 className="font-semibold text-secondary-900">{item.service.name}</h4>
+          <h4 className="font-semibold text-secondary-900 text-sm sm:text-base">
+            {item.service.name}
+          </h4>
           {item.service.name_en && (
-            <p className="text-xs text-secondary-500">{item.service.name_en}</p>
+            <p className="text-[11px] sm:text-xs text-secondary-500">{item.service.name_en}</p>
           )}
         </div>
         <div className="text-right">
-          <div className="font-bold text-primary-600">
+          <div className="font-bold text-primary-600 text-sm sm:text-base">
             {formatPrice(item.total_price)}
           </div>
         </div>
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center text-sm text-secondary-600">
-          <Calendar size={14} className="mr-2 text-secondary-400" />
+        <div className="flex flex-wrap items-center gap-y-1 text-xs sm:text-sm text-secondary-600">
+          <Calendar size={14} className="mr-1.5 sm:mr-2 text-secondary-400" />
           <span>{formatDate(new Date(item.booking_date), 'yyyy-MM-dd')}</span>
-          <Clock size={14} className="ml-4 mr-2 text-secondary-400" />
+          <Clock size={14} className="ml-3 sm:ml-4 mr-1.5 sm:mr-2 text-secondary-400" />
           <span>{item.start_time}</span>
         </div>
 
-        <div className="flex items-center text-sm text-secondary-600">
-          <User size={14} className="mr-2 text-secondary-400" />
+        <div className="flex items-center text-xs sm:text-sm text-secondary-600">
+          <User size={14} className="mr-1.5 sm:mr-2 text-secondary-400" />
           <span>{item.artist.name}</span>
         </div>
 
@@ -144,7 +154,7 @@ const ServiceHistoryCard = memo(function ServiceHistoryCard({
                 <div className="text-xs text-secondary-500 mb-1">
                   {t('customer.chart.customerNotes')}
                 </div>
-                <p className="text-sm text-secondary-700">{item.customer_notes}</p>
+                <p className="text-xs sm:text-sm text-secondary-700">{item.customer_notes}</p>
               </div>
             )}
             {item.staff_notes && (
@@ -152,7 +162,7 @@ const ServiceHistoryCard = memo(function ServiceHistoryCard({
                 <div className="text-xs text-secondary-500 mb-1">
                   {t('customer.chart.staffNotes')}
                 </div>
-                <p className="text-sm text-secondary-700">{item.staff_notes}</p>
+                <p className="text-xs sm:text-sm text-secondary-700">{item.staff_notes}</p>
               </div>
             )}
           </div>
@@ -219,24 +229,29 @@ export const CustomerChartModal = memo(function CustomerChartModal({
       title={t('customer.chart.title')}
       size="xl"
     >
-      <div className="space-y-6 max-h-[80vh] overflow-y-auto px-1">
+      <div className="space-y-4 sm:space-y-6 max-h-[78vh] sm:max-h-[80vh] overflow-y-auto px-0 sm:px-1">
         {/* Customer Basic Info */}
-        <Card>
-          <div className="space-y-4">
+        <Card padding="none">
+          <div className="space-y-3 sm:space-y-4 p-4 sm:p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-secondary-900">
+                <h2 className="text-xl sm:text-2xl font-bold text-secondary-900 leading-tight">
                   {customer.name}
                 </h2>
                 {customer.customer_type === 'foreign' && (
-                  <span className="text-sm text-secondary-500">
+                  <span className="text-xs sm:text-sm text-secondary-500">
                     {t('customer.type.foreign')}
                   </span>
                 )}
               </div>
               <div className="flex flex-wrap gap-1 justify-end">
                 {customer.tags.map((tag) => (
-                  <Badge key={tag} variant={getTagVariant(tag)}>
+                  <Badge
+                    key={tag}
+                    variant={getTagVariant(tag)}
+                    size="sm"
+                    className="text-[11px] sm:text-xs"
+                  >
                     {tag}
                   </Badge>
                 ))}
@@ -281,10 +296,10 @@ export const CustomerChartModal = memo(function CustomerChartModal({
 
         {/* Statistics */}
         <div>
-          <h3 className="text-lg font-bold text-secondary-900 mb-4">
+          <h3 className="text-base sm:text-lg font-bold text-secondary-900 mb-3 sm:mb-4">
             {t('customer.chart.statistics')}
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <StatCard
               icon={TrendingUp}
               label={t('customer.stats.totalVisits')}
@@ -311,10 +326,10 @@ export const CustomerChartModal = memo(function CustomerChartModal({
         {/* Favorites */}
         {(stats.favorite_service || stats.favorite_artist) && (
           <div>
-            <h3 className="text-lg font-bold text-secondary-900 mb-4">
+            <h3 className="text-base sm:text-lg font-bold text-secondary-900 mb-3 sm:mb-4">
               {t('customer.chart.favorites')}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {stats.favorite_service && (
                 <StatCard
                   icon={Scissors}
@@ -337,17 +352,17 @@ export const CustomerChartModal = memo(function CustomerChartModal({
 
         {/* Service History */}
         <div>
-          <h3 className="text-lg font-bold text-secondary-900 mb-4">
+          <h3 className="text-base sm:text-lg font-bold text-secondary-900 mb-3 sm:mb-4">
             {t('customer.chart.serviceHistory')}
           </h3>
           {serviceHistory.length === 0 ? (
-            <Card>
-              <div className="py-8 text-center text-secondary-500">
+            <Card padding="none">
+              <div className="py-6 sm:py-8 text-sm sm:text-base text-center text-secondary-500">
                 {t('customer.chart.noHistory')}
               </div>
             </Card>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5 sm:space-y-3">
               {serviceHistory.map((item) => (
                 <ServiceHistoryCard key={item.id} item={item} t={t} />
               ))}

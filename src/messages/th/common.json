@@ -88,7 +88,9 @@
     "reason": "เหตุผล"
   },
   "actions": {
-    "applyFilter": "กรอง"
+    "applyFilter": "กรอง",
+    "showDetails": "ดูรายละเอียด",
+    "hideDetails": "ย่อรายละเอียด"
   },
   "comingSoon": "เร็วๆ นี้",
   "verificationCode": "รหัสยืนยัน",

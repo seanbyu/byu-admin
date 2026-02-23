@@ -20,7 +20,7 @@ export interface StaffDaySheetViewProps {
   slotDuration: number;
   onBookingClick: (booking: Booking) => void;
   onAddBooking: (staffId: string, time?: string) => void;
-  onUpdateBooking: (id: string, updates: { price: number }) => void;
+  onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
 }
 
 export const StaffDaySheetView = memo(function StaffDaySheetView({
@@ -48,10 +48,13 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
     return matched ? [matched] : bookingEnabledStaff;
   }, [bookingEnabledStaff, selectedStaffId]);
 
+  // 해당 요일의 영업시간 (isOpen 여부 무관하게 조회)
   const todayBusinessHours = useMemo(() => {
     const dayOfWeek = new Date(selectedDate).getDay();
-    return businessHours.find((bh) => bh.dayOfWeek === dayOfWeek && bh.isOpen);
+    return businessHours.find((bh) => bh.dayOfWeek === dayOfWeek) ?? null;
   }, [businessHours, selectedDate]);
+
+  const isClosed = todayBusinessHours !== null && !todayBusinessHours.isOpen;
 
   const timeSlots = useMemo(() => {
     if (!todayBusinessHours) return [];
@@ -117,13 +120,13 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
       const date = new Date(today);
       date.setDate(today.getDate() + index);
       const weekday = getDayShortLabel(date.getDay());
-      const dayBusinessHours = businessHours.find((bh) => bh.dayOfWeek === date.getDay());
-      const disabled = dayBusinessHours?.isOpen === false;
+      const dayBH = businessHours.find((bh) => bh.dayOfWeek === date.getDay());
+      const closed = dayBH?.isOpen === false;
 
       return {
         key: formatDate(date, 'yyyy-MM-dd'),
         date,
-        disabled,
+        closed,
         label: t('booking.sheetDateChip', { day: date.getDate(), weekday }),
       };
     });
@@ -180,6 +183,11 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
               {todayBusinessHours.openTime} – {todayBusinessHours.closeTime}
             </span>
           )}
+          {isClosed && (
+            <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+              {t('booking.closedDayNotice')}
+            </span>
+          )}
         </div>
 
         {/* 주간 날짜 칩 */}
@@ -190,21 +198,30 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
                 key={item.key}
                 type="button"
                 onClick={() => onDateChange(new Date(item.date))}
-                disabled={item.disabled}
                 className={`px-2.5 py-1.5 rounded-md border text-xs whitespace-nowrap transition-colors ${
-                  item.disabled
-                    ? 'bg-secondary-100 text-secondary-400 border-secondary-200 cursor-not-allowed'
-                    : item.key === selectedDateKey
+                  item.key === selectedDateKey
                     ? 'bg-primary-500 text-white border-primary-500'
+                    : item.closed
+                    ? 'bg-secondary-50 text-secondary-400 border-secondary-200 hover:bg-secondary-100'
                     : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
                 }`}
               >
                 {item.label}
+                {item.closed && (
+                  <span className="ml-1 text-xs text-error-400">{t('booking.closedDayNotice')}</span>
+                )}
               </button>
             ))}
           </div>
         </div>
       </div>
+
+      {/* 영업시간 미설정 안내 */}
+      {businessHours.length === 0 && (
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-center text-sm text-yellow-700">
+          {t('booking.noBusinessHours')}
+        </div>
+      )}
 
       {/* 직원별 아코디언 */}
       {visibleStaff.map((staff) => (

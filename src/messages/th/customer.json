@@ -155,6 +155,17 @@
     "noHistory": "ไม่มีประวัติยอดขาย"
   },
 
+  "existingCustomer": "ลูกค้าเดิม",
+  "newCustomer": "ใหม่",
+  "nameHistory": {
+    "title": "ประวัติการเปลี่ยนชื่อ",
+    "changedBy": {
+      "web_booking": "จองผ่านเว็บ",
+      "admin": "แอดมิน",
+      "line_sync": "ซิงค์ LINE"
+    }
+  },
+
   "group": {
     "empty": "ไม่มีกลุ่มที่ลงทะเบียน"
   },

@@ -149,9 +149,9 @@ export const EditCustomerModal = memo(function EditCustomerModal({
       title={t('customer.edit.title')}
       size="full"
     >
-      <div className="flex min-h-[600px]">
+      <div className="flex flex-col lg:flex-row min-h-[600px]">
         {/* Left Panel - Customer Info Form */}
-        <div className="w-[360px] flex-shrink-0 pr-6 border-r border-secondary-200">
+        <div className="w-full lg:w-[380px] lg:flex-shrink-0 lg:pr-6 lg:border-r border-secondary-200">
           <CustomerInfoForm
             customer={customer}
             formData={formData}
@@ -169,7 +169,7 @@ export const EditCustomerModal = memo(function EditCustomerModal({
         </div>
 
         {/* Right Panel - Tabbed Content */}
-        <div className="flex-1 pl-6 overflow-hidden">
+        <div className="w-full mt-6 lg:mt-0 lg:flex-1 lg:pl-6 overflow-hidden">
           {/* Tab Navigation */}
           <div className="flex border-b border-secondary-200 mb-4 overflow-x-auto">
             {tabs.map((tab) => (
@@ -177,7 +177,7 @@ export const EditCustomerModal = memo(function EditCustomerModal({
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                className={`h-11 px-4 text-sm sm:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.key
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'
@@ -189,7 +189,7 @@ export const EditCustomerModal = memo(function EditCustomerModal({
           </div>
 
           {/* Tab Content */}
-          <div className="min-h-[500px] overflow-auto">
+          <div className="min-h-[360px] lg:min-h-[500px] overflow-auto">
             {activeTab === 'sales' && <SalesTabContent customer={customer} />}
             {activeTab === 'service' && <ServiceTabContent />}
             {activeTab === 'product' && <ProductTabContent />}

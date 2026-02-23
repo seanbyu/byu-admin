@@ -219,7 +219,7 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
         {/* 고객 이름 */}
         <div>
           <label className="block text-sm font-medium text-secondary-700 mb-1">
-            {t('customer.field.name')} <span className="text-red-500">*</span>
+            {t('customer.field.name')} <span className="text-error-500">*</span>
           </label>
           <Input
             value={formData.name}
@@ -244,13 +244,13 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
         {/* 담당자 */}
         <div>
           <label className="block text-sm font-medium text-secondary-700 mb-1">
-            {t('customer.field.primaryArtist')} <span className="text-red-500">*</span>
+            {t('customer.field.primaryArtist')} <span className="text-error-500">*</span>
           </label>
           <select
             value={formData.primary_artist_id}
             onChange={handleChange('primary_artist_id')}
             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-              errors.primary_artist_id ? 'border-red-500' : 'border-secondary-200'
+              errors.primary_artist_id ? 'border-error-500' : 'border-secondary-200'
             }`}
             disabled={isLoadingStaff}
           >
@@ -262,14 +262,14 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
             ))}
           </select>
           {errors.primary_artist_id && (
-            <p className="text-sm text-red-500 mt-1">{errors.primary_artist_id}</p>
+            <p className="text-sm text-error-500 mt-1">{errors.primary_artist_id}</p>
           )}
         </div>
 
         {/* 고객번호 */}
         <div>
           <label className="block text-sm font-medium text-secondary-700 mb-1">
-            {t('customer.field.customerNumber')} <span className="text-red-500">*</span>
+            {t('customer.field.customerNumber')} <span className="text-error-500">*</span>
           </label>
           <Input
             value={formData.customer_number}

@@ -4,6 +4,8 @@ import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { useCommonActionLabels } from '@/hooks/useCommonActionLabels';
+import { formatPhoneDisplay } from '@/lib/utils';
 
 interface NewCustomerConfirmModalProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ function NewCustomerConfirmModalComponent({
   isLoading,
 }: NewCustomerConfirmModalProps) {
   const t = useTranslations();
+  const actions = useCommonActionLabels();
 
   return (
     <Modal
@@ -40,15 +43,15 @@ function NewCustomerConfirmModalComponent({
             <span className="font-medium">{t('customer.name')}:</span> {customerName}
           </div>
           <div className="text-sm">
-            <span className="font-medium">{t('customer.phone')}:</span> {customerPhone}
+            <span className="font-medium">{t('customer.phone')}:</span> {formatPhoneDisplay(customerPhone)}
           </div>
         </div>
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            {t('common.cancel')}
+            {actions.cancel}
           </Button>
           <Button variant="primary" onClick={onConfirm} disabled={isLoading}>
-            {isLoading ? t('common.saving') : t('common.confirm')}
+            {isLoading ? t('common.saving') : actions.confirm}
           </Button>
         </div>
       </div>

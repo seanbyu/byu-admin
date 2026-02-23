@@ -1,8 +1,9 @@
 'use client';
 
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Booking } from '../../../types';
+import { BookingStatus } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import {
   addMinutes,
@@ -10,7 +11,7 @@ import {
   PAYMENT_METHOD_KEYS,
   isKnownPaymentMethod,
 } from './utils';
-import { StatusBadge } from './StatusBadge';
+import { InlineStatusSelect } from './InlineStatusSelect';
 import { InlinePriceCell } from './InlinePriceCell';
 import { StaffBookingMobileList } from './StaffBookingMobileList';
 
@@ -19,7 +20,7 @@ export interface StaffBookingTableProps {
   bookingsByTime: Record<string, Booking>;
   onBookingClick: (booking: Booking) => void;
   onAddBooking: (time: string) => void;
-  onUpdateBooking: (id: string, updates: { price: number }) => void;
+  onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
 }
 
 export const StaffBookingTable = memo(function StaffBookingTable({
@@ -30,6 +31,13 @@ export const StaffBookingTable = memo(function StaffBookingTable({
   onUpdateBooking,
 }: StaffBookingTableProps) {
   const t = useTranslations();
+
+  const handleStatusChange = useCallback(
+    (id: string, status: BookingStatus) => {
+      onUpdateBooking(id, { status });
+    },
+    [onUpdateBooking]
+  );
   const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
 
   const totalPrice = useMemo(
@@ -55,7 +63,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
   if (timeSlots.length === 0) {
     return (
       <div className="py-6 text-center text-sm text-secondary-400">
-        {t('booking.noBookings')}
+        {t('booking.noBusinessHours')}
       </div>
     );
   }
@@ -141,9 +149,10 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                       <span className="truncate block">{booking.notes || '—'}</span>
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2">
-                      <StatusBadge
+                      <InlineStatusSelect
+                        bookingId={booking.id}
                         status={booking.status}
-                        label={t(`booking.${booking.status.toLowerCase()}`)}
+                        onUpdate={handleStatusChange}
                       />
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-700">

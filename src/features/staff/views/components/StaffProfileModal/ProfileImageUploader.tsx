@@ -160,7 +160,7 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="absolute -top-1 -right-1 bg-white rounded-full p-1 border border-secondary-200 shadow-sm text-secondary-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  className="absolute -top-1 -right-1 bg-white rounded-full p-1 border border-secondary-200 shadow-sm text-secondary-400 hover:text-error-500 hover:bg-error-50 transition-colors"
                   title={t('staff.profileModal.deleteImage')}
                 >
                   <Trash2 size={14} />

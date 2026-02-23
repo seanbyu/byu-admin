@@ -14,7 +14,7 @@ export interface StaffAccordionItemProps {
   bookingsByTime: Record<string, Booking>;
   onBookingClick: (booking: Booking) => void;
   onAddBooking: (staffId: string, time?: string) => void;
-  onUpdateBooking: (id: string, updates: { price: number }) => void;
+  onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
 }
 
 export const StaffAccordionItem = memo(function StaffAccordionItem({

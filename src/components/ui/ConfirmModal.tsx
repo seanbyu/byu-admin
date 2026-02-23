@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from 'next-intl';
 import { AlertTriangle, Info } from 'lucide-react';
 import { Modal } from './Modal';
 import { Button } from './Button';
+import { useCommonActionLabels } from '@/hooks/useCommonActionLabels';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -29,9 +29,9 @@ export function ConfirmModal({
   variant = 'default',
   isLoading = false,
 }: ConfirmModalProps) {
-  const t = useTranslations('common');
-  const confirmLabel = confirmText ?? t('confirm');
-  const cancelLabel = cancelText ?? t('cancel');
+  const actions = useCommonActionLabels();
+  const confirmLabel = confirmText ?? actions.confirm;
+  const cancelLabel = cancelText ?? actions.cancel;
 
   const Icon = variant === 'destructive' ? AlertTriangle : Info;
   const iconBgColor =
