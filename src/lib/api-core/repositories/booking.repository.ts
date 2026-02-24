@@ -65,7 +65,10 @@ export class BookingRepository extends BaseRepository {
   }
 
   async confirmBooking(id: string): Promise<DBBooking> {
-    return this.updateBooking(id, { status: "CONFIRMED" });
+    return this.updateBooking(id, {
+      status: "CONFIRMED",
+      confirmed_at: new Date().toISOString(),
+    });
   }
 
   async deleteBooking(id: string): Promise<void> {

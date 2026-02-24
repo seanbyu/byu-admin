@@ -193,16 +193,19 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
 
   const handleVerify = useCallback(async () => {
     try {
+      console.log('[LineIntegrationTab] 검증 시작 - salonId:', salonId);
       const result = await verify();
+      console.log('[LineIntegrationTab] 검증 결과:', result);
       if (result.success) {
         toast.success(t('settings.line.verifySuccess'));
       } else {
         toast.error(t('settings.line.verifyFailed') + (result.error ? `: ${result.error}` : ''));
       }
-    } catch {
+    } catch (err) {
+      console.error('[LineIntegrationTab] 검증 예외:', err);
       toast.error(t('settings.line.verifyFailed'));
     }
-  }, [verify, toast, t]);
+  }, [verify, toast, t, salonId]);
 
   const handleToggle = useCallback(async () => {
     try {

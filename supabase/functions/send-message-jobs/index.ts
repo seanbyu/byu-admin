@@ -236,15 +236,16 @@ async function validateJob(
   supabase: ReturnType<typeof createClient>,
   job: MessageJob,
 ): Promise<string | null> {
-  // 1. 고객 정보 확인 (opt_out, line_user_id)
+  // 1. 고객 정보 확인 (opt_out, line_blocked, line_user_id)
   const { data: customer } = await supabase
     .from("customers")
-    .select("opt_out, line_user_id")
+    .select("opt_out, line_blocked, line_user_id")
     .eq("id", job.customer_id)
     .single();
 
   if (!customer) return "Customer not found";
   if (customer.opt_out) return "Customer opted out";
+  if (customer.line_blocked) return "Customer blocked LINE account";
   if (!customer.line_user_id) return "No LINE user ID";
 
   // payload의 line_user_id를 최신 값으로 갱신

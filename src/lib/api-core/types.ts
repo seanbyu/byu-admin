@@ -250,6 +250,7 @@ export interface UpdateBookingDto {
   total_price?: number;
   customer_notes?: string | null;
   status?: string;
+  confirmed_at?: string;
   cancelled_at?: string;
   cancellation_reason?: string;
   staff_notes?: string;

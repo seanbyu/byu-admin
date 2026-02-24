@@ -99,21 +99,50 @@ export const lineSettingsApi = {
       .eq('salon_id', salonId);
 
     if (error) throw error;
+
+    // salon.settings.contact_channels.line 제거
+    const { data: salon } = await supabase
+      .from('salons')
+      .select('settings')
+      .eq('id', salonId)
+      .single() as { data: { settings: Record<string, unknown> } | null; error: unknown };
+
+    if (salon?.settings) {
+      const currentSettings = salon.settings;
+      const contactChannels = (currentSettings.contact_channels as Record<string, unknown>) || {};
+      const { line: _, ...restChannels } = contactChannels;
+
+      await (supabase.from('salons') as any)
+        .update({
+          settings: {
+            ...currentSettings,
+            contact_channels: restChannels,
+          },
+        })
+        .eq('id', salonId);
+    }
   },
 
   verify: async (salonId: string): Promise<{ success: boolean; error?: string }> => {
-    // LINE API로 토큰 유효성 검증
+    // LINE API로 토큰 유효성 검증 (서버사이드 프록시 경유)
+    console.log('[LINE Verify] 시작 - salonId:', salonId);
     const settings = await lineSettingsApi.get(salonId);
+    console.log('[LINE Verify] settings 조회 결과:', settings ? { id: settings.id, isVerified: settings.isVerified, isActive: settings.isActive } : null);
     if (!settings) return { success: false, error: 'No LINE settings found' };
 
     try {
-      const response = await fetch('https://api.line.me/v2/bot/info', {
-        headers: {
-          Authorization: `Bearer ${settings.lineChannelAccessToken}`,
-        },
+      console.log('[LINE Verify] /api/line/verify 호출 시작');
+      const response = await fetch('/api/line/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken: settings.lineChannelAccessToken }),
       });
 
-      if (response.ok) {
+      const result = await response.json();
+      console.log('[LINE Verify] API 응답:', { status: response.status, success: result.success, botInfo: result.botInfo, error: result.error });
+
+      if (result.success) {
+        console.log('[LINE Verify] 검증 성공 - salon_line_settings 업데이트 중...');
         await (supabase
           .from('salon_line_settings') as any)
           .update({
@@ -123,21 +152,54 @@ export const lineSettingsApi = {
           })
           .eq('salon_id', salonId);
 
+        // 검증 성공 시 salon.settings.contact_channels.line 자동 설정
+        const basicId = result.botInfo?.basicId;
+        console.log('[LINE Verify] botInfo.basicId:', basicId);
+        if (basicId) {
+          const { data: salon } = await supabase
+            .from('salons')
+            .select('settings')
+            .eq('id', salonId)
+            .single() as { data: { settings: Record<string, unknown> } | null; error: unknown };
+
+          console.log('[LINE Verify] 현재 salon.settings:', salon?.settings);
+          const currentSettings = (salon?.settings) || {};
+          const contactChannels = (currentSettings.contact_channels as Record<string, unknown>) || {};
+
+          const newSettings = {
+            ...currentSettings,
+            contact_channels: {
+              ...contactChannels,
+              line: { enabled: true, id: basicId },
+            },
+          };
+          console.log('[LINE Verify] 업데이트할 salon.settings:', newSettings);
+
+          const updateResult = await (supabase.from('salons') as any)
+            .update({ settings: newSettings })
+            .eq('id', salonId);
+          console.log('[LINE Verify] salon.settings 업데이트 결과:', updateResult);
+        } else {
+          console.warn('[LINE Verify] basicId가 없음 - contact_channels 업데이트 건너뜀');
+        }
+
         return { success: true };
       }
 
-      const errorText = await response.text();
+      const errorMsg = result.error || `LINE API Error: ${response.status}`;
+      console.error('[LINE Verify] 검증 실패:', errorMsg);
       await (supabase
         .from('salon_line_settings') as any)
         .update({
           is_verified: false,
-          verification_error: `API Error ${response.status}: ${errorText}`,
+          verification_error: errorMsg,
         })
         .eq('salon_id', salonId);
 
-      return { success: false, error: `LINE API Error: ${response.status}` };
+      return { success: false, error: errorMsg };
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[LINE Verify] 예외 발생:', err);
       await (supabase
         .from('salon_line_settings') as any)
         .update({
