@@ -11,6 +11,7 @@
   "cancelled": "Cancelled",
   "noShow": "No Show",
   "newBookingAlert": "A new online booking has been received!",
+  "bookingRescheduledAlert": "A customer has rescheduled their booking.",
   "customer": "Customer",
   "designer": "Designer",
   "service": "Service",

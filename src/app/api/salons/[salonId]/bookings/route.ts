@@ -78,6 +78,23 @@ const NOTIFICATION_TEMPLATES = {
         `${p.customerName} การจอง ${p.categoryName} กับ ${p.artistName} วันที่ ${p.date} เวลา ${p.time} ถูกยกเลิกแล้วค่ะ`,
     },
   },
+  BOOKING_MODIFIED: {
+    ko: {
+      title: (salonName: string) => `${salonName} 예약 변경 알림`,
+      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
+        `${p.customerName}님, ${p.categoryName} 예약이 ${p.date} ${p.time} ${p.artistName}님으로 변경되었습니다.`,
+    },
+    en: {
+      title: (salonName: string) => `${salonName} Booking Rescheduled`,
+      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
+        `${p.customerName}, your ${p.categoryName} appointment has been rescheduled to ${p.date} at ${p.time} with ${p.artistName}.`,
+    },
+    th: {
+      title: (salonName: string) => `${salonName} แจ้งเตือนเปลี่ยนเวลา`,
+      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
+        `${p.customerName} การจอง ${p.categoryName} ถูกเปลี่ยนเป็นวันที่ ${p.date} เวลา ${p.time} กับ ${p.artistName} ค่ะ`,
+    },
+  },
 } as const;
 
 /**
@@ -126,7 +143,7 @@ function formatDate(dateStr: string, locale: Locale): string {
 async function sendBookingNotification(
   adminClient: ReturnType<typeof createAdminClient>,
   booking: BookingDetails,
-  notificationType: "BOOKING_CONFIRMED" | "BOOKING_CANCELLED",
+  notificationType: "BOOKING_CONFIRMED" | "BOOKING_CANCELLED" | "BOOKING_MODIFIED",
 ) {
   const locale = getNotificationLocale(booking);
   const template = NOTIFICATION_TEMPLATES[notificationType][locale];
@@ -256,6 +273,20 @@ async function sendBookingCancelledNotifications(
   }
 }
 
+/**
+ * 예약 변경 알림 (관리자가 일정 변경 시 고객에게 LINE 발송)
+ */
+async function sendBookingModifiedNotifications(
+  adminClient: ReturnType<typeof createAdminClient>,
+  booking: BookingDetails,
+) {
+  try {
+    await sendBookingNotification(adminClient, booking, "BOOKING_MODIFIED");
+  } catch (error) {
+    console.error("[Booking Notification] Modified error:", error);
+  }
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ salonId: string }> }
@@ -336,6 +367,16 @@ export async function POST(
                 } else {
                   sendBookingCancelledNotifications(adminClient, booking);
                 }
+              }
+            });
+          }
+
+          // 일정 변경 시 고객에게 LINE 알림 발송
+          if (data.updates?.booking_date || data.updates?.start_time) {
+            const modAdminClient = createAdminClient();
+            getBookingWithDetails(modAdminClient, data.id).then((booking) => {
+              if (booking) {
+                sendBookingModifiedNotifications(modAdminClient, booking);
               }
             });
           }

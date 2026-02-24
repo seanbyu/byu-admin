@@ -77,6 +77,19 @@ export function BookingRealtimeListener() {
               );
             }
           }
+
+          if (payload.eventType === 'UPDATE') {
+            const oldData = payload.old as Record<string, unknown>;
+            const newData = payload.new as Record<string, unknown>;
+
+            if (oldData.booking_date !== newData.booking_date || oldData.start_time !== newData.start_time) {
+              playNotificationSound();
+              toastRef.current.info(
+                tRef.current('booking.bookingRescheduledAlert'),
+                5000
+              );
+            }
+          }
         }
       )
       .subscribe();
