@@ -81,12 +81,18 @@ const NOTIFICATION_TEMPLATES = {
 } as const;
 
 /**
- * 살롱 locale 조회 (salons.settings JSONB에서)
+ * 알림 locale 결정: booking_meta.locale (고객 선택 언어) > salons.settings.locale (살롱 기본)
  */
-function getSalonLocale(booking: BookingDetails): Locale {
+function getNotificationLocale(booking: BookingDetails): Locale {
+  // 1. 고객이 예약 시 사용한 언어 (유저웹에서 저장)
+  const metaLocale = (booking as any).booking_meta?.locale;
+  if (metaLocale === "ko" || metaLocale === "en" || metaLocale === "th") return metaLocale;
+
+  // 2. 살롱 기본 언어
   const settings = (booking.salon as any)?.settings;
-  const locale = settings?.locale;
-  if (locale === "ko" || locale === "th") return locale;
+  const salonLocale = settings?.locale;
+  if (salonLocale === "ko" || salonLocale === "th") return salonLocale;
+
   return "en";
 }
 
@@ -122,7 +128,7 @@ async function sendBookingNotification(
   booking: BookingDetails,
   notificationType: "BOOKING_CONFIRMED" | "BOOKING_CANCELLED",
 ) {
-  const locale = getSalonLocale(booking);
+  const locale = getNotificationLocale(booking);
   const template = NOTIFICATION_TEMPLATES[notificationType][locale];
 
   const customerName = (booking.customer as any)?.name || "Customer";
