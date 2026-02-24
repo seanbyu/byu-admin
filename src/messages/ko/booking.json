@@ -68,7 +68,16 @@
     "bookingAdvanceDays14": "2주",
     "bookingAdvanceDays30": "1개월",
     "bookingAdvanceDays60": "2개월",
-    "bookingAdvanceDays90": "3개월"
+    "bookingAdvanceDays90": "3개월",
+    "cancellationHours": "예약 변경/취소 마감",
+    "cancellationNone": "취소 불가",
+    "cancellation1h": "1시간 전",
+    "cancellation2h": "2시간 전",
+    "cancellation3h": "3시간 전",
+    "cancellation6h": "6시간 전",
+    "cancellation12h": "12시간 전",
+    "cancellation24h": "24시간 전",
+    "cancellation48h": "48시간 전"
   },
   "placeholders": {
     "customerName": "고객 이름을 입력하세요",

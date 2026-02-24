@@ -24,6 +24,7 @@ export interface ContactChannels {
 export interface SalonSettings {
   slot_duration_minutes?: number;
   booking_advance_days?: number;
+  booking_cancellation_hours?: number;
   interpreter_enabled?: boolean;
   supported_languages?: SupportedLanguage[];
   contact_channels?: ContactChannels;
@@ -99,13 +100,15 @@ export function useBusinessHoursMutation(salonId: string) {
     mutateBusinessHours: (
       businessHours: BusinessHours[],
       slotDuration: number,
-      bookingAdvanceDays: number
+      bookingAdvanceDays: number,
+      cancellationHours?: number
     ) =>
       mutation.mutateAsync({
         businessHours,
         settings: {
           slot_duration_minutes: slotDuration,
           booking_advance_days: bookingAdvanceDays,
+          ...(cancellationHours !== undefined && { booking_cancellation_hours: cancellationHours }),
         },
       }),
   };

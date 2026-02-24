@@ -30,6 +30,7 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     businessHours,
     slotDuration,
     bookingAdvanceDays,
+    cancellationHours,
     holidays,
     newHoliday,
     initializeFromServer,
@@ -37,6 +38,7 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     setDayTime,
     setSlotDuration,
     setBookingAdvanceDays,
+    setCancellationHours,
     setNewHolidayField,
     addHoliday,
     removeHoliday,
@@ -110,7 +112,8 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
       await businessHoursMutation.mutateBusinessHours(
         businessHours,
         slotDuration,
-        bookingAdvanceDays
+        bookingAdvanceDays,
+        cancellationHours
       );
       markClean();
       setSaveSuccess(true);
@@ -118,7 +121,7 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     } catch (error) {
       console.error('Failed to save shop settings:', error);
     }
-  }, [businessHours, slotDuration, bookingAdvanceDays, businessHoursMutation, markClean]);
+  }, [businessHours, slotDuration, bookingAdvanceDays, cancellationHours, businessHoursMutation, markClean]);
 
   if (isLoading) {
     return (
@@ -143,10 +146,12 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
         businessHours={businessHours}
         slotDuration={slotDuration}
         bookingAdvanceDays={bookingAdvanceDays}
+        cancellationHours={cancellationHours}
         onToggleDay={handleToggleDay}
         onTimeChange={handleTimeChange}
         onSlotDurationChange={setSlotDuration}
         onBookingAdvanceDaysChange={setBookingAdvanceDays}
+        onCancellationHoursChange={setCancellationHours}
         onSave={handleSave}
         isSaving={businessHoursMutation.isPending}
         saveSuccess={saveSuccess}

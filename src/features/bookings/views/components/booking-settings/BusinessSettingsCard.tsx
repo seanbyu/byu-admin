@@ -13,10 +13,12 @@ interface BusinessSettingsCardProps {
   businessHours: BusinessHours[];
   slotDuration: number;
   bookingAdvanceDays: number;
+  cancellationHours: number;
   onToggleDay: (dayOfWeek: number) => void;
   onTimeChange: (dayOfWeek: number, field: 'openTime' | 'closeTime', value: string) => void;
   onSlotDurationChange: (value: number) => void;
   onBookingAdvanceDaysChange: (value: number) => void;
+  onCancellationHoursChange: (value: number) => void;
   onSave: () => void;
   isSaving: boolean;
   saveSuccess: boolean;
@@ -26,10 +28,12 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
   businessHours,
   slotDuration,
   bookingAdvanceDays,
+  cancellationHours,
   onToggleDay,
   onTimeChange,
   onSlotDurationChange,
   onBookingAdvanceDaysChange,
+  onCancellationHoursChange,
   onSave,
   isSaving,
   saveSuccess,
@@ -93,6 +97,29 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
               showPlaceholder={false}
             />
           </div>
+        </div>
+
+        {/* 예약 변경/취소 마감 시간 */}
+        <div>
+          <label className="block text-xs font-medium text-secondary-600 mb-1">
+            {t('booking.shopSettingsModal.cancellationHours')}
+          </label>
+          <Select
+            options={[
+              { value: '0', label: t('booking.shopSettingsModal.cancellationNone') },
+              { value: '1', label: t('booking.shopSettingsModal.cancellation1h') },
+              { value: '2', label: t('booking.shopSettingsModal.cancellation2h') },
+              { value: '3', label: t('booking.shopSettingsModal.cancellation3h') },
+              { value: '6', label: t('booking.shopSettingsModal.cancellation6h') },
+              { value: '12', label: t('booking.shopSettingsModal.cancellation12h') },
+              { value: '24', label: t('booking.shopSettingsModal.cancellation24h') },
+              { value: '48', label: t('booking.shopSettingsModal.cancellation48h') },
+            ]}
+            value={String(cancellationHours)}
+            onChange={(e) => onCancellationHoursChange(Number(e.target.value))}
+            className="w-full"
+            showPlaceholder={false}
+          />
         </div>
 
         {/* 영업 시간 설정 */}

@@ -18,6 +18,7 @@ interface SettingsFormState {
   businessHours: BusinessHours[];
   slotDuration: number;
   bookingAdvanceDays: number;
+  cancellationHours: number;
 
   // Holiday Form
   holidays: Holiday[];
@@ -43,6 +44,7 @@ interface SettingsFormState {
   setDayTime: (dayOfWeek: number, field: 'openTime' | 'closeTime', value: string) => void;
   setSlotDuration: (duration: number) => void;
   setBookingAdvanceDays: (days: number) => void;
+  setCancellationHours: (hours: number) => void;
 
   setHolidays: (holidays: Holiday[]) => void;
   addHoliday: (holiday: Holiday) => void;
@@ -67,6 +69,7 @@ interface SettingsFormState {
     settings?: {
       slot_duration_minutes?: number;
       booking_advance_days?: number;
+      booking_cancellation_hours?: number;
       interpreter_enabled?: boolean;
       supported_languages?: SupportedLanguage[];
       contact_channels?: ContactChannels;
@@ -93,6 +96,7 @@ const initialState = {
   businessHours: getDefaultBusinessHours(),
   slotDuration: 30,
   bookingAdvanceDays: 30,
+  cancellationHours: 24,
   holidays: [] as Holiday[],
   newHoliday: initialNewHoliday,
   interpreterEnabled: false,
@@ -139,6 +143,9 @@ export const useSettingsFormStore = create<SettingsFormState>()(
 
       setBookingAdvanceDays: (days) =>
         set({ bookingAdvanceDays: days, isDirty: true }, false, 'setBookingAdvanceDays'),
+
+      setCancellationHours: (hours) =>
+        set({ cancellationHours: hours, isDirty: true }, false, 'setCancellationHours'),
 
       // Holiday Actions
       setHolidays: (holidays) =>
@@ -266,6 +273,7 @@ export const useSettingsFormStore = create<SettingsFormState>()(
             holidays: data.holidays || [],
             slotDuration: data.settings?.slot_duration_minutes || 30,
             bookingAdvanceDays: data.settings?.booking_advance_days || 30,
+            cancellationHours: data.settings?.booking_cancellation_hours ?? 24,
             interpreterEnabled: data.settings?.interpreter_enabled || false,
             supportedLanguages: (data.settings?.supported_languages as SupportedLanguage[]) || [],
             contactChannels: data.settings?.contact_channels || initialContactChannels,
@@ -292,6 +300,7 @@ export const useSettingsFormStore = create<SettingsFormState>()(
 export const selectBusinessHours = (state: SettingsFormState) => state.businessHours;
 export const selectSlotDuration = (state: SettingsFormState) => state.slotDuration;
 export const selectBookingAdvanceDays = (state: SettingsFormState) => state.bookingAdvanceDays;
+export const selectCancellationHours = (state: SettingsFormState) => state.cancellationHours;
 export const selectHolidays = (state: SettingsFormState) => state.holidays;
 export const selectNewHoliday = (state: SettingsFormState) => state.newHoliday;
 export const selectInterpreterEnabled = (state: SettingsFormState) => state.interpreterEnabled;
