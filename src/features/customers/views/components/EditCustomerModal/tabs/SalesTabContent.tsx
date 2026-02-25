@@ -32,50 +32,50 @@ export const SalesTabContent = memo(function SalesTabContent({
   }[] = [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Sales Summary */}
       <div>
-        <h3 className="text-sm font-semibold text-secondary-900 mb-3">
+        <h3 className="mb-2 text-sm font-semibold text-secondary-900 md:mb-3 md:text-base">
           {t('customer.sales.totalSummary')}
         </h3>
-        <div className="grid grid-cols-5 gap-3">
-          <div className="border border-secondary-200 rounded-lg p-3">
-            <p className="text-xs text-secondary-500 mb-1">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-3 xl:grid-cols-5">
+          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+            <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('customer.tabs.service')}
             </p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm font-semibold text-secondary-900 md:text-base lg:text-lg">
               {formatPrice(salesSummary.service)}
             </p>
           </div>
-          <div className="border border-secondary-200 rounded-lg p-3">
-            <p className="text-xs text-secondary-500 mb-1">
+          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+            <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('customer.tabs.product')}
             </p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm font-semibold text-secondary-900 md:text-base lg:text-lg">
               {formatPrice(salesSummary.product)}
             </p>
           </div>
-          <div className="border border-secondary-200 rounded-lg p-3">
-            <p className="text-xs text-secondary-500 mb-1">
+          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+            <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('customer.sales.membershipSales')}
             </p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm font-semibold text-secondary-900 md:text-base lg:text-lg">
               {formatPrice(salesSummary.membership)}
             </p>
           </div>
-          <div className="border border-secondary-200 rounded-lg p-3">
-            <p className="text-xs text-secondary-500 mb-1">
+          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+            <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('customer.sales.ticketSales')}
             </p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm font-semibold text-secondary-900 md:text-base lg:text-lg">
               {formatPrice(salesSummary.ticket)}
             </p>
           </div>
-          <div className="border border-secondary-200 rounded-lg p-3">
-            <p className="text-xs text-secondary-500 mb-1">
+          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+            <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('customer.sales.cancellationFee')}
             </p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm font-semibold text-secondary-900 md:text-base lg:text-lg">
               {formatPrice(salesSummary.cancellationFee)}
             </p>
           </div>
@@ -84,11 +84,11 @@ export const SalesTabContent = memo(function SalesTabContent({
 
       {/* Sales History */}
       <div>
-        <h3 className="text-sm font-semibold text-secondary-900 mb-3">
+        <h3 className="mb-2 text-sm font-semibold text-secondary-900 md:mb-3 md:text-base">
           {t('customer.sales.history')}
         </h3>
         {salesHistory.length === 0 ? (
-          <div className="flex items-center justify-center h-[200px] text-secondary-400 border border-secondary-200 rounded-lg">
+          <div className="flex h-[180px] items-center justify-center rounded-lg border border-secondary-200 text-sm text-secondary-400 md:h-[200px] md:text-base">
             {t('customer.sales.noHistory')}
           </div>
         ) : (

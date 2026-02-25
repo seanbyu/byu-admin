@@ -43,6 +43,7 @@ export interface EditCustomerModalProps {
 export interface CustomerInfoFormProps {
   customer: CustomerListItem;
   formData: CustomerFormData;
+  errors?: Record<string, string>;
   isUpdating: boolean;
   isDeleting: boolean;
   showDeleteConfirm: boolean;

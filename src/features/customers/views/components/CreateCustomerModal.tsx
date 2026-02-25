@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useCallback, useState, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -12,7 +12,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useCustomers } from '../../hooks/useCustomers';
 import { useStaff } from '@/features/staff/hooks/useStaff';
 import { customerApi } from '../../api';
-import type { CreateCustomerDto } from '../../types';
+import type { CreateCustomerDto, CustomerType } from '../../types';
 
 // ============================================
 // CreateCustomerModal Component
@@ -50,6 +50,7 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
+  const queryClient = useQueryClient();
   const { createCustomer, isCreating } = useCustomers({ salon_id: salonId });
   const { staffData, isLoading: isLoadingStaff } = useStaff(salonId);
 
@@ -77,10 +78,12 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
     phone: '',
     primary_artist_id: '',
     customer_number: '',
+    customer_type: 'local' as CustomerType,
     birth_year: '',
     birth_month: '',
     birth_day: '',
     occupation: '',
+    notes: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -115,18 +118,22 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
         phone: '',
         primary_artist_id: '',
         customer_number: '',
+        customer_type: 'local' as CustomerType,
         birth_year: '',
         birth_month: '',
         birth_day: '',
         occupation: '',
+        notes: '',
       });
       setErrors({});
+      // 캐시 제거하여 다음 열림 시 새 고객번호 조회
+      queryClient.removeQueries({ queryKey: ['nextCustomerNumber', salonId] });
     }
-  }, [isOpen]);
+  }, [isOpen, queryClient, salonId]);
 
   const handleChange = useCallback(
     (field: keyof typeof formData) =>
-      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const value = e.target.value;
 
         // 고객번호는 숫자만 허용
@@ -159,11 +166,14 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
     if (!formData.name.trim()) {
       newErrors.name = t('customer.create.error.nameRequired');
     }
-    if (!formData.phone.trim()) {
+    if (formData.customer_type !== 'foreign' && !formData.phone.trim()) {
       newErrors.phone = t('customer.create.error.phoneRequired');
     }
-    if (!formData.primary_artist_id) {
-      newErrors.primary_artist_id = t('customer.create.error.artistRequired');
+    if (formData.phone.trim()) {
+      const digits = formData.phone.replace(/\D/g, '');
+      if (digits.length !== 10 && digits.length !== 11) {
+        newErrors.phone = t('customer.create.error.phoneInvalid');
+      }
     }
     if (!formData.customer_number.trim()) {
       newErrors.customer_number = t('customer.create.error.customerNumberRequired');
@@ -192,8 +202,10 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           phone: formData.phone || undefined,
           primary_artist_id: formData.primary_artist_id || undefined,
           customer_number: formData.customer_number || undefined,
+          customer_type: formData.customer_type,
           birth_date,
           occupation: formData.occupation || undefined,
+          notes: formData.notes || undefined,
         };
 
         await createCustomer(dto);
@@ -229,12 +241,45 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           />
         </div>
 
+        {/* 고객 유형 (내국인/외국인) */}
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">
+            {t('customer.field.customerType')}
+          </label>
+          <div className="flex space-x-2">
+            <button
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, customer_type: 'local' as CustomerType }))}
+              className={`flex-1 h-10 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                formData.customer_type === 'local'
+                  ? 'bg-primary-500 text-white border-primary-500'
+                  : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
+              }`}
+            >
+              {t('customer.type.local')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, customer_type: 'foreign' as CustomerType }))}
+              className={`flex-1 h-10 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                formData.customer_type === 'foreign'
+                  ? 'bg-primary-500 text-white border-primary-500'
+                  : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
+              }`}
+            >
+              {t('customer.type.foreign')}
+            </button>
+          </div>
+        </div>
+
         {/* 연락처 */}
         <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">
+            {t('customer.field.phone')} {formData.customer_type !== 'foreign' && <span className="text-error-500">*</span>}
+          </label>
           <PhoneInput
             value={formData.phone}
             onChange={handlePhoneChange}
-            label={`${t('customer.field.phone')} *`}
             placeholder="08X-XXX-XXXX"
             defaultCountryCode="+66"
             error={errors.phone}
@@ -244,26 +289,21 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
         {/* 담당자 */}
         <div>
           <label className="block text-sm font-medium text-secondary-700 mb-1">
-            {t('customer.field.primaryArtist')} <span className="text-error-500">*</span>
+            {t('customer.field.primaryArtist')}
           </label>
           <select
             value={formData.primary_artist_id}
             onChange={handleChange('primary_artist_id')}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-              errors.primary_artist_id ? 'border-error-500' : 'border-secondary-200'
-            }`}
+            className="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             disabled={isLoadingStaff}
           >
-            <option value="">{t('customer.create.selectArtist')}</option>
+            <option value="">{t('customer.create.unassigned')}</option>
             {eligibleStaff.map((staff) => (
               <option key={staff.id} value={staff.id}>
                 {staff.name} {staff.positionTitle && `(${staff.positionTitle})`}
               </option>
             ))}
           </select>
-          {errors.primary_artist_id && (
-            <p className="text-sm text-error-500 mt-1">{errors.primary_artist_id}</p>
-          )}
         </div>
 
         {/* 고객번호 */}
@@ -341,6 +381,20 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
             value={formData.occupation}
             onChange={handleChange('occupation')}
             placeholder={t('customer.create.occupationPlaceholder')}
+          />
+        </div>
+
+        {/* 고객메모 */}
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">
+            {t('customer.field.notes')}
+          </label>
+          <textarea
+            value={formData.notes}
+            onChange={handleChange('notes')}
+            placeholder={t('customer.edit.notesPlaceholder')}
+            rows={3}
+            className="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm"
           />
         </div>
 

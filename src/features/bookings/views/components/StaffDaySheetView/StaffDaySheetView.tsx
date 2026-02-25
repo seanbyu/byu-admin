@@ -7,6 +7,8 @@ import { Booking } from '../../../types';
 import { Staff } from '@/features/staff/types';
 import { BusinessHours } from '@/types';
 import { formatDate } from '@/lib/utils';
+import { useAuthStore } from '@/store/authStore';
+import { useMenus, useCategories } from '@/features/salon-menus/hooks/useSalonMenus';
 import { DAY_KEYS, DAY_SHORT_TRANSLATION_KEYS, generateTimeSlots } from './utils';
 import { StaffAccordionItem } from './StaffAccordionItem';
 
@@ -38,6 +40,25 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
   highlightedBookingId,
 }: StaffDaySheetViewProps) {
   const t = useTranslations();
+  const { user } = useAuthStore();
+  const salonId = user?.salonId || '';
+
+  // serviceId → categoryName 매핑 (테이블에서 카테고리명으로 표시)
+  const { menus } = useMenus(salonId, undefined, { enabled: !!salonId });
+  const { categories } = useCategories(salonId);
+
+  const serviceCategoryMap = useMemo(() => {
+    const categoryMap: Record<string, string> = {};
+    categories.forEach((cat) => { categoryMap[cat.id] = cat.name; });
+
+    const map: Record<string, string> = {};
+    (menus || []).forEach((menu) => {
+      if (menu.category_id && categoryMap[menu.category_id]) {
+        map[menu.id] = categoryMap[menu.category_id];
+      }
+    });
+    return map;
+  }, [menus, categories]);
 
   const bookingEnabledStaff = useMemo(
     () => staffMembers.filter((s) => s.isBookingEnabled),
@@ -236,6 +257,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
           onAddBooking={onAddBooking}
           onUpdateBooking={onUpdateBooking}
           highlightedBookingId={highlightedBookingId}
+          serviceCategoryMap={serviceCategoryMap}
         />
       ))}
     </div>

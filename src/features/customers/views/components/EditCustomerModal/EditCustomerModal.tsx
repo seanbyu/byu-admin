@@ -54,6 +54,7 @@ export const EditCustomerModal = memo(function EditCustomerModal({
 
   // Form state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<CustomerFormData>({
     name: '',
     customer_number: '',
@@ -84,8 +85,17 @@ export const EditCustomerModal = memo(function EditCustomerModal({
   const handleFormDataChange = useCallback(
     (updates: Partial<CustomerFormData>) => {
       setFormData((prev) => ({ ...prev, ...updates }));
+      // Clear errors for changed fields
+      const changedKeys = Object.keys(updates);
+      if (changedKeys.some((key) => errors[key])) {
+        setErrors((prev) => {
+          const next = { ...prev };
+          changedKeys.forEach((key) => delete next[key]);
+          return next;
+        });
+      }
     },
-    []
+    [errors]
   );
 
   const handleDelete = useCallback(async () => {
@@ -105,6 +115,27 @@ export const EditCustomerModal = memo(function EditCustomerModal({
       e.preventDefault();
 
       if (!customer) return;
+
+      // Validation
+      const newErrors: Record<string, string> = {};
+      if (!formData.name.trim()) {
+        newErrors.name = t('customer.create.error.nameRequired');
+      }
+      if (formData.customer_type === 'local') {
+        if (!formData.phone.trim()) {
+          newErrors.phone = t('customer.create.error.phoneRequired');
+        }
+      }
+      if (formData.phone.trim()) {
+        const digits = formData.phone.replace(/\D/g, '');
+        if (digits.length !== 10 && digits.length !== 11) {
+          newErrors.phone = t('customer.create.error.phoneInvalid');
+        }
+      }
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
 
       try {
         const updates: UpdateCustomerDto = {
@@ -127,7 +158,7 @@ export const EditCustomerModal = memo(function EditCustomerModal({
         console.error('Failed to update customer:', error);
       }
     },
-    [customer, formData, updateCustomer, onClose]
+    [customer, formData, updateCustomer, onClose, t]
   );
 
   if (!customer) return null;
@@ -149,12 +180,13 @@ export const EditCustomerModal = memo(function EditCustomerModal({
       title={t('customer.edit.title')}
       size="full"
     >
-      <div className="flex flex-col lg:flex-row min-h-[600px]">
+      <div className="flex min-h-[480px] flex-col gap-4 lg:min-h-[600px] lg:flex-row lg:gap-6">
         {/* Left Panel - Customer Info Form */}
-        <div className="w-full lg:w-[380px] lg:flex-shrink-0 lg:pr-6 lg:border-r border-secondary-200">
+        <div className="w-full border-secondary-200 lg:w-[360px] lg:flex-shrink-0 lg:border-r lg:pr-6">
           <CustomerInfoForm
             customer={customer}
             formData={formData}
+            errors={errors}
             isUpdating={isUpdating}
             isDeleting={isDeleting}
             showDeleteConfirm={showDeleteConfirm}
@@ -169,15 +201,15 @@ export const EditCustomerModal = memo(function EditCustomerModal({
         </div>
 
         {/* Right Panel - Tabbed Content */}
-        <div className="w-full mt-6 lg:mt-0 lg:flex-1 lg:pl-6 overflow-hidden">
+        <div className="mt-2 w-full overflow-hidden lg:mt-0 lg:flex-1 lg:pl-6">
           {/* Tab Navigation */}
-          <div className="flex border-b border-secondary-200 mb-4 overflow-x-auto">
+          <div className="mb-3 flex overflow-x-auto border-b border-secondary-200 lg:mb-4">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`h-11 px-4 text-sm sm:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
+                className={`h-10 whitespace-nowrap border-b-2 px-3 text-sm font-medium transition-colors md:h-11 md:px-4 md:text-base ${
                   activeTab === tab.key
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'
@@ -189,7 +221,7 @@ export const EditCustomerModal = memo(function EditCustomerModal({
           </div>
 
           {/* Tab Content */}
-          <div className="min-h-[360px] lg:min-h-[500px] overflow-auto">
+          <div className="min-h-[260px] overflow-auto md:min-h-[320px] lg:min-h-[500px]">
             {activeTab === 'sales' && <SalesTabContent customer={customer} />}
             {activeTab === 'service' && <ServiceTabContent />}
             {activeTab === 'product' && <ProductTabContent />}

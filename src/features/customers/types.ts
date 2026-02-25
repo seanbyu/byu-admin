@@ -9,7 +9,7 @@ export type CustomerTag = 'VIP' | 'REGULAR' | 'NEW' | 'RETURNING' | 'DORMANT' | 
 export type CustomerSortBy = 'last_visit' | 'total_visits' | 'total_spent' | 'name' | 'created_at';
 
 // Base filter types (기본 필터)
-export type CustomerBaseFilterType = 'all' | 'new' | 'returning' | 'regular' | 'dormant' | 'vip';
+export type CustomerBaseFilterType = 'all' | 'new' | 'returning' | 'regular' | 'dormant' | 'vip' | 'foreign';
 
 // Artist filter type (담당자 필터) - 'artist:{artistId}' 형식
 export type CustomerArtistFilterType = `artist:${string}`;

@@ -11,14 +11,14 @@
   "cancelled": "취소",
   "noShow": "노쇼",
   "newBookingAlert": "새로운 온라인 예약이 접수되었습니다!",
-  "bookingRescheduledAlert": "고객이 예약 일정을 변경했습니다.",
+  "bookingRescheduledAlert": "고객 예약 일정을 변경했습니다.",
   "customer": "고객",
   "designer": "직원",
   "service": "서비스",
   "date": "날짜",
   "time": "시간",
   "price": "가격",
-  "notes": "메모",
+  "notes": "시술메모",
   "paymentMethod": "결제수단",
   "paymentMethodCard": "카드",
   "paymentMethodCash": "현금",
@@ -82,7 +82,7 @@
   },
   "placeholders": {
     "customerName": "고객 이름을 입력하세요",
-    "notesPlaceholder": "특이사항이 있다면 입력하세요",
+    "notesPlaceholder": "시술 관련 메모를 입력하세요",
     "selectService": "서비스를 선택하세요"
   },
   "customerType": {
@@ -109,6 +109,25 @@
   "sampleServices": {
     "cut": "커트 - 35,000원",
     "color": "염색 - 120,000원"
+  },
+  "salesModal": {
+    "title": "매출 등록",
+    "registerSales": "매출등록",
+    "servicePrice": "시술 금액",
+    "paymentMethod": "결제 수단",
+    "productAmount": "제품 금액",
+    "productName": "제품명",
+    "selectPayment": "결제 수단 선택",
+    "noPayment": "미선택",
+    "productNamePlaceholder": "제품명을 입력하세요",
+    "editDiscount": "수정/할인",
+    "discountPercent": "%할인",
+    "discountFixed": "정액할인",
+    "originalPrice": "정가",
+    "discountAmount": "할인",
+    "finalPrice": "최종 금액",
+    "applyDiscount": "적용",
+    "cancelDiscount": "취소"
   },
   "settings": {
     "description": "온라인 예약 관련 설정을 관리합니다",

@@ -50,6 +50,9 @@ function getFieldValue(
     case 'has_primary_artist':
       return !!customer.primary_artist_id;
 
+    case 'is_foreign':
+      return customer.customer_type === 'foreign';
+
     default:
       return 0;
   }

@@ -16,6 +16,7 @@ export interface StaffAccordionItemProps {
   onAddBooking: (staffId: string, time?: string) => void;
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
   highlightedBookingId?: string | null;
+  serviceCategoryMap?: Record<string, string>;
 }
 
 export const StaffAccordionItem = memo(function StaffAccordionItem({
@@ -26,6 +27,7 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
   onAddBooking,
   onUpdateBooking,
   highlightedBookingId,
+  serviceCategoryMap,
 }: StaffAccordionItemProps) {
   const t = useTranslations();
   const [isOpen, setIsOpen] = useState(true);
@@ -115,6 +117,7 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
             onAddBooking={handleAddAtTime}
             onUpdateBooking={onUpdateBooking}
             highlightedBookingId={highlightedBookingId}
+            serviceCategoryMap={serviceCategoryMap}
           />
         </div>
       )}

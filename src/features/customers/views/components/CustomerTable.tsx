@@ -68,8 +68,8 @@ const MobileCustomerMeta = memo(function MobileCustomerMeta({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-[11px] text-secondary-500">{label}</p>
-      <p className="text-sm font-medium text-secondary-800 truncate">{value}</p>
+      <p className="text-[10px] text-secondary-500 md:text-[11px]">{label}</p>
+      <p className="truncate text-xs font-medium text-secondary-800 md:text-sm">{value}</p>
     </div>
   );
 });
@@ -94,6 +94,8 @@ interface CustomerTableProps {
   selectedIds?: string[];
   /** 선택 변경 핸들러 */
   onSelectionChange?: (ids: string[]) => void;
+  /** 전체 고객 기준 글로벌 번호 맵 (필터와 무관한 일관된 번호) */
+  customerNumberMap?: Map<string, number>;
 }
 
 export const CustomerTable = memo(function CustomerTable({
@@ -108,6 +110,7 @@ export const CustomerTable = memo(function CustomerTable({
   canDelete = false,
   selectedIds = [],
   onSelectionChange,
+  customerNumberMap,
 }: CustomerTableProps) {
   const t = useTranslations();
   const [expandedCustomerIds, setExpandedCustomerIds] = useState<Set<string>>(new Set());
@@ -179,9 +182,6 @@ export const CustomerTable = memo(function CustomerTable({
     });
   }, []);
 
-  // 페이지네이션을 고려한 시작 번호
-  const startNumber = (currentPage - 1) * pageSize;
-
   // js-cache-function-results: 컬럼 정의를 메모이제이션
   const columns = useMemo(
     () => [
@@ -223,9 +223,9 @@ export const CustomerTable = memo(function CustomerTable({
       {
         key: 'customer_number',
         header: t('customer.field.customerNumber'),
-        render: (customer: CustomerListItem, index: number) => (
+        render: (customer: CustomerListItem) => (
           <span className="text-sm font-mono text-secondary-700">
-            {customer.customer_number || startNumber + index + 1}
+            {customer.customer_number || customerNumberMap?.get(customer.id) || '-'}
           </span>
         ),
       },
@@ -336,7 +336,7 @@ export const CustomerTable = memo(function CustomerTable({
         ),
       },
     ],
-    [t, startNumber, onSelectionChange, isAllSelected, isIndeterminate, handleSelectAll, handleSelectOne, selectedIds]
+    [t, customerNumberMap, onSelectionChange, isAllSelected, isIndeterminate, handleSelectAll, handleSelectOne, selectedIds]
   );
 
   // 페이지네이션 계산
@@ -381,17 +381,17 @@ export const CustomerTable = memo(function CustomerTable({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 md:space-y-4">
       {/* Mobile: 카드 리스트 */}
       <div className="md:hidden space-y-3">
         {customers.length === 0 ? (
-          <div className="rounded-lg border border-secondary-200 bg-white py-10 text-center text-sm text-secondary-500">
+          <div className="rounded-lg border border-secondary-200 bg-white py-8 text-center text-sm text-secondary-500">
             {t('customer.noCustomers')}
           </div>
         ) : (
-          customers.map((customer, index) => {
+          customers.map((customer) => {
             const displayPhone = formatPhoneDisplay(customer.phone) ?? '-';
-            const customerNumber = customer.customer_number || startNumber + index + 1;
+            const customerNumber = customer.customer_number || customerNumberMap?.get(customer.id) || '-';
             const lastVisit = customer.last_visit
               ? formatDate(new Date(customer.last_visit), 'yyyy-MM-dd')
               : t('customer.noVisit');
@@ -409,10 +409,10 @@ export const CustomerTable = memo(function CustomerTable({
                     onClick={() => handleRowClick(customer)}
                     className="flex-1 min-w-0 text-left disabled:cursor-default"
                   >
-                    <p className="text-base font-semibold text-secondary-900 truncate">
+                    <p className="truncate text-sm font-semibold text-secondary-900 min-[360px]:text-base">
                       {customer.name}
                     </p>
-                    <p className="mt-0.5 text-sm text-secondary-700">{displayPhone}</p>
+                    <p className="mt-0.5 text-xs text-secondary-700 min-[360px]:text-sm">{displayPhone}</p>
                   </button>
 
                   {onSelectionChange && (
@@ -438,7 +438,7 @@ export const CustomerTable = memo(function CustomerTable({
                   <button
                     type="button"
                     onClick={() => handleToggleDetails(customer.id)}
-                    className="w-full flex items-center justify-between text-sm font-medium text-primary-600"
+                    className="flex w-full items-center justify-between text-xs font-medium text-primary-600 min-[360px]:text-sm"
                   >
                     <span>
                       {isExpanded
@@ -453,7 +453,7 @@ export const CustomerTable = memo(function CustomerTable({
                 </div>
 
                 {isExpanded && (
-                  <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
+                  <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 min-[360px]:grid-cols-2">
                     <MobileCustomerMeta
                       label={t('customer.field.customerNumber')}
                       value={customerNumber}
@@ -499,7 +499,7 @@ export const CustomerTable = memo(function CustomerTable({
       </div>
 
       {/* Desktop: 테이블 */}
-      <div className="hidden md:block">
+      <div className="hidden md:block md:[&_th]:px-3 md:[&_th]:py-2.5 md:[&_th]:text-[11px] md:[&_td]:px-3 md:[&_td]:py-3 md:[&_td]:text-sm lg:[&_th]:text-xs xl:[&_th]:px-4 xl:[&_td]:px-4 xl:[&_td]:py-3.5">
         <Table
           data={customers}
           columns={columns}
@@ -511,10 +511,10 @@ export const CustomerTable = memo(function CustomerTable({
       {/* Pagination */}
       {totalCount > 0 && (
         <>
-          <div className="hidden md:flex items-center justify-between px-4 py-3 border-t border-secondary-200">
+          <div className="hidden items-center justify-between border-t border-secondary-200 px-3 py-3 md:flex xl:px-4">
             {/* Left: Info */}
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-secondary-600">
+            <div className="flex items-center space-x-3 xl:space-x-4">
+              <span className="text-xs text-secondary-600 lg:text-sm">
                 {t('common.pagination.showing', {
                   start: startIndex,
                   end: endIndex,
@@ -526,7 +526,7 @@ export const CustomerTable = memo(function CustomerTable({
               <select
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                className="px-2 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="h-9 rounded-lg border border-secondary-200 bg-white px-2 text-xs text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 lg:text-sm"
               >
                 <option value={10}>10 / {t('common.pagination.page')}</option>
                 <option value={20}>20 / {t('common.pagination.page')}</option>
@@ -536,13 +536,13 @@ export const CustomerTable = memo(function CustomerTable({
             </div>
 
             {/* Right: Page navigation */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 lg:space-x-2">
               {/* Previous button */}
               <button
                 type="button"
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-9 rounded-lg border border-secondary-200 bg-white px-3 text-xs text-secondary-700 hover:bg-secondary-50 disabled:cursor-not-allowed disabled:opacity-50 lg:text-sm"
               >
                 {t('common.pagination.previous')}
               </button>
@@ -551,7 +551,7 @@ export const CustomerTable = memo(function CustomerTable({
               <div className="flex items-center space-x-1">
                 {getPageNumbers().map((page, idx) =>
                   page === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="px-2 text-secondary-400">
+                    <span key={`ellipsis-${idx}`} className="px-1.5 text-xs text-secondary-400 lg:px-2">
                       ...
                     </span>
                   ) : (
@@ -559,7 +559,7 @@ export const CustomerTable = memo(function CustomerTable({
                       key={page}
                       type="button"
                       onClick={() => onPageChange(page as number)}
-                      className={`px-3 py-1 text-sm rounded-lg ${
+                      className={`h-9 rounded-lg px-3 text-xs lg:text-sm ${
                         currentPage === page
                           ? 'bg-primary-500 text-white font-medium'
                           : 'bg-white text-secondary-700 hover:bg-secondary-50 border border-secondary-200'
@@ -576,22 +576,22 @@ export const CustomerTable = memo(function CustomerTable({
                 type="button"
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-9 rounded-lg border border-secondary-200 bg-white px-3 text-xs text-secondary-700 hover:bg-secondary-50 disabled:cursor-not-allowed disabled:opacity-50 lg:text-sm"
               >
                 {t('common.pagination.next')}
               </button>
             </div>
           </div>
 
-          <div className="md:hidden border-t border-secondary-200 px-1 pt-3 pb-1 space-y-3">
+          <div className="space-y-3 border-t border-secondary-200 px-1 pb-1 pt-3 md:hidden">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-secondary-600">
+              <span className="text-[11px] text-secondary-600">
                 {startIndex}-{endIndex} / {totalCount}
               </span>
               <select
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                className="h-9 px-2 text-sm border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="h-9 rounded-lg border border-secondary-200 bg-white px-2 text-xs text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value={10}>10 / {t('common.pagination.page')}</option>
                 <option value={20}>20 / {t('common.pagination.page')}</option>
@@ -605,12 +605,12 @@ export const CustomerTable = memo(function CustomerTable({
                 type="button"
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="h-10 rounded-lg border border-secondary-200 bg-white text-sm text-secondary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-10 rounded-lg border border-secondary-200 bg-white text-sm text-secondary-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t('common.pagination.previous')}
               </button>
 
-              <div className="h-10 rounded-lg border border-primary-200 bg-primary-50 text-primary-700 text-sm font-medium flex items-center justify-center">
+              <div className="flex h-10 items-center justify-center rounded-lg border border-primary-200 bg-primary-50 text-sm font-medium text-primary-700">
                 {currentPage} / {totalPages}
               </div>
 

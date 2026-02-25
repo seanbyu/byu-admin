@@ -276,38 +276,41 @@ const ConditionBuilder = memo(function ConditionBuilder({
                 ))}
               </select>
 
-              {/* Operator Select */}
-              <select
-                value={condition.operator}
-                onChange={(e) =>
-                  handleConditionChange(index, { operator: e.target.value as any })
-                }
-                className="w-20 px-2 py-1.5 text-sm border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                {fieldMeta.operators.map((op) => (
-                  <option key={op} value={op}>
-                    {t(`customer.filterManagement.operators.${op === '==' ? 'eq' : op === '!=' ? 'ne' : op === '>' ? 'gt' : op === '<' ? 'lt' : op === '>=' ? 'gte' : 'lte'}`)}
-                  </option>
-                ))}
-              </select>
-
-              {/* Value Input */}
               {isBoolean ? (
+                /* Boolean: 연산자 숨기고 예/아니오만 표시 */
                 <select
                   value={condition.value ? 'true' : 'false'}
                   onChange={(e) =>
-                    handleConditionChange(index, { value: e.target.value === 'true' })
+                    handleConditionChange(index, { operator: '==', value: e.target.value === 'true' })
                   }
-                  className="w-20 px-2 py-1.5 text-sm border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-24 px-2 py-1.5 text-sm border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="true">{t('common.yes')}</option>
                   <option value="false">{t('common.no')}</option>
                 </select>
               ) : (
-                <NumberInput
-                  value={condition.value as number}
-                  onChange={(val) => handleConditionChange(index, { value: val })}
-                />
+                <>
+                  {/* Operator Select */}
+                  <select
+                    value={condition.operator}
+                    onChange={(e) =>
+                      handleConditionChange(index, { operator: e.target.value as any })
+                    }
+                    className="w-20 px-2 py-1.5 text-sm border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    {fieldMeta.operators.map((op) => (
+                      <option key={op} value={op}>
+                        {t(`customer.filterManagement.operators.${op === '==' ? 'eq' : op === '!=' ? 'ne' : op === '>' ? 'gt' : op === '<' ? 'lt' : op === '>=' ? 'gte' : 'lte'}`)}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Number Value Input */}
+                  <NumberInput
+                    value={condition.value as number}
+                    onChange={(val) => handleConditionChange(index, { value: val })}
+                  />
+                </>
               )}
 
               {/* Remove Button */}

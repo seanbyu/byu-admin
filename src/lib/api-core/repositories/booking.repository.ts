@@ -104,6 +104,7 @@ export class BookingRepository extends BaseRepository {
       productName: booking.product?.name ?? null,
       productAmount: Number(booking.product_amount) || 0,
       storeSalesAmount: Number(booking.store_sales_amount) || 0,
+      bookingMeta: booking.booking_meta ?? undefined,
       createdAt: booking.created_at,
       updatedAt: booking.updated_at,
     };

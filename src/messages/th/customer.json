@@ -28,7 +28,8 @@
     "returning": "กลับมาอีกครั้ง",
     "regular": "ประจำ",
     "dormant": "ไม่ได้เข้ามานาน",
-    "vip": "วีไอพี"
+    "vip": "วีไอพี",
+    "foreign": "ต่างชาติ"
   },
 
   "sort": {
@@ -83,6 +84,7 @@
     "title": "เพิ่มลูกค้าใหม่",
     "namePlaceholder": "กรอกชื่อลูกค้า",
     "selectArtist": "เลือกพนักงาน",
+    "unassigned": "ไม่ระบุ",
     "customerNumberPlaceholder": "กรอกหมายเลขลูกค้า",
     "customerNumberHint": "กรอกได้เฉพาะตัวเลข หมายเลขถัดไปจากหมายเลขล่าสุดจะถูกกรอกอัตโนมัติ",
     "occupationPlaceholder": "กรอกอาชีพ",
@@ -92,6 +94,7 @@
     "error": {
       "nameRequired": "กรุณากรอกชื่อ",
       "phoneRequired": "กรุณากรอกหมายเลขโทรศัพท์",
+      "phoneInvalid": "หมายเลขโทรศัพท์ต้องเป็น 10 หรือ 11 หลัก",
       "artistRequired": "กรุณาเลือกพนักงาน",
       "customerNumberRequired": "กรุณากรอกหมายเลขลูกค้า"
     }
@@ -193,7 +196,8 @@
       "daysSinceLastVisit": "จำนวนวันตั้งแต่เข้ามาล่าสุด",
       "daysSinceRegistration": "วันที่ลงทะเบียน",
       "noShowCount": "จำนวนครั้งที่ไม่มาตามนัด",
-      "hasPrimaryArtist": "มีพนักงานประจำ"
+      "hasPrimaryArtist": "มีพนักงานประจำ",
+      "isForeign": "เป็นชาวต่างชาติ"
     },
     "operators": {
       "eq": "เท่ากับ",

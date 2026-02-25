@@ -12,7 +12,8 @@ export type CustomerFilterField =
   | 'days_since_last_visit'
   | 'days_since_registration'
   | 'no_show_count'
-  | 'has_primary_artist';
+  | 'has_primary_artist'
+  | 'is_foreign';
 
 /**
  * 숫자 필드용 연산자
@@ -156,6 +157,12 @@ export const FILTER_FIELD_META: Record<CustomerFilterField, FilterFieldMeta> = {
     operators: ['==', '!='],
     defaultValue: true,
   },
+  is_foreign: {
+    labelKey: 'customer.filterManagement.fields.isForeign',
+    type: 'boolean',
+    operators: ['==', '!='],
+    defaultValue: true,
+  },
 };
 
 /**
@@ -180,4 +187,5 @@ export const FILTER_FIELD_OPTIONS: { value: CustomerFilterField; labelKey: strin
   { value: 'days_since_registration', labelKey: 'customer.filterManagement.fields.daysSinceRegistration' },
   { value: 'no_show_count', labelKey: 'customer.filterManagement.fields.noShowCount' },
   { value: 'has_primary_artist', labelKey: 'customer.filterManagement.fields.hasPrimaryArtist' },
+  { value: 'is_foreign', labelKey: 'customer.filterManagement.fields.isForeign' },
 ];

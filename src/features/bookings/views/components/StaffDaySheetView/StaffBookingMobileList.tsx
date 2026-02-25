@@ -1,13 +1,13 @@
 'use client';
 
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Booking } from '../../../types';
 import { BookingStatus } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import { stripCountryCode, PAYMENT_METHOD_KEYS, isKnownPaymentMethod } from './utils';
 import { InlineStatusSelect } from './InlineStatusSelect';
-import { InlinePriceCell } from './InlinePriceCell';
+import { SalesRegistrationModal } from './SalesRegistrationModal';
 
 export interface StaffBookingMobileListProps {
   timeSlots: string[];
@@ -16,6 +16,7 @@ export interface StaffBookingMobileListProps {
   onAddBooking: (time: string) => void;
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
   highlightedBookingId?: string | null;
+  serviceCategoryMap?: Record<string, string>;
 }
 
 export const StaffBookingMobileList = memo(function StaffBookingMobileList({
@@ -25,8 +26,11 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
   onAddBooking,
   onUpdateBooking,
   highlightedBookingId,
+  serviceCategoryMap,
 }: StaffBookingMobileListProps) {
   const t = useTranslations();
+
+  const [salesBooking, setSalesBooking] = useState<Booking | null>(null);
 
   const handleStatusChange = useCallback(
     (id: string, status: BookingStatus) => {
@@ -34,6 +38,11 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
     },
     [onUpdateBooking]
   );
+
+  const handleOpenSales = useCallback((e: React.MouseEvent, booking: Booking) => {
+    e.stopPropagation();
+    setSalesBooking(booking);
+  }, []);
 
   const sortedBookings = useMemo(
     () =>
@@ -74,7 +83,7 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-secondary-900 truncate">
-                    {booking.startTime.slice(0, 5)} · {booking.serviceName}
+                    {booking.startTime.slice(0, 5)} · {booking.serviceName?.includes(', ') ? booking.serviceName : (serviceCategoryMap?.[booking.serviceId] || booking.serviceName)}
                   </p>
                   <p className="mt-0.5 text-xs text-secondary-600 truncate">
                     {booking.customerName}
@@ -99,12 +108,11 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="text-secondary-400">{t('booking.price')}</span>
-                  <div className="text-secondary-800 font-medium">
-                    <InlinePriceCell
-                      bookingId={booking.id}
-                      price={booking.price}
-                      onUpdate={(id, price) => onUpdateBooking(id, { price })}
-                    />
+                  <div
+                    className="text-secondary-800 font-medium cursor-pointer hover:text-primary-600"
+                    onClick={(e) => handleOpenSales(e, booking)}
+                  >
+                    {booking.price > 0 ? formatPrice(booking.price) : t('booking.salesModal.registerSales')}
                   </div>
                 </div>
                 <div className="text-right">
@@ -142,6 +150,13 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
           </div>
         </div>
       )}
+
+      <SalesRegistrationModal
+        isOpen={!!salesBooking}
+        onClose={() => setSalesBooking(null)}
+        booking={salesBooking}
+        onSave={onUpdateBooking}
+      />
     </div>
   );
 });

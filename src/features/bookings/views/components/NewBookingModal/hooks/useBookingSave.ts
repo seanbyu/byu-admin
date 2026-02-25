@@ -9,6 +9,7 @@ import { CustomerType, ExistingCustomer } from '../types';
 interface ServiceInfo {
   id: string;
   name: string;
+  category_id: string;
   duration_minutes?: number;
   base_price?: number;
   price?: number;
@@ -30,6 +31,7 @@ interface UseBookingSaveProps {
   selectedStaffName: string;
   // Service info
   selectedServices: ServiceInfo[];
+  categoryMap: Record<string, string>;
   // Callbacks
   onClose: () => void;
   validateForm: () => boolean;
@@ -69,6 +71,7 @@ export function useBookingSave({
   currentStaffId,
   selectedStaffName,
   selectedServices,
+  categoryMap,
   onClose,
   validateForm,
   selectedCustomer,
@@ -91,38 +94,15 @@ export function useBookingSave({
     []
   );
 
-  const buildServiceSummary = useCallback((services: ServiceInfo[]) => {
-    const grouped = services.reduce<Map<string, { name: string; count: number }>>(
-      (acc, service) => {
-        const current = acc.get(service.id);
-        if (current) {
-          current.count += 1;
-        } else {
-          acc.set(service.id, { name: service.name, count: 1 });
-        }
-        return acc;
-      },
-      new Map()
-    );
-
-    return Array.from(grouped.values())
-      .map((item) => `${item.name} x${item.count}`)
-      .join(', ');
-  }, []);
-
-  const mergeNotesWithServices = useCallback(
-    (baseNotes: string, services: ServiceInfo[]) => {
-      const trimmedNotes = baseNotes.trim();
-      if (services.length <= 1) {
-        return trimmedNotes || undefined;
-      }
-
-      const summaryLine = `[Services] ${buildServiceSummary(services)}`;
-      if (!trimmedNotes) return summaryLine;
-      if (trimmedNotes.includes(summaryLine)) return trimmedNotes;
-      return `${trimmedNotes}\n${summaryLine}`;
+  // 선택된 서비스들의 카테고리명 조합 (중복 제거)
+  const getCategoryServiceName = useCallback(
+    (services: ServiceInfo[]) => {
+      const categoryNames = [...new Set(
+        services.map((s) => categoryMap[s.category_id] || s.name)
+      )];
+      return categoryNames.join(', ');
     },
-    [buildServiceSummary]
+    [categoryMap]
   );
 
   // 실제 예약 저장 로직
@@ -140,7 +120,10 @@ export function useBookingSave({
         0
       );
       const endTime = calculateEndTime(currentTime, durationMinutes);
-      const mergedNotes = mergeNotesWithServices(notes, selectedServices);
+      const serviceName = getCategoryServiceName(selectedServices);
+      const finalNotes = notes.trim() || undefined;
+
+      const serviceIds = selectedServices.map((s) => s.id);
 
       await createBooking({
         salonId,
@@ -150,17 +133,18 @@ export function useBookingSave({
         staffId: currentStaffId,
         staffName: selectedStaffName,
         serviceId: primaryService.id,
-        serviceName: primaryService.name,
+        serviceName,
+        serviceIds,
         date: toLocalDateStr(currentDate),
         startTime: currentTime,
         endTime,
         status: BookingStatus.CONFIRMED,
         price: servicePrice,
         source: 'WALK_IN',
-        notes: mergedNotes,
+        notes: finalNotes,
         productAmount: 0,
         storeSalesAmount: 0,
-      });
+      } as any);
 
       onClose();
     },
@@ -168,6 +152,7 @@ export function useBookingSave({
       selectedServices,
       calculateEndTime,
       currentTime,
+      getCategoryServiceName,
       createBooking,
       salonId,
       customerName,
@@ -177,7 +162,6 @@ export function useBookingSave({
       selectedStaffName,
       currentDate,
       notes,
-      mergeNotesWithServices,
       onClose,
     ]
   );
@@ -196,19 +180,24 @@ export function useBookingSave({
       0
     );
     const endTime = calculateEndTime(currentTime, durationMinutes);
-    const mergedNotes = mergeNotesWithServices(notes, selectedServices);
+    const serviceName = getCategoryServiceName(selectedServices);
+    const finalNotes = notes.trim() || undefined;
+
+    const serviceIds = selectedServices.map((s) => s.id);
 
     await updateBooking({
       id: editBooking.id,
       updates: {
         staffId: currentStaffId,
         serviceId: primaryService.id,
+        serviceName,
+        serviceIds,
         date: toLocalDateStr(currentDate),
         startTime: currentTime,
         endTime,
         price: servicePrice,
-        notes: mergedNotes,
-      },
+        notes: finalNotes,
+      } as Partial<Booking> & { serviceIds?: string[] },
     });
 
     onClose();
@@ -217,11 +206,11 @@ export function useBookingSave({
     selectedServices,
     calculateEndTime,
     currentTime,
+    getCategoryServiceName,
     updateBooking,
     currentStaffId,
     currentDate,
     notes,
-    mergeNotesWithServices,
     onClose,
   ]);
 

@@ -238,6 +238,7 @@ export interface CreateBookingDto {
   product_id?: string;
   product_amount?: number;
   store_sales_amount?: number;
+  booking_meta?: Record<string, any>;
 }
 
 // Booking update DTO
@@ -260,6 +261,7 @@ export interface UpdateBookingDto {
   product_id?: string | null;
   product_amount?: number;
   store_sales_amount?: number;
+  booking_meta?: Record<string, any>;
 }
 
 // Customer create DTO
@@ -389,6 +391,7 @@ export interface BookingResponse {
   productName: string | null;
   productAmount: number;
   storeSalesAmount: number;
+  bookingMeta?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
 }

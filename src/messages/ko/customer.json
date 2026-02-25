@@ -28,7 +28,8 @@
     "returning": "재방문",
     "regular": "단골",
     "dormant": "휴면",
-    "vip": "VIP"
+    "vip": "VIP",
+    "foreign": "외국인"
   },
 
   "sort": {
@@ -83,6 +84,7 @@
     "title": "신규 고객 등록",
     "namePlaceholder": "고객 이름을 입력하세요",
     "selectArtist": "담당자를 선택하세요",
+    "unassigned": "미지정",
     "customerNumberPlaceholder": "고객번호를 입력하세요",
     "customerNumberHint": "숫자만 입력 가능합니다. 마지막 번호 다음이 자동으로 입력됩니다.",
     "occupationPlaceholder": "직업을 입력하세요",
@@ -92,6 +94,7 @@
     "error": {
       "nameRequired": "이름을 입력해주세요",
       "phoneRequired": "연락처를 입력해주세요",
+      "phoneInvalid": "전화번호는 10자리 또는 11자리여야 합니다",
       "artistRequired": "담당자를 선택해주세요",
       "customerNumberRequired": "고객번호를 입력해주세요"
     }
@@ -193,7 +196,8 @@
       "daysSinceLastVisit": "마지막 방문 이후 일수",
       "daysSinceRegistration": "고객 등록일",
       "noShowCount": "노쇼 횟수",
-      "hasPrimaryArtist": "담당자 지정 여부"
+      "hasPrimaryArtist": "담당자 지정 여부",
+      "isForeign": "외국인 여부"
     },
     "operators": {
       "eq": "같음",

@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { X } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -9,15 +10,14 @@ import { Select } from '@/components/ui/Select';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { formatDate } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
-import { ServiceSelector } from '../ServiceSelector';
 import { useCustomers } from '@/features/customers/hooks/useCustomers';
-import { useMenus } from '@/features/salon-menus/hooks/useSalonMenus';
+import { useMenus, useCategories } from '@/features/salon-menus/hooks/useSalonMenus';
 import { SalonMenu } from '@/features/salon-menus/types';
 import { useBookings } from '../../../hooks/useBookings';
 import { NewBookingModalProps } from './types';
 import { useBookingForm, useCustomerSearch, useBookingSave } from './hooks';
 import { CustomerSection, NewCustomerConfirmModal, TimeSlotSelector } from './components';
-import { X } from 'lucide-react';
+import { ServiceSelector } from '../ServiceSelector';
 
 function NewBookingModalComponent({
   isOpen,
@@ -43,10 +43,72 @@ function NewBookingModalComponent({
   // Data hooks
   const { customers } = useCustomers({ salon_id: salonId });
   const { menus } = useMenus(salonId, undefined, { enabled: !!salonId });
+  const { categories } = useCategories(salonId);
   const { confirmBooking, isConfirming, deleteBooking, isDeleting } = useBookings(salonId);
+
+  // 카테고리 맵: categoryId → categoryName
+  const categoryMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    categories.forEach((cat) => { map[cat.id] = cat.name; });
+    return map;
+  }, [categories]);
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [isServiceInitialized, setIsServiceInitialized] = useState(false);
+
+  // 메뉴 맵: menuId → SalonMenu
+  const menuMap = useMemo(() => {
+    const map: Record<string, SalonMenu> = {};
+    (menus || []).forEach((menu) => { map[menu.id] = menu; });
+    return map;
+  }, [menus]);
+
+  // 선택된 서비스 목록 (중복 포함, useBookingSave에 전달)
+  const selectedServices = useMemo<SalonMenu[]>(() => {
+    return selectedServiceIds
+      .map((id) => menuMap[id])
+      .filter((menu): menu is SalonMenu => Boolean(menu));
+  }, [selectedServiceIds, menuMap]);
+
+  // 카테고리별 그룹 표시 (Cut x2, Perm x1 등)
+  const selectedServiceGroups = useMemo(() => {
+    const groups: { categoryId: string; categoryName: string; count: number; totalDuration: number; totalPrice: number }[] = [];
+    const groupMap = new Map<string, number>();
+
+    selectedServiceIds.forEach((id) => {
+      const menu = menuMap[id];
+      if (!menu) return;
+      const catId = menu.category_id;
+      const idx = groupMap.get(catId);
+
+      if (idx !== undefined) {
+        groups[idx].count += 1;
+        groups[idx].totalDuration += menu.duration_minutes || 60;
+        groups[idx].totalPrice += menu.base_price || menu.price || 0;
+      } else {
+        groupMap.set(catId, groups.length);
+        groups.push({
+          categoryId: catId,
+          categoryName: categoryMap[catId] || menu.name,
+          count: 1,
+          totalDuration: menu.duration_minutes || 60,
+          totalPrice: menu.base_price || menu.price || 0,
+        });
+      }
+    });
+
+    return groups;
+  }, [selectedServiceIds, menuMap, categoryMap]);
+
+  const totalServiceDuration = useMemo(
+    () => selectedServiceGroups.reduce((sum, g) => sum + g.totalDuration, 0),
+    [selectedServiceGroups]
+  );
+  const totalServicePrice = useMemo(
+    () => selectedServiceGroups.reduce((sum, g) => sum + g.totalPrice, 0),
+    [selectedServiceGroups]
+  );
 
   // Form hook
   const form = useBookingForm({
@@ -81,73 +143,6 @@ function NewBookingModalComponent({
     }
   }, [isEditMode, editBooking]);
 
-  const menuMap = useMemo(() => {
-    return new Map(
-      (menus || [])
-        .filter((menu) => menu.is_active)
-        .map((menu) => [menu.id, menu])
-    );
-  }, [menus]);
-
-  const selectedServices = useMemo<SalonMenu[]>(
-    () =>
-      selectedServiceIds
-        .map((serviceId) => menuMap.get(serviceId))
-        .filter((menu): menu is SalonMenu => Boolean(menu)),
-    [selectedServiceIds, menuMap]
-  );
-
-  const selectedServiceGroups = useMemo(() => {
-    const grouped = new Map<
-      string,
-      {
-        id: string;
-        name: string;
-        count: number;
-        unitDuration: number;
-        unitPrice: number;
-      }
-    >();
-
-    selectedServices.forEach((service) => {
-      const existing = grouped.get(service.id);
-      const unitDuration = service.duration_minutes || 60;
-      const unitPrice = service.base_price || service.price || 0;
-
-      if (existing) {
-        existing.count += 1;
-      } else {
-        grouped.set(service.id, {
-          id: service.id,
-          name: service.name,
-          count: 1,
-          unitDuration,
-          unitPrice,
-        });
-      }
-    });
-
-    return Array.from(grouped.values());
-  }, [selectedServices]);
-
-  const totalServiceDuration = useMemo(
-    () =>
-      selectedServices.reduce(
-        (sum, service) => sum + (service.duration_minutes || 60),
-        0
-      ),
-    [selectedServices]
-  );
-
-  const totalServicePrice = useMemo(
-    () =>
-      selectedServices.reduce(
-        (sum, service) => sum + (service.base_price || service.price || 0),
-        0
-      ),
-    [selectedServices]
-  );
-
   // 선택된 직원 이름
   const selectedStaffName = useMemo(() => {
     const staff = designers.find((d) => d.value === form.currentStaffId);
@@ -163,10 +158,17 @@ function NewBookingModalComponent({
     onClose();
   }, [form, customerSearch, onClose]);
 
+  // 서비스 초기화 (수정 모드 또는 선택된 서비스)
   useEffect(() => {
     if (isOpen && !isServiceInitialized) {
-      if (isEditMode && editBooking?.serviceId) {
-        setSelectedServiceIds([editBooking.serviceId]);
+      if (isEditMode && editBooking) {
+        // booking_meta.service_ids가 있으면 복수 서비스 복원, 없으면 단일 serviceId
+        const metaServiceIds = editBooking.bookingMeta?.service_ids;
+        if (Array.isArray(metaServiceIds) && metaServiceIds.length > 0) {
+          setSelectedServiceIds(metaServiceIds);
+        } else if (editBooking.serviceId) {
+          setSelectedServiceIds([editBooking.serviceId]);
+        }
       } else if (selectedServiceId) {
         setSelectedServiceIds([selectedServiceId]);
       } else {
@@ -181,6 +183,7 @@ function NewBookingModalComponent({
     }
   }, [isOpen, isServiceInitialized, isEditMode, editBooking?.serviceId, selectedServiceId]);
 
+  // form.currentServiceId 동기화
   useEffect(() => {
     const primaryServiceId = selectedServiceIds[0] ?? '';
     if (form.currentServiceId !== primaryServiceId) {
@@ -188,6 +191,7 @@ function NewBookingModalComponent({
     }
   }, [selectedServiceIds, form.currentServiceId, form.handleServiceChange]);
 
+  // 서비스 추가 핸들러
   const handleServiceAdd = useCallback(
     (serviceId: string) => {
       setSelectedServiceIds((prev) => [...prev, serviceId]);
@@ -198,19 +202,15 @@ function NewBookingModalComponent({
     [form]
   );
 
-  const handleRemoveService = useCallback((serviceId: string) => {
-    setSelectedServiceIds((prev) => {
-      const index = prev.indexOf(serviceId);
-      if (index < 0) return prev;
-      return [...prev.slice(0, index), ...prev.slice(index + 1)];
-    });
-  }, []);
-
-  const handleRemoveAllService = useCallback((serviceId: string) => {
-    setSelectedServiceIds((prev) =>
-      prev.filter((selectedServiceId) => selectedServiceId !== serviceId)
-    );
-  }, []);
+  // 카테고리 그룹 전체 삭제
+  const handleRemoveCategoryServices = useCallback(
+    (categoryId: string) => {
+      setSelectedServiceIds((prev) =>
+        prev.filter((id) => menuMap[id]?.category_id !== categoryId)
+      );
+    },
+    [menuMap]
+  );
 
   // 예약 확정 핸들러
   const handleConfirm = useCallback(async () => {
@@ -237,6 +237,7 @@ function NewBookingModalComponent({
     currentStaffId: form.currentStaffId,
     selectedStaffName,
     selectedServices,
+    categoryMap,
     onClose: handleClose,
     validateForm: form.validateForm,
     selectedCustomer: customerSearch.selectedCustomer,
@@ -304,49 +305,31 @@ function NewBookingModalComponent({
             </label>
             {selectedServiceGroups.length > 0 && (
               <div className="mb-3 space-y-1.5 rounded-lg border border-primary-200 bg-white p-2.5">
-                {selectedServiceGroups.map((service) => (
+                {selectedServiceGroups.map((group) => (
                   <div
-                    key={service.id}
+                    key={group.categoryId}
                     className="flex items-center justify-between rounded-md bg-primary-50 px-2.5 py-2"
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-primary-700 truncate">
-                        {service.name} x{service.count}
+                        {group.categoryName} x{group.count}
                       </p>
                       <p className="text-xs text-secondary-600">
-                        {service.unitDuration * service.count}min / ฿{(service.unitPrice * service.count).toLocaleString()}
+                        {group.totalDuration}min / ฿{group.totalPrice.toLocaleString()}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => handleServiceAdd(service.id)}
-                        className="h-7 w-7 rounded-md border border-primary-300 bg-white text-primary-600 text-sm font-semibold hover:bg-primary-100"
-                        aria-label="Add one more service"
-                      >
-                        +
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveService(service.id)}
-                        className="h-7 w-7 rounded-md border border-primary-300 bg-white text-primary-600 text-sm font-semibold hover:bg-primary-100"
-                        aria-label="Remove one service"
-                      >
-                        -
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveAllService(service.id)}
-                        className="h-7 w-7 rounded-md border border-primary-300 bg-white text-primary-600 hover:bg-primary-100 flex items-center justify-center"
-                        aria-label="Delete selected service item"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCategoryServices(group.categoryId)}
+                      className="h-7 w-7 rounded-md border border-primary-300 bg-white text-primary-600 hover:bg-primary-100 flex items-center justify-center"
+                      aria-label="Remove category services"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 ))}
                 <div className="flex items-center justify-between border-t border-primary-100 pt-2 text-xs text-secondary-700">
-                  <span>총 {selectedServices.length}개 서비스</span>
+                  <span>{t('booking.total')} {selectedServiceIds.length}</span>
                   <span>
                     {totalServiceDuration}min / ฿{totalServicePrice.toLocaleString()}
                   </span>
@@ -384,14 +367,19 @@ function NewBookingModalComponent({
             error={form.errors.time}
           />
 
-          {/* 메모 */}
-          <Input
-            label={t('booking.notes')}
-            placeholder={t('booking.placeholders.notesPlaceholder')}
-            value={form.notes}
-            onChange={(e) => form.setNotes(e.target.value)}
-            className="text-secondary-900 placeholder:text-secondary-500 focus:ring-primary-500"
-          />
+          {/* 시술메모 */}
+          <div>
+            <label className="block text-sm font-medium text-secondary-800 mb-1">
+              {t('booking.notes')}
+            </label>
+            <textarea
+              placeholder={t('booking.placeholders.notesPlaceholder')}
+              value={form.notes}
+              onChange={(e) => form.setNotes(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm text-secondary-900 placeholder:text-secondary-500"
+            />
+          </div>
 
           {/* 버튼 */}
           <div className="flex items-center justify-between pt-4">

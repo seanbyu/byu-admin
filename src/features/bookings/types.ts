@@ -40,6 +40,8 @@ export interface Booking {
   productAmount: number;
   // 점포 판매 (소매)
   storeSalesAmount: number;
+  // 메타데이터 (복수 서비스 등)
+  bookingMeta?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
 }

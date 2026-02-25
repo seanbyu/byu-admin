@@ -28,7 +28,8 @@
     "returning": "Returning",
     "regular": "Regular",
     "dormant": "Dormant",
-    "vip": "VIP"
+    "vip": "VIP",
+    "foreign": "Foreign"
   },
 
   "sort": {
@@ -83,6 +84,7 @@
     "title": "Add New Customer",
     "namePlaceholder": "Enter customer name",
     "selectArtist": "Select staff",
+    "unassigned": "Unassigned",
     "customerNumberPlaceholder": "Enter customer number",
     "customerNumberHint": "Numbers only. The next number after the last one is auto-filled.",
     "occupationPlaceholder": "Enter occupation",
@@ -92,6 +94,7 @@
     "error": {
       "nameRequired": "Please enter a name",
       "phoneRequired": "Please enter a phone number",
+      "phoneInvalid": "Phone number must be 10 or 11 digits",
       "artistRequired": "Please select a staff member",
       "customerNumberRequired": "Please enter a customer number"
     }
@@ -193,7 +196,8 @@
       "daysSinceLastVisit": "Days Since Last Visit",
       "daysSinceRegistration": "Days Since Registration",
       "noShowCount": "No-Show Count",
-      "hasPrimaryArtist": "Has Assigned Staff"
+      "hasPrimaryArtist": "Has Assigned Staff",
+      "isForeign": "Is Foreign"
     },
     "operators": {
       "eq": "Equals",

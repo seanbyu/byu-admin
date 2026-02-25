@@ -78,7 +78,7 @@ const FilterTabs = memo(function FilterTabs({
   variant?: 'default' | 'staff';
 }) {
   return (
-    <div className="flex space-x-2 overflow-x-auto pb-2">
+    <div className="flex space-x-1.5 overflow-x-auto pb-2 md:space-x-2">
       {tabs.map((tab, index) => {
         const isActive = activeFilter === tab.type;
         const staffPalette = STAFF_FILTER_PALETTE[index % STAFF_FILTER_PALETTE.length];
@@ -95,13 +95,13 @@ const FilterTabs = memo(function FilterTabs({
           <button
             key={tab.type}
             type="button"
-            className={`px-4 py-2 rounded-lg whitespace-nowrap border transition-colors ${
+            className={`h-9 rounded-lg whitespace-nowrap border px-3 text-sm font-medium transition-colors md:h-10 md:px-4 md:text-base ${
               isActive ? 'border-transparent' : 'border-secondary-200'
             } ${stateClass}`}
             onClick={() => onFilterChange(tab.type)}
           >
             {tab.label}
-            <span className="ml-2 text-sm opacity-75">({tab.count})</span>
+            <span className="ml-1.5 text-xs opacity-75 md:ml-2 md:text-sm">({tab.count})</span>
           </button>
         );
       })}
@@ -344,7 +344,7 @@ const FilterConditionsDisplay = memo(function FilterConditionsDisplay({
   };
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-primary-50 border border-primary-200 rounded-lg text-sm">
+    <div className="flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-xs md:text-sm">
       <Filter size={14} className="text-primary-500 flex-shrink-0" />
       <span className="text-primary-700 font-medium">
         {formatConditionsNaturally()}
@@ -386,7 +386,7 @@ const SortDropdown = memo(function SortDropdown({
       <select
         value={sortBy}
         onChange={handleSortChange}
-        className="h-11 flex-1 sm:flex-none px-3 text-sm sm:text-base border border-secondary-200 rounded-lg bg-white text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+        className="h-10 flex-1 rounded-lg border border-secondary-200 bg-white px-3 text-sm text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 md:h-11 md:text-base"
       >
         <option value="last_visit">{t('customer.sort.lastVisit')}</option>
         <option value="total_visits">{t('customer.sort.totalVisits')}</option>
@@ -396,7 +396,7 @@ const SortDropdown = memo(function SortDropdown({
       </select>
       <button
         type="button"
-        className={`h-11 w-11 flex items-center justify-center border border-secondary-200 rounded-lg bg-white text-secondary-700 hover:bg-secondary-50 transition-transform ${
+        className={`h-10 w-10 flex items-center justify-center rounded-lg border border-secondary-200 bg-white text-secondary-700 transition-transform hover:bg-secondary-50 md:h-11 md:w-11 ${
           sortOrder === 'desc' ? 'rotate-180' : ''
         }`}
         onClick={handleToggleOrder}
@@ -512,6 +512,7 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
           count: filterCounts.dormant,
         },
         { type: 'vip', label: t('customer.filter.vip'), count: filterCounts.vip },
+        { type: 'foreign', label: t('customer.filter.foreign'), count: filterCounts.foreign },
       ];
 
   // 담당자별 필터 탭 데이터
@@ -526,19 +527,19 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
       {/* Title and Add Button */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900">
+          <h1 className="text-xl font-bold text-secondary-900 sm:text-2xl lg:text-3xl">
             {t('customer.title')}
           </h1>
-          <p className="text-sm sm:text-base text-secondary-600 mt-1">
+          <p className="mt-1 text-sm text-secondary-600 sm:text-base">
             {t('customer.pageDescription')}
           </p>
         </div>
         {canAddCustomer && (
           <Button
             onClick={onAddCustomer}
-            className="h-11 px-4 text-sm sm:text-base flex items-center justify-center gap-2 shrink-0"
+            className="h-10 shrink-0 gap-1.5 px-3 text-sm sm:h-11 sm:gap-2 sm:px-4 sm:text-base"
           >
-            <Plus size={20} />
+            <Plus size={18} className="sm:h-5 sm:w-5" />
             <span>{t('customer.addNew')}</span>
           </Button>
         )}
@@ -584,10 +585,10 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
             <button
               type="button"
               onClick={onOpenFilterSettings}
-              className="p-2 rounded-lg text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 transition-colors"
+              className="h-9 w-9 rounded-lg text-secondary-500 transition-colors hover:bg-secondary-100 hover:text-secondary-700 md:h-10 md:w-10"
               title={t('customer.filterManagement.title')}
             >
-              <Settings size={20} />
+              <Settings size={18} className="mx-auto" />
             </button>
           </>
         )}
@@ -604,14 +605,14 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400"
-              size={18}
+              size={16}
             />
             <input
               type="text"
               placeholder={t('customer.search.placeholder')}
               value={searchQuery}
               onChange={handleSearchChange}
-              className="w-full h-11 pl-10 pr-4 text-sm sm:text-base border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="h-10 w-full rounded-lg border border-secondary-200 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 sm:h-11 sm:pl-10 sm:pr-4 sm:text-base"
             />
           </div>
         </div>

@@ -16,6 +16,7 @@ interface CreateBookingInput {
   staffId: string;
   serviceId: string;
   serviceName?: string;
+  serviceIds?: string[];
   date: Date | string;
   startTime: string;
   endTime: string;
@@ -71,6 +72,12 @@ export class BookingService {
       service_price: camelInput.price,
       total_price: camelInput.price,
       customer_notes: camelInput.notes,
+      ...((camelInput.serviceName || camelInput.serviceIds) && {
+        booking_meta: {
+          ...(camelInput.serviceName && { category_name: camelInput.serviceName }),
+          ...(camelInput.serviceIds && { service_ids: camelInput.serviceIds }),
+        },
+      }),
     };
   }
 
@@ -99,12 +106,33 @@ export class BookingService {
       notes: 'customer_notes',
       paymentMethod: 'payment_method',
       productId: 'product_id',
+      productName: 'product_name',
       productAmount: 'product_amount',
       storeSalesAmount: 'store_sales_amount',
     };
 
+    // 프론트엔드 전용 필드 (DB 컬럼 없음) — 무시
+    const skipKeys = new Set([
+      'staffName', 'customerName', 'customerPhone', 'source', 'salonId',
+    ]);
+
     const result: Record<string, any> = {};
     for (const [key, value] of Object.entries(updates)) {
+      if (skipKeys.has(key)) continue;
+      // serviceName → booking_meta.category_name 으로 변환
+      if (key === 'serviceName') {
+        if (value) {
+          result['booking_meta'] = { ...(result['booking_meta'] || {}), category_name: value };
+        }
+        continue;
+      }
+      // serviceIds → booking_meta.service_ids 으로 변환
+      if (key === 'serviceIds') {
+        if (Array.isArray(value)) {
+          result['booking_meta'] = { ...(result['booking_meta'] || {}), service_ids: value };
+        }
+        continue;
+      }
       const newKey = keyMap[key] || key;
       // date를 문자열로 변환
       if (key === 'date') {

@@ -11,14 +11,14 @@
   "cancelled": "ยกเลิก",
   "noShow": "ไม่มาตามนัด",
   "newBookingAlert": "มีการจองออนไลน์ใหม่เข้ามา!",
-  "bookingRescheduledAlert": "ลูกค้าเปลี่ยนเวลาจอง",
+  "bookingRescheduledAlert": "ลูกค้าเปลี่ยนเวลาการจอง",
   "customer": "ลูกค้า",
   "designer": "ช่างทำผม",
   "service": "บริการ",
   "date": "วันที่",
   "time": "เวลา",
   "price": "ราคา",
-  "notes": "หมายเหตุ",
+  "notes": "บันทึกการให้บริการ",
   "paymentMethod": "การชำระเงิน",
   "paymentMethodCard": "บัตร",
   "paymentMethodCash": "เงินสด",
@@ -82,7 +82,7 @@
   },
   "placeholders": {
     "customerName": "กรอกชื่อลูกค้า",
-    "notesPlaceholder": "กรอกหมายเหตุพิเศษ",
+    "notesPlaceholder": "กรอกบันทึกเกี่ยวกับการให้บริการ",
     "selectService": "เลือกบริการ"
   },
   "customerType": {
@@ -109,6 +109,25 @@
   "sampleServices": {
     "cut": "ตัดผม - 35,000 วอน",
     "color": "ย้อมสี - 120,000 วอน"
+  },
+  "salesModal": {
+    "title": "ลงทะเบียนยอดขาย",
+    "registerSales": "ยอดขาย",
+    "servicePrice": "ราคาบริการ",
+    "paymentMethod": "วิธีการชำระเงิน",
+    "productAmount": "ยอดสินค้า",
+    "productName": "ชื่อสินค้า",
+    "selectPayment": "เลือกวิธีการชำระเงิน",
+    "noPayment": "ไม่ระบุ",
+    "productNamePlaceholder": "กรอกชื่อสินค้า",
+    "editDiscount": "แก้ไข/ส่วนลด",
+    "discountPercent": "ลด %",
+    "discountFixed": "ลดราคา",
+    "originalPrice": "ราคาเต็ม",
+    "discountAmount": "ส่วนลด",
+    "finalPrice": "ราคาสุทธิ",
+    "applyDiscount": "ใช้งาน",
+    "cancelDiscount": "ยกเลิก"
   },
   "settings": {
     "description": "จัดการการตั้งค่าการจองออนไลน์",

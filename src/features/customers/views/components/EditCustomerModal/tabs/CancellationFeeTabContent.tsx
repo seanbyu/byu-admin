@@ -8,7 +8,7 @@ export const CancellationFeeTabContent = memo(
     const t = useTranslations();
 
     return (
-      <div className="flex items-center justify-center h-[400px] text-secondary-400">
+      <div className="flex h-[260px] items-center justify-center text-sm text-secondary-400 md:h-[320px] md:text-base lg:h-[400px]">
         {t('common.comingSoon')}
       </div>
     );

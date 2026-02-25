@@ -75,6 +75,8 @@ const filterCustomersWithCustomFilters = (
               return tags.includes('dormant');
             case 'vip':
               return tags.includes('vip');
+            case 'foreign':
+              return customer.customer_type === 'foreign';
             default:
               return true;
           }
@@ -182,6 +184,18 @@ export default function CustomersPageView() {
 
   const customers = data?.customers || [];
 
+  // 전체 고객 글로벌 번호 맵 (생성순 기준, 필터/정렬과 무관하게 일관된 번호)
+  const customerNumberMap = useMemo(() => {
+    const map = new Map<string, number>();
+    const sorted = [...customers].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    sorted.forEach((customer, index) => {
+      map.set(customer.id, index + 1);
+    });
+    return map;
+  }, [customers]);
+
   // js-cache-function-results: 필터링/정렬/페이징을 메모이제이션
   const filteredAndSortedCustomers = useMemo(() => {
     const filtered = filterCustomersWithCustomFilters(customers, activeFilter, searchQuery, customFilters);
@@ -206,6 +220,7 @@ export default function CustomersPageView() {
       regular: 0,
       dormant: 0,
       vip: 0,
+      foreign: 0,
     };
 
     customers.forEach((customer) => {
@@ -215,6 +230,7 @@ export default function CustomersPageView() {
       if (tags.includes('regular')) counts.regular++;
       if (tags.includes('dormant')) counts.dormant++;
       if (tags.includes('vip')) counts.vip++;
+      if (customer.customer_type === 'foreign') counts.foreign++;
     });
 
     return counts;
@@ -311,7 +327,7 @@ export default function CustomersPageView() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Header with tabs, search, and view toggle */}
         <CustomerPageHeader
           activeFilter={activeFilter}
@@ -332,7 +348,7 @@ export default function CustomersPageView() {
         />
 
         {/* Content */}
-        <Card padding="sm">
+        <Card padding="sm" className="rounded-xl">
           <CustomerTable
             customers={paginatedCustomers}
             onCustomerClick={handleCustomerClick}
@@ -345,6 +361,7 @@ export default function CustomersPageView() {
             canDelete={canDeleteCustomer}
             selectedIds={selectedIdsArray}
             onSelectionChange={handleSelectionChange}
+            customerNumberMap={customerNumberMap}
           />
         </Card>
       </div>

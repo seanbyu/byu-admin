@@ -12,7 +12,7 @@ import {
   isKnownPaymentMethod,
 } from './utils';
 import { InlineStatusSelect } from './InlineStatusSelect';
-import { InlinePriceCell } from './InlinePriceCell';
+import { SalesRegistrationModal } from './SalesRegistrationModal';
 import { StaffBookingMobileList } from './StaffBookingMobileList';
 
 export interface StaffBookingTableProps {
@@ -22,6 +22,7 @@ export interface StaffBookingTableProps {
   onAddBooking: (time: string) => void;
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
   highlightedBookingId?: string | null;
+  serviceCategoryMap?: Record<string, string>;
 }
 
 export const StaffBookingTable = memo(function StaffBookingTable({
@@ -31,6 +32,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
   onAddBooking,
   onUpdateBooking,
   highlightedBookingId,
+  serviceCategoryMap,
 }: StaffBookingTableProps) {
   const t = useTranslations();
 
@@ -41,6 +43,12 @@ export const StaffBookingTable = memo(function StaffBookingTable({
     [onUpdateBooking]
   );
   const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
+  const [salesBooking, setSalesBooking] = useState<Booking | null>(null);
+
+  const handleOpenSales = useCallback((e: React.MouseEvent, booking: Booking) => {
+    e.stopPropagation();
+    setSalesBooking(booking);
+  }, []);
 
   const totalPrice = useMemo(
     () => Object.values(bookingsByTime).reduce((sum, b) => sum + (b.price || 0), 0),
@@ -79,6 +87,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
         onAddBooking={onAddBooking}
         onUpdateBooking={onUpdateBooking}
         highlightedBookingId={highlightedBookingId}
+        serviceCategoryMap={serviceCategoryMap}
       />
 
       <div className="hidden md:block overflow-x-auto">
@@ -144,7 +153,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                       {slot}
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-900">
-                      {booking.serviceName}
+                      {booking.serviceName?.includes(', ') ? booking.serviceName : (serviceCategoryMap?.[booking.serviceId] || booking.serviceName)}
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-700">
                       {booking.customerName}
@@ -162,12 +171,16 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                         onUpdate={handleStatusChange}
                       />
                     </td>
-                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-700">
-                      <InlinePriceCell
-                        bookingId={booking.id}
-                        price={booking.price}
-                        onUpdate={(id, price) => onUpdateBooking(id, { price })}
-                      />
+                    <td
+                      className="border border-secondary-200 px-2 lg:px-3 py-2 text-right text-secondary-700 group/price relative cursor-pointer hover:bg-primary-50"
+                      onClick={(e) => handleOpenSales(e, booking)}
+                    >
+                      <span className="group-hover/price:hidden">
+                        {booking.price > 0 ? formatPrice(booking.price) : '—'}
+                      </span>
+                      <span className="hidden group-hover/price:inline text-primary-600 text-xs font-medium">
+                        {t('booking.salesModal.registerSales')}
+                      </span>
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-secondary-600 text-xs">
                       {booking.paymentMethod
@@ -250,6 +263,13 @@ export const StaffBookingTable = memo(function StaffBookingTable({
           )}
         </table>
       </div>
+
+      <SalesRegistrationModal
+        isOpen={!!salesBooking}
+        onClose={() => setSalesBooking(null)}
+        booking={salesBooking}
+        onSave={onUpdateBooking}
+      />
     </div>
   );
 });

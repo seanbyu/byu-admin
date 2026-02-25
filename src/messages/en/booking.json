@@ -11,14 +11,14 @@
   "cancelled": "Cancelled",
   "noShow": "No Show",
   "newBookingAlert": "A new online booking has been received!",
-  "bookingRescheduledAlert": "A customer has rescheduled their booking.",
+  "bookingRescheduledAlert": "Customer has rescheduled their booking.",
   "customer": "Customer",
   "designer": "Designer",
   "service": "Service",
   "date": "Date",
   "time": "Time",
   "price": "Price",
-  "notes": "Notes",
+  "notes": "Treatment Notes",
   "paymentMethod": "Payment",
   "paymentMethodCard": "Card",
   "paymentMethodCash": "Cash",
@@ -82,7 +82,7 @@
   },
   "placeholders": {
     "customerName": "Enter customer name",
-    "notesPlaceholder": "Enter any special notes",
+    "notesPlaceholder": "Enter treatment notes",
     "selectService": "Select a service"
   },
   "customerType": {
@@ -109,6 +109,25 @@
   "sampleServices": {
     "cut": "Haircut - 35,000 KRW",
     "color": "Hair Color - 120,000 KRW"
+  },
+  "salesModal": {
+    "title": "Register Sales",
+    "registerSales": "Sales",
+    "servicePrice": "Service Price",
+    "paymentMethod": "Payment Method",
+    "productAmount": "Product Amount",
+    "productName": "Product Name",
+    "selectPayment": "Select payment method",
+    "noPayment": "None",
+    "productNamePlaceholder": "Enter product name",
+    "editDiscount": "Edit/Discount",
+    "discountPercent": "% Off",
+    "discountFixed": "Fixed Off",
+    "originalPrice": "Original",
+    "discountAmount": "Discount",
+    "finalPrice": "Final Price",
+    "applyDiscount": "Apply",
+    "cancelDiscount": "Cancel"
   },
   "settings": {
     "description": "Manage online booking settings",
