@@ -135,6 +135,11 @@ export function useBookingSave({
         serviceId: primaryService.id,
         serviceName,
         serviceIds,
+        bookingMeta: {
+          channel: 'admin',
+          category_name: serviceName,
+          service_ids: serviceIds,
+        },
         date: toLocalDateStr(currentDate),
         startTime: currentTime,
         endTime,

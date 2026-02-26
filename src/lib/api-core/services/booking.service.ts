@@ -17,6 +17,7 @@ interface CreateBookingInput {
   serviceId: string;
   serviceName?: string;
   serviceIds?: string[];
+  bookingMeta?: Record<string, any>;
   date: Date | string;
   startTime: string;
   endTime: string;
@@ -72,8 +73,10 @@ export class BookingService {
       service_price: camelInput.price,
       total_price: camelInput.price,
       customer_notes: camelInput.notes,
-      ...((camelInput.serviceName || camelInput.serviceIds) && {
+      ...(camelInput.status && { status: camelInput.status }),
+      ...((camelInput.serviceName || camelInput.serviceIds || camelInput.bookingMeta) && {
         booking_meta: {
+          ...(camelInput.bookingMeta || {}),
           ...(camelInput.serviceName && { category_name: camelInput.serviceName }),
           ...(camelInput.serviceIds && { service_ids: camelInput.serviceIds }),
         },

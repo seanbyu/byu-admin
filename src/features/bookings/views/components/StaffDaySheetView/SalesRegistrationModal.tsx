@@ -535,7 +535,7 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
               onClick={handleSave}
               disabled={selectedServiceIds.length === 0}
             >
-              {isSalesRegistered ? t('booking.salesModal.editSales') : t('common.save')}
+              {isSalesRegistered ? t('booking.salesModal.editSales') : t('booking.salesModal.registerSales')}
             </Button>
           </div>
         </div>

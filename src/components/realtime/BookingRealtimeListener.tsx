@@ -70,9 +70,12 @@ export function BookingRealtimeListener() {
             const meta = newBooking.booking_meta as Record<string, unknown> | null;
 
             if (meta) {
-              playNotificationSound();
+              const isAdmin = meta.channel === 'admin';
+              if (!isAdmin) {
+                playNotificationSound();
+              }
               toastRef.current.info(
-                tRef.current('booking.newBookingAlert'),
+                tRef.current(isAdmin ? 'booking.adminBookingAlert' : 'booking.newBookingAlert'),
                 5000
               );
             }
