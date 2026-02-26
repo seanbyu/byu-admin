@@ -127,7 +127,15 @@
     "discountAmount": "할인",
     "finalPrice": "최종 금액",
     "applyDiscount": "적용",
-    "cancelDiscount": "취소"
+    "cancelDiscount": "취소",
+    "editTitle": "매출 수정",
+    "editSales": "매출 수정",
+    "deleteSales": "매출 삭제",
+    "salesRegistered": "매출이 등록되었습니다",
+    "salesUpdated": "매출이 수정되었습니다",
+    "salesDeleted": "매출이 삭제되었습니다",
+    "deleteConfirmTitle": "매출을 삭제하시겠습니까?",
+    "deleteConfirmDescription": "삭제된 매출 정보는 복구할 수 없습니다."
   },
   "settings": {
     "description": "온라인 예약 관련 설정을 관리합니다",

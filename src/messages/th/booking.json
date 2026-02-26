@@ -127,7 +127,15 @@
     "discountAmount": "ส่วนลด",
     "finalPrice": "ราคาสุทธิ",
     "applyDiscount": "ใช้งาน",
-    "cancelDiscount": "ยกเลิก"
+    "cancelDiscount": "ยกเลิก",
+    "editTitle": "แก้ไขยอดขาย",
+    "editSales": "แก้ไขยอดขาย",
+    "deleteSales": "ลบยอดขาย",
+    "salesRegistered": "ลงทะเบียนยอดขายเรียบร้อยแล้ว",
+    "salesUpdated": "อัปเดตยอดขายเรียบร้อยแล้ว",
+    "salesDeleted": "ลบยอดขายเรียบร้อยแล้ว",
+    "deleteConfirmTitle": "ลบยอดขายหรือไม่?",
+    "deleteConfirmDescription": "ข้อมูลยอดขายที่ลบแล้วไม่สามารถกู้คืนได้"
   },
   "settings": {
     "description": "จัดการการตั้งค่าการจองออนไลน์",

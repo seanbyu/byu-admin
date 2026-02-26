@@ -127,7 +127,15 @@
     "discountAmount": "Discount",
     "finalPrice": "Final Price",
     "applyDiscount": "Apply",
-    "cancelDiscount": "Cancel"
+    "cancelDiscount": "Cancel",
+    "editTitle": "Edit Sales",
+    "editSales": "Edit Sales",
+    "deleteSales": "Delete Sales",
+    "salesRegistered": "Sales registered successfully",
+    "salesUpdated": "Sales updated successfully",
+    "salesDeleted": "Sales deleted successfully",
+    "deleteConfirmTitle": "Delete sales?",
+    "deleteConfirmDescription": "Deleted sales information cannot be recovered."
   },
   "settings": {
     "description": "Manage online booking settings",

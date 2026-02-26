@@ -82,7 +82,15 @@ export function BookingRealtimeListener() {
             const oldData = payload.old as Record<string, unknown>;
             const newData = payload.new as Record<string, unknown>;
 
-            if (oldData.booking_date !== newData.booking_date || oldData.start_time !== newData.start_time) {
+            // old에 booking_date가 있어야 비교 가능 (REPLICA IDENTITY FULL 필요)
+            // old에 해당 필드가 없으면 (undefined) 일정 변경 알림을 건너뜀
+            const hasOldDate = oldData.booking_date !== undefined;
+            const hasOldTime = oldData.start_time !== undefined;
+
+            if (
+              (hasOldDate && oldData.booking_date !== newData.booking_date) ||
+              (hasOldTime && oldData.start_time !== newData.start_time)
+            ) {
               playNotificationSound();
               toastRef.current.info(
                 tRef.current('booking.bookingRescheduledAlert'),

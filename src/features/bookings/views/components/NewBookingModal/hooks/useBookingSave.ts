@@ -197,7 +197,13 @@ export function useBookingSave({
         endTime,
         price: servicePrice,
         notes: finalNotes,
-      } as Partial<Booking> & { serviceIds?: string[] },
+        // 기존 booking_meta 보존 (sales_registered 등)
+        bookingMeta: {
+          ...(editBooking.bookingMeta || {}),
+          category_name: serviceName,
+          service_ids: serviceIds,
+        },
+      } as Partial<Booking> & { serviceIds?: string[]; bookingMeta?: Record<string, any> },
     });
 
     onClose();

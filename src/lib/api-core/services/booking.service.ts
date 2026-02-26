@@ -133,6 +133,13 @@ export class BookingService {
         }
         continue;
       }
+      // bookingMeta → booking_meta 머지 (프론트에서 기존 메타와 머지한 객체)
+      if (key === 'bookingMeta') {
+        if (value && typeof value === 'object') {
+          result['booking_meta'] = { ...(result['booking_meta'] || {}), ...value };
+        }
+        continue;
+      }
       const newKey = keyMap[key] || key;
       // date를 문자열로 변환
       if (key === 'date') {

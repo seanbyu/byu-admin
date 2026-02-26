@@ -38,13 +38,12 @@ function NewBookingModalComponent({
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
   const isEditMode = !!editBooking;
-  const isPendingBooking = isEditMode && editBooking?.status === 'PENDING';
 
   // Data hooks
   const { customers } = useCustomers({ salon_id: salonId });
   const { menus } = useMenus(salonId, undefined, { enabled: !!salonId });
   const { categories } = useCategories(salonId);
-  const { confirmBooking, isConfirming, deleteBooking, isDeleting } = useBookings(salonId);
+  const { deleteBooking, isDeleting } = useBookings(salonId);
 
   // 카테고리 맵: categoryId → categoryName
   const categoryMap = useMemo(() => {
@@ -212,17 +211,6 @@ function NewBookingModalComponent({
     [menuMap]
   );
 
-  // 예약 확정 핸들러
-  const handleConfirm = useCallback(async () => {
-    if (!editBooking?.id) return;
-    try {
-      await confirmBooking(editBooking.id);
-      handleClose();
-    } catch (error) {
-      console.error('Failed to confirm booking:', error);
-    }
-  }, [editBooking, confirmBooking, handleClose]);
-
   // Booking save hook
   const bookingSave = useBookingSave({
     salonId,
@@ -255,7 +243,7 @@ function NewBookingModalComponent({
     }
   }, [editBooking, deleteBooking, handleClose]);
 
-  const isLoading = bookingSave.isCreating || bookingSave.isUpdating || bookingSave.isCreatingCustomer || isConfirming || isDeleting;
+  const isLoading = bookingSave.isCreating || bookingSave.isUpdating || bookingSave.isCreatingCustomer || isDeleting;
 
   return (
     <>
@@ -405,16 +393,6 @@ function NewBookingModalComponent({
               >
                 {t('common.cancel')}
               </Button>
-              {isPendingBooking && (
-                <Button
-                  variant="primary"
-                  type="button"
-                  onClick={handleConfirm}
-                  disabled={isLoading}
-                >
-                  {isConfirming ? t('common.saving') : t('booking.confirmBooking')}
-                </Button>
-              )}
               <Button variant="primary" type="submit" disabled={isLoading}>
                 {isLoading ? t('common.saving') : t('common.save')}
               </Button>
