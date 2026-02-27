@@ -191,9 +191,9 @@ export const PositionSelector = memo(function PositionSelector({
               <div className="absolute z-10 w-full mt-1 bg-white border border-secondary-200 rounded-md shadow-lg max-h-80 overflow-auto">
                 {/* 검색 입력 */}
                 <div className="p-2 border-b border-secondary-100 sticky top-0 bg-white">
-                  <input
+                  <Input
                     type="text"
-                    className="w-full px-3 py-2 text-sm border border-secondary-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="text-sm border-secondary-200"
                     placeholder={t('staff.profileModal.position.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

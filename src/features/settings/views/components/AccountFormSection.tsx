@@ -156,7 +156,7 @@ export const AccountFormSection = memo(function AccountFormSection({
             {t('settings.account.sendCode')}
           </Button>
           {sendCodeError && (
-            <p className="text-sm text-red-500">{sendCodeError}</p>
+            <p className="text-sm text-error-500">{sendCodeError}</p>
           )}
         </div>
 
@@ -174,13 +174,13 @@ export const AccountFormSection = memo(function AccountFormSection({
               resetTrigger={resetTrigger}
             />
             {verifyError && (
-              <p className="text-sm text-red-500">{verifyError}</p>
+              <p className="text-sm text-error-500">{verifyError}</p>
             )}
           </>
         )}
 
         {isPhoneVerified && isPhoneChanged && (
-          <div className="flex items-center gap-2 text-green-600">
+          <div className="flex items-center gap-2 text-success-600">
             <Check size={16} />
             <span className="text-sm">{t('settings.account.phoneVerified')}</span>
           </div>

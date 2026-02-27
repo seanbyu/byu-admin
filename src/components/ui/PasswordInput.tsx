@@ -68,15 +68,15 @@ function ValidationRule({
   return (
     <div
       className={`flex items-center gap-1.5 text-xs ${
-        isEmpty ? 'text-gray-400' : isValid ? 'text-green-600' : 'text-red-500'
+        isEmpty ? 'text-secondary-400' : isValid ? 'text-success-600' : 'text-error-500'
       }`}
     >
       {isEmpty ? (
-        <div className="w-3 h-3 rounded-full border border-gray-300" />
+        <div className="w-3 h-3 rounded-full border border-secondary-300" />
       ) : isValid ? (
-        <Check size={12} className="text-green-600" />
+        <Check size={12} className="text-success-600" />
       ) : (
-        <X size={12} className="text-red-500" />
+        <X size={12} className="text-error-500" />
       )}
       <span>{label}</span>
     </div>
@@ -114,7 +114,7 @@ export function PasswordInput({
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-secondary-700">
           {label}
         </label>
       )}
@@ -127,23 +127,23 @@ export function PasswordInput({
           placeholder={placeholder || t('password.placeholder')}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
             error
-              ? 'border-red-500'
+              ? 'border-error-500'
               : !isEmpty && validation.isValid
-                ? 'border-green-500'
-                : 'border-gray-300'
+                ? 'border-success-500'
+                : 'border-secondary-300'
           }`}
         />
         <button
           type="button"
           onClick={toggleShowPassword}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-500 hover:text-secondary-700"
           tabIndex={-1}
         >
           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-error-500">{error}</p>}
 
       {showValidationRules && (
         <div className="space-y-1 mt-2">
@@ -205,7 +205,7 @@ export function PasswordConfirmInput({
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-secondary-700">
           {label}
         </label>
       )}
@@ -218,16 +218,16 @@ export function PasswordConfirmInput({
           placeholder={placeholder || t('password.confirmPlaceholder')}
           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10 ${
             showError
-              ? 'border-red-500'
+              ? 'border-error-500'
               : showSuccess
-                ? 'border-green-500'
-                : 'border-gray-300'
+                ? 'border-success-500'
+                : 'border-secondary-300'
           }`}
         />
         <button
           type="button"
           onClick={toggleShowPassword}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-500 hover:text-secondary-700"
           tabIndex={-1}
         >
           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -235,10 +235,10 @@ export function PasswordConfirmInput({
       </div>
 
       {showError && (
-        <p className="text-sm text-red-500">{t('password.mismatch')}</p>
+        <p className="text-sm text-error-500">{t('password.mismatch')}</p>
       )}
       {showSuccess && (
-        <p className="text-sm text-green-600">{t('password.match')}</p>
+        <p className="text-sm text-success-600">{t('password.match')}</p>
       )}
     </div>
   );

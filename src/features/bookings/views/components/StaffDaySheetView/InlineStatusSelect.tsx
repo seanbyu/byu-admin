@@ -2,6 +2,7 @@
 
 import { memo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { Select } from '@/components/ui/Select';
 import { BookingStatus } from '@/types';
 import { STATUS_STYLES } from './StatusBadge';
 
@@ -65,20 +66,17 @@ export const InlineStatusSelect = memo(function InlineStatusSelect({
   }
 
   return (
-    <select
+    <Select
       value={status}
       onChange={handleChange}
       onClick={handleClick}
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border cursor-pointer outline-none focus:ring-1 focus:ring-primary-400 appearance-none bg-no-repeat bg-[length:12px] bg-[right_4px_center] pr-5 ${STATUS_STYLES[status]}`}
+      options={STATUS_ORDER.map((s) => ({ value: s, label: t(STATUS_I18N_KEY[s]) }))}
+      showPlaceholder={false}
+      containerClassName="!w-auto"
+      className={`!w-auto inline-flex items-center !px-2 !py-0.5 !rounded !text-xs !font-medium !border cursor-pointer outline-none focus:!ring-1 focus:!ring-primary-400 appearance-none bg-no-repeat bg-[length:12px] bg-[right_4px_center] !pr-5 ${STATUS_STYLES[status]}`}
       style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
       }}
-    >
-      {STATUS_ORDER.map((s) => (
-        <option key={s} value={s}>
-          {t(STATUS_I18N_KEY[s])}
-        </option>
-      ))}
-    </select>
+    />
   );
 });

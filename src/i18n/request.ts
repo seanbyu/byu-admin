@@ -22,6 +22,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       review: (await import(`../messages/${locale}/review.json`)).default,
       sales: (await import(`../messages/${locale}/sales.json`)).default,
       salon: (await import(`../messages/${locale}/salon.json`)).default,
+      product: (await import(`../messages/${locale}/product.json`)).default,
       chat: (await import(`../messages/${locale}/chat.json`)).default,
       settings: (await import(`../messages/${locale}/settings.json`)).default,
     },

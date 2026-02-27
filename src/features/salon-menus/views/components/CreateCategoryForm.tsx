@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { SalonIndustry, MenuCategory } from '../../types';
 
 interface CreateCategoryFormProps {
@@ -48,7 +49,7 @@ export default function CreateCategoryForm({
   };
 
   return (
-    <div className="mb-4 md:mb-6 bg-white p-3 sm:p-4 md:p-5 xl:p-6 rounded-lg border border-gray-200 shadow-sm">
+    <div className="mb-4 md:mb-6 bg-white p-3 sm:p-4 md:p-5 xl:p-6 rounded-lg border border-secondary-200 shadow-sm">
       <h3 className="text-sm md:text-base font-semibold mb-3 md:mb-4">{t('menu.addGroup')}</h3>
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 md:gap-2">
         <Input
@@ -59,25 +60,34 @@ export default function CreateCategoryForm({
           autoFocus
         />
         {orderedIndustries.length > 0 && (
-          <select
-            className="h-10 w-full sm:w-auto rounded-md border border-input bg-background px-3 py-2 text-sm"
+          <Select
+            className="h-10 w-full sm:w-auto rounded-md text-sm"
             value={selectedIndustryForCreate}
             onChange={(e) => onSelectIndustryForCreate(e.target.value)}
-          >
-            <option value="">{t('common.select')}</option>
-            {orderedIndustries.map((ind) => (
-              <option key={ind.id} value={ind.id}>
-                {ind.name}
-              </option>
-            ))}
-          </select>
+            options={orderedIndustries.map((ind) => ({
+              value: ind.id,
+              label: ind.name || '',
+            }))}
+            placeholder={t('common.select')}
+          />
         )}
-        <Button size="sm" className="h-10 sm:h-9" onClick={handleCreateCategory}>
-          {t('common.save')}
-        </Button>
-        <Button size="sm" className="h-10 sm:h-9" variant="ghost" onClick={onCancel}>
-          {t('common.cancel')}
-        </Button>
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <Button
+            size="sm"
+            className="h-10 sm:h-9 whitespace-nowrap shrink-0"
+            onClick={handleCreateCategory}
+          >
+            {t('common.save')}
+          </Button>
+          <Button
+            size="sm"
+            className="h-10 sm:h-9 whitespace-nowrap shrink-0"
+            variant="ghost"
+            onClick={onCancel}
+          >
+            {t('common.cancel')}
+          </Button>
+        </div>
       </div>
     </div>
   );

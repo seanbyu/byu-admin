@@ -7,7 +7,7 @@ import { BookingStatus } from '@/types';
 import { cn, formatPrice } from '@/lib/utils';
 import { stripCountryCode, PAYMENT_METHOD_KEYS, isKnownPaymentMethod } from './utils';
 import { InlineStatusSelect } from './InlineStatusSelect';
-import { SalesRegistrationModal } from './SalesRegistrationModal';
+import { SalesRegistrationModal } from '../SalesRegistrationModal';
 
 export interface StaffBookingMobileListProps {
   timeSlots: string[];
@@ -124,7 +124,14 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
                     className="text-secondary-800 font-medium cursor-pointer hover:text-primary-600"
                     onClick={(e) => handleOpenSales(e, booking)}
                   >
-                    {booking.price > 0 ? formatPrice(booking.price) : t('booking.salesModal.registerSales')}
+                    {booking.price > 0
+                      ? formatPrice(booking.price)
+                      : t('booking.salesModal.registerSales')}
+                    {booking.bookingMeta?.sales_registered && (
+                      <span className="ml-1 text-primary-500 text-[10px]">
+                        {t('booking.salesModal.editSales')}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="text-right">

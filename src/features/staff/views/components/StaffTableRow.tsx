@@ -4,6 +4,7 @@ import { memo, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Select } from '@/components/ui/Select';
 import { Staff } from '../../types';
 
 export interface StaffTableRowProps {
@@ -182,21 +183,20 @@ export const StaffTableRow = memo(function StaffTableRow({
             )
           ) : onSoftResign || onImmediateResign ? (
             // 일반 직원: 네이티브 셀렉트로 퇴사 처리 (overflow 스크롤 이슈 방지)
-            <select
+            <Select
               value={resignAction}
               onChange={handleResignActionChange}
-              className="h-8 min-w-[120px] px-2 text-xs border border-error-200 rounded-md bg-white text-error-500 focus:outline-none focus:ring-2 focus:ring-error-200"
-            >
-              <option value="" disabled>
-                {t('actions.resign')}
-              </option>
-              {onSoftResign && (
-                <option value="soft">{t('actions.softResign')}</option>
-              )}
-              {onImmediateResign && (
-                <option value="immediate">{t('actions.immediateResign')}</option>
-              )}
-            </select>
+              className="h-8 min-w-[120px] px-2 text-xs border-error-200 text-error-500 focus:ring-error-200"
+              placeholder={t('actions.resign')}
+              options={[
+                ...(onSoftResign
+                  ? [{ value: 'soft', label: t('actions.softResign') }]
+                  : []),
+                ...(onImmediateResign
+                  ? [{ value: 'immediate', label: t('actions.immediateResign') }]
+                  : []),
+              ]}
+            />
           ) : (
             <span className="text-secondary-400">-</span>
           )
@@ -264,17 +264,16 @@ export const StaffTableRow = memo(function StaffTableRow({
           <span>{getRoleName(member.role)}</span>
         ) : isAdmin && !isResigned && onRoleChange ? (
           // Admin 유저: 네이티브 셀렉트로 역할 변경 (overflow 스크롤 이슈 방지)
-          <select
+          <Select
             value={member.role}
             onChange={(e) => handleRoleSelect(e.target.value)}
-            className="text-sm text-secondary-600 bg-transparent border-0 focus:outline-none focus:ring-0 pr-5 cursor-pointer"
-          >
-            {ROLE_OPTIONS.map((role) => (
-              <option key={role} value={role}>
-                {getRoleName(role)}
-              </option>
-            ))}
-          </select>
+            className="h-8 min-w-[110px] text-sm bg-transparent border-0 focus:ring-0 pr-5 cursor-pointer"
+            showPlaceholder={false}
+            options={ROLE_OPTIONS.map((role) => ({
+              value: role,
+              label: getRoleName(role),
+            }))}
+          />
         ) : (
           // 일반 유저: 정적 표시
           <span>{getRoleName(member.role)}</span>

@@ -4,6 +4,8 @@ import { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { Spinner } from '@/components/ui/Spinner';
@@ -291,19 +293,16 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           <label className="block text-sm font-medium text-secondary-700 mb-1">
             {t('customer.field.primaryArtist')}
           </label>
-          <select
+          <Select
             value={formData.primary_artist_id}
             onChange={handleChange('primary_artist_id')}
-            className="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder={t('customer.create.unassigned')}
+            options={eligibleStaff.map((staff) => ({
+              value: staff.id,
+              label: `${staff.name}${staff.positionTitle ? ` (${staff.positionTitle})` : ''}`,
+            }))}
             disabled={isLoadingStaff}
-          >
-            <option value="">{t('customer.create.unassigned')}</option>
-            {eligibleStaff.map((staff) => (
-              <option key={staff.id} value={staff.id}>
-                {staff.name} {staff.positionTitle && `(${staff.positionTitle})`}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         {/* 고객번호 */}
@@ -329,46 +328,43 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           </label>
           <div className="flex gap-2">
             {/* 년 */}
-            <select
-              value={formData.birth_year}
-              onChange={handleChange('birth_year')}
-              className="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">{t('customer.create.year')}</option>
-              {yearOptions.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+            <div className="flex-1">
+              <Select
+                value={formData.birth_year}
+                onChange={handleChange('birth_year')}
+                placeholder={t('customer.create.year')}
+                options={yearOptions.map((year) => ({
+                  value: String(year),
+                  label: String(year),
+                }))}
+              />
+            </div>
 
             {/* 월 */}
-            <select
-              value={formData.birth_month}
-              onChange={handleChange('birth_month')}
-              className="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">{t('customer.create.month')}</option>
-              {MONTH_OPTIONS.map((month) => (
-                <option key={month} value={month}>
-                  {month}
-                </option>
-              ))}
-            </select>
+            <div className="flex-1">
+              <Select
+                value={formData.birth_month}
+                onChange={handleChange('birth_month')}
+                placeholder={t('customer.create.month')}
+                options={MONTH_OPTIONS.map((month) => ({
+                  value: String(month),
+                  label: String(month),
+                }))}
+              />
+            </div>
 
             {/* 일 */}
-            <select
-              value={formData.birth_day}
-              onChange={handleChange('birth_day')}
-              className="flex-1 px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">{t('customer.create.day')}</option>
-              {dayOptions.map((day) => (
-                <option key={day} value={day}>
-                  {day}
-                </option>
-              ))}
-            </select>
+            <div className="flex-1">
+              <Select
+                value={formData.birth_day}
+                onChange={handleChange('birth_day')}
+                placeholder={t('customer.create.day')}
+                options={dayOptions.map((day) => ({
+                  value: String(day),
+                  label: String(day),
+                }))}
+              />
+            </div>
           </div>
         </div>
 
@@ -389,12 +385,12 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           <label className="block text-sm font-medium text-secondary-700 mb-1">
             {t('customer.field.notes')}
           </label>
-          <textarea
+          <Textarea
             value={formData.notes}
             onChange={handleChange('notes')}
             placeholder={t('customer.edit.notesPlaceholder')}
             rows={3}
-            className="w-full px-3 py-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm"
+            className="resize-none text-sm"
           />
         </div>
 

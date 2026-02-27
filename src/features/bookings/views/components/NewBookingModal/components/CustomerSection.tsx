@@ -114,7 +114,7 @@ function CustomerSectionComponent({
                 {selectedCustomer.name}
               </span>
               <span className="text-xs text-primary-500">{formatPhoneDisplay(selectedCustomer.phone)}</span>
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-info-100 text-info-700">
                 {t('customer.existingCustomer')}
               </span>
             </div>
@@ -131,7 +131,7 @@ function CustomerSectionComponent({
         {/* 신규 고객 표시 */}
         {!selectedCustomer && customerPhone.replace(/\D/g, '').length >= 3 && customerType === 'local' && (
           <div className="mb-2 px-2 py-1">
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-warning-100 text-warning-700">
               {t('customer.newCustomer')}
             </span>
           </div>

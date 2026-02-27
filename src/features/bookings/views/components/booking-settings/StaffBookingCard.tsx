@@ -4,6 +4,7 @@ import { memo, useCallback, useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Switch } from '@/components/ui/Switch';
 import { useStaff } from '@/features/staff/hooks/useStaff';
 import { Staff } from '@/features/staff/types';
 import { Check, Users, Calendar, GripVertical } from 'lucide-react';
@@ -138,7 +139,7 @@ export const StaffBookingCard = memo(function StaffBookingCard({
             </h2>
           </div>
           {saveSuccess === 'order' && (
-            <div className="flex items-center gap-1 text-green-600">
+            <div className="flex items-center gap-1 text-success-600">
               <Check size={14} />
               <span className="text-xs">{t('common.saved')}</span>
             </div>
@@ -210,21 +211,16 @@ export const StaffBookingCard = memo(function StaffBookingCard({
                   {/* 예약 허용 토글 */}
                   <div className="flex items-center gap-1.5">
                     {saveSuccess === staff.id && (
-                      <Check size={12} className="text-green-600" />
+                      <Check size={12} className="text-success-600" />
                     )}
                     <span className="text-xs text-secondary-500 hidden sm:inline">
                       {t('booking.settings.staffBooking.bookingAllowed')}
                     </span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={staff.isBookingEnabled}
-                        disabled={isUpdating}
-                        onChange={(e) => handleBookingToggle(staff.id, e.target.checked)}
-                      />
-                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed" />
-                    </label>
+                    <Switch
+                      checked={staff.isBookingEnabled}
+                      disabled={isUpdating}
+                      onCheckedChange={(checked) => handleBookingToggle(staff.id, checked)}
+                    />
                   </div>
                 </div>
               </div>
@@ -232,8 +228,8 @@ export const StaffBookingCard = memo(function StaffBookingCard({
           </div>
         )}
 
-        <div className="mt-3 p-2.5 bg-blue-50 rounded-lg">
-          <p className="text-xs text-blue-600">
+        <div className="mt-3 p-2.5 bg-primary-50 rounded-lg">
+          <p className="text-xs text-primary-600">
             {t('booking.settings.staffBooking.orderHint')}
           </p>
         </div>

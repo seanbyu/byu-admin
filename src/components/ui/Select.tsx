@@ -8,6 +8,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
   helperText?: string;
+  containerClassName?: string;
   options: { value: string; label: string }[];
   placeholder?: string;
   showPlaceholder?: boolean;
@@ -19,6 +20,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       label,
       error,
       helperText,
+      containerClassName,
       options,
       className,
       placeholder,
@@ -31,7 +33,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     const placeholderText = placeholder ?? t('select');
 
     return (
-      <div className="w-full">
+      <div className={cn('w-full', containerClassName)}>
         {label && (
           <label className="block text-sm font-medium text-secondary-700 mb-1">
             {label}

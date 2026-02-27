@@ -118,7 +118,7 @@ export const VerificationCodeInput = memo(function VerificationCodeInput({
       </div>
 
       {isExpired && timeLeft === 0 && (
-        <p className="text-sm text-red-500">
+        <p className="text-sm text-error-500">
           {t('common.codeExpired')}
         </p>
       )}

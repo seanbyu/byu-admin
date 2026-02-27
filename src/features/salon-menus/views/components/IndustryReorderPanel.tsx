@@ -33,19 +33,19 @@ const IndustryRow = memo(function IndustryRow({
   moveDownLabel,
 }: IndustryRowProps) {
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+    <div className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg border border-secondary-100">
       <div className="flex items-center gap-3">
-        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white text-xs font-bold text-gray-500 border border-gray-200">
+        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white text-xs font-bold text-secondary-500 border border-secondary-200">
           {index + 1}
         </span>
-        <span className="font-medium text-gray-700">{industry.name}</span>
+        <span className="font-medium text-secondary-700">{industry.name}</span>
       </div>
       <div className="flex items-center gap-1">
         <button
           type="button"
           onClick={onMoveUp}
           disabled={isFirst}
-          className="p-1.5 rounded-md hover:bg-white text-gray-600 disabled:opacity-30"
+          className="p-1.5 rounded-md hover:bg-white text-secondary-600 disabled:opacity-30"
           aria-label={moveUpLabel}
         >
           <ArrowUp className="w-4 h-4" />
@@ -54,7 +54,7 @@ const IndustryRow = memo(function IndustryRow({
           type="button"
           onClick={onMoveDown}
           disabled={isLast}
-          className="p-1.5 rounded-md hover:bg-white text-gray-600 disabled:opacity-30"
+          className="p-1.5 rounded-md hover:bg-white text-secondary-600 disabled:opacity-30"
           aria-label={moveDownLabel}
         >
           <ArrowDown className="w-4 h-4" />
@@ -77,8 +77,8 @@ export const IndustryReorderPanel = memo(function IndustryReorderPanel({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4">
+    <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6 mb-8">
+      <h3 className="text-sm font-semibold text-secondary-900 mb-4">
         {t('industryOrder')}
       </h3>
       <div className="flex flex-col gap-2 max-w-lg">
@@ -96,7 +96,7 @@ export const IndustryReorderPanel = memo(function IndustryReorderPanel({
           />
         ))}
       </div>
-      <p className="mt-2 text-xs text-gray-500">
+      <p className="mt-2 text-xs text-secondary-500">
         * {t('industryOrderHint')}
       </p>
     </div>

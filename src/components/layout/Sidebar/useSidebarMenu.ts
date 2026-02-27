@@ -12,6 +12,7 @@ import {
   Building2,
   Briefcase,
   Menu,
+  Package,
   LucideIcon,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
@@ -95,6 +96,13 @@ export function useSidebarMenu(): MenuItem[] {
             name: t('nav.menus'),
             icon: Menu,
             href: '/menus',
+            roles: [UserRole.MANAGER, UserRole.ARTIST, UserRole.STAFF, UserRole.ADMIN],
+            permissionKey: 'menus',
+          },
+          {
+            name: t('nav.products'),
+            icon: Package,
+            href: '/products',
             roles: [UserRole.MANAGER, UserRole.ARTIST, UserRole.STAFF, UserRole.ADMIN],
             permissionKey: 'menus',
           },

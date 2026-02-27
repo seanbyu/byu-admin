@@ -193,7 +193,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
             </span>
           )}
           {isClosed && (
-            <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-medium text-error-500 bg-error-50 px-2 py-0.5 rounded-full">
               {t('booking.closedDayNotice')}
             </span>
           )}
@@ -227,7 +227,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
 
       {/* 영업시간 미설정 안내 */}
       {businessHours.length === 0 && (
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-center text-sm text-yellow-700">
+        <div className="rounded-lg border border-warning-200 bg-warning-50 px-4 py-3 text-center text-sm text-warning-700">
           {t('booking.noBusinessHours')}
         </div>
       )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useCallback } from 'react';
+import { Input } from '@/components/ui/Input';
 import { formatPrice } from '@/lib/utils';
 
 export const InlinePriceCell = memo(function InlinePriceCell({
@@ -45,10 +46,10 @@ export const InlinePriceCell = memo(function InlinePriceCell({
 
   if (editing) {
     return (
-      <input
+      <Input
         type="number"
         autoFocus
-        className="w-full text-right border border-primary-400 rounded px-1 py-0.5 text-sm outline-none focus:ring-1 focus:ring-primary-500"
+        className="!w-full !text-right !border-primary-400 !rounded !px-1 !py-0.5 !text-sm focus:!ring-1 focus:!ring-primary-500"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onBlur={(e) => commit(e.target.value)}

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Eye, EyeOff } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import {
   PasswordInput,
   PasswordConfirmInput,
@@ -79,11 +80,11 @@ export const PasswordChangeSection = memo(function PasswordChangeSection({
       <div className="space-y-4">
         {/* 현재 비밀번호 */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-secondary-700">
             {t('settings.account.currentPassword')}
           </label>
           <div className="relative">
-            <input
+            <Input
               type={showCurrentPassword ? 'text' : 'password'}
               value={currentPassword}
               onChange={(e) => {
@@ -91,12 +92,12 @@ export const PasswordChangeSection = memo(function PasswordChangeSection({
                 setError('');
               }}
               placeholder={t('settings.account.currentPasswordPlaceholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 pr-10"
+              className="!pr-10"
             />
             <button
               type="button"
               onClick={() => setShowCurrentPassword((prev) => !prev)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-500 hover:text-secondary-700"
               tabIndex={-1}
             >
               {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -131,7 +132,7 @@ export const PasswordChangeSection = memo(function PasswordChangeSection({
 
         {/* 에러 메시지 */}
         {error && (
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-error-500">{error}</p>
         )}
       </div>
 

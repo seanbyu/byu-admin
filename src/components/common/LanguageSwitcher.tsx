@@ -47,19 +47,19 @@ export default function LanguageSwitcher({ className }: LanguageSwitcherProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium text-gray-700 bg-white/80 backdrop-blur-sm shadow-sm border border-gray-200"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary-100 transition-colors text-sm font-medium text-secondary-700 bg-white/80 backdrop-blur-sm shadow-sm border border-secondary-200"
       >
         <Globe size={18} />
         <span className="uppercase">{locale}</span>
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+        <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-secondary-100 py-1 z-50">
           {SUPPORTED_LOCALES.map((lang) => (
             <button
               key={lang.code}
               onClick={() => handleSwitch(lang.code)}
-              className="w-full flex items-center justify-between px-3 py-2 text-sm text-left hover:bg-gray-50 text-gray-700"
+              className="w-full flex items-center justify-between px-3 py-2 text-sm text-left hover:bg-secondary-50 text-secondary-700"
             >
               <span>{lang.label}</span>
               {locale === lang.code && (

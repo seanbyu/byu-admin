@@ -2,6 +2,8 @@
 
 import { memo, useCallback } from 'react';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { useTranslations } from 'next-intl';
@@ -49,13 +51,6 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
   const handlePhoneChange = useCallback(
     (value: string) => {
       onFormDataChange({ phone: value });
-    },
-    [onFormDataChange]
-  );
-
-  const handleStaffChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      onFormDataChange({ primary_artist_id: e.target.value });
     },
     [onFormDataChange]
   );
@@ -128,24 +123,18 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
         <label className="mb-1 block text-xs font-semibold text-secondary-700">
           {t('customer.field.primaryArtist')}
         </label>
-        <select
+        <Select
           value={formData.primary_artist_id}
-          onChange={handleStaffChange}
-          className={`h-9 w-full rounded-lg border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-            errors.primary_artist_id ? 'border-error-500' : 'border-secondary-200'
-          }`}
+          onChange={(e) => onFormDataChange({ primary_artist_id: e.target.value })}
+          className="h-9 text-sm"
+          error={errors.primary_artist_id}
+          placeholder={t('customer.create.unassigned')}
+          options={staffList.map((staff) => ({
+            value: staff.id,
+            label: `${staff.name}${staff.positionTitle ? ` (${staff.positionTitle})` : ''}`,
+          }))}
           disabled={isLoadingStaff}
-        >
-          <option value="">{t('customer.create.unassigned')}</option>
-          {staffList.map((staff) => (
-            <option key={staff.id} value={staff.id}>
-              {staff.name} {staff.positionTitle && `(${staff.positionTitle})`}
-            </option>
-          ))}
-        </select>
-        {errors.primary_artist_id && (
-          <p className="mt-1 text-xs text-error-500">{errors.primary_artist_id}</p>
-        )}
+        />
       </div>
 
       {/* Phone */}
@@ -181,12 +170,12 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
         <label className="mb-1 block text-xs font-semibold text-secondary-700">
           {t('customer.field.notes')}
         </label>
-        <textarea
+        <Textarea
           value={formData.notes}
           onChange={handleChange('notes')}
           placeholder={t('customer.edit.notesPlaceholder')}
           rows={3}
-          className="w-full rounded-lg border border-secondary-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="text-sm"
         />
       </div>
 

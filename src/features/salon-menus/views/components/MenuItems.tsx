@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { Plus } from 'lucide-react';
 import { useMenus } from '../../hooks/useSalonMenus';
 import { SalonMenu } from '../../types';
@@ -174,35 +176,41 @@ export default function MenuItems({
       {/* Add New Menu Form */}
       {canEdit && (
         isAdding ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 md:gap-2 p-3 sm:p-4 md:p-4 bg-blue-50 rounded-lg border border-blue-100 mt-1.5 md:mt-2">
-            <input
-              className="w-full sm:flex-1 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs md:text-sm border rounded-md"
-              placeholder={t('menuNamePlaceholder')}
-              value={newMenu.name}
-              onChange={(e) => setNewMenu({ ...newMenu, name: e.target.value })}
-              autoFocus
-            />
-            <select
-              className="w-full sm:w-24 px-2 py-1.5 sm:py-2 text-xs md:text-sm border rounded-md"
-              value={newMenu.duration}
-              onChange={(e) =>
-                setNewMenu({
-                  ...newMenu,
-                  duration: Number(e.target.value),
-                })
-              }
-            >
-              <option value={15}>{t('durations.15min')}</option>
-              <option value={30}>{t('durations.30min')}</option>
-              <option value={60}>{t('durations.60min')}</option>
-              <option value={90}>{t('durations.90min')}</option>
-              <option value={120}>{t('durations.120min')}</option>
-            </select>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 md:gap-2 p-3 sm:p-4 md:p-4 bg-primary-50 rounded-lg border border-primary-100 mt-1.5 md:mt-2">
+            <div className="w-full sm:flex-1">
+              <Input
+                className="px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs md:text-sm rounded-md"
+                placeholder={t('menuNamePlaceholder')}
+                value={newMenu.name}
+                onChange={(e) => setNewMenu({ ...newMenu, name: e.target.value })}
+                autoFocus
+              />
+            </div>
+            <div className="w-full sm:w-24">
+              <Select
+                className="px-2 py-1.5 sm:py-2 text-xs md:text-sm rounded-md"
+                value={String(newMenu.duration)}
+                showPlaceholder={false}
+                options={[
+                  { value: '15', label: t('durations.15min') },
+                  { value: '30', label: t('durations.30min') },
+                  { value: '60', label: t('durations.60min') },
+                  { value: '90', label: t('durations.90min') },
+                  { value: '120', label: t('durations.120min') },
+                ]}
+                onChange={(e) =>
+                  setNewMenu({
+                    ...newMenu,
+                    duration: Number(e.target.value),
+                  })
+                }
+              />
+            </div>
             <div className="flex items-center gap-1 w-full sm:w-28">
-              <span className="text-xs md:text-sm text-gray-500 whitespace-nowrap">{t('unit.currency')}</span>
-              <input
+              <span className="text-xs md:text-sm text-secondary-500 whitespace-nowrap">{t('unit.currency')}</span>
+              <Input
                 type="number"
-                className="w-full px-2 py-1.5 sm:py-2 text-xs md:text-sm border rounded-md text-right"
+                className="w-full px-2 py-1.5 sm:py-2 text-xs md:text-sm rounded-md text-right"
                 placeholder="0"
                 value={newMenu.price}
                 onChange={(e) =>
@@ -211,12 +219,16 @@ export default function MenuItems({
               />
             </div>
             <div className="flex items-center gap-1.5 md:gap-2 sm:ml-auto">
-              <Button size="sm" className="h-10 sm:h-9" onClick={handleAddMenu}>
+              <Button
+                size="sm"
+                className="h-10 sm:h-9 whitespace-nowrap shrink-0"
+                onClick={handleAddMenu}
+              >
                 {t('confirm')}
               </Button>
               <Button
                 size="sm"
-                className="h-10 sm:h-9"
+                className="h-10 sm:h-9 whitespace-nowrap shrink-0"
                 variant="ghost"
                 onClick={() => {
                   setIsAdding(false);
@@ -230,7 +242,7 @@ export default function MenuItems({
         ) : (
           <button
             onClick={() => setIsAdding(true)}
-            className="w-full flex items-center justify-center gap-1.5 md:gap-2 py-1.5 sm:py-2 text-xs md:text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 md:gap-2 py-1.5 sm:py-2 text-xs md:text-sm text-secondary-400 hover:text-secondary-600 hover:bg-secondary-50 rounded-md transition-colors"
           >
             <Plus className="w-4 h-4" /> {t('addMenu')}
           </button>

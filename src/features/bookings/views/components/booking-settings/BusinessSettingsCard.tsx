@@ -51,7 +51,7 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
         </div>
         <div className="flex items-center gap-2">
           {saveSuccess && (
-            <span className="flex items-center gap-1 text-xs text-green-600">
+            <span className="flex items-center gap-1 text-xs text-success-600">
               <Check size={14} />
             </span>
           )}
@@ -155,9 +155,9 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
                     <span
                       className={`text-sm font-medium w-12 shrink-0 ${
                         bh.dayOfWeek === 0
-                          ? 'text-red-500'
+                          ? 'text-error-500'
                           : bh.dayOfWeek === 6
-                            ? 'text-blue-500'
+                            ? 'text-info-500'
                             : 'text-secondary-700'
                       }`}
                     >

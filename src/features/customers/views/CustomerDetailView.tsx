@@ -31,6 +31,31 @@ interface CustomerDetailViewProps {
   customerNo: string;
 }
 
+const TAB_QUERY_TO_TAB: Record<string, CustomerTab> = {
+  sale: 'sales',
+  sales: 'sales',
+  procedure: 'service',
+  service: 'service',
+  product: 'product',
+  products: 'product',
+  reservation: 'reservation',
+  reserve: 'reservation',
+  booking: 'reservation',
+  membership: 'membership',
+  cancellationfee: 'cancellationFee',
+  'cancellation-fee': 'cancellationFee',
+  cancellation: 'cancellationFee',
+};
+
+const TAB_TO_QUERY: Record<CustomerTab, string> = {
+  sales: 'sale',
+  service: 'service',
+  product: 'product',
+  reservation: 'reservation',
+  membership: 'membership',
+  cancellationFee: 'cancellationFee',
+};
+
 export default memo(function CustomerDetailView({ customerNo }: CustomerDetailViewProps) {
   const t = useTranslations();
   const router = useRouter();
@@ -65,7 +90,7 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
       }));
   }, [staffData]);
 
-  // Tab state
+  // URL query 기반 탭 상태 (?tab=sale|service|product|reservation...)
   const [activeTab, setActiveTab] = useState<CustomerTab>('sales');
 
   // Form state
@@ -99,6 +124,44 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
+
+  useEffect(() => {
+    const getTabFromLocation = (): CustomerTab => {
+      if (typeof window === 'undefined') return 'sales';
+      const raw = (new URLSearchParams(window.location.search).get('tab') || 'sale')
+        .trim()
+        .toLowerCase();
+      return TAB_QUERY_TO_TAB[raw] || 'sales';
+    };
+
+    // Initial tab sync from URL
+    setActiveTab(getTabFromLocation());
+
+    // Keep tab in sync when browser back/forward changes query string
+    const handlePopState = () => {
+      setActiveTab(getTabFromLocation());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleTabChange = useCallback(
+    (tab: CustomerTab) => {
+      if (tab === activeTab) return;
+      const nextQueryTab = TAB_TO_QUERY[tab];
+      setActiveTab(tab);
+
+      if (typeof window === 'undefined') return;
+
+      const params = new URLSearchParams(window.location.search);
+      params.set('tab', nextQueryTab);
+      const query = params.toString();
+      const nextUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+      // Replace URL only, without triggering app-router navigation/remount.
+      window.history.replaceState(window.history.state, '', nextUrl);
+    },
+    [activeTab]
+  );
 
   const handleFormDataChange = useCallback(
     (updates: Partial<CustomerFormData>) => {
@@ -255,7 +318,7 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
                   <button
                     key={tab.key}
                     type="button"
-                    onClick={() => setActiveTab(tab.key)}
+                    onClick={() => handleTabChange(tab.key)}
                     className={`h-10 whitespace-nowrap border-b-2 px-3 text-sm font-medium transition-colors md:h-11 md:px-4 md:text-base ${
                       activeTab === tab.key
                         ? 'border-primary-500 text-primary-600'

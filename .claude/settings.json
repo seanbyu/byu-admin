@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/masihyeon/Desktop/salon-store-web/src/app/api/**)",
+      "Bash(npx --yes md-to-pdf:*)"
+    ]
+  }
+}

@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { supabase } from '@/lib/supabase/client';
 import { createStaff } from '@/actions/staff';
 import { useUser } from '@/features/auth/hooks/useAuth';
@@ -77,7 +80,7 @@ export default function InviteStaffModal({
     <Modal isOpen={isOpen} onClose={onClose} title="Invite New Staff" size="md">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+          <div className="bg-error-50 text-error-600 p-3 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -85,17 +88,16 @@ export default function InviteStaffModal({
         <div className="space-y-2">
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-secondary-700"
           >
             Email Address
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             placeholder="staff@example.com"
           />
         </div>
@@ -103,17 +105,16 @@ export default function InviteStaffModal({
         <div className="space-y-2">
           <label
             htmlFor="name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-secondary-700"
           >
             Full Name
           </label>
-          <input
+          <Input
             id="name"
             type="text"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             placeholder="Jane Doe"
           />
         </div>
@@ -121,41 +122,42 @@ export default function InviteStaffModal({
         <div className="space-y-2">
           <label
             htmlFor="role"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-secondary-700"
           >
             Role
           </label>
-          <select
+          <Select
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="STAFF">Staff</option>
-            <option value="MANAGER">Manager</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-          <p className="text-xs text-gray-500">
+            showPlaceholder={false}
+            options={[
+              { value: 'STAFF', label: 'Staff' },
+              { value: 'MANAGER', label: 'Manager' },
+              { value: 'ADMIN', label: 'Admin' },
+            ]}
+          />
+          <p className="text-xs text-secondary-500">
             This determines their access level in the system.
           </p>
         </div>
 
         <div className="flex justify-end pt-4 space-x-3">
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            variant="secondary"
             disabled={loading}
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50"
+            variant="primary"
           >
             {loading ? 'Sending...' : 'Send Invitation'}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

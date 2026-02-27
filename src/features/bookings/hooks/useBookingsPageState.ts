@@ -22,12 +22,12 @@ import {
 
 // 상수를 모듈 레벨로 호이스팅
 const STATUS_COLORS: Readonly<Record<BookingStatus, string>> = {
-  [BookingStatus.PENDING]: 'bg-yellow-100 text-yellow-700',
-  [BookingStatus.CONFIRMED]: 'bg-blue-100 text-blue-700',
-  [BookingStatus.IN_PROGRESS]: 'bg-purple-100 text-purple-700',
-  [BookingStatus.COMPLETED]: 'bg-green-100 text-green-700',
-  [BookingStatus.CANCELLED]: 'bg-red-100 text-red-700',
-  [BookingStatus.NO_SHOW]: 'bg-gray-100 text-gray-700',
+  [BookingStatus.PENDING]: 'bg-warning-100 text-warning-700',
+  [BookingStatus.CONFIRMED]: 'bg-info-100 text-info-700',
+  [BookingStatus.IN_PROGRESS]: 'bg-primary-100 text-primary-700',
+  [BookingStatus.COMPLETED]: 'bg-success-100 text-success-700',
+  [BookingStatus.CANCELLED]: 'bg-error-100 text-error-700',
+  [BookingStatus.NO_SHOW]: 'bg-secondary-100 text-secondary-700',
 } as const;
 
 export interface DesignerOption {

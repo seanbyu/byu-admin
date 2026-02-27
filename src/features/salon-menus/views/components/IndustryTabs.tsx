@@ -10,12 +10,13 @@ interface IndustryTabsProps {
   selectedIndustries: SalonIndustry[];
   onSelectTab: (tab: string) => void;
   onAddIndustryClick?: () => void;
+  addIndustryLabel?: string;
 }
 
 // rendering-hoist-jsx: 정적 클래스명 상수 호이스팅
 const BASE_TAB_CLASS = 'px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[11px] sm:text-xs md:text-sm font-medium transition-colors';
-const ACTIVE_TAB_CLASS = 'bg-blue-500 text-white';
-const INACTIVE_TAB_CLASS = 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50';
+const ACTIVE_TAB_CLASS = 'bg-primary-500 text-white';
+const INACTIVE_TAB_CLASS = 'bg-white text-secondary-500 border border-secondary-200 hover:bg-secondary-50';
 
 // 개별 탭 버튼 컴포넌트 (rerender-memo)
 interface TabButtonProps {
@@ -43,8 +44,10 @@ export const IndustryTabs = memo(function IndustryTabs({
   selectedIndustries,
   onSelectTab,
   onAddIndustryClick,
+  addIndustryLabel,
 }: IndustryTabsProps) {
   const t = useTranslations();
+  const addLabel = addIndustryLabel ?? t('menu.addIndustry');
 
   // 각 탭 클릭 핸들러를 상위에서 생성하지 않고 직접 전달
   const handleAllTabClick = useCallback(() => {
@@ -76,7 +79,7 @@ export const IndustryTabs = memo(function IndustryTabs({
             className={`${BASE_TAB_CLASS} ${INACTIVE_TAB_CLASS} flex items-center gap-1 whitespace-nowrap shrink-0`}
           >
             <Plus className="w-3 h-3" />
-            {t('menu.addIndustry')}
+            {addLabel}
           </button>
         )}
       </div>

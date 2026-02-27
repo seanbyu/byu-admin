@@ -37,6 +37,25 @@ pnpm build    # 프로덕션 빌드
 pnpm start    # 프로덕션 서버 실행
 pnpm lint     # ESLint 실행
 pnpm format   # Prettier 포맷팅
+pnpm sync:claude-skills  # skills/ -> .claude/skills 동기화
+pnpm ds:check            # 디자인시스템 규칙 체크 (non-strict)
+pnpm ds:check:strict     # 디자인시스템 규칙 체크 (strict, CI용)
+pnpm ci:protect:ds       # main/develop 브랜치에 DS 체크를 필수 상태검사로 추가
+```
+
+`pnpm ci:protect:ds` 실행 전 준비:
+- `gh auth login` 완료
+- 대상 브랜치(`main`, `develop`)에 브랜치 보호가 이미 활성화되어 있어야 함
+- 미리보기만 하려면: `bash scripts/configure-branch-protection.sh --dry-run`
+
+## Claude Code Skills
+
+- Codex용 스킬 원본은 `skills/`에 둡니다.
+- Claude Code 호환본은 `.claude/skills/`에 둡니다.
+- 스킬 수정 후 아래 명령으로 Claude 호환본을 갱신합니다.
+
+```bash
+pnpm sync:claude-skills
 ```
 
 ## 프로젝트 구조 (최상위)

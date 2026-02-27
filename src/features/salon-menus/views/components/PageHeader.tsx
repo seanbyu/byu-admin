@@ -19,7 +19,7 @@ export const PageHeader = memo(function PageHeader({
 
   return (
     <div className="mb-3 md:mb-5 xl:mb-6 flex flex-col gap-2 md:gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{t('title')}</h1>
+      <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-secondary-900">{t('title')}</h1>
       {onSettingsClick && (
         <Button
           variant="outline"

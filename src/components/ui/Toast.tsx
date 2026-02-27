@@ -21,15 +21,15 @@ const iconMap = {
 };
 
 const styleMap = {
-  success: 'bg-green-50 border-green-200 text-green-800',
-  error: 'bg-red-50 border-red-200 text-red-800',
-  info: 'bg-blue-50 border-blue-200 text-blue-800',
+  success: 'bg-success-50 border-success-200 text-success-800',
+  error: 'bg-error-50 border-error-200 text-error-800',
+  info: 'bg-primary-50 border-primary-200 text-primary-800',
 };
 
 const iconStyleMap = {
-  success: 'text-green-500',
-  error: 'text-red-500',
-  info: 'text-blue-500',
+  success: 'text-success-500',
+  error: 'text-error-500',
+  info: 'text-primary-500',
 };
 
 export const Toast = memo(function Toast({

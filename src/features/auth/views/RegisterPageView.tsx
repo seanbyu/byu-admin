@@ -232,20 +232,20 @@ export default function RegisterPageView() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12 relative">
       <LanguageSwitcher className="absolute top-4 right-4" />
-      <div className="max-w-md w-full border border-gray-200 rounded-xl p-8 shadow-sm">
+      <div className="max-w-md w-full border border-secondary-200 rounded-xl p-8 shadow-sm">
         {/* Header with Back Button */}
         <div className="relative flex items-center justify-center mb-10">
           <button
             onClick={() => router.push('/login')}
-            className="absolute left-0 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute left-0 p-1 -ml-1 text-secondary-400 hover:text-secondary-600 transition-colors"
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
+          <h1 className="text-xl font-bold text-secondary-900">{t('title')}</h1>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md text-sm">
+          <div className="mb-4 p-3 bg-error-50 text-error-600 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -253,8 +253,8 @@ export default function RegisterPageView() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Email Input */}
           <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-900">
-              {t('id')} <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-secondary-900">
+              {t('id')} <span className="text-error-500">*</span>
             </label>
             <div className="flex gap-2">
               <div className="flex-1">
@@ -286,19 +286,19 @@ export default function RegisterPageView() {
             </div>
             {emailMessage && (
               <p
-                className={`text-xs ${emailStatus === 'available' ? 'text-green-600' : 'text-red-600'}`}
+                className={`text-xs ${emailStatus === 'available' ? 'text-success-600' : 'text-error-600'}`}
               >
                 {emailMessage}
               </p>
             )}
-            <p className="text-xs text-gray-400">{t('helpers.id')}</p>
+            <p className="text-xs text-secondary-400">{t('helpers.id')}</p>
           </div>
 
           {/* Password */}
           <div className="space-y-4">
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-900">
-                {t('password')} <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-secondary-900">
+                {t('password')} <span className="text-error-500">*</span>
               </label>
               <PasswordInput
                 value={password || ''}
@@ -309,8 +309,8 @@ export default function RegisterPageView() {
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-900">
-                {t('confirmPassword')} <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-secondary-900">
+                {t('confirmPassword')} <span className="text-error-500">*</span>
               </label>
               <PasswordConfirmInput
                 password={password || ''}
@@ -323,19 +323,19 @@ export default function RegisterPageView() {
 
           {/* Name */}
           <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-900">
-              {t('name')} <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-secondary-900">
+              {t('name')} <span className="text-error-500">*</span>
             </label>
             <Input
               placeholder={t('placeholders.name')}
               {...register('name', { required: t('errors.required') })}
               error={errors.name?.message}
             />
-            <p className="text-xs text-gray-400">{t('helpers.name')}</p>
+            <p className="text-xs text-secondary-400">{t('helpers.name')}</p>
           </div>
           <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-900">
-              {t('salonName')} <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-secondary-900">
+              {t('salonName')} <span className="text-error-500">*</span>
             </label>
             <div className="flex gap-2">
               <div className="flex-1">
@@ -367,15 +367,15 @@ export default function RegisterPageView() {
             </div>
             {salonNameMessage && (
               <p
-                className={`text-xs ${salonNameStatus === 'available' ? 'text-green-600' : 'text-red-600'}`}
+                className={`text-xs ${salonNameStatus === 'available' ? 'text-success-600' : 'text-error-600'}`}
               >
                 {salonNameMessage}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              {t('industry')} <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-secondary-900 mb-2">
+              {t('industry')} <span className="text-error-500">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               {INDUSTRIES.map((ind) => {
@@ -386,7 +386,7 @@ export default function RegisterPageView() {
                     type="button"
                     onClick={() => toggleIndustry(ind.value)}
                     className={`flex items-center justify-center gap-2 p-3 rounded-md border text-sm font-medium transition-all
-                        ${isSelected ? 'border-black bg-gray-900 text-white' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}
+                        ${isSelected ? 'border-primary-600 bg-primary-600 text-white' : 'border-secondary-200 bg-white text-secondary-700 hover:border-secondary-300'}`}
                   >
                     {ind.label}
                     {isSelected && <Check className="w-4 h-4" />}
@@ -397,8 +397,8 @@ export default function RegisterPageView() {
           </div>
           {/* Phone Verification */}
           <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-900">
-              {t('phone')} <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-secondary-900">
+              {t('phone')} <span className="text-error-500">*</span>
             </label>
             <div className="flex gap-2">
               <div className="w-[100px]">
@@ -443,26 +443,25 @@ export default function RegisterPageView() {
               </div>
             )}
             {otpVerified && (
-              <p className="text-sm text-green-600 mt-1">
+              <p className="text-sm text-success-600 mt-1">
                 {t('success.otpVerified')}
               </p>
             )}
           </div>
 
           <div className="pt-6">
-            <p className="text-xs text-gray-500 text-center mb-4">
+            <p className="text-xs text-secondary-500 text-center mb-4">
               {t('helpers.agreement')}
             </p>
             <Button
               type="submit"
               variant="primary"
-              className="w-full h-12 text-lg font-medium bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-gray-700 border-none"
-              // Style usually changes to Black when valid. For now using basic style or class logic.
+              className={`w-full h-12 text-lg font-medium border-none ${
+                otpVerified
+                  ? 'bg-primary-700 text-white hover:bg-primary-800'
+                  : 'bg-secondary-200 text-secondary-500 hover:bg-secondary-300 hover:text-secondary-700'
+              }`}
               disabled={isLoading || !otpVerified}
-              style={{
-                backgroundColor: otpVerified ? '#000' : '#E5E7EB',
-                color: otpVerified ? '#fff' : '#9CA3AF',
-              }}
             >
               {t('submit')}
             </Button>

@@ -31,7 +31,13 @@ function NoSalonState() {
   return <div className="p-8">{t('noData')}</div>;
 }
 
-export default function SalonMenusPageView() {
+interface SalonMenusPageViewProps {
+  addIndustryLabel?: string;
+}
+
+export default function SalonMenusPageView({
+  addIndustryLabel,
+}: SalonMenusPageViewProps = {}) {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
@@ -79,6 +85,7 @@ export default function SalonMenusPageView() {
           selectedIndustries={selectedIndustries}
           onSelectTab={setSelectedTab}
           onAddIndustryClick={canEditMenus ? openIndustryModal : undefined}
+          addIndustryLabel={addIndustryLabel}
         />
 
         {/* Selected Industries Reordering Panel */}
@@ -101,7 +108,7 @@ export default function SalonMenusPageView() {
         )}
 
         {/* Main Content Area */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[460px] md:min-h-[520px] xl:min-h-[600px]">
+        <div className="bg-white rounded-lg shadow-sm border border-secondary-200 min-h-[460px] md:min-h-[520px] xl:min-h-[600px]">
           {salonId ? (
             <MenuList
               salonId={salonId}

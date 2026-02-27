@@ -101,7 +101,7 @@ export const HolidaySettingsCard = memo(function HolidaySettingsCard({
                   <button
                     type="button"
                     onClick={() => onRemoveHoliday(holiday.id)}
-                    className="p-1 text-red-500 hover:bg-red-50 rounded"
+                    className="p-1 text-error-500 hover:bg-error-50 rounded"
                   >
                     <Trash2 size={14} />
                   </button>

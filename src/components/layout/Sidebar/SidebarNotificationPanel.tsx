@@ -76,7 +76,7 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
             {t('common.notifications.title')}
           </span>
           {unreadCount > 0 && (
-            <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+            <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-error-500 text-white text-[10px] font-bold leading-none">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
@@ -122,12 +122,12 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
                       'group/notif flex flex-col gap-0.5 px-2.5 py-2 rounded-lg text-[11px] md:text-xs transition-colors cursor-pointer',
                       notif.read_at
                         ? 'bg-transparent text-sidebar-text-muted hover:bg-sidebar-hover'
-                        : 'bg-blue-900/30 text-sidebar-text hover:bg-blue-900/50'
+                        : 'bg-primary-900/30 text-sidebar-text hover:bg-primary-900/50'
                     )}
                   >
                     <div className="flex items-center gap-1.5">
                       {!notif.read_at && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0" />
                       )}
                       <span className="font-medium truncate flex-1">
                         {getNotificationTitle(notif, t)}
@@ -137,7 +137,7 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
                           e.stopPropagation();
                           deleteNotification(notif.id);
                         }}
-                        className="shrink-0 p-0.5 rounded text-sidebar-text-subtle hover:text-red-400 transition-colors opacity-0 group-hover/notif:opacity-100"
+                        className="shrink-0 p-0.5 rounded text-sidebar-text-subtle hover:text-error-400 transition-colors opacity-0 group-hover/notif:opacity-100"
                       >
                         <X size={12} />
                       </button>

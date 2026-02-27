@@ -154,7 +154,7 @@ export default function MenuList({
   return (
     <div className="flex flex-col xl:flex-row w-full gap-2 sm:gap-3 md:gap-4 xl:gap-6 items-stretch xl:items-start p-2.5 sm:p-4 md:p-5 xl:p-6">
       {/* Left Sidebar - Treated as separate card */}
-      <div className="w-full xl:w-64 xl:flex-shrink-0 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div className="w-full xl:w-64 xl:flex-shrink-0 bg-white rounded-lg border border-secondary-200 shadow-sm overflow-hidden">
         <MenusSidebar
           categories={categories}
           orderedIndustries={orderedIndustries}
@@ -172,7 +172,7 @@ export default function MenuList({
       </div>
 
       {/* Main Content - Treated as separate card */}
-      <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm p-3 sm:p-4 md:p-5 xl:p-6 min-h-[420px] md:min-h-[480px] xl:min-h-[600px]">
+      <div className="flex-1 bg-white rounded-lg border border-secondary-200 shadow-sm p-3 sm:p-4 md:p-5 xl:p-6 min-h-[420px] md:min-h-[480px] xl:min-h-[600px]">
         {isCreating && (
           <CreateCategoryForm
             categories={categories}
@@ -185,10 +185,10 @@ export default function MenuList({
         )}
 
         {isLoading ? (
-          <div className="text-center py-4 text-gray-500">{t('loading')}</div>
+          <div className="text-center py-4 text-secondary-500">{t('loading')}</div>
         ) : categories.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg border border-dashed border-gray-200">
-            <p className="text-gray-500 mb-2">{t('noCategories')}</p>
+          <div className="text-center py-12 bg-white rounded-lg border border-dashed border-secondary-200">
+            <p className="text-secondary-500 mb-2">{t('noCategories')}</p>
             {canEdit && (
               <Button
                 variant="outline"
@@ -280,7 +280,7 @@ export default function MenuList({
               if (otherCategories.length > 0) {
                 return (
                   <div className="space-y-3 md:space-y-4">
-                    <div className="text-xs sm:text-sm font-semibold text-gray-500">
+                    <div className="text-xs sm:text-sm font-semibold text-secondary-500">
                       {t('other')}
                     </div>
                     {otherCategories.map((category) => (

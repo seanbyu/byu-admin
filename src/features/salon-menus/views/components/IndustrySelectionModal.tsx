@@ -35,7 +35,7 @@ const IndustryButton = memo(function IndustryButton({
         ${
           isSelected
             ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
-            : 'border-gray-100 bg-white text-gray-600 hover:border-gray-200 hover:bg-gray-50'
+            : 'border-secondary-100 bg-white text-secondary-600 hover:border-secondary-200 hover:bg-secondary-50'
         }
       `}
     >
@@ -55,7 +55,7 @@ const IndustryButton = memo(function IndustryButton({
 function InfoPanel() {
   const t = useTranslations('menu');
   return (
-    <div className="bg-blue-50 text-blue-800 text-sm p-4 rounded-md mb-6 flex items-start gap-2">
+    <div className="bg-primary-50 text-primary-800 text-sm p-4 rounded-md mb-6 flex items-start gap-2">
       <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
       <p>
         {t('industryInfo')}
@@ -83,12 +83,12 @@ function IndustrySelectionModalComponent({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">{t('menu.industrySettings')}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-100">
+          <h2 className="text-lg font-bold text-secondary-900">{t('menu.industrySettings')}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-secondary-400 hover:text-secondary-600 transition-colors"
             aria-label={t('common.close')}
           >
             <X className="w-5 h-5" />
@@ -115,7 +115,7 @@ function IndustrySelectionModalComponent({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 flex justify-end">
+        <div className="px-6 py-4 bg-secondary-50 flex justify-end">
           <Button onClick={onClose} className="px-6">
             {t('common.complete')}
           </Button>

@@ -4,12 +4,12 @@ import { memo } from 'react';
 import { BookingStatus } from '@/types';
 
 export const STATUS_STYLES: Record<BookingStatus, string> = {
-  [BookingStatus.PENDING]: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-  [BookingStatus.CONFIRMED]: 'bg-blue-100 text-blue-700 border-blue-300',
-  [BookingStatus.IN_PROGRESS]: 'bg-purple-100 text-purple-700 border-purple-300',
-  [BookingStatus.COMPLETED]: 'bg-green-100 text-green-700 border-green-300',
-  [BookingStatus.CANCELLED]: 'bg-red-100 text-red-700 border-red-300',
-  [BookingStatus.NO_SHOW]: 'bg-gray-100 text-gray-700 border-gray-300',
+  [BookingStatus.PENDING]: 'bg-warning-100 text-warning-700 border-warning-300',
+  [BookingStatus.CONFIRMED]: 'bg-info-100 text-info-700 border-info-300',
+  [BookingStatus.IN_PROGRESS]: 'bg-primary-100 text-primary-700 border-primary-300',
+  [BookingStatus.COMPLETED]: 'bg-success-100 text-success-700 border-success-300',
+  [BookingStatus.CANCELLED]: 'bg-error-100 text-error-700 border-error-300',
+  [BookingStatus.NO_SHOW]: 'bg-secondary-100 text-secondary-700 border-secondary-300',
 };
 
 export const StatusBadge = memo(function StatusBadge({

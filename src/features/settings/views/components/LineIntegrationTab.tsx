@@ -4,6 +4,7 @@ import { useState, useCallback, memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Check, AlertCircle, ExternalLink, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { useLineSettings } from '../../hooks/useLineSettings';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -44,7 +45,7 @@ const StatusBadge = memo(function StatusBadge({
   }
   if (!isVerified) {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-700">
         <AlertCircle size={12} />
         {t('settings.line.statusUnverified')}
       </span>
@@ -58,7 +59,7 @@ const StatusBadge = memo(function StatusBadge({
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-success-100 text-success-700">
       <Check size={12} />
       {t('settings.line.statusConnected')}
     </span>
@@ -90,15 +91,15 @@ const SecretInput = memo(function SecretInput({
     <div>
       <label className="block text-sm font-medium text-secondary-700 mb-1.5">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-error-500 ml-0.5">*</span>}
       </label>
       <div className="relative">
-        <input
+        <Input
           type={visible ? 'text' : 'password'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full h-10 px-3 pr-10 text-sm border border-secondary-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+          className="!h-10 !pr-10 !font-mono"
         />
         <button
           type="button"
@@ -309,7 +310,7 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    className="text-error-500 hover:text-error-700 hover:bg-error-50"
                   >
                     <Trash2 size={14} className="mr-1" />
                     {t('settings.line.disconnect')}
@@ -320,7 +321,7 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
 
             {/* Verification status */}
             {isVerified && settings?.lastVerifiedAt && (
-              <p className="text-xs text-green-600 flex items-center gap-1">
+              <p className="text-xs text-success-600 flex items-center gap-1">
                 <Check size={12} />
                 {t('settings.line.lastVerified', {
                   date: new Date(settings.lastVerifiedAt).toLocaleDateString(),
@@ -328,7 +329,7 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
               </p>
             )}
             {!isVerified && settings?.verificationError && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
+              <p className="text-xs text-error-500 flex items-center gap-1">
                 <AlertCircle size={12} />
                 {settings.verificationError}
               </p>
@@ -351,8 +352,8 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
 
         {/* Delete Confirmation */}
         {showDeleteConfirm && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700 mb-3">
+          <div className="mt-4 p-4 bg-error-50 border border-error-200 rounded-lg">
+            <p className="text-sm text-error-700 mb-3">
               {t('settings.line.deleteConfirm')}
             </p>
             <div className="flex gap-2">
@@ -361,7 +362,7 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
                 size="sm"
                 onClick={handleDelete}
                 isLoading={isRemoving}
-                className="border-red-300 text-red-700 hover:bg-red-100"
+                className="border-error-300 text-error-700 hover:bg-error-100"
               >
                 {t('settings.line.confirmDelete')}
               </Button>
@@ -384,14 +385,14 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
             {/* Channel ID */}
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-1.5">
-                Channel ID <span className="text-red-500">*</span>
+                Channel ID <span className="text-error-500">*</span>
               </label>
-              <input
+              <Input
                 type="text"
                 value={channelId}
                 onChange={(e) => setChannelId(e.target.value)}
                 placeholder="1234567890"
-                className="w-full h-10 px-3 text-sm border border-secondary-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+                className="!h-10 !font-mono"
               />
             </div>
 
@@ -419,12 +420,12 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
                 LIFF ID
                 <span className="text-secondary-400 text-xs ml-1">({t('common.optional')})</span>
               </label>
-              <input
+              <Input
                 type="text"
                 value={liffId}
                 onChange={(e) => setLiffId(e.target.value)}
                 placeholder="1234567890-xxxxxxxx"
-                className="w-full h-10 px-3 text-sm border border-secondary-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+                className="!h-10 !font-mono"
               />
               <p className="mt-1 text-xs text-secondary-400">
                 {t('settings.line.liffIdHint')}

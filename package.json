@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "sync:claude-skills": "bash scripts/sync-claude-skills.sh",
+    "cskills": "bash scripts/find-claude-skills.sh",
+    "ci:protect:ds": "bash scripts/configure-branch-protection.sh",
+    "ds:check": "bash scripts/check-design-system.sh",
+    "ds:check:strict": "bash scripts/check-design-system.sh --strict"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

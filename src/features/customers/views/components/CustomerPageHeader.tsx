@@ -4,6 +4,8 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Search, ArrowUpDown, Plus, Settings, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import type {
   CustomerFilterType,
   CustomerSortBy,
@@ -383,17 +385,19 @@ const SortDropdown = memo(function SortDropdown({
 
   return (
     <div className="flex items-center gap-2 w-full sm:w-auto">
-      <select
+      <Select
         value={sortBy}
         onChange={handleSortChange}
-        className="h-10 flex-1 rounded-lg border border-secondary-200 bg-white px-3 text-sm text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 md:h-11 md:text-base"
-      >
-        <option value="last_visit">{t('customer.sort.lastVisit')}</option>
-        <option value="total_visits">{t('customer.sort.totalVisits')}</option>
-        <option value="total_spent">{t('customer.sort.totalSpent')}</option>
-        <option value="name">{t('customer.sort.name')}</option>
-        <option value="created_at">{t('customer.sort.createdAt')}</option>
-      </select>
+        className="h-10 flex-1 text-sm md:h-11 md:text-base"
+        showPlaceholder={false}
+        options={[
+          { value: 'last_visit', label: t('customer.sort.lastVisit') },
+          { value: 'total_visits', label: t('customer.sort.totalVisits') },
+          { value: 'total_spent', label: t('customer.sort.totalSpent') },
+          { value: 'name', label: t('customer.sort.name') },
+          { value: 'created_at', label: t('customer.sort.createdAt') },
+        ]}
+      />
       <button
         type="button"
         className={`h-10 w-10 flex items-center justify-center rounded-lg border border-secondary-200 bg-white text-secondary-700 transition-transform hover:bg-secondary-50 md:h-11 md:w-11 ${
@@ -607,12 +611,12 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400"
               size={16}
             />
-            <input
+            <Input
               type="text"
               placeholder={t('customer.search.placeholder')}
               value={searchQuery}
               onChange={handleSearchChange}
-              className="h-10 w-full rounded-lg border border-secondary-200 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 sm:h-11 sm:pl-10 sm:pr-4 sm:text-base"
+              className="h-10 w-full pl-9 pr-3 text-sm sm:h-11 sm:pl-10 sm:pr-4 sm:text-base"
             />
           </div>
         </div>

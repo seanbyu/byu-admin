@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
 import { useStaffPositions } from '../../../hooks/useStaffPositions';
 import { ProfileImageUploader } from './ProfileImageUploader';
 import { PositionSelector } from './PositionSelector';
@@ -202,8 +203,8 @@ function StaffProfileModal({
           <label className="block text-sm font-medium text-secondary-700">
             {t('staff.profileModal.introduction')}
           </label>
-          <textarea
-            className="w-full min-h-[100px] px-3 py-2 border border-secondary-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          <Textarea
+            className="min-h-[100px]"
             {...register('description')}
             placeholder={t('staff.profileModal.introPlaceholder')}
           />

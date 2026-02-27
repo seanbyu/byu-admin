@@ -66,7 +66,9 @@ function SortableCategoryItem({
       ref={setNodeRef}
       style={style}
       className={`group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-        selectedCategoryId === category.id ? 'bg-blue-50' : 'hover:bg-gray-100'
+        selectedCategoryId === category.id
+          ? 'bg-primary-50'
+          : 'hover:bg-secondary-100'
       }`}
       onClick={() => onSelectCategory(category.id)}
     >
@@ -74,7 +76,7 @@ function SortableCategoryItem({
         <span
           className={`text-sidebar-category ${
             selectedCategoryId === category.id
-              ? '!font-bold !text-blue-600'
+              ? '!font-bold !text-primary-600'
               : ''
           }`}
         >
@@ -83,7 +85,7 @@ function SortableCategoryItem({
         <span className="text-caption">{count}</span>
       </div>
       <div {...attributes} {...listeners} className="cursor-grab p-1">
-        <Menu className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100" />
+        <Menu className="w-3 h-3 text-secondary-300 opacity-0 group-hover:opacity-100" />
       </div>
     </div>
   );
@@ -150,8 +152,8 @@ export default function MenusSidebar({
           onClick={() => onSelectCategory(null)}
           className={`w-full rounded-lg border px-2.5 py-1.5 text-left transition-colors ${
             selectedCategoryId === null
-              ? 'bg-blue-500 border-blue-500 text-white'
-              : 'bg-white border-gray-200 text-gray-800'
+              ? 'bg-primary-500 border-primary-500 text-white'
+              : 'bg-white border-secondary-200 text-secondary-800'
           }`}
         >
           <span className="text-xs sm:text-sm font-semibold">
@@ -167,8 +169,8 @@ export default function MenusSidebar({
               onClick={() => onSelectCategory(category.id)}
               className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] sm:text-xs font-medium transition-colors ${
                 selectedCategoryId === category.id
-                  ? 'bg-blue-50 text-blue-600 border-blue-200'
-                  : 'bg-white text-gray-600 border-gray-200'
+                  ? 'bg-primary-50 text-primary-600 border-primary-200'
+                  : 'bg-white text-secondary-600 border-secondary-200'
               }`}
             >
               {category.name} ({menuCounts[category.id] || 0})
@@ -178,7 +180,7 @@ export default function MenusSidebar({
             <button
               type="button"
               onClick={() => onAddCategory(addCategoryIndustryId)}
-              className="shrink-0 rounded-full border border-dashed border-gray-300 px-2.5 py-1 text-[11px] sm:text-xs font-medium text-gray-500 hover:text-gray-700"
+              className="shrink-0 rounded-full border border-dashed border-secondary-300 px-2.5 py-1 text-[11px] sm:text-xs font-medium text-secondary-500 hover:text-secondary-700"
             >
               + {t('addGroup')}
             </button>
@@ -191,8 +193,8 @@ export default function MenusSidebar({
           onClick={() => onSelectCategory(null)}
           className={`p-4 rounded-lg cursor-pointer transition-colors ${
             selectedCategoryId === null
-              ? 'bg-blue-500 text-white'
-              : 'bg-white border border-gray-200 hover:bg-gray-50'
+              ? 'bg-primary-500 text-white'
+              : 'bg-white border border-secondary-200 hover:bg-secondary-50'
           }`}
         >
           <div className="font-bold text-lg mb-1">
@@ -238,7 +240,7 @@ export default function MenusSidebar({
               {onAddCategory && (
                 <button
                   onClick={() => onAddCategory(industry.id)}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-secondary-400 hover:text-secondary-600 transition-colors"
                 >
                   <Plus className="w-3 h-3" />
                   {t('addGroup')}

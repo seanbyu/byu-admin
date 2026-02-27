@@ -118,7 +118,7 @@ const BookingFilters = memo(function BookingFilters({
   );
 });
 
-export default function BookingsPageView() {
+export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}) {
   const t = useTranslations();
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
@@ -226,10 +226,10 @@ export default function BookingsPageView() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-secondary-900">
-              {t('booking.title')}
+              {t(isChart ? 'booking.chartTitle' : 'booking.title')}
             </h1>
             <p className="text-sm md:text-base text-secondary-600 mt-1">
-              {t('booking.pageDescription')}
+              {t(isChart ? 'booking.chartDescription' : 'booking.pageDescription')}
             </p>
           </div>
           {canCreateBooking && (

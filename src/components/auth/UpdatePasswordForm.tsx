@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 export default function UpdatePasswordForm() {
   const [password, setPassword] = useState('');
@@ -55,7 +57,7 @@ export default function UpdatePasswordForm() {
       <h2 className="text-2xl font-bold mb-6 text-center">Set New Password</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+          <div className="bg-error-50 text-error-600 p-3 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -63,17 +65,16 @@ export default function UpdatePasswordForm() {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-secondary-700 mb-1"
           >
             New Password
           </label>
-          <input
+          <Input
             id="password"
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             placeholder="********"
           />
         </div>
@@ -81,28 +82,27 @@ export default function UpdatePasswordForm() {
         <div>
           <label
             htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-secondary-700 mb-1"
           >
             Confirm Password
           </label>
-          <input
+          <Input
             id="confirmPassword"
             type="password"
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             placeholder="********"
           />
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={loading}
-          className="w-full py-2 px-4 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50"
+          className="w-full"
         >
           {loading ? 'Updating...' : 'Update Password'}
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -4,6 +4,7 @@ import { useCallback, useRef, memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Pencil, Check, X, MapPin } from 'lucide-react';
 import { StoreInfo } from '../../types';
 import { useSalonData } from '../../hooks/useSalonData';
@@ -81,19 +82,19 @@ const EditableField = memo(function EditableField({
       <div className="flex items-center gap-2">
         <div className="flex-1 flex items-center gap-2">
           {icon}
-          <input
+          <Input
             type="text"
             value={tempValue}
             onChange={handleChange}
             placeholder={placeholder}
-            className="flex-1 h-10 px-3 text-sm border border-secondary-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="flex-1 h-10 text-sm bg-white"
             autoFocus
           />
         </div>
         <button
           onClick={onSave}
           disabled={isUpdating}
-          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+          className="p-2 text-success-600 hover:bg-success-50 rounded-lg transition-colors"
         >
           <Check size={18} />
         </button>
@@ -225,7 +226,7 @@ const StoreImageSection = memo(function StoreImageSection({
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="hidden"
+          hidden
         />
       </div>
     </Card>
@@ -385,7 +386,7 @@ export function StoreInfoTab({
               tempValue={tempValue}
               isUpdating={isUpdating}
               icon={
-                <div className="flex items-center justify-center w-6 h-6 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 rounded flex-shrink-0">
+                <div className="flex items-center justify-center w-6 h-6 bg-gradient-to-br from-primary-500 via-info-500 to-warning-400 rounded flex-shrink-0">
                   <InstagramIcon size={14} />
                 </div>
               }

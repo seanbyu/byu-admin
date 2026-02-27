@@ -46,5 +46,9 @@ tsconfig.tsbuildinfo
 .claude/settings.local.json
 
 # Scripts & Skills (local tooling)
-/scripts/
+/scripts/*
+!/scripts/sync-claude-skills.sh
+!/scripts/find-claude-skills.sh
+!/scripts/check-design-system.sh
+!/scripts/configure-branch-protection.sh
 /skills/

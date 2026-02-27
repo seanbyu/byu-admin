@@ -39,7 +39,7 @@ export const InterpreterServiceCard = memo(function InterpreterServiceCard({
         </div>
         <div className="flex items-center gap-2">
           {saveSuccess && (
-            <span className="flex items-center gap-1 text-xs text-green-600">
+            <span className="flex items-center gap-1 text-xs text-success-600">
               <Check size={14} />
             </span>
           )}

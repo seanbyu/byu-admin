@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Checkbox } from '@/components/ui/Checkbox';
 import { useAuthStore } from '@/store/authStore';
 import { useLogin } from '../hooks/useAuth';
 import { Scissors } from 'lucide-react';
@@ -113,8 +114,8 @@ export default function LoginPageView() {
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 p-3 bg-error-50 border border-error-200 rounded-lg">
+              <p className="text-sm text-error-600">{error}</p>
             </div>
           )}
 
@@ -146,11 +147,9 @@ export default function LoginPageView() {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
+                <Checkbox
                   defaultChecked
                   {...register('rememberMe')}
-                  className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
                 />
                 <span className="ml-2 text-sm text-secondary-700">
                   {t('rememberMe')}

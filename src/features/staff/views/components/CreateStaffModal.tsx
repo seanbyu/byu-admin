@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { supabase } from '@/lib/supabase/client';
 import { createStaff } from '@/actions/staff';
 import { Loader2 } from 'lucide-react';
@@ -242,7 +243,7 @@ function CreateStaffModal({
             {t('staff.createModal.email')}
           </label>
           <div className="flex gap-2">
-            <input
+            <Input
               id="email"
               type="email"
               {...register('email', {
@@ -253,24 +254,25 @@ function CreateStaffModal({
                 },
               })}
               onChange={handleEmailChange}
-              className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+              className={`flex-1 ${
                 errors.email ? 'border-error-500' : emailCheckStatus === 'available' ? 'border-success-500' : 'border-secondary-300'
               }`}
               placeholder="example@email.com"
               disabled={isLimitReached}
             />
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={handleCheckEmail}
               disabled={isLimitReached || emailCheckMutation.isPending || !email || !EMAIL_REGEX.test(email)}
-              className="px-3 py-2 text-sm border border-secondary-300 rounded-md hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="px-3 py-2 text-sm whitespace-nowrap"
             >
               {emailCheckMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 t('staff.validation.checkDuplicate')
               )}
-            </button>
+            </Button>
           </div>
           {errors.email ? (
             <p className="text-sm text-error-500">{errors.email.message}</p>
@@ -312,16 +314,17 @@ function CreateStaffModal({
           >
             {t('staff.createModal.role')}
           </label>
-          <select
+          <Select
             id="role"
             {...register('role')}
-            className="w-full px-3 py-2 border border-secondary-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            showPlaceholder={false}
+            options={[
+              { value: 'MANAGER', label: t('staff.createModal.roleManager') },
+              { value: 'ARTIST', label: t('staff.createModal.roleArtist') },
+              { value: 'STAFF', label: t('staff.createModal.roleStaff') },
+            ]}
             disabled={isLimitReached}
-          >
-            <option value="MANAGER">{t('staff.createModal.roleManager')}</option>
-            <option value="ARTIST">{t('staff.createModal.roleArtist')}</option>
-            <option value="STAFF">{t('staff.createModal.roleStaff')}</option>
-          </select>
+          />
         </div>
 
         {/* 에러 메시지 */}

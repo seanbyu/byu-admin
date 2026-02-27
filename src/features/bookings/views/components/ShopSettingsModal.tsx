@@ -188,9 +188,9 @@ export function ShopSettingsModal({
                           <span
                             className={`text-sm font-medium ${
                               bh.dayOfWeek === 0
-                                ? 'text-red-500'
+                                ? 'text-error-500'
                                 : bh.dayOfWeek === 6
-                                  ? 'text-blue-500'
+                                  ? 'text-info-500'
                                   : 'text-secondary-700'
                             }`}
                           >
@@ -302,7 +302,7 @@ export function ShopSettingsModal({
                           <button
                             type="button"
                             onClick={() => handleRemoveHoliday(holiday.id)}
-                            className="p-1 text-red-500 hover:bg-red-50 rounded"
+                            className="p-1 text-error-500 hover:bg-error-50 rounded"
                           >
                             <Trash2 size={16} />
                           </button>

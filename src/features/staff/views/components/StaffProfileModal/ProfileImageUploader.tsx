@@ -4,6 +4,7 @@ import React, { memo, useState, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Camera, Trash2, Loader2 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { Input } from '@/components/ui/Input';
 import { supabase } from '@/lib/supabase/client';
 import { ProfileImageUploaderProps } from './types';
 
@@ -173,12 +174,12 @@ export const ProfileImageUploader = memo(function ProfileImageUploader({
             </div>
           )}
           <div className="flex-1">
-            <input
+            <Input
               ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={handleFileUpload}
-              className="block w-full text-sm text-secondary-500
+              className="!border-0 !px-0 !py-0 !text-sm !text-secondary-500 !bg-transparent focus:!ring-0
                 file:mr-4 file:py-2 file:px-4
                 file:rounded-full file:border-0
                 file:text-sm file:font-semibold

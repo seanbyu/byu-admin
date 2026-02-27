@@ -3,6 +3,8 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -56,17 +58,17 @@ export default function SortableMenuRow({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 md:gap-2 py-2.5 md:py-3 px-3 md:px-4 bg-gray-50 rounded-lg mb-0.5 md:mb-1 last:mb-0 hover:bg-gray-100 transition-colors group ${
-        isDragging ? 'shadow-lg border-blue-200 border' : ''
+      className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 md:gap-2 py-2.5 md:py-3 px-3 md:px-4 bg-secondary-50 rounded-lg mb-0.5 md:mb-1 last:mb-0 hover:bg-secondary-100 transition-colors group ${
+        isDragging ? 'shadow-lg border-primary-200 border' : ''
       }`}
     >
       {currentlyEditing ? (
         <div className="flex w-full flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 md:gap-2">
           {/* Name Input */}
           <div className="w-full sm:flex-1 sm:pr-4">
-            <input
+            <Input
               type="text"
-              className="w-full px-2 py-1 border border-gray-300 rounded text-xs md:text-sm"
+              className="px-2 py-1 text-xs md:text-sm rounded-md"
               placeholder={t('menu.name')}
               value={editMenuData.name}
               onChange={(e) =>
@@ -81,31 +83,33 @@ export default function SortableMenuRow({
 
           {/* Duration Input */}
           <div className="w-full sm:w-24 text-left sm:text-center sm:pr-4">
-            <select
-              className="w-full px-2 py-1 border border-gray-300 rounded text-xs md:text-sm"
+            <Select
+              className="px-2 py-1 text-xs md:text-sm rounded-md"
               value={editMenuData.duration}
+              showPlaceholder={false}
+              options={[
+                { value: '15', label: t('menu.durations.15min') },
+                { value: '30', label: t('menu.durations.30min') },
+                { value: '60', label: t('menu.durations.60min') },
+                { value: '90', label: t('menu.durations.90min') },
+                { value: '120', label: t('menu.durations.120min') },
+              ]}
               onChange={(e) =>
                 onEditMenuDataChange({
                   ...editMenuData,
                   duration: e.target.value,
                 })
               }
-            >
-              <option value="15">{t('menu.durations.15min')}</option>
-              <option value="30">{t('menu.durations.30min')}</option>
-              <option value="60">{t('menu.durations.60min')}</option>
-              <option value="90">{t('menu.durations.90min')}</option>
-              <option value="120">{t('menu.durations.120min')}</option>
-            </select>
+            />
           </div>
 
           {/* Price Input */}
           <div className="w-full sm:w-32 text-left sm:text-right sm:pr-4">
             <div className="flex items-center justify-start sm:justify-end gap-1">
               <span className="text-xs md:text-sm">{t('menu.unit.currency')}</span>
-              <input
+              <Input
                 type="number"
-                className="w-20 px-2 py-1 border border-gray-300 rounded text-xs md:text-sm text-right"
+                className="w-20 px-2 py-1 text-xs md:text-sm rounded-md text-right"
                 placeholder={t('menu.price')}
                 value={editMenuData.price}
                 onChange={(e) =>
@@ -119,11 +123,20 @@ export default function SortableMenuRow({
           </div>
 
           {/* Actions */}
-          <div className="w-full sm:w-16 flex justify-end gap-1">
-            <Button size="sm" className="h-9 sm:h-8" onClick={onSaveMenu}>
+          <div className="w-full sm:w-auto flex justify-end gap-1.5 sm:gap-2 sm:ml-auto">
+            <Button
+              size="sm"
+              className="h-9 sm:h-8 whitespace-nowrap shrink-0"
+              onClick={onSaveMenu}
+            >
               {t('common.save')}
             </Button>
-            <Button size="sm" className="h-9 sm:h-8" variant="ghost" onClick={onCancelEditMenu}>
+            <Button
+              size="sm"
+              className="h-9 sm:h-8 whitespace-nowrap shrink-0"
+              variant="ghost"
+              onClick={onCancelEditMenu}
+            >
               {t('common.cancel')}
             </Button>
           </div>
@@ -155,7 +168,7 @@ export default function SortableMenuRow({
                   e.stopPropagation();
                   onDeleteMenu(menu.id);
                 }}
-                className="p-1 text-gray-400 hover:text-red-500"
+                className="p-1 text-secondary-400 hover:text-error-500"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -164,7 +177,7 @@ export default function SortableMenuRow({
               <button
                 {...attributes}
                 {...listeners}
-                className="p-1 text-gray-300 cursor-move hover:text-gray-600"
+                className="p-1 text-secondary-300 cursor-move hover:text-secondary-600"
               >
                 <GripVertical className="w-4 h-4" />
               </button>
