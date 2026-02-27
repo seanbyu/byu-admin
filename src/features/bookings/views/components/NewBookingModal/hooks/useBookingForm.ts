@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { CustomerType } from '../types';
+import { CustomerType, UseBookingFormProps, UseBookingFormReturn } from '../types';
 import { Booking } from '../../../../types';
 
 const parseLocalDate = (value: string): Date => {
@@ -17,54 +17,6 @@ const toDateInputValue = (date: Date | string): string => {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
-
-interface UseBookingFormProps {
-  editBooking?: Booking;
-  selectedDate: Date;
-  selectedTime: string;
-  selectedStaffId: string;
-  selectedServiceId: string;
-  isEditMode: boolean;
-  onDateChange: (date: Date) => void;
-  onTimeChange: (time: string) => void;
-  onStaffChange: (staffId: string) => void;
-  onServiceChange: (serviceId: string) => void;
-}
-
-interface UseBookingFormReturn {
-  // Form state
-  customerName: string;
-  customerPhone: string;
-  customerType: CustomerType;
-  notes: string;
-  errors: Record<string, string>;
-  // Internal state (for edit mode)
-  internalDate: Date;
-  internalTime: string;
-  internalStaffId: string;
-  internalServiceId: string;
-  // Computed values (use these in components)
-  currentDate: Date;
-  currentTime: string;
-  currentStaffId: string;
-  currentServiceId: string;
-  // Setters
-  setCustomerName: (name: string) => void;
-  setCustomerPhone: (phone: string) => void;
-  setCustomerType: (type: CustomerType) => void;
-  setNotes: (notes: string) => void;
-  setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  // Handlers
-  handleDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleTimeChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  setTime: (time: string) => void;
-  handleStaffChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  handleServiceChange: (serviceId: string) => void;
-  // Actions
-  resetForm: () => void;
-  validateForm: () => boolean;
-  initializeEditForm: (booking: Booking) => void;
-}
 
 export function useBookingForm({
   editBooking,

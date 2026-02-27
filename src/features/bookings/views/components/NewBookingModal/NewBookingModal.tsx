@@ -11,9 +11,10 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { formatDate } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import { useCustomers } from '@/features/customers/hooks/useCustomers';
-import { useMenus, useCategories } from '@/features/salon-menus/hooks/useSalonMenus';
 import { SalonMenu } from '@/features/salon-menus/types';
 import { useBookings } from '../../../hooks/useBookings';
+import { useCategoryMap, useMenuMap } from '../../../hooks/useMenuMaps';
+import { useServiceGroups } from '../../../hooks/useServiceGroups';
 import { NewBookingModalProps } from './types';
 import { useBookingForm, useCustomerSearch, useBookingSave } from './hooks';
 import { CustomerSection, NewCustomerConfirmModal, TimeSlotSelector } from './components';
@@ -41,27 +42,13 @@ function NewBookingModalComponent({
 
   // Data hooks
   const { customers } = useCustomers({ salon_id: salonId });
-  const { menus } = useMenus(salonId, undefined, { enabled: !!salonId });
-  const { categories } = useCategories(salonId);
   const { deleteBooking, isDeleting } = useBookings(salonId);
-
-  // 카테고리 맵: categoryId → categoryName
-  const categoryMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    categories.forEach((cat) => { map[cat.id] = cat.name; });
-    return map;
-  }, [categories]);
+  const categoryMap = useCategoryMap(salonId);
+  const menuMap = useMenuMap(salonId);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [isServiceInitialized, setIsServiceInitialized] = useState(false);
-
-  // 메뉴 맵: menuId → SalonMenu
-  const menuMap = useMemo(() => {
-    const map: Record<string, SalonMenu> = {};
-    (menus || []).forEach((menu) => { map[menu.id] = menu; });
-    return map;
-  }, [menus]);
 
   // 선택된 서비스 목록 (중복 포함, useBookingSave에 전달)
   const selectedServices = useMemo<SalonMenu[]>(() => {
@@ -71,43 +58,11 @@ function NewBookingModalComponent({
   }, [selectedServiceIds, menuMap]);
 
   // 카테고리별 그룹 표시 (Cut x2, Perm x1 등)
-  const selectedServiceGroups = useMemo(() => {
-    const groups: { categoryId: string; categoryName: string; count: number; totalDuration: number; totalPrice: number }[] = [];
-    const groupMap = new Map<string, number>();
-
-    selectedServiceIds.forEach((id) => {
-      const menu = menuMap[id];
-      if (!menu) return;
-      const catId = menu.category_id;
-      const idx = groupMap.get(catId);
-
-      if (idx !== undefined) {
-        groups[idx].count += 1;
-        groups[idx].totalDuration += menu.duration_minutes || 60;
-        groups[idx].totalPrice += menu.base_price || menu.price || 0;
-      } else {
-        groupMap.set(catId, groups.length);
-        groups.push({
-          categoryId: catId,
-          categoryName: categoryMap[catId] || menu.name,
-          count: 1,
-          totalDuration: menu.duration_minutes || 60,
-          totalPrice: menu.base_price || menu.price || 0,
-        });
-      }
-    });
-
-    return groups;
-  }, [selectedServiceIds, menuMap, categoryMap]);
-
-  const totalServiceDuration = useMemo(
-    () => selectedServiceGroups.reduce((sum, g) => sum + g.totalDuration, 0),
-    [selectedServiceGroups]
-  );
-  const totalServicePrice = useMemo(
-    () => selectedServiceGroups.reduce((sum, g) => sum + g.totalPrice, 0),
-    [selectedServiceGroups]
-  );
+  const {
+    groups: selectedServiceGroups,
+    totalDuration: totalServiceDuration,
+    totalPrice: totalServicePrice,
+  } = useServiceGroups(selectedServiceIds, menuMap, categoryMap);
 
   // Form hook
   const form = useBookingForm({
@@ -292,31 +247,29 @@ function NewBookingModalComponent({
               {t('booking.service')} <span className="text-error-500">*</span>
             </label>
             {selectedServiceGroups.length > 0 && (
-              <div className="mb-3 space-y-1.5 rounded-lg border border-primary-200 bg-white p-2.5">
+              <div className="mb-2 space-y-1 rounded-lg border border-primary-200 bg-white p-1.5">
                 {selectedServiceGroups.map((group) => (
                   <div
                     key={group.categoryId}
-                    className="flex items-center justify-between rounded-md bg-primary-50 px-2.5 py-2"
+                    className="flex items-center justify-between rounded bg-primary-50 px-2 py-1"
                   >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-primary-700 truncate">
-                        {group.categoryName} x{group.count}
-                      </p>
-                      <p className="text-xs text-secondary-600">
+                    <span className="text-xs font-medium text-primary-700 truncate">
+                      {group.categoryName} x{group.count}
+                      <span className="ml-1.5 font-normal text-secondary-500">
                         {group.totalDuration}min / ฿{group.totalPrice.toLocaleString()}
-                      </p>
-                    </div>
+                      </span>
+                    </span>
                     <button
                       type="button"
                       onClick={() => handleRemoveCategoryServices(group.categoryId)}
-                      className="h-7 w-7 rounded-md border border-primary-300 bg-white text-primary-600 hover:bg-primary-100 flex items-center justify-center"
+                      className="ml-2 h-5 w-5 shrink-0 rounded border border-primary-300 bg-white text-primary-600 hover:bg-primary-100 flex items-center justify-center"
                       aria-label="Remove category services"
                     >
-                      <X size={14} />
+                      <X size={12} />
                     </button>
                   </div>
                 ))}
-                <div className="flex items-center justify-between border-t border-primary-100 pt-2 text-xs text-secondary-700">
+                <div className="flex items-center justify-between border-t border-primary-100 pt-1 px-1 text-[11px] text-secondary-500">
                   <span>{t('booking.total')} {selectedServiceIds.length}</span>
                   <span>
                     {totalServiceDuration}min / ฿{totalServicePrice.toLocaleString()}

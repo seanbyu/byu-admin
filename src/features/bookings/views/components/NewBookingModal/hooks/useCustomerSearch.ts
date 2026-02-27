@@ -1,25 +1,9 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { ExistingCustomer } from '../types';
-
-interface UseCustomerSearchProps {
-  customerPhone: string;
-  customers: any[] | undefined;
-  onPhoneChange: (phone: string) => void;
-  onNameChange: (name: string) => void;
-}
-
-interface UseCustomerSearchReturn {
-  selectedCustomer: ExistingCustomer | null;
-  showCustomerDropdown: boolean;
-  matchingCustomers: ExistingCustomer[];
-  dropdownRef: React.RefObject<HTMLDivElement | null>;
-  handleSelectCustomer: (customer: any) => void;
-  handleClearCustomer: () => void;
-  handlePhoneChange: (value: string) => void;
-  handlePhoneFocus: () => void;
-  setSelectedCustomer: React.Dispatch<React.SetStateAction<ExistingCustomer | null>>;
-  setShowCustomerDropdown: React.Dispatch<React.SetStateAction<boolean>>;
-}
+import {
+  ExistingCustomer,
+  UseCustomerSearchProps,
+  UseCustomerSearchReturn,
+} from '../types';
 
 const toDigits = (value: string) => value.replace(/\D/g, '');
 

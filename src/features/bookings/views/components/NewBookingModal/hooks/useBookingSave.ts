@@ -1,61 +1,38 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useBookings } from '../../../../hooks/useBookings';
 import { useCustomers } from '@/features/customers/hooks/useCustomers';
 import { BookingStatus } from '@/types';
 import { Booking } from '../../../../types';
-import { CustomerType, ExistingCustomer } from '../types';
+import { toLocalDateStr, calculateEndTime } from '../../../../utils';
+import {
+  ServiceInfo,
+  UseBookingSaveProps,
+  UseBookingSaveReturn,
+} from '../types';
 
-interface ServiceInfo {
-  id: string;
-  name: string;
-  category_id: string;
-  duration_minutes?: number;
-  base_price?: number;
-  price?: number;
-}
+function buildBookingPayload(
+  services: ServiceInfo[],
+  currentTime: string,
+  categoryMap: Record<string, string>
+) {
+  const primaryServiceId = services[0]?.id ?? '';
+  const durationMinutes = services.reduce(
+    (sum, s) => sum + (s.duration_minutes || 60),
+    0
+  );
+  const servicePrice = services.reduce(
+    (sum, s) => sum + (s.base_price || s.price || 0),
+    0
+  );
+  const endTime = calculateEndTime(currentTime, durationMinutes);
+  const categoryNames = [...new Set(
+    services.map((s) => categoryMap[s.category_id] || s.name)
+  )];
+  const serviceName = categoryNames.join(', ');
+  const serviceIds = services.map((s) => s.id);
 
-interface UseBookingSaveProps {
-  salonId: string;
-  editBooking?: Booking;
-  isEditMode: boolean;
-  // Form values
-  customerName: string;
-  customerPhone: string;
-  customerType: CustomerType;
-  notes: string;
-  // Current values
-  currentDate: Date;
-  currentTime: string;
-  currentStaffId: string;
-  selectedStaffName: string;
-  // Service info
-  selectedServices: ServiceInfo[];
-  categoryMap: Record<string, string>;
-  // Callbacks
-  onClose: () => void;
-  validateForm: () => boolean;
-  // Customer
-  selectedCustomer: ExistingCustomer | null;
-}
-
-interface UseBookingSaveReturn {
-  isCreating: boolean;
-  isUpdating: boolean;
-  isCreatingCustomer: boolean;
-  showNewCustomerConfirm: boolean;
-  setShowNewCustomerConfirm: React.Dispatch<React.SetStateAction<boolean>>;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  handleConfirmNewCustomer: () => Promise<void>;
-}
-
-// Date 객체를 UTC 변환 없이 로컬 기준 YYYY-MM-DD 문자열로 직렬화
-// (JSON.stringify 시 UTC로 변환되어 날짜가 하루 밀리는 버그 방지)
-function toLocalDateStr(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return { primaryServiceId, servicePrice, endTime, serviceName, serviceIds };
 }
 
 export function useBookingSave({
@@ -82,48 +59,14 @@ export function useBookingSave({
 
   const [showNewCustomerConfirm, setShowNewCustomerConfirm] = useState(false);
 
-  // 시간 계산 헬퍼 함수
-  const calculateEndTime = useCallback(
-    (startTime: string, durationMinutes: number): string => {
-      const [hours, minutes] = startTime.split(':').map(Number);
-      const totalMinutes = hours * 60 + minutes + durationMinutes;
-      const endHours = Math.floor(totalMinutes / 60) % 24;
-      const endMinutes = totalMinutes % 60;
-      return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
-    },
-    []
-  );
-
-  // 선택된 서비스들의 카테고리명 조합 (중복 제거)
-  const getCategoryServiceName = useCallback(
-    (services: ServiceInfo[]) => {
-      const categoryNames = [...new Set(
-        services.map((s) => categoryMap[s.category_id] || s.name)
-      )];
-      return categoryNames.join(', ');
-    },
-    [categoryMap]
-  );
-
   // 실제 예약 저장 로직
   const saveBooking = useCallback(
     async (customerId: string) => {
       if (selectedServices.length === 0) return;
 
-      const primaryService = selectedServices[0];
-      const durationMinutes = selectedServices.reduce(
-        (sum, service) => sum + (service.duration_minutes || 60),
-        0
-      );
-      const servicePrice = selectedServices.reduce(
-        (sum, service) => sum + (service.base_price || service.price || 0),
-        0
-      );
-      const endTime = calculateEndTime(currentTime, durationMinutes);
-      const serviceName = getCategoryServiceName(selectedServices);
+      const { primaryServiceId, servicePrice, endTime, serviceName, serviceIds } =
+        buildBookingPayload(selectedServices, currentTime, categoryMap);
       const finalNotes = notes.trim() || undefined;
-
-      const serviceIds = selectedServices.map((s) => s.id);
 
       await createBooking({
         salonId,
@@ -132,7 +75,7 @@ export function useBookingSave({
         customerPhone: customerType === 'foreign' ? '' : customerPhone.trim(),
         staffId: currentStaffId,
         staffName: selectedStaffName,
-        serviceId: primaryService.id,
+        serviceId: primaryServiceId,
         serviceName,
         serviceIds,
         bookingMeta: {
@@ -155,9 +98,8 @@ export function useBookingSave({
     },
     [
       selectedServices,
-      calculateEndTime,
       currentTime,
-      getCategoryServiceName,
+      categoryMap,
       createBooking,
       salonId,
       customerName,
@@ -175,26 +117,15 @@ export function useBookingSave({
   const handleUpdateBooking = useCallback(async () => {
     if (!editBooking || selectedServices.length === 0) return;
 
-    const primaryService = selectedServices[0];
-    const durationMinutes = selectedServices.reduce(
-      (sum, service) => sum + (service.duration_minutes || 60),
-      0
-    );
-    const servicePrice = selectedServices.reduce(
-      (sum, service) => sum + (service.base_price || service.price || 0),
-      0
-    );
-    const endTime = calculateEndTime(currentTime, durationMinutes);
-    const serviceName = getCategoryServiceName(selectedServices);
+    const { primaryServiceId, servicePrice, endTime, serviceName, serviceIds } =
+      buildBookingPayload(selectedServices, currentTime, categoryMap);
     const finalNotes = notes.trim() || undefined;
-
-    const serviceIds = selectedServices.map((s) => s.id);
 
     await updateBooking({
       id: editBooking.id,
       updates: {
         staffId: currentStaffId,
-        serviceId: primaryService.id,
+        serviceId: primaryServiceId,
         serviceName,
         serviceIds,
         date: toLocalDateStr(currentDate),
@@ -202,7 +133,6 @@ export function useBookingSave({
         endTime,
         price: servicePrice,
         notes: finalNotes,
-        // 기존 booking_meta 보존 (sales_registered 등)
         bookingMeta: {
           ...(editBooking.bookingMeta || {}),
           category_name: serviceName,
@@ -215,9 +145,8 @@ export function useBookingSave({
   }, [
     editBooking,
     selectedServices,
-    calculateEndTime,
     currentTime,
-    getCategoryServiceName,
+    categoryMap,
     updateBooking,
     currentStaffId,
     currentDate,
