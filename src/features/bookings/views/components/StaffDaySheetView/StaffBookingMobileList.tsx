@@ -71,12 +71,23 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
               data-booking-id={booking.id}
               role="button"
               tabIndex={0}
-              onClick={() => onBookingClick(booking)}
+              onClick={() =>
+                booking.bookingMeta?.sales_registered
+                  ? setSalesBooking(booking)
+                  : onBookingClick(booking)
+              }
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') onBookingClick(booking);
+                if (e.key === 'Enter' || e.key === ' ') {
+                  booking.bookingMeta?.sales_registered
+                    ? setSalesBooking(booking)
+                    : onBookingClick(booking);
+                }
               }}
               className={cn(
-                'w-full text-left px-3 py-3 bg-white hover:bg-secondary-50 transition-colors',
+                'w-full text-left px-3 py-3 transition-colors',
+                booking.bookingMeta?.sales_registered
+                  ? 'bg-secondary-100 hover:bg-secondary-200'
+                  : 'bg-white hover:bg-secondary-50',
                 highlightedBookingId === booking.id && 'booking-highlight'
               )}
             >
@@ -96,6 +107,7 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
                   bookingId={booking.id}
                   status={booking.status}
                   onUpdate={handleStatusChange}
+                  disabled={!!booking.bookingMeta?.sales_registered}
                 />
               </div>
 

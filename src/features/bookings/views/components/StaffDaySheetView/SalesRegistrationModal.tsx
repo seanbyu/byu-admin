@@ -16,6 +16,7 @@ import {
 } from '@/features/salon-menus/hooks/useSalonMenus';
 import { ServiceSelector } from '../ServiceSelector';
 import { Booking } from '../../../types';
+import { BookingStatus } from '@/types';
 
 type PaymentMethod = 'CARD' | 'CASH' | 'TRANSFER' | '';
 type DiscountType = 'percent' | 'fixed';
@@ -252,6 +253,7 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
       paymentMethod: paymentMethod || undefined,
       productAmount: productAmountNum,
       productName: productName.trim() || undefined,
+      status: BookingStatus.COMPLETED,
       bookingMeta: {
         ...(booking.bookingMeta || {}),
         sales_registered: true,

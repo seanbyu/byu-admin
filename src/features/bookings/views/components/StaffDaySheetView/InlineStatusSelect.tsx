@@ -29,10 +29,12 @@ export const InlineStatusSelect = memo(function InlineStatusSelect({
   bookingId,
   status,
   onUpdate,
+  disabled,
 }: {
   bookingId: string;
   status: BookingStatus;
   onUpdate: (id: string, status: BookingStatus) => void;
+  disabled?: boolean;
 }) {
   const t = useTranslations();
 
@@ -50,6 +52,17 @@ export const InlineStatusSelect = memo(function InlineStatusSelect({
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
   }, []);
+
+  if (disabled) {
+    return (
+      <span
+        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${STATUS_STYLES[status]}`}
+        onClick={handleClick}
+      >
+        {t(STATUS_I18N_KEY[status])}
+      </span>
+    );
+  }
 
   return (
     <select

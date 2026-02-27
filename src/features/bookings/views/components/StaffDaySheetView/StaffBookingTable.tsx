@@ -144,10 +144,17 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                   <tr
                     data-booking-id={booking.id}
                     className={cn(
-                      'hover:bg-primary-50 cursor-pointer transition-colors',
+                      'cursor-pointer transition-colors',
+                      booking.bookingMeta?.sales_registered
+                        ? 'bg-secondary-100 hover:bg-secondary-200'
+                        : 'hover:bg-primary-50',
                       highlightedBookingId === booking.id && 'booking-highlight'
                     )}
-                    onClick={() => onBookingClick(booking)}
+                    onClick={() =>
+                      booking.bookingMeta?.sales_registered
+                        ? setSalesBooking(booking)
+                        : onBookingClick(booking)
+                    }
                   >
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-700 font-medium">
                       {slot}
@@ -169,6 +176,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                         bookingId={booking.id}
                         status={booking.status}
                         onUpdate={handleStatusChange}
+                        disabled={!!booking.bookingMeta?.sales_registered}
                       />
                     </td>
                     <td
