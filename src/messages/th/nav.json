@@ -1,6 +1,7 @@
 {
   "dashboard": "แดชบอร์ด",
   "bookings": "การจอง",
+  "bookingChart": "ชาร์ตการจอง",
   "bookingCalendar": "ปฏิทินการจอง",
   "onlineBookingSettings": "ตั้งค่าการจองออนไลน์",
   "customers": "ลูกค้า",

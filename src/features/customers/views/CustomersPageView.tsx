@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo, useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
@@ -10,7 +10,6 @@ import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { CustomerPageHeader } from './components/CustomerPageHeader';
 import { CustomerTable } from './components/CustomerTable';
 import { CustomerChartModal } from './components/CustomerChartModal';
-import { EditCustomerModal } from './components/EditCustomerModal';
 import { CreateCustomerModal } from './components/CreateCustomerModal';
 import { FilterSettingsModal } from './components/FilterSettingsModal';
 import {
@@ -141,6 +140,7 @@ const sortCustomers = (
 
 export default function CustomersPageView() {
   const t = useTranslations();
+  const router = useRouter();
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
@@ -151,7 +151,7 @@ export default function CustomersPageView() {
 
   // Zustand store (선택적 구독)
   const { activeFilter, searchQuery, sortBy, sortOrder } = useCustomerFilterState();
-  const { showChartModal, showEditModal, showCreateModal, selectedCustomerId } = useCustomerModals();
+  const { showChartModal, showCreateModal, selectedCustomerId } = useCustomerModals();
   const { currentPage, pageSize } = useCustomerPagination();
   const { selectedCustomerIds } = useCustomerSelection();
   const actions = useCustomerUIActions();
@@ -269,20 +269,20 @@ export default function CustomersPageView() {
       .sort((a, b) => a.artistName.localeCompare(b.artistName));
   }, [customers]);
 
-  // advanced-event-handler-refs: 안정적인 이벤트 핸들러
+  // 고객 클릭 → 상세 페이지로 이동 (고객번호로 라우팅)
   const handleCustomerClick = useCallback(
     (customerId: string) => {
-      actions.openEditModal(customerId);
+      const customer = customers.find((c) => c.id === customerId);
+      const customerNo = customer?.customer_number;
+      if (customerNo) {
+        router.push(`/customers/detail/${customerNo}`);
+      }
     },
-    [actions]
+    [router, customers]
   );
 
   const handleCloseChartModal = useCallback(() => {
     actions.closeChartModal();
-  }, [actions]);
-
-  const handleCloseEditModal = useCallback(() => {
-    actions.closeEditModal();
   }, [actions]);
 
   const handleAddCustomer = useCallback(() => {
@@ -304,29 +304,25 @@ export default function CustomersPageView() {
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-          <div className="text-secondary-500">{t('common.loading')}</div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+        <div className="text-secondary-500">{t('common.loading')}</div>
+      </div>
     );
   }
 
   // js-early-exit: 에러 상태 조기 반환
   if (error) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-          <div className="text-error-500">
-            {t('common.error')}: {error.message}
-          </div>
+      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+        <div className="text-error-500">
+          {t('common.error')}: {error.message}
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
+    <>
       <div className="space-y-4 md:space-y-6">
         {/* Header with tabs, search, and view toggle */}
         <CustomerPageHeader
@@ -376,15 +372,6 @@ export default function CustomersPageView() {
         />
       )}
 
-      {/* Edit Customer Modal */}
-      {showEditModal && selectedCustomerId && (
-        <EditCustomerModal
-          isOpen={showEditModal}
-          customer={customers.find((c) => c.id === selectedCustomerId) || null}
-          onClose={handleCloseEditModal}
-        />
-      )}
-
       {/* Create Customer Modal */}
       {showCreateModal && (
         <CreateCustomerModal
@@ -401,6 +388,6 @@ export default function CustomersPageView() {
           salonId={salonId}
         />
       )}
-    </Layout>
+    </>
   );
 }

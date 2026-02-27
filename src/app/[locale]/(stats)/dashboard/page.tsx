@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
@@ -94,8 +93,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Welcome */}
         <div>
           <h1 className="text-3xl font-bold text-secondary-900">
@@ -217,6 +215,5 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
-    </Layout>
   );
 }

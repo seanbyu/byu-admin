@@ -1,6 +1,7 @@
 {
   "dashboard": "Dashboard",
   "bookings": "Bookings",
+  "bookingChart": "Booking Chart",
   "bookingCalendar": "Booking Calendar",
   "onlineBookingSettings": "Online Booking Settings",
   "customers": "Customers",

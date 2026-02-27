@@ -3,7 +3,6 @@
 import { useMemo, useCallback, useEffect, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
@@ -214,16 +213,14 @@ export default function BookingsPageView() {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-          <div className="text-secondary-500">{t('common.loading')}</div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+        <div className="text-secondary-500">{t('common.loading')}</div>
+      </div>
     );
   }
 
   return (
-    <Layout>
+    <>
       <div className="space-y-4 md:space-y-6">
         {/* 헤더 */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -313,6 +310,6 @@ export default function BookingsPageView() {
           editBooking={pageState.selectedBooking}
         />
       )}
-    </Layout>
+    </>
   );
 }

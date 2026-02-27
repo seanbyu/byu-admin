@@ -1,6 +1,7 @@
 {
   "dashboard": "대시보드",
   "bookings": "예약 관리",
+  "bookingChart": "예약차트",
   "bookingCalendar": "예약 캘린더",
   "onlineBookingSettings": "온라인 예약설정",
   "customers": "고객 관리",

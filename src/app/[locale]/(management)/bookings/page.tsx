@@ -1,5 +1,5 @@
-import BookingsPageView from '@/features/bookings/views/BookingsPageView';
+import { redirect } from 'next/navigation';
 
 export default function BookingsPage() {
-  return <BookingsPageView />;
+  redirect('/bookings/chart');
 }

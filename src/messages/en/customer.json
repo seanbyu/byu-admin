@@ -1,5 +1,5 @@
 {
-  "title": "Customer Management",
+  "title": "Customer Chart",
   "pageDescription": "Manage customer information and view service history",
   "customerNumber": "Customer Number",
   "name": "Name",
@@ -70,6 +70,10 @@
     "birthDate": "Date of Birth",
     "occupation": "Occupation",
     "group": "Group"
+  },
+
+  "detail": {
+    "title": "Customer Details"
   },
 
   "edit": {

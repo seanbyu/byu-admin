@@ -3,7 +3,6 @@
 import { useCallback, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Layout } from '@/components/layout/Layout';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -192,8 +191,7 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
   // Render
   // ============================================
   return (
-    <Layout>
-      <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="px-1">
           <h1 className="text-xl sm:text-2xl font-bold text-secondary-900">
@@ -260,6 +258,5 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
           )}
         </div>
       </div>
-    </Layout>
   );
 }

@@ -42,11 +42,19 @@ export function useSidebarMenu(): MenuItem[] {
         permissionKey: 'dashboard',
       },
       {
+        id: 'booking-management',
         name: t('nav.bookings'),
         icon: Calendar,
-        href: '/bookings',
         roles: [UserRole.MANAGER, UserRole.ARTIST, UserRole.STAFF, UserRole.ADMIN],
-        permissionKey: 'bookings',
+        subItems: [
+          {
+            name: t('nav.bookingChart'),
+            icon: Calendar,
+            href: '/bookings/chart',
+            roles: [UserRole.MANAGER, UserRole.ARTIST, UserRole.STAFF, UserRole.ADMIN],
+            permissionKey: 'bookings',
+          },
+        ],
       },
       {
         id: 'customer-management',

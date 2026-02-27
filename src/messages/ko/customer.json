@@ -1,5 +1,5 @@
 {
-  "title": "고객 관리",
+  "title": "고객 차트",
   "pageDescription": "고객 정보를 관리하고 시술 이력을 확인하세요",
   "customerNumber": "고객 번호",
   "name": "이름",
@@ -70,6 +70,10 @@
     "birthDate": "생년월일",
     "occupation": "직업",
     "group": "그룹"
+  },
+
+  "detail": {
+    "title": "고객 상세정보"
   },
 
   "edit": {

@@ -47,6 +47,8 @@ export const Sidebar: React.FC = () => {
       return data;
     },
     enabled: !!user?.salonId,
+    staleTime: 1000 * 60 * 10, // 10분
+    gcTime: 1000 * 60 * 30, // 30분
   });
 
   const handleNavLinkClick = React.useCallback(() => {

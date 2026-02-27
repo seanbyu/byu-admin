@@ -1,6 +1,5 @@
 'use client';
 
-import { Layout } from '@/components/layout/Layout';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { ShopSettingsSection } from '@/features/bookings/views/components/ShopSettingsSection';
@@ -15,39 +14,35 @@ export default function OnlineBookingSettingsPage() {
 
   if (!salonId) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-          <div className="text-secondary-500">{t('common.loading')}</div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+        <div className="text-secondary-500">{t('common.loading')}</div>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="flex flex-col gap-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-xl font-bold text-secondary-900">
-            {t('nav.onlineBookingSettings')}
-          </h1>
-          <p className="text-sm text-secondary-600 mt-2">
-            {t('booking.settings.description')}
-          </p>
-        </div>
-
-        {/* 직원 예약 허용 설정 */}
-        <StaffBookingSection salonId={salonId} />
-
-        {/* 통역 서비스 설정 */}
-        <InterpreterServiceSection salonId={salonId} />
-
-        {/* 문의 채널 설정 */}
-        <ContactChannelsSection salonId={salonId} />
-
-        {/* 샵 영업 설정 */}
-        <ShopSettingsSection salonId={salonId} />
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl font-bold text-secondary-900">
+          {t('nav.onlineBookingSettings')}
+        </h1>
+        <p className="text-sm text-secondary-600 mt-2">
+          {t('booking.settings.description')}
+        </p>
       </div>
-    </Layout>
+
+      {/* 직원 예약 허용 설정 */}
+      <StaffBookingSection salonId={salonId} />
+
+      {/* 통역 서비스 설정 */}
+      <InterpreterServiceSection salonId={salonId} />
+
+      {/* 문의 채널 설정 */}
+      <ContactChannelsSection salonId={salonId} />
+
+      {/* 샵 영업 설정 */}
+      <ShopSettingsSection salonId={salonId} />
+    </div>
   );
 }

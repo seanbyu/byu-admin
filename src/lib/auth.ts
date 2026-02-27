@@ -423,11 +423,22 @@ export async function getCurrentUser(): Promise<User | null> {
       return null;
     }
 
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', sessionData.session.user.id)
-      .single();
+    // users + staff_profiles 병렬 조회
+    const userId = sessionData.session.user.id;
+    const [userResult, profileResult] = await Promise.all([
+      supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single(),
+      supabase
+        .from('staff_profiles')
+        .select('salon_id, is_owner, is_approved, permissions')
+        .eq('user_id', userId)
+        .maybeSingle(),
+    ]);
+
+    const { data: userData, error: userError } = userResult;
 
     if (userError || !userData) {
       // DB에 정보가 없으면 auth 정보로 fallback (임시)
@@ -453,39 +464,33 @@ export async function getCurrentUser(): Promise<User | null> {
       return user;
     }
 
-    // staff_profiles에서 salon_id, is_owner, is_approved, permissions 조회
+    // staff_profiles 결과 처리
     const role = userData.role?.toUpperCase();
     let salonId: string | undefined = undefined;
     let isOwner = false;
     let isApproved = true;
     let permissions: any[] = [];
 
-    if (role === 'ADMIN' || role === 'MANAGER' || role === 'ARTIST' || role === 'STAFF') {
-      const { data: profileData, error: profileError } = await supabase
-        .from('staff_profiles')
-        .select('salon_id, is_owner, is_approved, permissions')
-        .eq('user_id', userData.id)
-        .maybeSingle();
+    const { data: profileData, error: profileError } = profileResult;
 
-      if (profileError) {
-        console.warn('Error fetching staff_profiles:', profileError.message);
-      }
+    if (profileError) {
+      console.warn('Error fetching staff_profiles:', profileError.message);
+    }
 
-      if (profileData) {
-        salonId = profileData.salon_id;
-        isOwner = profileData.is_owner ?? false;
-        isApproved = profileData.is_approved ?? true;
+    if (profileData && (role === 'ADMIN' || role === 'MANAGER' || role === 'ARTIST' || role === 'STAFF')) {
+      salonId = profileData.salon_id;
+      isOwner = profileData.is_owner ?? false;
+      isApproved = profileData.is_approved ?? true;
 
-        if (profileData.permissions) {
-          permissions = Object.entries(profileData.permissions || {}).map(
-            ([key, val]: [string, any]) => ({
-              module: key,
-              canRead: val.view || false,
-              canWrite: val.edit || val.create || false,
-              canDelete: val.delete || false,
-            })
-          );
-        }
+      if (profileData.permissions) {
+        permissions = Object.entries(profileData.permissions || {}).map(
+          ([key, val]: [string, any]) => ({
+            module: key,
+            canRead: val.view || false,
+            canWrite: val.edit || val.create || false,
+            canDelete: val.delete || false,
+          })
+        );
       }
     }
 

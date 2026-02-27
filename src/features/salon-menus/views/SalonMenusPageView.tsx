@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
-import { Layout } from '@/components/layout/Layout';
 import { useSalonMenusView } from '../hooks/useSalonMenusView';
 import { PageHeader } from './components/PageHeader';
 import { IndustryTabs } from './components/IndustryTabs';
@@ -22,9 +21,7 @@ const IndustrySelectionModal = dynamic(
 function LoadingState() {
   const t = useTranslations('common');
   return (
-    <Layout>
-      <div className="p-8">{t('loading')}</div>
-    </Layout>
+    <div className="p-8">{t('loading')}</div>
   );
 }
 
@@ -69,8 +66,7 @@ export default function SalonMenusPageView() {
   }
 
   return (
-    <Layout>
-      <div className="p-3 sm:p-4 md:p-6 xl:p-8 max-w-7xl mx-auto">
+    <div className="p-3 sm:p-4 md:p-6 xl:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <PageHeader
           onSettingsClick={canEditMenus ? toggleReorderSettings : undefined}
@@ -119,6 +115,5 @@ export default function SalonMenusPageView() {
           )}
         </div>
       </div>
-    </Layout>
   );
 }
