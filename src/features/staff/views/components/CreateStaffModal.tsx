@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { supabase } from '@/lib/supabase/client';
-import { createStaff } from '@/actions/staff';
+import { createStaff } from '@/features/staff/actions';
 import { Loader2 } from 'lucide-react';
 import { createAuthApi } from '@/features/auth/api';
 import { PasswordWithConfirm, validatePassword } from '@/components/ui/PasswordInput';

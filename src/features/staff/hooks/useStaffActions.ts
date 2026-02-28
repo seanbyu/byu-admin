@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase/client';
-import { deleteStaff, softDeleteStaff, cancelResignation } from '@/actions/staff';
+import { deleteStaff, softDeleteStaff, cancelResignation } from '@/features/staff/actions';
 import { Staff, StaffPermission } from '../types';
 
 interface UseStaffActionsParams {

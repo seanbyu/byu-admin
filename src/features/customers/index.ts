@@ -6,3 +6,6 @@ export { customerKeys } from './hooks/queries';
 
 // Hooks
 export { useCustomers } from './hooks/useCustomers';
+
+// Server Actions
+export { createCustomer, updateCustomer, deleteCustomer } from './actions';
