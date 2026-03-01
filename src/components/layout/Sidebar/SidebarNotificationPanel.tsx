@@ -56,7 +56,7 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
         setHighlightedBookingId(notif.booking_id);
       }
 
-      if (pathname !== '/bookings') {
+      if (!pathname.includes('/bookings')) {
         router.push('/bookings');
       }
       onNavClick();
@@ -110,16 +110,12 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
               notifications.map((notif) => {
                 const detail = getNotificationDetail(notif, t, locale);
                 return (
-                  <div
+                  <button
                     key={notif.id}
-                    role="button"
-                    tabIndex={0}
+                    type="button"
                     onClick={() => handleNotificationClick(notif)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleNotificationClick(notif);
-                    }}
                     className={cn(
-                      'group/notif flex flex-col gap-0.5 px-2.5 py-2 rounded-lg text-[11px] md:text-xs transition-colors cursor-pointer',
+                      'group/notif w-full text-left flex flex-col gap-0.5 px-2.5 py-2 rounded-lg text-[11px] md:text-xs transition-colors cursor-pointer',
                       notif.read_at
                         ? 'bg-transparent text-sidebar-text-muted hover:bg-sidebar-hover'
                         : 'bg-primary-900/30 text-sidebar-text hover:bg-primary-900/50'
@@ -132,15 +128,23 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
                       <span className="font-medium truncate flex-1">
                         {getNotificationTitle(notif, t)}
                       </span>
-                      <button
+                      <span
+                        role="button"
+                        tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteNotification(notif.id);
                         }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.stopPropagation();
+                            deleteNotification(notif.id);
+                          }
+                        }}
                         className="shrink-0 p-0.5 rounded text-sidebar-text-subtle hover:text-error-400 transition-colors opacity-0 group-hover/notif:opacity-100"
                       >
                         <X size={12} />
-                      </button>
+                      </span>
                     </div>
                     {detail.dateTime && (
                       <p className="text-[10px] md:text-[11px] text-sidebar-text-muted pl-0.5 truncate">
@@ -155,7 +159,7 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
                     <div className="text-[10px] md:text-[11px] text-sidebar-text-subtle pl-0.5">
                       {getRelativeTime(notif.created_at, t)}
                     </div>
-                  </div>
+                  </button>
                 );
               })
             )}

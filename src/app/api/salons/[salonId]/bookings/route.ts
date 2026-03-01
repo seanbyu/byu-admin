@@ -43,22 +43,42 @@ type Locale = "ko" | "en" | "th";
 // ============================================
 // 다국어 알림 템플릿 (ko / en / th)
 // ============================================
+type NotifParams = { customerName: string; date: string; time: string; artistName: string; categoryName: string };
+
 const NOTIFICATION_TEMPLATES = {
   BOOKING_CONFIRMED: {
     ko: {
       title: (salonName: string) => `${salonName} 예약 알림`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
+      body: (p: NotifParams) =>
         `${p.customerName}님, ${p.date} ${p.time} ${p.artistName}님과의 ${p.categoryName} 예약이 확정되었습니다.`,
     },
     en: {
       title: (salonName: string) => `${salonName} Booking Confirmation`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
+      body: (p: NotifParams) =>
         `${p.customerName}, your ${p.categoryName} appointment with ${p.artistName} on ${p.date} at ${p.time} has been confirmed.`,
     },
     th: {
       title: (salonName: string) => `${salonName} แจ้งเตือนการจอง`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
+      body: (p: NotifParams) =>
         `${p.customerName} การจอง ${p.categoryName} กับ ${p.artistName} วันที่ ${p.date} เวลา ${p.time} ได้รับการยืนยันแล้วค่ะ`,
+    },
+  },
+  // 유저가 일정 변경 요청 후 관리자가 확정한 경우 (DB 타입은 BOOKING_CONFIRMED 재사용)
+  BOOKING_CHANGE_CONFIRMED: {
+    ko: {
+      title: (salonName: string) => `${salonName} 예약 알림`,
+      body: (p: NotifParams) =>
+        `${p.customerName}님, ${p.date} ${p.time} ${p.artistName}님과의 ${p.categoryName} 예약 변경이 확정되었습니다.`,
+    },
+    en: {
+      title: (salonName: string) => `${salonName} Booking Change Confirmed`,
+      body: (p: NotifParams) =>
+        `${p.customerName}, your rescheduled ${p.categoryName} appointment with ${p.artistName} on ${p.date} at ${p.time} has been confirmed.`,
+    },
+    th: {
+      title: (salonName: string) => `${salonName} แจ้งเตือนการจอง`,
+      body: (p: NotifParams) =>
+        `${p.customerName} การเปลี่ยนเวลา ${p.categoryName} กับ ${p.artistName} วันที่ ${p.date} เวลา ${p.time} ได้รับการยืนยันแล้วค่ะ`,
     },
   },
   BOOKING_CANCELLED: {
@@ -140,13 +160,25 @@ function formatDate(dateStr: string, locale: Locale): string {
 /**
  * 예약 알림 공통: notifications INSERT + LINE Edge Function 호출
  */
+type TemplateKey = keyof typeof NOTIFICATION_TEMPLATES;
+type DbNotificationType = "BOOKING_CONFIRMED" | "BOOKING_CANCELLED" | "BOOKING_MODIFIED";
+
+// BOOKING_CHANGE_CONFIRMED는 DB enum에 없으므로 BOOKING_CONFIRMED 타입으로 저장
+const TEMPLATE_TO_DB_TYPE: Record<TemplateKey, DbNotificationType> = {
+  BOOKING_CONFIRMED: "BOOKING_CONFIRMED",
+  BOOKING_CHANGE_CONFIRMED: "BOOKING_CONFIRMED",
+  BOOKING_CANCELLED: "BOOKING_CANCELLED",
+  BOOKING_MODIFIED: "BOOKING_MODIFIED",
+};
+
 async function sendBookingNotification(
   adminClient: ReturnType<typeof createAdminClient>,
   booking: BookingDetails,
-  notificationType: "BOOKING_CONFIRMED" | "BOOKING_CANCELLED" | "BOOKING_MODIFIED",
+  templateKey: TemplateKey,
 ) {
   const locale = getNotificationLocale(booking);
-  const template = NOTIFICATION_TEMPLATES[notificationType][locale];
+  const template = NOTIFICATION_TEMPLATES[templateKey][locale];
+  const dbType = TEMPLATE_TO_DB_TYPE[templateKey];
 
   const customerName = (booking.customer as any)?.name || "Customer";
   const artistName = (booking.artist as any)?.name || "";
@@ -174,17 +206,20 @@ async function sendBookingNotification(
     locale,
   };
 
-  // 중복 체크
+  // 중복 체크: 10분 이내 동일 타입 알림이 있으면 재발송 방지
+  // (reschedule 후 재확정 시 재발송 허용하기 위해 시간 기반으로 체크)
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data: existing } = await adminClient
     .from("notifications")
     .select("id")
     .eq("booking_id", booking.id)
-    .eq("notification_type", notificationType)
+    .eq("notification_type", dbType)
     .eq("channel", "LINE")
+    .gt("created_at", tenMinutesAgo)
     .limit(1);
 
   if (existing && existing.length > 0) {
-    console.log(`[Booking Notification] ${notificationType} LINE already exists for booking:`, booking.id);
+    console.log(`[Booking Notification] ${templateKey} LINE already sent recently for booking:`, booking.id);
     return;
   }
 
@@ -195,7 +230,7 @@ async function sendBookingNotification(
       booking_id: booking.id,
       salon_id: booking.salon_id,
       channel: "LINE",
-      notification_type: notificationType,
+      notification_type: dbType,
       recipient_type: "CUSTOMER",
       recipient_customer_id: booking.customer_id,
       title,
@@ -217,7 +252,7 @@ async function sendBookingNotification(
       booking_id: booking.id,
       salon_id: booking.salon_id,
       channel: "IN_APP",
-      notification_type: notificationType,
+      notification_type: dbType,
       recipient_type: "CUSTOMER",
       recipient_customer_id: booking.customer_id,
       title,
@@ -242,18 +277,21 @@ async function sendBookingNotification(
     }
   }
 
-  console.log(`[Booking Notification] Created ${notificationType} (${locale}) notifications for booking:`, booking.id);
+  console.log(`[Booking Notification] Created ${templateKey} (${locale}) notifications for booking:`, booking.id);
 }
 
 /**
  * 예약 확정 알림
+ * @param isReschedule true면 "예약 변경이 확정되었습니다" 메시지 발송
  */
 async function sendBookingConfirmedNotifications(
   adminClient: ReturnType<typeof createAdminClient>,
   booking: BookingDetails,
+  isReschedule = false,
 ) {
   try {
-    await sendBookingNotification(adminClient, booking, "BOOKING_CONFIRMED");
+    const templateKey: TemplateKey = isReschedule ? "BOOKING_CHANGE_CONFIRMED" : "BOOKING_CONFIRMED";
+    await sendBookingNotification(adminClient, booking, templateKey);
   } catch (error) {
     console.error("[Booking Notification] Confirmed error:", error);
   }
@@ -360,13 +398,24 @@ export async function POST(
           // 상태 변경에 따른 알림 발송
           if (data.updates?.status === 'CONFIRMED' || data.updates?.status === 'CANCELLED') {
             const adminClient = createAdminClient();
-            getBookingWithDetails(adminClient, data.id).then((booking) => {
-              if (booking) {
-                if (data.updates.status === 'CONFIRMED') {
-                  sendBookingConfirmedNotifications(adminClient, booking);
-                } else {
-                  sendBookingCancelledNotifications(adminClient, booking);
+            getBookingWithDetails(adminClient, data.id).then(async (booking) => {
+              if (!booking) return;
+              if (data.updates.status === 'CONFIRMED') {
+                // 유저가 일정 변경 요청한 경우 → "변경 확정" 메시지 발송
+                const isReschedule = (booking as any).booking_meta?.reschedule_pending === true;
+                await sendBookingConfirmedNotifications(adminClient, booking, isReschedule);
+
+                // reschedule_pending 플래그 클리어
+                if (isReschedule) {
+                  const currentMeta = (booking as any).booking_meta as Record<string, unknown> || {};
+                  const { reschedule_pending, ...restMeta } = currentMeta;
+                  await adminClient
+                    .from('bookings')
+                    .update({ booking_meta: restMeta })
+                    .eq('id', data.id);
                 }
+              } else {
+                sendBookingCancelledNotifications(adminClient, booking);
               }
             });
           }
