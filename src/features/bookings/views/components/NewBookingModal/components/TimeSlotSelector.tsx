@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { BusinessHours } from '@/types';
 
 // 어드민은 항상 30분 단위 고정
@@ -45,6 +46,8 @@ export const TimeSlotSelector = memo(function TimeSlotSelector({
   required,
   error,
 }: TimeSlotSelectorProps) {
+  const t = useTranslations('booking');
+
   // 선택된 날짜의 요일에 해당하는 영업시간 조회
   const todayHours = useMemo(() => {
     const dayOfWeek = selectedDate.getDay(); // 0 = 일요일
@@ -76,7 +79,7 @@ export const TimeSlotSelector = memo(function TimeSlotSelector({
         // 휴무일
         <div className="flex items-center gap-2 px-3 py-2.5 bg-secondary-50 border border-secondary-200 rounded-lg text-sm text-secondary-500">
           <span className="text-base">🚫</span>
-          <span>휴무일 — 예약 불가</span>
+          <span>{t('dayOffUnavailable')}</span>
         </div>
       ) : (
         <div className="rounded-lg border border-secondary-200 bg-secondary-50 p-2">

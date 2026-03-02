@@ -106,8 +106,8 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
     const { salonId } = await params;
     requireField(salonId, "salonId");
 
-    const body = await req.json();
-    const { id } = body as { id: string };
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id") ?? undefined;
     requireField(id, "id");
 
     const supabase = createClient(req);

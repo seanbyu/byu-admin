@@ -17,7 +17,7 @@ import { useCategoryMap, useMenuMap } from '../../../hooks/useMenuMaps';
 import { useServiceGroups } from '../../../hooks/useServiceGroups';
 import { NewBookingModalProps } from './types';
 import { useBookingForm, useCustomerSearch, useBookingSave } from './hooks';
-import { CustomerSection, NewCustomerConfirmModal, TimeSlotSelector } from './components';
+import { CustomerSection, NewCustomerConfirmModal, TimeSlotSelector, BookingDatePicker } from './components';
 import { ServiceSelector } from '../ServiceSelector';
 
 function NewBookingModalComponent({
@@ -288,13 +288,11 @@ function NewBookingModalComponent({
           </div>
 
           {/* 날짜 */}
-          <Input
-            type="date"
+          <BookingDatePicker
             label={t('booking.date')}
             required
-            value={formatDate(form.currentDate, 'yyyy-MM-dd')}
-            onChange={form.handleDateChange}
-            className="text-secondary-900 placeholder:text-secondary-500 focus:ring-primary-500"
+            value={form.currentDate}
+            onChange={form.setDate}
           />
 
           {/* 시간 선택 (어드민: 항상 30분 단위, 영업시간 기반) */}

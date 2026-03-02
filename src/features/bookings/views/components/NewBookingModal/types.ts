@@ -75,6 +75,7 @@ export interface UseBookingFormReturn {
   setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   // Handlers
   handleDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setDate: (date: Date) => void;
   handleTimeChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   setTime: (time: string) => void;
   handleStaffChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;

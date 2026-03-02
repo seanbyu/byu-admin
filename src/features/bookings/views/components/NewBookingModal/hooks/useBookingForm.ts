@@ -82,6 +82,17 @@ export function useBookingForm({
     [isEditMode, onDateChange]
   );
 
+  const setDate = useCallback(
+    (newDate: Date) => {
+      if (isEditMode) {
+        setInternalDate(newDate);
+      } else {
+        onDateChange(newDate);
+      }
+    },
+    [isEditMode, onDateChange]
+  );
+
   const handleTimeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const newTime = e.target.value;
@@ -185,6 +196,7 @@ export function useBookingForm({
     setNotes,
     setErrors,
     handleDateChange,
+    setDate,
     handleTimeChange,
     setTime,
     handleStaffChange,

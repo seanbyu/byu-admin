@@ -17,6 +17,7 @@ import {
 } from '@/features/notifications/hooks/useNotifications';
 import { type Notification, getBookingInfo } from '@/features/notifications/api';
 import { useBookingsUIStore } from '@/features/bookings/stores/bookingsStore';
+import { useAuthStore } from '@/store/authStore';
 
 interface SidebarNotificationPanelProps {
   onNavClick: () => void;
@@ -31,6 +32,9 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
 
+  const { user } = useAuthStore();
+  const salonId = user?.salonId;
+
   const { data: notifications = [], isLoading } = useNotifications(20);
   const { data: unreadCount = 0 } = useUnreadCount();
   const { mutate: markAsRead } = useMarkAsRead();
@@ -43,11 +47,11 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
         markAsRead(notif.id);
       }
 
-      if (notif.booking_id) {
+      if (notif.booking_id && salonId) {
         const { setHighlightedBookingId, setSelectedDate, setSelectedStaffId } = useBookingsUIStore.getState();
 
         // 예약 날짜 + 담당 직원 조회하여 해당 날짜/직원 탭으로 이동
-        const info = await getBookingInfo(notif.booking_id);
+        const info = await getBookingInfo(salonId, notif.booking_id);
         if (info) {
           setSelectedDate(new Date(info.booking_date + 'T00:00:00'));
           setSelectedStaffId(info.artist_id);
@@ -61,7 +65,7 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
       }
       onNavClick();
     },
-    [markAsRead, pathname, router, onNavClick]
+    [markAsRead, pathname, router, onNavClick, salonId]
   );
 
   return (

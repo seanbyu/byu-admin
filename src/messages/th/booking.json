@@ -12,6 +12,7 @@
   "completed": "เสร็จสิ้น",
   "cancelled": "ยกเลิก",
   "noShow": "ไม่มาตามนัด",
+  "dayOffUnavailable": "วันหยุด — ไม่สามารถจองได้",
   "newBookingAlert": "มีการจองออนไลน์ใหม่เข้ามา!",
   "adminBookingAlert": "ลงทะเบียนการจองใหม่แล้ว",
   "bookingRescheduledAlert": "ลูกค้าเปลี่ยนเวลาการจอง",
