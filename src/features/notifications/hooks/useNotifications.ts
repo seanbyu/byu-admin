@@ -52,7 +52,7 @@ export function useMarkAsRead() {
   const salonId = user?.salonId;
 
   return useMutation({
-    mutationFn: markAsRead,
+    mutationFn: (id: string) => markAsRead(salonId!, id),
     onSuccess: () => {
       // 알림 목록과 읽지 않은 수 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ["notifications", salonId] });
@@ -88,7 +88,7 @@ export function useDeleteNotification() {
   const salonId = user?.salonId;
 
   return useMutation({
-    mutationFn: deleteNotification,
+    mutationFn: (id: string) => deleteNotification(salonId!, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications", salonId] });
       queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count", salonId] });
