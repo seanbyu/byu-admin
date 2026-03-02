@@ -28,9 +28,10 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
     ...BOOKINGS_QUERY_OPTIONS,
   });
 
-  // Invalidate helper
+  // Invalidate helper — invalidate + force immediate refetch
   const invalidateBookings = useCallback(() => {
     queryClient.invalidateQueries({ queryKey });
+    queryClient.refetchQueries({ queryKey, type: 'active' });
   }, [queryClient, queryKey]);
 
   // Create booking

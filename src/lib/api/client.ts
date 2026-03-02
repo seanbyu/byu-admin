@@ -216,6 +216,7 @@ class ApiClient {
       : '';
     return this.request<T>(`${endpoint}${queryString}`, {
       method: 'GET',
+      cache: 'no-store',
     });
   }
 

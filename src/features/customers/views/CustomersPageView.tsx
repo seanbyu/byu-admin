@@ -4,6 +4,7 @@ import { useMemo, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/Card';
+import { Spinner } from '@/components/ui/Spinner';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
@@ -305,7 +306,7 @@ export default function CustomersPageView() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <div className="text-secondary-500">{t('common.loading')}</div>
+        <Spinner size="xl" />
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { memo } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
+import { Spinner } from '@/components/ui/Spinner';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useSalonMenusView } from '../hooks/useSalonMenusView';
 import { PageHeader } from './components/PageHeader';
@@ -16,14 +17,6 @@ const IndustrySelectionModal = dynamic(
   () => import('./components/IndustrySelectionModal'),
   { ssr: false }
 );
-
-// 로딩 컴포넌트 (rendering-hoist-jsx)
-function LoadingState() {
-  const t = useTranslations('common');
-  return (
-    <div className="p-8">{t('loading')}</div>
-  );
-}
 
 // 살롱 정보 없음 컴포넌트 (rendering-hoist-jsx)
 function NoSalonState() {
@@ -68,7 +61,11 @@ export default function SalonMenusPageView({
 
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
-    return <LoadingState />;
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+        <Spinner size="xl" />
+      </div>
+    );
   }
 
   return (
