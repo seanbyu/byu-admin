@@ -43,7 +43,7 @@ export const StaffPageHeader = memo(function StaffPageHeader({
       {showAddButton && (
         <Button
           variant="outline"
-          className="w-full sm:w-auto h-10 md:h-10"
+          className="w-full sm:w-auto h-10 md:h-10 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           onClick={onInviteClick}
         >
           {t('register')}
