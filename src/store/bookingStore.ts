@@ -6,4 +6,4 @@
  * import { useBookingsStore } from '@/features/bookings/stores';
  */
 
-export { useBookingsStore as useBookingStore } from "@/features/bookings/stores";
+export { useBookingsUIStore as useBookingStore } from "@/features/bookings/stores";

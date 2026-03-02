@@ -5,7 +5,7 @@ export class ProductRepository extends BaseRepository {
   // ─── Categories ───────────────────────────────────────
 
   async getCategories(salonId: string): Promise<ProductCategory[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from('product_categories')
       .select('*')
       .eq('salon_id', salonId)
@@ -21,7 +21,7 @@ export class ProductRepository extends BaseRepository {
     name: string,
     displayOrder: number
   ): Promise<ProductCategory> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from('product_categories')
       .insert({ salon_id: salonId, name, display_order: displayOrder })
       .select()
@@ -32,7 +32,7 @@ export class ProductRepository extends BaseRepository {
   }
 
   async updateCategory(id: string, name: string): Promise<ProductCategory> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from('product_categories')
       .update({ name, updated_at: new Date().toISOString() })
       .eq('id', id)
@@ -44,7 +44,7 @@ export class ProductRepository extends BaseRepository {
   }
 
   async deleteCategory(id: string): Promise<void> {
-    const { error } = await this.supabase
+    const { error } = await (this.supabase as any)
       .from('product_categories')
       .delete()
       .eq('id', id);
@@ -57,20 +57,20 @@ export class ProductRepository extends BaseRepository {
   ): Promise<void> {
     const results = await Promise.all(
       categories.map((cat) =>
-        this.supabase
+        (this.supabase as any)
           .from('product_categories')
           .update({ display_order: cat.display_order })
           .eq('id', cat.id)
       )
     );
-    const err = results.find((r) => r.error)?.error;
+    const err = results.find((r: any) => r.error)?.error;
     if (err) throw new Error(err.message);
   }
 
   // ─── Products ─────────────────────────────────────────
 
   async getProducts(salonId: string, categoryId?: string): Promise<Product[]> {
-    let query = this.supabase
+    let query = (this.supabase as any)
       .from('salon_products')
       .select('*')
       .eq('salon_id', salonId)
@@ -91,7 +91,7 @@ export class ProductRepository extends BaseRepository {
     categoryId: string,
     productData: { name: string; price: number; displayOrder: number }
   ): Promise<Product> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from('salon_products')
       .insert({
         salon_id: salonId,
@@ -109,7 +109,7 @@ export class ProductRepository extends BaseRepository {
   }
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
-    const { data, error } = await this.supabase
+    const { data, error } = await (this.supabase as any)
       .from('salon_products')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
@@ -121,7 +121,7 @@ export class ProductRepository extends BaseRepository {
   }
 
   async deleteProduct(id: string): Promise<void> {
-    const { error } = await this.supabase
+    const { error } = await (this.supabase as any)
       .from('salon_products')
       .delete()
       .eq('id', id);
@@ -134,13 +134,13 @@ export class ProductRepository extends BaseRepository {
   ): Promise<void> {
     const results = await Promise.all(
       products.map((p) =>
-        this.supabase
+        (this.supabase as any)
           .from('salon_products')
           .update({ display_order: p.display_order })
           .eq('id', p.id)
       )
     );
-    const err = results.find((r) => r.error)?.error;
+    const err = results.find((r: any) => r.error)?.error;
     if (err) throw new Error(err.message);
   }
 }

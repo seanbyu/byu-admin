@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { DayPicker, useDayPicker, type CalendarMonth } from 'react-day-picker';
 import { useLocale } from 'next-intl';
-import { ko, enUS, th } from 'date-fns/locale';
+import { ko, enUS, th, type Locale } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -132,7 +132,7 @@ export function BookingDatePicker({
             locale={dateLocale}
             defaultMonth={value}
             components={{
-              Nav: () => null, // 기본 Nav 숨김 (캡션에 통합)
+              Nav: () => <></>, // 기본 Nav 숨김 (캡션에 통합)
               MonthCaption: ({ calendarMonth }) => (
                 <CalendarCaption
                   calendarMonth={calendarMonth}

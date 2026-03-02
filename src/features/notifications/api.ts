@@ -13,6 +13,7 @@ export interface NotificationMetadata {
   artist_name?: string;
   customer_name?: string;
   category_name?: string;
+  service_name?: string;
   booking_date?: string;
   start_time?: string;
   salon_name?: string;
