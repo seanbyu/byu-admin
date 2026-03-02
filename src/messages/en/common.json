@@ -68,6 +68,7 @@
     "newBooking": "New booking request",
     "confirmedBooking": "Booking confirmed",
     "cancelledBooking": "Booking cancelled",
+    "rescheduledBooking": "Booking reschedule request",
     "bookingReminder": "Booking reminder",
     "completedBooking": "Booking completed",
     "noShowBooking": "No-show recorded",

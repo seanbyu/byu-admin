@@ -76,8 +76,24 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     switch (action) {
       // ─── 예약 확정 ───
       case "confirm": {
+        // reschedule_pending 플래그 확인 → 변경 재확정 vs 일반 확정 분기
+        const { data: bookingSnap } = await adminClient
+          .from("bookings")
+          .select("booking_meta")
+          .eq("id", bookingId)
+          .single();
+        const snapMeta = (bookingSnap?.booking_meta as Record<string, unknown> | null) ?? {};
+        const isReschedule = snapMeta.reschedule_pending === true;
+
         result = await bookingService.confirmBooking(bookingId);
-        notifService.onBookingConfirmed(bookingId).catch(console.error);
+
+        if (isReschedule) {
+          const { reschedule_pending: _, ...restMeta } = snapMeta;
+          await adminClient.from("bookings").update({ booking_meta: restMeta }).eq("id", bookingId);
+          notifService.onBookingChangeConfirmed(bookingId).catch(console.error);
+        } else {
+          notifService.onBookingConfirmed(bookingId).catch(console.error);
+        }
         break;
       }
 

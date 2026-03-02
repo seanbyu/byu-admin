@@ -159,7 +159,7 @@ export async function dispatchNotification(
     }
   }
 
-  // IN_APP 알림
+  // IN_APP 알림 (관리자 대상)
   const inAppIsDuplicate = await isDuplicateNotification(client, payload.bookingId, dbType, "IN_APP");
   if (!inAppIsDuplicate) {
     await client.from("notifications").insert({
@@ -167,8 +167,7 @@ export async function dispatchNotification(
       salon_id: payload.salonId,
       channel: "IN_APP",
       notification_type: dbType,
-      recipient_type: "CUSTOMER",
-      recipient_customer_id: payload.customerId,
+      recipient_type: "ADMIN",
       title,
       body,
       metadata,

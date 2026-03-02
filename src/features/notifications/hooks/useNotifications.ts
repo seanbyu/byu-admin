@@ -134,6 +134,8 @@ export function getNotificationTitle(
       return t("common.notifications.confirmedBooking");
     case "BOOKING_CANCELLED":
       return t("common.notifications.cancelledBooking");
+    case "BOOKING_MODIFIED":
+      return t("common.notifications.rescheduledBooking");
     case "BOOKING_REMINDER":
       return t("common.notifications.bookingReminder");
     case "BOOKING_COMPLETED":
@@ -176,6 +178,7 @@ export function getNotificationDetail(
   const parts: string[] = [];
   if (meta.artist_name) parts.push(meta.artist_name);
   if (meta.service_name) parts.push(meta.service_name);
+  else if (meta.category_name) parts.push(meta.category_name);
   if (parts.length > 0) {
     staffService = parts.join(' | ') + ' ' + t('common.notifications.pendingStatus');
   }

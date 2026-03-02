@@ -68,6 +68,7 @@
     "newBooking": "새로운 예약 요청",
     "confirmedBooking": "예약이 확정되었습니다",
     "cancelledBooking": "예약이 취소되었습니다",
+    "rescheduledBooking": "예약 일정 변경 요청",
     "bookingReminder": "예약 알림",
     "completedBooking": "예약이 완료되었습니다",
     "noShowBooking": "노쇼 처리되었습니다",

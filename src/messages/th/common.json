@@ -68,6 +68,7 @@
     "newBooking": "มีคำขอจองใหม่",
     "confirmedBooking": "การจองได้รับการยืนยันแล้ว",
     "cancelledBooking": "การจองถูกยกเลิก",
+    "rescheduledBooking": "คำขอเปลี่ยนเวลาจอง",
     "bookingReminder": "การแจ้งเตือนการจอง",
     "completedBooking": "การจองเสร็จสมบูรณ์",
     "noShowBooking": "บันทึกการไม่มาตามนัด",
