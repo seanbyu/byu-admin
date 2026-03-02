@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { BookingService } from '@/lib/api-core';
+import { NotificationService } from '@/lib/api-core/notifications/notification.service';
 
 /**
- * Service Role Client (RLS 우회) - 알림 생성 등 시스템 작업용
+ * Service Role Client (RLS 우회) — 알림 생성 등 시스템 작업용
  */
 function createAdminClient() {
   return createSupabaseClient(
@@ -14,339 +15,20 @@ function createAdminClient() {
   );
 }
 
-/**
- * 예약 상세 조회 (알림 생성에 필요한 관계 데이터 포함)
- */
-async function getBookingWithDetails(adminClient: ReturnType<typeof createAdminClient>, bookingId: string) {
-  const { data, error } = await adminClient
-    .from("bookings")
-    .select(`
-      *,
-      customer:customers!bookings_customer_id_fkey(id, name, phone),
-      artist:users!bookings_artist_id_fkey(id, name),
-      service:services(id, name, category:service_categories(name, name_en, name_th)),
-      salon:salons!bookings_salon_id_fkey(id, name, settings)
-    `)
-    .eq("id", bookingId)
-    .single();
-
-  if (error) {
-    console.error("[Booking Notification] Failed to get booking details:", error);
-    return null;
-  }
-  return data;
-}
-
-type BookingDetails = NonNullable<Awaited<ReturnType<typeof getBookingWithDetails>>>;
-type Locale = "ko" | "en" | "th";
-
-// ============================================
-// 다국어 알림 템플릿 (ko / en / th)
-// ============================================
-type NotifParams = { customerName: string; date: string; time: string; artistName: string; categoryName: string };
-
-const NOTIFICATION_TEMPLATES = {
-  BOOKING_CONFIRMED: {
-    ko: {
-      title: (salonName: string) => `${salonName} 예약 알림`,
-      body: (p: NotifParams) =>
-        `${p.customerName}님, ${p.date} ${p.time} ${p.artistName}님과의 ${p.categoryName} 예약이 확정되었습니다.`,
-    },
-    en: {
-      title: (salonName: string) => `${salonName} Booking Confirmation`,
-      body: (p: NotifParams) =>
-        `${p.customerName}, your ${p.categoryName} appointment with ${p.artistName} on ${p.date} at ${p.time} has been confirmed.`,
-    },
-    th: {
-      title: (salonName: string) => `${salonName} แจ้งเตือนการจอง`,
-      body: (p: NotifParams) =>
-        `${p.customerName} การจอง ${p.categoryName} กับ ${p.artistName} วันที่ ${p.date} เวลา ${p.time} ได้รับการยืนยันแล้วค่ะ`,
-    },
-  },
-  // 유저가 일정 변경 요청 후 관리자가 확정한 경우 (DB 타입은 BOOKING_CONFIRMED 재사용)
-  BOOKING_CHANGE_CONFIRMED: {
-    ko: {
-      title: (salonName: string) => `${salonName} 예약 알림`,
-      body: (p: NotifParams) =>
-        `${p.customerName}님, ${p.date} ${p.time} ${p.artistName}님과의 ${p.categoryName} 예약 변경이 확정되었습니다.`,
-    },
-    en: {
-      title: (salonName: string) => `${salonName} Booking Change Confirmed`,
-      body: (p: NotifParams) =>
-        `${p.customerName}, your rescheduled ${p.categoryName} appointment with ${p.artistName} on ${p.date} at ${p.time} has been confirmed.`,
-    },
-    th: {
-      title: (salonName: string) => `${salonName} แจ้งเตือนการจอง`,
-      body: (p: NotifParams) =>
-        `${p.customerName} การเปลี่ยนเวลา ${p.categoryName} กับ ${p.artistName} วันที่ ${p.date} เวลา ${p.time} ได้รับการยืนยันแล้วค่ะ`,
-    },
-  },
-  BOOKING_CANCELLED: {
-    ko: {
-      title: (salonName: string) => `${salonName} 예약 알림`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
-        `${p.customerName}님, ${p.date} ${p.time} ${p.artistName}님과의 ${p.categoryName} 예약이 취소되었습니다.`,
-    },
-    en: {
-      title: (salonName: string) => `${salonName} Booking Cancellation`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
-        `${p.customerName}, your ${p.categoryName} appointment with ${p.artistName} on ${p.date} at ${p.time} has been cancelled.`,
-    },
-    th: {
-      title: (salonName: string) => `${salonName} แจ้งเตือนการจอง`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
-        `${p.customerName} การจอง ${p.categoryName} กับ ${p.artistName} วันที่ ${p.date} เวลา ${p.time} ถูกยกเลิกแล้วค่ะ`,
-    },
-  },
-  BOOKING_MODIFIED: {
-    ko: {
-      title: (salonName: string) => `${salonName} 예약 변경 알림`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
-        `${p.customerName}님, ${p.categoryName} 예약이 ${p.date} ${p.time} ${p.artistName}님으로 변경되었습니다.`,
-    },
-    en: {
-      title: (salonName: string) => `${salonName} Booking Rescheduled`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
-        `${p.customerName}, your ${p.categoryName} appointment has been rescheduled to ${p.date} at ${p.time} with ${p.artistName}.`,
-    },
-    th: {
-      title: (salonName: string) => `${salonName} แจ้งเตือนเปลี่ยนเวลา`,
-      body: (p: { customerName: string; date: string; time: string; artistName: string; categoryName: string }) =>
-        `${p.customerName} การจอง ${p.categoryName} ถูกเปลี่ยนเป็นวันที่ ${p.date} เวลา ${p.time} กับ ${p.artistName} ค่ะ`,
-    },
-  },
-} as const;
-
-/**
- * 알림 locale 결정: booking_meta.locale (고객 선택 언어) > salons.settings.locale (살롱 기본)
- */
-function getNotificationLocale(booking: BookingDetails): Locale {
-  // 1. 고객이 예약 시 사용한 언어 (유저웹에서 저장)
-  const metaLocale = (booking as any).booking_meta?.locale;
-  if (metaLocale === "ko" || metaLocale === "en" || metaLocale === "th") return metaLocale;
-
-  // 2. 살롱 기본 언어
-  const settings = (booking.salon as any)?.settings;
-  const salonLocale = settings?.locale;
-  if (salonLocale === "ko" || salonLocale === "th") return salonLocale;
-
-  return "en";
-}
-
-/**
- * 카테고리명 추출 (locale별 다국어)
- */
-function getCategoryName(booking: BookingDetails, locale: Locale): string {
-  const category = (booking.service as any)?.category;
-  if (!category) return (booking.service as any)?.name || "";
-
-  if (locale === "ko") return category.name || category.name_en || "";
-  if (locale === "th") return category.name_th || category.name_en || category.name || "";
-  return category.name_en || category.name || "";
-}
-
-/**
- * 날짜 포맷 (locale별)
- */
-function formatDate(dateStr: string, locale: Locale): string {
-  const localeMap: Record<Locale, string> = { ko: "ko-KR", en: "en-US", th: "th-TH" };
-  return new Date(dateStr).toLocaleDateString(localeMap[locale], {
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-  });
-}
-
-/**
- * 예약 알림 공통: notifications INSERT + LINE Edge Function 호출
- */
-type TemplateKey = keyof typeof NOTIFICATION_TEMPLATES;
-type DbNotificationType = "BOOKING_CONFIRMED" | "BOOKING_CANCELLED" | "BOOKING_MODIFIED";
-
-// BOOKING_CHANGE_CONFIRMED는 DB enum에 없으므로 BOOKING_CONFIRMED 타입으로 저장
-const TEMPLATE_TO_DB_TYPE: Record<TemplateKey, DbNotificationType> = {
-  BOOKING_CONFIRMED: "BOOKING_CONFIRMED",
-  BOOKING_CHANGE_CONFIRMED: "BOOKING_CONFIRMED",
-  BOOKING_CANCELLED: "BOOKING_CANCELLED",
-  BOOKING_MODIFIED: "BOOKING_MODIFIED",
-};
-
-async function sendBookingNotification(
-  adminClient: ReturnType<typeof createAdminClient>,
-  booking: BookingDetails,
-  templateKey: TemplateKey,
-) {
-  const locale = getNotificationLocale(booking);
-  const template = NOTIFICATION_TEMPLATES[templateKey][locale];
-  const dbType = TEMPLATE_TO_DB_TYPE[templateKey];
-
-  const customerName = (booking.customer as any)?.name || "Customer";
-  const artistName = (booking.artist as any)?.name || "";
-  const salonName = (booking.salon as any)?.name || "";
-  const categoryName = getCategoryName(booking, locale);
-  const startTime = booking.start_time?.slice(0, 5) || "";
-  const formattedDate = formatDate(booking.booking_date, locale);
-
-  const title = template.title(salonName);
-  const body = template.body({
-    customerName,
-    date: formattedDate,
-    time: startTime,
-    artistName,
-    categoryName,
-  });
-
-  const metadata = {
-    artist_name: artistName,
-    customer_name: customerName,
-    category_name: categoryName,
-    booking_date: booking.booking_date,
-    start_time: startTime,
-    salon_name: salonName,
-    locale,
-  };
-
-  // 중복 체크: 10분 이내 동일 타입 알림이 있으면 재발송 방지
-  // (reschedule 후 재확정 시 재발송 허용하기 위해 시간 기반으로 체크)
-  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-  const { data: existing } = await adminClient
-    .from("notifications")
-    .select("id")
-    .eq("booking_id", booking.id)
-    .eq("notification_type", dbType)
-    .eq("channel", "LINE")
-    .gt("created_at", tenMinutesAgo)
-    .limit(1);
-
-  if (existing && existing.length > 0) {
-    console.log(`[Booking Notification] ${templateKey} LINE already sent recently for booking:`, booking.id);
-    return;
-  }
-
-  // LINE 알림 생성
-  const { data: lineNotif, error: lineErr } = await adminClient
-    .from("notifications")
-    .insert({
-      booking_id: booking.id,
-      salon_id: booking.salon_id,
-      channel: "LINE",
-      notification_type: dbType,
-      recipient_type: "CUSTOMER",
-      recipient_customer_id: booking.customer_id,
-      title,
-      body,
-      metadata,
-      status: "PENDING",
-    })
-    .select("id")
-    .single();
-
-  if (lineErr) {
-    console.error("[Booking Notification] Failed to create LINE notification:", lineErr);
-  }
-
-  // IN_APP 알림 생성
-  const { error: inAppErr } = await adminClient
-    .from("notifications")
-    .insert({
-      booking_id: booking.id,
-      salon_id: booking.salon_id,
-      channel: "IN_APP",
-      notification_type: dbType,
-      recipient_type: "CUSTOMER",
-      recipient_customer_id: booking.customer_id,
-      title,
-      body,
-      metadata,
-      status: "PENDING",
-    });
-
-  if (inAppErr) {
-    console.error("[Booking Notification] Failed to create IN_APP notification:", inAppErr);
-  }
-
-  // Edge Function 즉시 호출 (LINE 발송)
-  if (lineNotif?.id) {
-    const { error: fnError } = await adminClient.functions.invoke(
-      "send-line-notifications",
-      { body: { notification_ids: [lineNotif.id] } }
-    );
-
-    if (fnError) {
-      console.error("[Booking Notification] Edge Function invocation failed:", fnError);
-    }
-  }
-
-  console.log(`[Booking Notification] Created ${templateKey} (${locale}) notifications for booking:`, booking.id);
-}
-
-/**
- * 예약 확정 알림
- * @param isReschedule true면 "예약 변경이 확정되었습니다" 메시지 발송
- */
-async function sendBookingConfirmedNotifications(
-  adminClient: ReturnType<typeof createAdminClient>,
-  booking: BookingDetails,
-  isReschedule = false,
-) {
-  try {
-    const templateKey: TemplateKey = isReschedule ? "BOOKING_CHANGE_CONFIRMED" : "BOOKING_CONFIRMED";
-    await sendBookingNotification(adminClient, booking, templateKey);
-  } catch (error) {
-    console.error("[Booking Notification] Confirmed error:", error);
-  }
-}
-
-/**
- * 예약 취소 알림
- */
-async function sendBookingCancelledNotifications(
-  adminClient: ReturnType<typeof createAdminClient>,
-  booking: BookingDetails,
-) {
-  try {
-    await sendBookingNotification(adminClient, booking, "BOOKING_CANCELLED");
-  } catch (error) {
-    console.error("[Booking Notification] Cancelled error:", error);
-  }
-}
-
-/**
- * 예약 변경 알림 (관리자가 일정 변경 시 고객에게 LINE 발송)
- */
-async function sendBookingModifiedNotifications(
-  adminClient: ReturnType<typeof createAdminClient>,
-  booking: BookingDetails,
-) {
-  try {
-    await sendBookingNotification(adminClient, booking, "BOOKING_MODIFIED");
-  } catch (error) {
-    console.error("[Booking Notification] Modified error:", error);
-  }
-}
-
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ salonId: string }> }
 ) {
   try {
     const { salonId } = await params;
-    const { searchParams } = new URL(req.url); // Use filters if needed
-
     const supabase = createClient(req);
     const service = new BookingService(supabase);
     const bookings = await service.getBookings(salonId);
 
-    return NextResponse.json({
-      success: true,
-      data: bookings,
-    });
+    return NextResponse.json({ success: true, data: bookings });
   } catch (error: any) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    console.error('[Booking API] GET error:', error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
@@ -360,104 +42,103 @@ export async function POST(
     const { action, ...data } = body;
 
     const supabase = createClient(req);
-    const service = new BookingService(supabase);
+    const bookingService = new BookingService(supabase);
     let result;
 
     if (action) {
       switch (action) {
-        case 'cancel_booking': {
-          result = await service.cancelBooking(data.id);
-
-          // 취소 알림 생성 + LINE 발송 (fire-and-forget)
-          const cancelAdminClient = createAdminClient();
-          getBookingWithDetails(cancelAdminClient, data.id).then((booking) => {
-            if (booking) {
-              sendBookingCancelledNotifications(cancelAdminClient, booking);
-            }
-          });
-          break;
-        }
-        case 'complete_booking':
-          result = await service.completeBooking(data.id);
-          break;
+        // ─────────────────────────────────────────
+        // 예약 확정
+        // ─────────────────────────────────────────
         case 'confirm_booking': {
-          result = await service.confirmBooking(data.id);
+          result = await bookingService.confirmBooking(data.id);
 
-          // 알림 생성 + LINE 발송 (fire-and-forget)
           const adminClient = createAdminClient();
-          getBookingWithDetails(adminClient, data.id).then((booking) => {
-            if (booking) {
-              sendBookingConfirmedNotifications(adminClient, booking);
-            }
-          });
+          const notifService = new NotificationService(adminClient);
+          notifService.onBookingConfirmed(data.id).catch(console.error);
           break;
         }
+
+        // ─────────────────────────────────────────
+        // 예약 취소
+        // ─────────────────────────────────────────
+        case 'cancel_booking': {
+          result = await bookingService.cancelBooking(data.id);
+
+          const adminClient = createAdminClient();
+          const notifService = new NotificationService(adminClient);
+          notifService.onBookingCancelled(data.id).catch(console.error);
+          break;
+        }
+
+        // ─────────────────────────────────────────
+        // 예약 업데이트 (상태변경 / 일정변경 통합 처리)
+        // ─────────────────────────────────────────
         case 'update_booking': {
-          result = await service.updateBooking(data.id, data.updates);
+          result = await bookingService.updateBooking(data.id, data.updates);
 
-          // 상태 변경에 따른 알림 발송
-          if (data.updates?.status === 'CONFIRMED' || data.updates?.status === 'CANCELLED') {
-            const adminClient = createAdminClient();
-            getBookingWithDetails(adminClient, data.id).then(async (booking) => {
-              if (!booking) return;
-              if (data.updates.status === 'CONFIRMED') {
-                // 유저가 일정 변경 요청한 경우 → "변경 확정" 메시지 발송
-                const isReschedule = (booking as any).booking_meta?.reschedule_pending === true;
-                await sendBookingConfirmedNotifications(adminClient, booking, isReschedule);
+          const adminClient = createAdminClient();
+          const notifService = new NotificationService(adminClient);
 
-                // reschedule_pending 플래그 클리어
-                if (isReschedule) {
-                  const currentMeta = (booking as any).booking_meta as Record<string, unknown> || {};
-                  const { reschedule_pending, ...restMeta } = currentMeta;
-                  await adminClient
-                    .from('bookings')
-                    .update({ booking_meta: restMeta })
-                    .eq('id', data.id);
-                }
-              } else {
-                sendBookingCancelledNotifications(adminClient, booking);
+          // reschedule_pending 플래그 확인 후 전달
+          const currentMeta = data.updates?.bookingMeta ?? {};
+          notifService
+            .onBookingUpdated(data.id, data.updates, currentMeta)
+            .then(async (results) => {
+              // 재확정 시 reschedule_pending 플래그 클리어
+              const wasReschedule = currentMeta?.reschedule_pending === true;
+              const wasConfirmed = data.updates?.status === "CONFIRMED";
+              if (wasReschedule && wasConfirmed) {
+                const { reschedule_pending, ...restMeta } = currentMeta;
+                await adminClient
+                  .from('bookings')
+                  .update({ booking_meta: restMeta })
+                  .eq('id', data.id);
               }
-            });
-          }
-
-          // 일정 변경 시 고객에게 LINE 알림 발송
-          if (data.updates?.booking_date || data.updates?.start_time) {
-            const modAdminClient = createAdminClient();
-            getBookingWithDetails(modAdminClient, data.id).then((booking) => {
-              if (booking) {
-                sendBookingModifiedNotifications(modAdminClient, booking);
-              }
-            });
-          }
+            })
+            .catch(console.error);
           break;
         }
-        case 'create_booking':
-          result = await service.createBooking(salonId, data);
+
+        // ─────────────────────────────────────────
+        // 예약 생성
+        // ─────────────────────────────────────────
+        case 'create_booking': {
+          result = await bookingService.createBooking(salonId, data);
           break;
-        case 'delete_booking':
-          await service.deleteBooking(data.id);
+        }
+
+        // ─────────────────────────────────────────
+        // 예약 완료
+        // ─────────────────────────────────────────
+        case 'complete_booking': {
+          result = await bookingService.completeBooking(data.id);
+          break;
+        }
+
+        // ─────────────────────────────────────────
+        // 예약 삭제
+        // ─────────────────────────────────────────
+        case 'delete_booking': {
+          await bookingService.deleteBooking(data.id);
           result = null;
           break;
+        }
+
         default:
           return NextResponse.json(
-            { success: false, message: 'Invalid action' },
+            { success: false, message: `Unknown action: ${action}` },
             { status: 400 }
           );
       }
     } else {
-      // Legacy support: default to create if no action for backward compatibility
-      result = await service.createBooking(salonId, body);
+      // Backward compatibility: action 없으면 create로 처리
+      result = await bookingService.createBooking(salonId, body);
     }
 
-    return NextResponse.json({
-      success: true,
-      data: result,
-    });
+    return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    console.error('[Booking API] POST error:', error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
