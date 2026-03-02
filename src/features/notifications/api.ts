@@ -1,15 +1,23 @@
 /**
- * Notifications API
+ * Notifications API Client
+ *
+ * Supabase 직접 접근 제거 → API Route 경유
+ * REST 엔드포인트: /api/salons/{salonId}/notifications
  */
 
-import { supabase } from "@/lib/supabase/client";
+import { apiClient } from "@/lib/api/client";
+
+const notifPath = (salonId: string) => `/salons/${salonId}/notifications`;
 
 export interface NotificationMetadata {
   artist_name?: string;
   customer_name?: string;
-  service_name?: string | null;
+  category_name?: string;
   booking_date?: string;
   start_time?: string;
+  salon_name?: string;
+  locale?: string;
+  trigger_type?: string;
 }
 
 export interface Notification {
@@ -24,117 +32,57 @@ export interface Notification {
   metadata: NotificationMetadata | null;
 }
 
-/**
- * 살롱의 알림 목록 조회
- */
+// ─── 알림 목록 조회 ───
 export async function getNotifications(salonId: string, limit = 10): Promise<Notification[]> {
-
-  const { data, error } = await supabase
-    .from("notifications")
-    .select("*")
-    .eq("salon_id", salonId)
-    .eq("recipient_type", "ADMIN")
-    .eq("channel", "IN_APP")
-    .neq("status", "FAILED") // soft-deleted 제외
-    .order("created_at", { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    // AbortError: auth 세션 갱신 시 Supabase가 요청을 중단하는 정상 동작
-    if (error.message?.includes('AbortError')) return [];
+  try {
+    const res = await apiClient.get<Notification[]>(notifPath(salonId), { limit });
+    return res.data ?? [];
+  } catch (error) {
+    if ((error as any)?.message?.includes("AbortError")) return [];
     console.error("Failed to fetch notifications:", error);
     throw error;
   }
-
-  return data || [];
 }
 
-/**
- * 읽지 않은 알림 수 조회
- */
+// ─── 미읽음 카운트 조회 ───
 export async function getUnreadCount(salonId: string): Promise<number> {
-
-  const { count, error } = await supabase
-    .from("notifications")
-    .select("*", { count: "exact", head: true })
-    .eq("salon_id", salonId)
-    .eq("recipient_type", "ADMIN")
-    .eq("channel", "IN_APP")
-    .neq("status", "FAILED") // soft-deleted 제외
-    .is("read_at", null);
-
-  if (error) {
+  try {
+    const res = await apiClient.get<{ unreadCount: number }>(notifPath(salonId), {
+      unread_count: true,
+    });
+    return res.data?.unreadCount ?? 0;
+  } catch (error) {
     console.error("Failed to fetch unread count:", error);
     return 0;
   }
-
-  return count || 0;
 }
 
-/**
- * 알림을 읽음으로 표시
- */
-export async function markAsRead(notificationId: string): Promise<void> {
-
-  const { error } = await supabase
-    .from("notifications")
-    .update({ read_at: new Date().toISOString() } as never)
-    .eq("id", notificationId);
-
-  if (error) {
-    console.error("Failed to mark notification as read:", error);
-    throw error;
-  }
+// ─── 단건 읽음 처리 ───
+export async function markAsRead(salonId: string, notificationId: string): Promise<void> {
+  await apiClient.patch(notifPath(salonId), { id: notificationId });
 }
 
-/**
- * 모든 알림을 읽음으로 표시
- */
+// ─── 전체 읽음 처리 ───
 export async function markAllAsRead(salonId: string): Promise<void> {
-
-  const { error } = await supabase
-    .from("notifications")
-    .update({ read_at: new Date().toISOString() } as never)
-    .eq("salon_id", salonId)
-    .eq("recipient_type", "ADMIN")
-    .eq("channel", "IN_APP") // 인앱 알림만 업데이트
-    .is("read_at", null);
-
-  if (error) {
-    console.error("Failed to mark all notifications as read:", error);
-    throw error;
-  }
+  await apiClient.patch(notifPath(salonId), {});
 }
 
-/**
- * 알림 삭제 (실제 DELETE - RLS DELETE 정책 적용)
- */
-export async function deleteNotification(notificationId: string): Promise<void> {
-  const { error } = await supabase
-    .from("notifications")
-    .delete()
-    .eq("id", notificationId);
-
-  if (error) {
-    console.error("Failed to delete notification:", error);
-    throw error;
-  }
+// ─── 알림 삭제 ───
+export async function deleteNotification(salonId: string, notificationId: string): Promise<void> {
+  await apiClient.delete(`${notifPath(salonId)}?id=${notificationId}`);
 }
 
-/**
- * 예약 정보 조회 (알림 클릭 시 해당 날짜/직원으로 이동용)
- */
+// ─── 예약 정보 조회 (알림 클릭 시 날짜/직원 이동용) ───
 export interface BookingInfo {
   booking_date: string;
   artist_id: string;
 }
 
-export async function getBookingInfo(bookingId: string): Promise<BookingInfo | null> {
-  const { data } = await supabase
-    .from("bookings")
-    .select("booking_date, artist_id")
-    .eq("id", bookingId)
-    .single();
-
-  return (data as BookingInfo | null) || null;
+export async function getBookingInfo(salonId: string, bookingId: string): Promise<BookingInfo | null> {
+  try {
+    const res = await apiClient.get<BookingInfo>(`/salons/${salonId}/bookings/${bookingId}`);
+    return res.data ?? null;
+  } catch {
+    return null;
+  }
 }
