@@ -173,12 +173,12 @@ export function useStaffActions({
     [handleUpdateStaff, clearSelectedStaff]
   );
 
-  // 프로필 저장
+  // 프로필 저장 (에러 시 throw하여 모달에서 처리)
   const handleProfileSave = useCallback(
     async (id: string, updates: Partial<Staff>) => {
-      await handleUpdateStaff(id, updates);
+      await updateStaff({ staffId: id, updates });
     },
-    [handleUpdateStaff]
+    [updateStaff]
   );
 
   // 직원 생성 성공

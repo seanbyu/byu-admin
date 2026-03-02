@@ -52,17 +52,24 @@ class ApiClient {
   private async getAccessToken(): Promise<string | null> {
     if (typeof window === 'undefined') return null;
 
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+    try {
+      const sessionPromise = supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (error) {
+          console.error('Error getting session:', error.message);
+          return null;
+        }
+        return session?.access_token ?? null;
+      });
 
-    if (error) {
-      console.error('Error getting session:', error.message);
+      // 10초 이내 응답 없으면 null 반환 (토큰 갱신 네트워크 지연 대비)
+      const timeoutPromise = new Promise<null>((resolve) =>
+        setTimeout(() => resolve(null), 10000)
+      );
+
+      return await Promise.race([sessionPromise, timeoutPromise]);
+    } catch {
       return null;
     }
-
-    return session?.access_token ?? null;
   }
 
   private async buildHeaders(
@@ -163,9 +170,26 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
+    const REQUEST_TIMEOUT_MS = 30000; // 30초
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(
+        () => reject(new ApiError('요청 시간이 초과되었습니다.', 'TIMEOUT', 408)),
+        REQUEST_TIMEOUT_MS
+      );
+    });
+
     try {
-      return this.performRequest<T>(endpoint, options);
+      const result = await Promise.race([
+        this.performRequest<T>(endpoint, options),
+        timeoutPromise,
+      ]);
+      clearTimeout(timeoutId);
+      return result;
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('API request error:', error);
       throw error;
     }
