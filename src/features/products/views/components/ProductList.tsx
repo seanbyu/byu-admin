@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
 import { Plus } from 'lucide-react';
 import { useProductCategories, useProducts } from '../../hooks/useProducts';
 import { ProductCategory, Product } from '../../types';
@@ -36,7 +37,7 @@ export default function ProductList({
     updateCategory,
   } = useProductCategories(salonId);
 
-  const { products: allProducts } = useProducts(salonId);
+  const { products: allProducts, updateProduct } = useProducts(salonId);
 
   const [isCreating, setIsCreating] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -92,8 +93,6 @@ export default function ProductList({
       price: product.price?.toString() || '0',
     });
   };
-
-  const { updateProduct } = useProducts(salonId);
 
   const handleSaveProduct = async () => {
     if (!editingProductId || !editProductData.name.trim()) return;
@@ -155,7 +154,9 @@ export default function ProductList({
         )}
 
         {isLoading ? (
-          <div className="text-center py-4 text-secondary-500">{tc('loading')}</div>
+          <div className="flex justify-center py-4">
+            <Spinner size="md" />
+          </div>
         ) : categories.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border border-dashed border-secondary-200">
             <p className="text-secondary-500 mb-2">{t('noProducts')}</p>

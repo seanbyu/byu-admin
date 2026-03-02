@@ -1,11 +1,11 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { MessageCircle, Check } from 'lucide-react';
+import { MessageCircle, Check, ChevronDown } from 'lucide-react';
 import { ContactChannels } from '../../../hooks/useSalonSettings';
 
 // LINE 아이콘 컴포넌트
@@ -52,105 +52,131 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
   saveSuccess,
 }: ContactChannelsCardProps) {
   const t = useTranslations();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <Card className="p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="flex items-center gap-2 text-left"
+          aria-expanded={isExpanded}
+        >
           <MessageCircle size={18} className="text-secondary-600" />
           <h2 className="text-base font-semibold text-secondary-900">
             {t('booking.settings.contactChannels.title')}
           </h2>
-        </div>
-        <div className="flex items-center gap-2">
-          {saveSuccess && (
-            <span className="flex items-center gap-1 text-xs text-success-600">
-              <Check size={14} />
-            </span>
-          )}
-          <Button variant="primary" size="sm" onClick={onSave} disabled={isSaving}>
-            {isSaving ? t('common.saving') : t('common.save')}
-          </Button>
+          <ChevronDown
+            size={16}
+            className={`text-secondary-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        <div className="min-w-[120px] flex justify-end">
+          <div
+            className={`flex items-center gap-2 transition-all duration-200 ${
+              isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
+            }`}
+          >
+            {saveSuccess && (
+              <span className="flex items-center gap-1 text-xs text-success-600">
+                <Check size={14} />
+              </span>
+            )}
+            <Button variant="primary" size="sm" onClick={onSave} disabled={isSaving}>
+              {isSaving ? t('common.saving') : t('common.save')}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <p className="text-xs text-secondary-500 mb-4">
-        {t('booking.settings.contactChannels.description')}
-      </p>
+      <div
+        aria-hidden={!isExpanded}
+        className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin-top] duration-300 ease-out ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'
+        }`}
+      >
+        <div className="min-h-0">
+          <p className="text-xs text-secondary-500 mb-4">
+            {t('booking.settings.contactChannels.description')}
+          </p>
 
-      <div className="space-y-4">
-        {/* LINE */}
-        <div className="p-4 bg-secondary-50 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <LineIcon className="text-social-line" />
-              <span className="text-sm font-medium text-secondary-900">LINE</span>
+          <div className="space-y-4">
+            {/* LINE */}
+            <div className="p-4 bg-secondary-50 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <LineIcon className="text-social-line" />
+                  <span className="text-sm font-medium text-secondary-900">LINE</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onToggleChannel('line')}
+                  className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
+                    contactChannels.line?.enabled ? 'bg-social-line' : 'bg-secondary-300'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      contactChannels.line?.enabled ? 'right-1' : 'left-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {contactChannels.line?.enabled && (
+                <div>
+                  <Input
+                    placeholder={t('booking.settings.contactChannels.linePlaceholder')}
+                    value={contactChannels.line?.id || ''}
+                    onChange={(e) => onChannelIdChange('line', e.target.value)}
+                    className="bg-white"
+                  />
+                  <p className="text-xs text-secondary-400 mt-1.5">
+                    {t('booking.settings.contactChannels.lineHint')}
+                  </p>
+                </div>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => onToggleChannel('line')}
-              className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
-                contactChannels.line?.enabled ? 'bg-social-line' : 'bg-secondary-300'
-              }`}
-            >
-              <span
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                  contactChannels.line?.enabled ? 'right-1' : 'left-1'
-                }`}
-              />
-            </button>
+
+            {/* Instagram */}
+            <div className="p-4 bg-secondary-50 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <InstagramIcon className="text-social-instagram" />
+                  <span className="text-sm font-medium text-secondary-900">Instagram</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onToggleChannel('instagram')}
+                  className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
+                    contactChannels.instagram?.enabled ? 'bg-social-instagram' : 'bg-secondary-300'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      contactChannels.instagram?.enabled ? 'right-1' : 'left-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {contactChannels.instagram?.enabled && (
+                <div>
+                  <Input
+                    placeholder={t('booking.settings.contactChannels.instagramPlaceholder')}
+                    value={contactChannels.instagram?.id || ''}
+                    onChange={(e) => onChannelIdChange('instagram', e.target.value)}
+                    className="bg-white"
+                  />
+                  <p className="text-xs text-secondary-400 mt-1.5">
+                    {t('booking.settings.contactChannels.instagramHint')}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-
-          {contactChannels.line?.enabled && (
-            <div>
-              <Input
-                placeholder={t('booking.settings.contactChannels.linePlaceholder')}
-                value={contactChannels.line?.id || ''}
-                onChange={(e) => onChannelIdChange('line', e.target.value)}
-                className="bg-white"
-              />
-              <p className="text-xs text-secondary-400 mt-1.5">
-                {t('booking.settings.contactChannels.lineHint')}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Instagram */}
-        <div className="p-4 bg-secondary-50 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <InstagramIcon className="text-social-instagram" />
-              <span className="text-sm font-medium text-secondary-900">Instagram</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onToggleChannel('instagram')}
-              className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
-                contactChannels.instagram?.enabled ? 'bg-social-instagram' : 'bg-secondary-300'
-              }`}
-            >
-              <span
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                  contactChannels.instagram?.enabled ? 'right-1' : 'left-1'
-                }`}
-              />
-            </button>
-          </div>
-
-          {contactChannels.instagram?.enabled && (
-            <div>
-              <Input
-                placeholder={t('booking.settings.contactChannels.instagramPlaceholder')}
-                value={contactChannels.instagram?.id || ''}
-                onChange={(e) => onChannelIdChange('instagram', e.target.value)}
-                className="bg-white"
-              />
-              <p className="text-xs text-secondary-400 mt-1.5">
-                {t('booking.settings.contactChannels.instagramHint')}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </Card>

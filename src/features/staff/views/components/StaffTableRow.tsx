@@ -241,10 +241,10 @@ export const StaffTableRow = memo(function StaffTableRow({
           <Button
             variant="outline"
             size="sm"
-            className="h-8 px-3 text-xs"
+            className="h-8 px-3 text-xs cursor-pointer focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             onClick={handleProfileEditClick}
           >
-            {t('actions.editInfo')}
+            {t('actions.edit')}
           </Button>
         ) : member.profileImage ? (
           <img

@@ -352,9 +352,10 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
                     type="button"
                     variant="outline"
                     size="sm"
+                    className="cursor-pointer focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                     onClick={() => onProfileEdit(member)}
                   >
-                    {t('staff.actions.editInfo')}
+                    {t('staff.actions.edit')}
                   </Button>
                 )}
               </div>

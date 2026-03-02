@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
 import { Plus } from 'lucide-react';
 import { useCategories, useMenus } from '../../hooks/useSalonMenus';
 import { SalonIndustry } from '../../types';
@@ -63,7 +64,8 @@ export default function MenuList({
     }
   };
 
-  const { updateMenu } = useMenus(salonId);
+  const { updateMenu, data: allMenusData } = useMenus(salonId);
+  const allMenus = allMenusData ?? [];
 
   // Editing State
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
@@ -131,7 +133,6 @@ export default function MenuList({
     }
   };
 
-  const { data: allMenus = [] } = useMenus(salonId);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null
   );
@@ -185,7 +186,9 @@ export default function MenuList({
         )}
 
         {isLoading ? (
-          <div className="text-center py-4 text-secondary-500">{t('loading')}</div>
+          <div className="flex justify-center py-4">
+            <Spinner size="md" />
+          </div>
         ) : categories.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border border-dashed border-secondary-200">
             <p className="text-secondary-500 mb-2">{t('noCategories')}</p>

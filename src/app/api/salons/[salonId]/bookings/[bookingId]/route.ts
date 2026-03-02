@@ -23,6 +23,30 @@ function createAdminClient() {
 type RouteContext = { params: Promise<{ salonId: string; bookingId: string }> };
 
 // ─────────────────────────────────────────
+// GET /api/salons/[salonId]/bookings/[bookingId]
+// ─────────────────────────────────────────
+export async function GET(req: NextRequest, { params }: RouteContext) {
+  try {
+    const { salonId, bookingId } = await params;
+    requireField(bookingId, "bookingId");
+
+    const supabase = createClient(req);
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("booking_date, artist_id")
+      .eq("id", bookingId)
+      .eq("salon_id", salonId)
+      .single();
+
+    if (error || !data) throw new AppError("NOT_FOUND", "Booking not found");
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+// ─────────────────────────────────────────
 // PATCH /api/salons/[salonId]/bookings/[bookingId]
 //
 // Body 옵션:

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { StaffService } from '@/lib/api-core';
+import { checkPermission } from '@/lib/server/checkPermission';
 
 export async function GET(
   req: NextRequest,
@@ -50,6 +50,23 @@ export async function POST(
       case 'update_staff':
         result = await service.updateStaff(salonId, data.staffId, data.updates);
         break;
+      case 'create_staff': {
+        const authHeader = req.headers.get('Authorization');
+        const token = authHeader?.replace('Bearer ', '') || '';
+        const permCheck = await checkPermission(token, salonId, 'staff', 'canWrite');
+        if (!permCheck.authorized) {
+          return NextResponse.json(
+            { success: false, message: permCheck.error },
+            { status: 403 }
+          );
+        }
+        result = await service.createStaff(
+          salonId,
+          { email: data.email, name: data.name, role: data.role, password: data.password },
+          permCheck.userId!
+        );
+        break;
+      }
       default:
         return NextResponse.json(
           { success: false, message: 'Invalid action' },

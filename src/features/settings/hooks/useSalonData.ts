@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { settingsApi } from '../api';
 import { settingsKeys } from './useSettings';
 
 // ============================================
@@ -19,8 +19,8 @@ export interface SalonData {
 }
 
 // ============================================
-// Direct Supabase Query Hook
-// 설정 페이지 전용 - 사이드바 쿼리와 분리
+// useSalonData Hook
+// 설정 페이지 전용 - settingsApi 경유 (apiClient 패턴)
 // ============================================
 
 export function useSalonData(salonId: string) {
@@ -31,21 +31,19 @@ export function useSalonData(salonId: string) {
     queryFn: async () => {
       if (!salonId) return null;
 
-      const { data, error } = await supabase
-        .from('salons')
-        .select('name, address, cover_image_url, settings')
-        .eq('id', salonId)
-        .single();
+      const res = await settingsApi.getStoreInfo(salonId);
+      if (!res.data) return null;
 
-      if (error) {
-        console.error('Salon query error:', error);
-        return null;
-      }
-
-      return data as SalonData;
+      const d = res.data;
+      return {
+        name: d.name,
+        address: d.address || null,
+        cover_image_url: d.imageUrl || null,
+        settings: d.instagramUrl ? { instagram_url: d.instagramUrl } : null,
+      };
     },
     enabled: !!salonId,
-    staleTime: 0, // 항상 fresh 데이터 요청
+    staleTime: 0,
   });
 
   const refetch = useCallback(async () => {

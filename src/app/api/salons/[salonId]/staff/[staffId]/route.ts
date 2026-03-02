@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { StaffService } from '@/lib/api-core';
+import { checkPermission } from '@/lib/server/checkPermission';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!; // Or Service Role if updating user data?
-// Original file used ANON_KEY but implicitly? No, `StaffService` in original used `SUPABASE_SERVICE_ROLE_KEY` internally.
-// The route file imported `StaffService` which had `createClient` inside it with Service Role Key.
-// So here we MUST use SERVICE DATA KEY to maintain behavior for admin updates.
-
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -28,6 +24,89 @@ export async function PATCH(
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ salonId: string; staffId: string }> }
+) {
+  try {
+    const { salonId, staffId } = await params;
+    const authHeader = req.headers.get('Authorization');
+    const token = authHeader?.replace('Bearer ', '') || '';
+    const permCheck = await checkPermission(token, salonId, 'staff', 'canDelete');
+    if (!permCheck.authorized) {
+      return NextResponse.json({ success: false, message: permCheck.error }, { status: 403 });
+    }
+
+    const service = new StaffService(supabase);
+    await service.hardDeleteStaff(staffId, salonId, permCheck.userId!);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Delete Error:', error);
+    const isBusinessError = error.message?.startsWith('ERROR_');
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: isBusinessError ? 400 : 500 }
+    );
+  }
+}
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ salonId: string; staffId: string }> }
+) {
+  try {
+    const { salonId, staffId } = await params;
+    const body = await req.json();
+    const { action, ...data } = body;
+
+    const authHeader = req.headers.get('Authorization');
+    const token = authHeader?.replace('Bearer ', '') || '';
+
+    const service = new StaffService(supabase);
+
+    switch (action) {
+      case 'soft_delete': {
+        const permCheck = await checkPermission(token, salonId, 'staff', 'canWrite');
+        if (!permCheck.authorized) {
+          return NextResponse.json({ success: false, message: permCheck.error }, { status: 403 });
+        }
+        await service.softDeleteStaff(staffId, salonId, permCheck.userId!);
+        break;
+      }
+      case 'cancel_resignation': {
+        const permCheck = await checkPermission(token, salonId, 'staff', 'canWrite');
+        if (!permCheck.authorized) {
+          return NextResponse.json({ success: false, message: permCheck.error }, { status: 403 });
+        }
+        await service.cancelResignation(staffId);
+        break;
+      }
+      case 'update_role': {
+        const permCheck = await checkPermission(token, salonId, 'staff', 'canWrite');
+        if (!permCheck.authorized) {
+          return NextResponse.json({ success: false, message: permCheck.error }, { status: 403 });
+        }
+        const { error } = await (supabase.from('users') as any)
+          .update({ role: data.role })
+          .eq('id', staffId);
+        if (error) throw error;
+        break;
+      }
+      default:
+        return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Staff action Error:', error);
+    const isBusinessError = error.message?.startsWith('ERROR_');
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: isBusinessError ? 400 : 500 }
     );
   }
 }

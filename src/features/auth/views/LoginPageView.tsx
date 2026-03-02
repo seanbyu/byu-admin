@@ -12,6 +12,7 @@ import { Scissors } from 'lucide-react';
 import { User } from '@/types';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
+import { LanguageSelectModal } from './LanguageSelectModal';
 
 type AuthErrorCode =
   | 'INVALID_CREDENTIALS'
@@ -41,6 +42,7 @@ export default function LoginPageView() {
   const t = useTranslations('auth.login');
   const { login } = useAuthStore();
   const [error, setError] = useState('');
+  const [showLangModal, setShowLangModal] = useState(true);
   const rememberMeRef = useRef(true); // 로그인 상태 유지 값 저장용
 
   const {
@@ -96,6 +98,7 @@ export default function LoginPageView() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 px-4 relative">
+      {showLangModal && <LanguageSelectModal onClose={() => setShowLangModal(false)} />}
       <LanguageSwitcher className="absolute top-4 right-4" />
       <div className="max-w-md w-full">
         {/* Logo */}

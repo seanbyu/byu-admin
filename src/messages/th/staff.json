@@ -32,7 +32,7 @@
     "allPermissions": "สิทธิ์ทั้งหมด",
     "setPermissions": "ตั้งค่าสิทธิ์",
     "viewPermissions": "ดูสิทธิ์",
-    "editInfo": "แก้ไขข้อมูล"
+    "edit": "แก้ไข"
   },
   "status": {
     "resignedDaysLeft": "กำลังลาออก (D-{days})"

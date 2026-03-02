@@ -3,11 +3,10 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBookingsApi } from '../api';
-import { supabase } from '@/lib/supabase/client';
 import { Booking } from '../types';
 import { bookingKeys, BOOKINGS_QUERY_OPTIONS } from './queries';
 
-const bookingsApi = createBookingsApi(supabase);
+const bookingsApi = createBookingsApi();
 
 interface UseBookingsOptions {
   enabled?: boolean;

@@ -3,7 +3,6 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createSalonMenusApi } from '../api';
-import { supabase } from '@/lib/supabase/client';
 import {
   SalonMenu,
   MenuCategory,
@@ -18,7 +17,7 @@ import {
   MENUS_QUERY_OPTIONS,
 } from './queries';
 
-const salonMenusApi = createSalonMenusApi(supabase);
+const salonMenusApi = createSalonMenusApi();
 
 // ============================================
 // Industries Hook

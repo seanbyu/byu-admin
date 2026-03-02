@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
+import { Spinner } from '@/components/ui/Spinner';
 import { ShopSettingsSection } from '@/features/bookings/views/components/ShopSettingsSection';
 import { StaffBookingSection } from '@/features/bookings/views/components/StaffBookingSection';
 import { InterpreterServiceSection } from '@/features/bookings/views/components/InterpreterServiceSection';
@@ -15,7 +16,7 @@ export default function OnlineBookingSettingsPage() {
   if (!salonId) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <div className="text-secondary-500">{t('common.loading')}</div>
+        <Spinner size="lg" />
       </div>
     );
   }

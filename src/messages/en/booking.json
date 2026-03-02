@@ -12,6 +12,7 @@
   "completed": "Completed",
   "cancelled": "Cancelled",
   "noShow": "No Show",
+  "dayOffUnavailable": "Day Off — Unavailable",
   "newBookingAlert": "A new online booking has been received!",
   "adminBookingAlert": "A new booking has been registered.",
   "bookingRescheduledAlert": "Customer has rescheduled their booking.",
