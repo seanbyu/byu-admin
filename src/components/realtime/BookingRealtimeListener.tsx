@@ -51,7 +51,7 @@ export function BookingRealtimeListener() {
   useEffect(() => {
     if (!salonId) return;
 
-    // 1. bookings 테이블 구독 → 예약 목록 갱신 + 새 예약 알림
+    // 1. bookings 테이블 구독 → 예약 목록 즉시 재조회 + 새 예약 알림
     const bookingsChannel = supabase
       .channel(`bookings:salon:${salonId}`)
       .on(
@@ -63,7 +63,12 @@ export function BookingRealtimeListener() {
           filter: `salon_id=eq.${salonId}`,
         },
         (payload) => {
-          queryClient.invalidateQueries({ queryKey: bookingKeys.list(salonId) });
+          // invalidateQueries는 stale 표시만 → 새로고침해야 반영됨
+          // refetchQueries로 즉시 재조회 강제
+          queryClient.refetchQueries({
+            queryKey: bookingKeys.list(salonId),
+            type: 'active',
+          });
 
           if (payload.eventType === 'INSERT') {
             const newBooking = payload.new as Record<string, unknown>;
@@ -103,7 +108,12 @@ export function BookingRealtimeListener() {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        // 구독 실패 시 콘솔 경고 (silent failure 방지)
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] bookings 채널 연결 실패:', status);
+        }
+      });
 
     // 2. notifications 테이블 구독 → 사이드바 알림 패널 즉시 갱신
     const notificationsChannel = supabase
@@ -117,11 +127,21 @@ export function BookingRealtimeListener() {
           filter: `salon_id=eq.${salonId}`,
         },
         () => {
-          queryClient.invalidateQueries({ queryKey: ['notifications', salonId] });
-          queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count', salonId] });
+          queryClient.refetchQueries({
+            queryKey: ['notifications', salonId],
+            type: 'active',
+          });
+          queryClient.refetchQueries({
+            queryKey: ['notifications', 'unread-count', salonId],
+            type: 'active',
+          });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] notifications 채널 연결 실패:', status);
+        }
+      });
 
     return () => {
       supabase.removeChannel(bookingsChannel);

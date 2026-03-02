@@ -24,7 +24,7 @@ export function useNotifications(limit = 10) {
     queryKey: ["notifications", salonId, limit],
     queryFn: () => getNotifications(salonId!, limit),
     enabled: !!salonId,
-    refetchInterval: 30000, // 30초마다 자동 새로고침
+    refetchInterval: 5 * 60 * 1000, // Realtime이 주 업데이트, 5분은 연결 끊김 대비 fallback
   });
 }
 
@@ -39,7 +39,7 @@ export function useUnreadCount() {
     queryKey: ["notifications", "unread-count", salonId],
     queryFn: () => getUnreadCount(salonId!),
     enabled: !!salonId,
-    refetchInterval: 30000, // 30초마다 자동 새로고침
+    refetchInterval: 5 * 60 * 1000, // Realtime이 주 업데이트, 5분은 연결 끊김 대비 fallback
   });
 }
 
