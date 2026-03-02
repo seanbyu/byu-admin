@@ -164,6 +164,179 @@ export class StaffRepository extends BaseRepository {
     return count || 0;
   }
 
+  private static readonly DEFAULT_STAFF_PERMISSIONS = {
+    dashboard: { canRead: true, canWrite: true, canDelete: false },
+    bookings: { canRead: true, canWrite: true, canDelete: false },
+    customers: { canRead: true, canWrite: true, canDelete: false },
+    staff: { canRead: true, canWrite: true, canDelete: false },
+    menus: { canRead: true, canWrite: true, canDelete: false },
+    reviews: { canRead: true, canWrite: true, canDelete: false },
+    sales: { canRead: true, canWrite: true, canDelete: false },
+    settings: { canRead: true, canWrite: true, canDelete: false },
+  };
+
+  async getSalonPlanType(salonId: string): Promise<string> {
+    const { data: salon, error } = await this.supabase
+      .from("salons")
+      .select("plan_type")
+      .eq("id", salonId)
+      .single();
+    if (error) throw new Error("Failed to fetch salon info");
+    return (salon as any)?.plan_type || "FREE";
+  }
+
+  async isOwner(staffId: string, salonId: string): Promise<boolean> {
+    const { data } = await this.supabase
+      .from("staff_profiles")
+      .select("is_owner")
+      .eq("user_id", staffId)
+      .eq("salon_id", salonId)
+      .maybeSingle();
+    return !!(data as any)?.is_owner;
+  }
+
+  async createStaffUser(params: {
+    salonId: string;
+    email: string;
+    name: string;
+    role: string;
+    password: string;
+    createdById: string;
+  }): Promise<{ success: boolean }> {
+    const { salonId, email, name, role, password, createdById } = params;
+
+    let finalEmail = email;
+    if (!finalEmail.includes("@")) {
+      finalEmail = `${email}@salon.local`;
+    }
+
+    const { data: newUser, error: createError } =
+      await this.supabase.auth.admin.createUser({
+        email: finalEmail,
+        password,
+        email_confirm: true,
+        user_metadata: { name, role, user_type: "SALON", salon_id: salonId, is_approved: true },
+      });
+
+    if (createError) throw createError;
+    if (!newUser.user) throw new Error("Failed to create user");
+
+    const newUserId = newUser.user.id;
+
+    const { data: existingUser } = await this.supabase
+      .from("users")
+      .select("id")
+      .eq("id", newUserId)
+      .maybeSingle();
+
+    if (!existingUser) {
+      const { error: userInsertError } = await (
+        this.supabase.from("users") as ReturnType<typeof this.supabase.from>
+      ).insert({
+        id: newUserId,
+        user_type: "SALON",
+        role: role.toUpperCase(),
+        email: finalEmail,
+        name,
+        is_active: true,
+      } as never);
+
+      if (userInsertError) {
+        await this.supabase.auth.admin.deleteUser(newUserId);
+        throw new Error(
+          `ERROR_CREATE_USER_PROFILE: ${userInsertError.message} (${userInsertError.code})`
+        );
+      }
+    } else {
+      await (this.supabase.from("users") as ReturnType<typeof this.supabase.from>)
+        .update({ role: role.toUpperCase(), name } as never)
+        .eq("id", newUserId);
+    }
+
+    const { data: existingProfile } = await this.supabase
+      .from("staff_profiles")
+      .select("user_id")
+      .eq("user_id", newUserId)
+      .maybeSingle();
+
+    if (!existingProfile) {
+      const { error: profileInsertError } = await (
+        this.supabase.from("staff_profiles") as ReturnType<typeof this.supabase.from>
+      ).insert({
+        user_id: newUserId,
+        salon_id: salonId,
+        is_owner: false,
+        is_approved: true,
+        approved_by: createdById,
+        approved_at: new Date().toISOString(),
+        created_by: createdById,
+        is_booking_enabled: true,
+        permissions: StaffRepository.DEFAULT_STAFF_PERMISSIONS,
+      } as never);
+
+      if (profileInsertError) {
+        await (this.supabase.from("users") as ReturnType<typeof this.supabase.from>)
+          .delete()
+          .eq("id", newUserId);
+        await this.supabase.auth.admin.deleteUser(newUserId);
+        throw new Error(`ERROR_CREATE_STAFF_PROFILE: ${profileInsertError.message}`);
+      }
+    } else {
+      await (this.supabase.from("staff_profiles") as ReturnType<typeof this.supabase.from>)
+        .update({
+          salon_id: salonId,
+          is_approved: true,
+          approved_by: createdById,
+          approved_at: new Date().toISOString(),
+          is_booking_enabled: true,
+          permissions: StaffRepository.DEFAULT_STAFF_PERMISSIONS,
+        } as never)
+        .eq("user_id", newUserId);
+    }
+
+    return { success: true };
+  }
+
+  async softDeleteStaff(staffId: string): Promise<{ success: boolean }> {
+    const { error } = await (
+      this.supabase.from("users") as ReturnType<typeof this.supabase.from>
+    )
+      .update({ is_active: false, deleted_at: new Date().toISOString() } as never)
+      .eq("id", staffId);
+    if (error) throw new Error("Failed to process resignation");
+    return { success: true };
+  }
+
+  async cancelResignation(staffId: string): Promise<{ success: boolean }> {
+    const { error } = await (
+      this.supabase.from("users") as ReturnType<typeof this.supabase.from>
+    )
+      .update({ is_active: true, deleted_at: null } as never)
+      .eq("id", staffId);
+    if (error) throw new Error("Failed to cancel resignation");
+    return { success: true };
+  }
+
+  async hardDeleteStaff(staffId: string): Promise<{ success: boolean }> {
+    const { error: profileError } = await this.supabase
+      .from("staff_profiles")
+      .delete()
+      .eq("user_id", staffId);
+    if (profileError) throw new Error("Failed to delete staff profile");
+
+    const { error: userError } = await (
+      this.supabase.from("users") as ReturnType<typeof this.supabase.from>
+    )
+      .delete()
+      .eq("id", staffId);
+    if (userError) throw new Error("Failed to delete user");
+
+    const { error: authError } = await this.supabase.auth.admin.deleteUser(staffId);
+    if (authError) throw new Error("Failed to delete auth user");
+
+    return { success: true };
+  }
+
   async updateStaff(
     _salonId: string,
     staffId: string,

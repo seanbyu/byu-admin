@@ -49,6 +49,44 @@ export const staffApi = {
       staffOrders,
     });
   },
+
+  // POST: 직원 생성
+  create: (
+    salonId: string,
+    data: { email: string; name: string; role: string; password?: string }
+  ): Promise<ApiResponse<{ success: boolean }>> => {
+    return apiClient.post(endpoints.salons.staff.path(salonId), {
+      action: 'create_staff',
+      ...data,
+    });
+  },
+
+  // DELETE: 직원 완전 삭제
+  hardDelete: (salonId: string, staffId: string): Promise<ApiResponse<{ success: boolean }>> => {
+    return apiClient.delete(`${endpoints.salons.staff.path(salonId)}/${staffId}`);
+  },
+
+  // POST: 퇴사 예정 처리
+  softDelete: (salonId: string, staffId: string): Promise<ApiResponse<{ success: boolean }>> => {
+    return apiClient.post(`${endpoints.salons.staff.path(salonId)}/${staffId}`, {
+      action: 'soft_delete',
+    });
+  },
+
+  // POST: 퇴사 예정 취소
+  cancelResignation: (salonId: string, staffId: string): Promise<ApiResponse<{ success: boolean }>> => {
+    return apiClient.post(`${endpoints.salons.staff.path(salonId)}/${staffId}`, {
+      action: 'cancel_resignation',
+    });
+  },
+
+  // POST: 역할 변경
+  updateRole: (salonId: string, staffId: string, role: string): Promise<ApiResponse<{ success: boolean }>> => {
+    return apiClient.post(`${endpoints.salons.staff.path(salonId)}/${staffId}`, {
+      action: 'update_role',
+      role,
+    });
+  },
 } as const;
 
 // ============================================

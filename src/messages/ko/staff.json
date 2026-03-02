@@ -32,7 +32,7 @@
     "allPermissions": "모든 권한",
     "setPermissions": "권한 설정",
     "viewPermissions": "권한 보기",
-    "editInfo": "정보 수정"
+    "edit": "수정"
   },
   "status": {
     "resignedDaysLeft": "퇴사 예정 (D-{days})"

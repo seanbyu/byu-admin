@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { supabase } from '@/lib/supabase/client';
-import { createStaff } from '@/features/staff/actions';
+import { staffApi } from '@/features/staff/api';
 import { Loader2 } from 'lucide-react';
 import { createAuthApi } from '@/features/auth/api';
 import { PasswordWithConfirm, validatePassword } from '@/components/ui/PasswordInput';
@@ -156,25 +156,12 @@ function CreateStaffModal({
   // 직원 생성 mutation
   const createStaffMutation = useMutation({
     mutationFn: async (data: CreateStaffFormData) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error(t('staff.validation.loginRequired'));
-      }
-
-      const result = await createStaff({
-        salonId,
+      return staffApi.create(salonId, {
         email: data.email,
         name: data.name,
         role: data.role,
         password: data.password,
-        accessToken: session.access_token,
       });
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      return result;
     },
     onSuccess: () => {
       onSuccess();

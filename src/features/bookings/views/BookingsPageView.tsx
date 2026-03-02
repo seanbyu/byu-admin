@@ -16,6 +16,7 @@ import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { Plus } from 'lucide-react';
+import { Spinner } from '@/components/ui/Spinner';
 import { salonsApi } from '@/features/salons/api';
 import { StaffDaySheetView } from './components/StaffDaySheetView';
 
@@ -136,7 +137,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     enabled: !!salonId,
   });
 
-  const { data: settingsResponse } = useQuery({
+  const { data: settingsResponse, isLoading: isSettingsLoading } = useQuery({
     queryKey: salonSettingsKeys.detail(salonId),
     queryFn: () => salonsApi.getSettings(salonId),
     enabled: !!salonId,
@@ -214,7 +215,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <div className="text-secondary-500">{t('common.loading')}</div>
+        <Spinner size="xl" />
       </div>
     );
   }
@@ -256,19 +257,25 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
 
         {/* 현황판 */}
         <Card>
-          <StaffDaySheetView
-            bookings={filteredBookings}
-            staffMembers={staffMembers}
-            selectedDate={pageState.selectedDate}
-            selectedStaffId={pageState.selectedStaffId}
-            onDateChange={pageState.setSelectedDate}
-            businessHours={businessHours}
-            slotDuration={slotDuration}
-            onBookingClick={pageState.openBookingDetailModal}
-            onAddBooking={handleSheetAddBooking}
-            onUpdateBooking={handleSheetUpdateBooking}
-            highlightedBookingId={highlightedBookingId}
-          />
+          {isSettingsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Spinner size="lg" />
+            </div>
+          ) : (
+            <StaffDaySheetView
+              bookings={filteredBookings}
+              staffMembers={staffMembers}
+              selectedDate={pageState.selectedDate}
+              selectedStaffId={pageState.selectedStaffId}
+              onDateChange={pageState.setSelectedDate}
+              businessHours={businessHours}
+              slotDuration={slotDuration}
+              onBookingClick={pageState.openBookingDetailModal}
+              onAddBooking={handleSheetAddBooking}
+              onUpdateBooking={handleSheetUpdateBooking}
+              highlightedBookingId={highlightedBookingId}
+            />
+          )}
         </Card>
       </div>
 

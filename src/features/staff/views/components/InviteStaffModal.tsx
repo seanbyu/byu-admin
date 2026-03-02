@@ -5,8 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { supabase } from '@/lib/supabase/client';
-import { createStaff } from '@/features/staff/actions';
+import { staffApi } from '@/features/staff/api';
 import { useUser } from '@/features/auth/hooks/useAuth';
 
 interface InviteStaffModalProps {
@@ -37,39 +36,17 @@ export default function InviteStaffModal({
         throw new Error('Salon ID not found. Please log in again.');
       }
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        throw new Error('You must be logged in to invite staff.');
-      }
-
-      const result = await createStaff({
-        salonId: user.salonId,
+      await staffApi.create(user.salonId, {
         email,
         name,
         role,
-        password: 'salon1234!', // Default password for invitations
-        accessToken: session.access_token,
+        password: 'salon1234!',
       });
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
 
       onSuccess();
       onClose();
       setRole('STAFF');
     } catch (err: any) {
-      if (
-        err.message?.includes('User from sub claim') ||
-        err.message?.toLowerCase().includes('unauthorized')
-      ) {
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-        return;
-      }
       setError(err.message);
     } finally {
       setLoading(false);

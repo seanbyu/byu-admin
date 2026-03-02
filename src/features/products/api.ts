@@ -1,84 +1,62 @@
-import { supabase } from '@/lib/supabase/client';
+import { apiClient } from '@/lib/api/client';
+import { endpoints } from '@/lib/api/endpoints';
 import { Product, ProductCategory } from './types';
+
+const path = (salonId: string) => endpoints.salons.products.path(salonId);
 
 export const productsApi = {
   // ─── Categories ───────────────────────────────────────
   getCategories: async (salonId: string): Promise<ProductCategory[]> => {
-    const { data, error } = await (supabase as any)
-      .from('product_categories')
-      .select('*')
-      .eq('salon_id', salonId)
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: true });
-
-    if (error) throw error;
-    return (data as ProductCategory[]) || [];
+    const res = await apiClient.get<ProductCategory[]>(path(salonId), { type: 'categories' });
+    return res.data ?? [];
   },
 
-  createCategory: async (salonId: string, name: string, displayOrder: number): Promise<ProductCategory> => {
-    const { data, error } = await (supabase as any)
-      .from('product_categories')
-      .insert({
-        salon_id: salonId,
-        name,
-        display_order: displayOrder,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as ProductCategory;
+  createCategory: async (
+    salonId: string,
+    name: string,
+    displayOrder: number
+  ): Promise<ProductCategory> => {
+    const res = await apiClient.post<ProductCategory>(path(salonId), {
+      action: 'create_category',
+      name,
+      displayOrder,
+    });
+    return res.data!;
   },
 
-  updateCategory: async (id: string, name: string): Promise<ProductCategory> => {
-    const { data, error } = await (supabase as any)
-      .from('product_categories')
-      .update({ name, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as ProductCategory;
+  updateCategory: async (salonId: string, id: string, name: string): Promise<ProductCategory> => {
+    const res = await apiClient.post<ProductCategory>(path(salonId), {
+      action: 'update_category',
+      id,
+      name,
+    });
+    return res.data!;
   },
 
-  deleteCategory: async (id: string): Promise<void> => {
-    const { error } = await (supabase as any)
-      .from('product_categories')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+  deleteCategory: async (salonId: string, id: string): Promise<void> => {
+    await apiClient.post(path(salonId), {
+      action: 'delete_category',
+      id,
+    });
   },
 
-  reorderCategories: async (categories: { id: string; display_order: number }[]): Promise<void> => {
-    const promises = categories.map((cat) =>
-      (supabase as any)
-        .from('product_categories')
-        .update({ display_order: cat.display_order })
-        .eq('id', cat.id)
-    );
-    const results = await Promise.all(promises);
-    const error = results.find((r) => r.error)?.error;
-    if (error) throw error;
+  reorderCategories: async (
+    salonId: string,
+    categories: { id: string; display_order: number }[]
+  ): Promise<void> => {
+    await apiClient.post(path(salonId), {
+      action: 'reorder_categories',
+      categories,
+    });
   },
 
   // ─── Products ─────────────────────────────────────────
   getProducts: async (salonId: string, categoryId?: string): Promise<Product[]> => {
-    let query = (supabase as any)
-      .from('salon_products')
-      .select('*')
-      .eq('salon_id', salonId)
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: false });
-
-    if (categoryId) {
-      query = query.eq('category_id', categoryId);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return (data as Product[]) || [];
+    const res = await apiClient.get<Product[]>(path(salonId), {
+      type: 'products',
+      ...(categoryId ? { categoryId } : {}),
+    });
+    return res.data ?? [];
   },
 
   createProduct: async (
@@ -86,56 +64,41 @@ export const productsApi = {
     categoryId: string,
     data: { name: string; price: number; displayOrder: number }
   ): Promise<Product> => {
-    const { data: result, error } = await (supabase as any)
-      .from('salon_products')
-      .insert({
-        salon_id: salonId,
-        category_id: categoryId,
-        name: data.name,
-        price: data.price,
-        display_order: data.displayOrder,
-        is_active: true,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return result as Product;
+    const res = await apiClient.post<Product>(path(salonId), {
+      action: 'create_product',
+      categoryId,
+      productData: data,
+    });
+    return res.data!;
   },
 
-  updateProduct: async (id: string, updates: Partial<Product>): Promise<Product> => {
-    const { data, error } = await (supabase as any)
-      .from('salon_products')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as Product;
+  updateProduct: async (
+    salonId: string,
+    id: string,
+    updates: Partial<Product>
+  ): Promise<Product> => {
+    const res = await apiClient.post<Product>(path(salonId), {
+      action: 'update_product',
+      id,
+      updates,
+    });
+    return res.data!;
   },
 
-  deleteProduct: async (id: string): Promise<void> => {
-    const { error } = await (supabase as any)
-      .from('salon_products')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+  deleteProduct: async (salonId: string, id: string): Promise<void> => {
+    await apiClient.post(path(salonId), {
+      action: 'delete_product',
+      id,
+    });
   },
 
-  reorderProducts: async (products: { id: string; display_order: number }[]): Promise<void> => {
-    const promises = products.map((p) =>
-      (supabase as any)
-        .from('salon_products')
-        .update({ display_order: p.display_order })
-        .eq('id', p.id)
-    );
-    const results = await Promise.all(promises);
-    const error = results.find((r) => r.error)?.error;
-    if (error) throw error;
+  reorderProducts: async (
+    salonId: string,
+    products: { id: string; display_order: number }[]
+  ): Promise<void> => {
+    await apiClient.post(path(salonId), {
+      action: 'reorder_products',
+      products,
+    });
   },
 };

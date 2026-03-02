@@ -20,6 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
 import { Input } from '@/components/ui/Input';
 import { useTranslations, useLocale } from 'next-intl';
 import { GripVertical, Pencil, Trash2, Plus, X, Lock } from 'lucide-react';
@@ -612,7 +613,7 @@ export const FilterSettingsModal = memo(function FilterSettingsModal({
     >
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="text-secondary-500">{t('common.loading')}</div>
+          <Spinner size="lg" />
         </div>
       ) : showForm ? (
         <FilterEditForm

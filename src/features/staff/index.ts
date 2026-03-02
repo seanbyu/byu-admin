@@ -55,5 +55,3 @@ export { useStaffActions } from './hooks/useStaffActions';
 // Views
 export { default as StaffPageView } from './views/StaffPageView';
 
-// Server Actions
-export { createStaff, inviteStaff, deleteStaff, softDeleteStaff, cancelResignation } from './actions';

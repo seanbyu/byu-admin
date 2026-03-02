@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api';
 import { Product, ProductCategory } from '../types';
@@ -29,14 +28,14 @@ export function useProductCategories(salonId: string) {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) =>
-      productsApi.updateCategory(id, name),
+      productsApi.updateCategory(salonId, id, name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.categories(salonId) });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => productsApi.deleteCategory(id),
+    mutationFn: (id: string) => productsApi.deleteCategory(salonId, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.categories(salonId) });
       queryClient.invalidateQueries({ queryKey: productKeys.list(salonId) });
@@ -45,7 +44,7 @@ export function useProductCategories(salonId: string) {
 
   const reorderMutation = useMutation({
     mutationFn: (categories: { id: string; display_order: number }[]) =>
-      productsApi.reorderCategories(categories),
+      productsApi.reorderCategories(salonId, categories),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.categories(salonId) });
     },
@@ -95,14 +94,14 @@ export function useProducts(salonId: string, categoryId?: string) {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Record<string, any> }) =>
-      productsApi.updateProduct(id, updates),
+      productsApi.updateProduct(salonId, id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.list(salonId) });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => productsApi.deleteProduct(id),
+    mutationFn: (id: string) => productsApi.deleteProduct(salonId, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.list(salonId) });
     },
@@ -110,7 +109,7 @@ export function useProducts(salonId: string, categoryId?: string) {
 
   const reorderMutation = useMutation({
     mutationFn: (products: { id: string; display_order: number }[]) =>
-      productsApi.reorderProducts(products),
+      productsApi.reorderProducts(salonId, products),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.list(salonId) });
     },

@@ -2,8 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { supabase } from '@/lib/supabase/client';
-import { deleteStaff, softDeleteStaff, cancelResignation } from '@/features/staff/actions';
+import { staffApi } from '../api';
 import { Staff, StaffPermission } from '../types';
 
 interface UseStaffActionsParams {
@@ -63,28 +62,12 @@ export function useStaffActions({
       if (!confirm(t('confirm.softResign'))) return;
 
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          alert(t('errors.loginRequired'));
-          return;
-        }
-
-        const result = await softDeleteStaff({
-          staffId,
-          salonId,
-          accessToken: session.access_token,
-        });
-
-        if (result.error) {
-          handleResignError(result.error);
-          return;
-        }
-
+        await staffApi.softDelete(salonId, staffId);
         alert(t('success.softResigned'));
         refetch();
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        alert(t('errors.deleteFailed'));
+        handleResignError(err.message || t('errors.deleteFailed'));
       }
     },
     [salonId, refetch, t, handleResignError]
@@ -96,28 +79,12 @@ export function useStaffActions({
       if (!confirm(t('confirm.immediateResign'))) return;
 
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          alert(t('errors.loginRequired'));
-          return;
-        }
-
-        const result = await deleteStaff({
-          staffId,
-          salonId,
-          accessToken: session.access_token,
-        });
-
-        if (result.error) {
-          handleResignError(result.error);
-          return;
-        }
-
+        await staffApi.hardDelete(salonId, staffId);
         alert(t('success.resigned'));
         refetch();
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        alert(t('errors.deleteFailed'));
+        handleResignError(err.message || t('errors.deleteFailed'));
       }
     },
     [salonId, refetch, t, handleResignError]
@@ -129,28 +96,12 @@ export function useStaffActions({
       if (!confirm(t('confirm.cancelResignation'))) return;
 
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          alert(t('errors.loginRequired'));
-          return;
-        }
-
-        const result = await cancelResignation({
-          staffId,
-          salonId,
-          accessToken: session.access_token,
-        });
-
-        if (result.error) {
-          alert(result.error);
-          return;
-        }
-
+        await staffApi.cancelResignation(salonId, staffId);
         alert(t('success.resignationCancelled'));
         refetch();
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        alert(t('errors.cancelFailed'));
+        alert(err.message || t('errors.cancelFailed'));
       }
     },
     [salonId, refetch, t]
@@ -189,27 +140,16 @@ export function useStaffActions({
 
   // 역할 변경
   const handleRoleChange = useCallback(
-    async (staffId: string, userId: string, newRole: string) => {
+    async (staffId: string, _userId: string, newRole: string) => {
       try {
-        // users 테이블의 role 업데이트
-        const { error } = await supabase
-          .from('users')
-          .update({ role: newRole } as never)
-          .eq('id', userId);
-
-        if (error) {
-          console.error('Error updating role:', error);
-          alert(t('errors.updateFailed'));
-          return;
-        }
-
+        await staffApi.updateRole(salonId, staffId, newRole);
         refetch();
       } catch (err) {
         console.error(err);
         alert(t('errors.updateFailed'));
       }
     },
-    [refetch, t]
+    [salonId, refetch, t]
   );
 
   return useMemo(

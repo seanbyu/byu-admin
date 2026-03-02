@@ -32,7 +32,7 @@
     "allPermissions": "All Permissions",
     "setPermissions": "Set Permissions",
     "viewPermissions": "View Permissions",
-    "editInfo": "Edit Info"
+    "edit": "Edit"
   },
   "status": {
     "resignedDaysLeft": "Resigning (D-{days})"

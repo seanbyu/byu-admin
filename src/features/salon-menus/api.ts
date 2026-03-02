@@ -1,11 +1,9 @@
 import { apiClient } from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
-import { SupabaseClient } from '@supabase/supabase-js';
 import { IndustriesResponse, MenuCategory, SalonMenu } from './types';
 import { ApiResponse } from '@/types';
 
-// Client arg unused
-export const createSalonMenusApi = (client?: SupabaseClient<any>) => {
+export const createSalonMenusApi = () => {
   return {
     getIndustries: async (
       salonId: string

@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Spinner } from '@/components/ui/Spinner';
 import { useTranslations } from 'next-intl';
 import { formatDate, formatPrice } from '@/lib/utils';
 import {
@@ -205,7 +206,7 @@ export const CustomerChartModal = memo(function CustomerChartModal({
     return (
       <Modal isOpen={isOpen} onClose={onClose} title={t('customer.chart.title')} size="xl">
         <div className="flex items-center justify-center py-12">
-          <div className="text-secondary-500">{t('common.loading')}</div>
+          <Spinner size="lg" />
         </div>
       </Modal>
     );

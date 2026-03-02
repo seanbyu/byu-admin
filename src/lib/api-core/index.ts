@@ -12,3 +12,5 @@ export * from "./services/salon-menu.service";
 export * from "./services/auth.service";
 export * from "./repositories/customer.repository";
 export * from "./services/customer.service";
+export * from "./repositories/product.repository";
+export * from "./services/product.service";

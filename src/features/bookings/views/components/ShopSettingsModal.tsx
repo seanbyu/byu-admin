@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Card } from '@/components/ui/Card';
@@ -151,7 +152,7 @@ export function ShopSettingsModal({
     <Modal isOpen={isOpen} onClose={onClose} title={t('booking.shopSettingsModal.title')} size="lg">
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="text-secondary-500">{t('common.loading')}</div>
+          <Spinner size="lg" />
         </div>
       ) : (
         <>

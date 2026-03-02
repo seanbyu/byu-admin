@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link, usePathname } from '@/i18n/routing';
 import { MenuItem } from './useSidebarMenu';
@@ -53,11 +53,23 @@ export const SidebarNavMenu = React.memo(function SidebarNavMenu({
                     {item.name}
                   </span>
                 </div>
-                {isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+                <ChevronRight
+                  size={15}
+                  className={cn(
+                    'transition-transform duration-300 ease-out',
+                    isOpen && 'rotate-90'
+                  )}
+                />
               </button>
 
-              {isOpen && (
-                <ul className="mt-1 ml-2.5 md:ml-3.5 space-y-1 border-l-2 border-sidebar-sub-border pl-2">
+              <div
+                aria-hidden={!isOpen}
+                className={cn(
+                  'grid overflow-hidden transition-[grid-template-rows,opacity,margin-top] duration-300 ease-out',
+                  isOpen ? 'grid-rows-[1fr] opacity-100 mt-1' : 'grid-rows-[0fr] opacity-0 mt-0'
+                )}
+              >
+                <ul className="min-h-0 ml-2.5 md:ml-3.5 space-y-1 border-l-2 border-sidebar-sub-border pl-2">
                   {item.subItems.map((subItem) => {
                     const isSubActive = pathname === subItem.href;
                     const SubIcon = subItem.icon;
@@ -72,6 +84,8 @@ export const SidebarNavMenu = React.memo(function SidebarNavMenu({
                               ? 'text-sidebar-active-text font-medium bg-sidebar-active'
                               : 'text-sidebar-text-muted hover:bg-sidebar-hover hover:text-sidebar-hover-text'
                           )}
+                          tabIndex={isOpen ? 0 : -1}
+                          aria-hidden={!isOpen}
                         >
                           <SubIcon size={15} className="mr-2 md:mr-2.5 xl:mr-3 shrink-0" />
                           <span>{subItem.name}</span>
@@ -80,7 +94,7 @@ export const SidebarNavMenu = React.memo(function SidebarNavMenu({
                     );
                   })}
                 </ul>
-              )}
+              </div>
             </li>
           );
         }
