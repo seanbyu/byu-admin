@@ -7,18 +7,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { BookingService } from "@/lib/api-core";
-import { NotificationService } from "@/lib/api-core/notifications/notification.service";
 import { AppError, handleApiError, requireField } from "@/lib/errors";
-
-function createAdminClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-}
 
 type RouteContext = { params: Promise<{ salonId: string; bookingId: string }> };
 
@@ -68,16 +58,13 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
     const supabase = createClient(req);
     const bookingService = new BookingService(supabase);
-    const adminClient = createAdminClient();
-    const notifService = new NotificationService(adminClient);
 
     let result;
 
     switch (action) {
       // ─── 예약 확정 ───
       case "confirm": {
-        // reschedule_pending 플래그 확인 → 변경 재확정 vs 일반 확정 분기
-        const { data: bookingSnap } = await adminClient
+        const { data: bookingSnap } = await supabase
           .from("bookings")
           .select("booking_meta")
           .eq("id", bookingId)
@@ -88,11 +75,11 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         result = await bookingService.confirmBooking(bookingId);
 
         if (isReschedule) {
-          const { reschedule_pending: _, ...restMeta } = snapMeta;
-          await adminClient.from("bookings").update({ booking_meta: restMeta }).eq("id", bookingId);
-          notifService.onBookingChangeConfirmed(bookingId).catch(console.error);
-        } else {
-          notifService.onBookingConfirmed(bookingId).catch(console.error);
+          const { reschedule_pending: _omit, ...restMeta } = snapMeta;
+          await supabase
+            .from("bookings")
+            .update({ booking_meta: restMeta } as never)
+            .eq("id", bookingId);
         }
         break;
       }
@@ -100,7 +87,6 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       // ─── 예약 취소 ───
       case "cancel": {
         result = await bookingService.cancelBooking(bookingId);
-        notifService.onBookingCancelled(bookingId).catch(console.error);
         break;
       }
 
@@ -117,21 +103,6 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         }
 
         result = await bookingService.updateBooking(bookingId, updates);
-
-        const bookingMeta = (updates.bookingMeta as Record<string, unknown>) ?? {};
-        notifService
-          .onBookingUpdated(bookingId, updates, bookingMeta)
-          .then(async () => {
-            // 재확정 시 reschedule_pending 플래그 클리어
-            if (updates.status === "CONFIRMED" && bookingMeta?.reschedule_pending) {
-              const { reschedule_pending, ...restMeta } = bookingMeta;
-              await adminClient
-                .from("bookings")
-                .update({ booking_meta: restMeta })
-                .eq("id", bookingId);
-            }
-          })
-          .catch(console.error);
         break;
       }
     }

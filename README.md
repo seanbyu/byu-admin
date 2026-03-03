@@ -183,6 +183,7 @@ NEXT_PUBLIC_INSTARGRAM_ACCESS_TOKEN=
 |---|---|---|
 | `enqueue-message-jobs` | 매일 09:00 (Asia/Bangkok) | 대상 산출 및 message_jobs 적재 |
 | `send-message-jobs` | 5분마다 | pending jobs를 LINE Push로 발송 |
+| `process-outbox` | 1분마다 | `notification_outbox`의 LINE 발송 + 재시도 처리 |
 | `track-message-event` | On-demand | 클릭/전환 이벤트 기록 |
 
 ### 환경변수 (Edge Functions)
@@ -234,6 +235,18 @@ SELECT cron.schedule(
   '*/5 * * * *',
   $$SELECT net.http_post(
     url := 'https://YOUR_PROJECT.supabase.co/functions/v1/send-message-jobs',
+    headers := jsonb_build_object(
+      'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key')
+    )
+  );$$
+);
+
+-- outbox: 1분마다 (LINE 공통 발송 경로)
+SELECT cron.schedule(
+  'process-outbox',
+  '*/1 * * * *',
+  $$SELECT net.http_post(
+    url := 'https://YOUR_PROJECT.supabase.co/functions/v1/process-outbox',
     headers := jsonb_build_object(
       'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key')
     )
