@@ -12,6 +12,14 @@
 
 
 -- ============================================
+-- 0. customers 컬럼 선보장 (migration 23/29가 미적용 환경 대비)
+-- ============================================
+ALTER TABLE customers
+  ADD COLUMN IF NOT EXISTS opt_out      BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS line_blocked BOOLEAN NOT NULL DEFAULT false;
+
+
+-- ============================================
 -- 1. ENUM 추가
 -- ============================================
 
