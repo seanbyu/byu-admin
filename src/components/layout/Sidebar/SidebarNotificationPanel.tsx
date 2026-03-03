@@ -11,6 +11,7 @@ import {
   useMarkAsRead,
   useMarkAllAsRead,
   useDeleteNotification,
+  useRealtimeNotifications,
   getRelativeTime,
   getNotificationTitle,
   getNotificationDetail,
@@ -34,6 +35,9 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
 
   const { user } = useAuthStore();
   const salonId = user?.salonId;
+
+  // Realtime 구독: notifications INSERT 시 캐시 즉시 무효화
+  useRealtimeNotifications();
 
   const { data: notifications = [], isLoading } = useNotifications(20);
   const { data: unreadCount = 0 } = useUnreadCount();

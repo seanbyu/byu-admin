@@ -2,7 +2,9 @@
  * Notifications Hooks
  */
 
+import { useEffect } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase/client";
 import { useAuthStore } from "@/store/authStore";
 import {
   getNotifications,
@@ -77,6 +79,50 @@ export function useMarkAllAsRead() {
       queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count", salonId] });
     },
   });
+}
+
+/**
+ * Supabase Realtime 구독 훅
+ *
+ * notifications 테이블에 ADMIN IN_APP 레코드가 INSERT될 때마다
+ * TanStack Query 캐시를 즉시 무효화 → 알림 패널 실시간 갱신
+ *
+ * 사용처: SidebarNotificationPanel 또는 최상위 레이아웃에서 한 번만 마운트
+ */
+export function useRealtimeNotifications() {
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const salonId = user?.salonId;
+
+  useEffect(() => {
+    if (!salonId) return;
+
+    const channel = supabase
+      .channel(`admin-notifications:${salonId}`)
+      .on(
+        "postgres_changes",
+        {
+          event:  "INSERT",
+          schema: "public",
+          table:  "notifications",
+          filter: `salon_id=eq.${salonId}`,
+        },
+        (payload) => {
+          const n = payload.new as { recipient_type: string; channel: string };
+
+          // ADMIN IN_APP 알림만 처리 (LINE 로그 INSERT는 무시)
+          if (n.recipient_type !== "ADMIN" || n.channel !== "IN_APP") return;
+
+          queryClient.invalidateQueries({ queryKey: ["notifications", salonId] });
+          queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count", salonId] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [salonId, queryClient]);
 }
 
 /**
