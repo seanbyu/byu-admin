@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useCallback, useEffect, memo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { Card } from '@/components/ui/Card';
@@ -15,6 +16,7 @@ import { salonSettingsKeys, SALON_SETTINGS_QUERY_OPTIONS } from '../hooks/querie
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
+import { useRouter } from '@/i18n/routing';
 import { Plus } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
 import { salonsApi } from '@/features/salons/api';
@@ -123,6 +125,8 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   const t = useTranslations();
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { canWrite } = usePermission();
   const canCreateBooking = canWrite(PermissionModules.BOOKINGS);
@@ -176,31 +180,41 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     [updateBooking]
   );
 
-  // 알림 클릭 → 스크롤 + 하이라이트 해제
+  // ── 알림 클릭 처리 (URL 파라미터 방식) ────────────────────────────────
+  const highlightParam    = searchParams.get('highlight');
+  const dateParam         = searchParams.get('date');
+  const staffParam        = searchParams.get('staff');
+  const { setSelectedDate, setSelectedStaffId, setHighlightedBookingId } = pageState;
+
+  // 1) URL 파라미터 → Zustand 상태 설정 (데이터 로딩 완료 시점에 실행)
+  useEffect(() => {
+    if (!highlightParam || isLoading || isSettingsLoading) return;
+
+    if (dateParam)  setSelectedDate(new Date(dateParam + 'T00:00:00'));
+    if (staffParam) setSelectedStaffId(staffParam);
+    setHighlightedBookingId(highlightParam);
+
+    // URL 파라미터 정리 (히스토리에 파라미터 남기지 않음)
+    router.replace('/bookings/chart');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightParam, isLoading, isSettingsLoading]);
+
+  // 2) highlightedBookingId 변경 시 스크롤 (폴링 없이 requestAnimationFrame 1회)
   const highlightedBookingId = pageState.highlightedBookingId;
-  const setHighlightedBookingId = pageState.setHighlightedBookingId;
   useEffect(() => {
     if (!highlightedBookingId) return;
 
-    // 페이지 이동 후 데이터 로딩 완료까지 대기하며 스크롤 시도
-    let attempts = 0;
-    const maxAttempts = 10;
-    const tryScroll = () => {
-      const el = document.querySelector(`[data-booking-id="${highlightedBookingId}"]`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else if (attempts < maxAttempts) {
-        attempts++;
-        scrollRetry = setTimeout(tryScroll, 300);
-      }
-    };
-    let scrollRetry = setTimeout(tryScroll, 300);
+    // 렌더 완료 후 실제로 보이는 요소만 찾아 스크롤
+    // (모바일 md:hidden div 와 데스크탑 tr 중 offsetParent !== null 인 것)
+    const raf = requestAnimationFrame(() => {
+      const all = document.querySelectorAll(`[data-booking-id="${highlightedBookingId}"]`);
+      const el  = Array.from(all).find((e) => (e as HTMLElement).offsetParent !== null);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
 
-    const clearTimer = setTimeout(() => {
-      setHighlightedBookingId(null);
-    }, 5000);
+    const clearTimer = setTimeout(() => setHighlightedBookingId(null), 5000);
 
-    return () => { clearTimeout(scrollRetry); clearTimeout(clearTimer); };
+    return () => { cancelAnimationFrame(raf); clearTimeout(clearTimer); };
   }, [highlightedBookingId, setHighlightedBookingId]);
 
   const handleSheetAddBooking = useCallback(

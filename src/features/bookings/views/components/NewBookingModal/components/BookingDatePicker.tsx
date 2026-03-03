@@ -76,8 +76,17 @@ export function BookingDatePicker({
         setOpen(false);
       }
     };
-    if (open) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // 모달 스크롤 시 달력 닫기 (input과 달력이 분리되는 현상 방지)
+    const handleScroll = () => setOpen(false);
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('scroll', handleScroll, true); // capture: 모달 내부 스크롤도 감지
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('scroll', handleScroll, true);
+    };
   }, [open]);
 
   const handleSelect = useCallback(
@@ -95,7 +104,7 @@ export function BookingDatePicker({
   const captionFormat = locale === 'en' ? 'MMMM yyyy' : locale === 'th' ? 'MMMM yyyy' : 'yyyy년 M월';
 
   return (
-    <div className="w-full" ref={containerRef}>
+    <div className="w-full relative" ref={containerRef}>
       {label && (
         <label className="block text-sm font-medium text-secondary-800 mb-2">
           {label}

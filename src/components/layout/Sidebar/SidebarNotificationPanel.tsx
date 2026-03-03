@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { Bell, Check, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
-import { usePathname, useRouter } from '@/i18n/routing';
+import { useRouter } from '@/i18n/routing';
 import {
   useNotifications,
   useUnreadCount,
@@ -17,7 +17,6 @@ import {
   getNotificationDetail,
 } from '@/features/notifications/hooks/useNotifications';
 import { type Notification, getBookingInfo } from '@/features/notifications/api';
-import { useBookingsUIStore } from '@/features/bookings/stores/bookingsStore';
 import { useAuthStore } from '@/store/authStore';
 
 interface SidebarNotificationPanelProps {
@@ -29,7 +28,6 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
 }: SidebarNotificationPanelProps) {
   const t = useTranslations();
   const locale = useLocale();
-  const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
 
@@ -52,24 +50,21 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
       }
 
       if (notif.booking_id && salonId) {
-        const { setHighlightedBookingId, setSelectedDate, setSelectedStaffId } = useBookingsUIStore.getState();
-
-        // 예약 날짜 + 담당 직원 조회하여 해당 날짜/직원 탭으로 이동
+        // 예약 날짜·직원 정보를 URL 파라미터로 전달 → BookingsPageView에서 처리
         const info = await getBookingInfo(salonId, notif.booking_id);
+        const params = new URLSearchParams({ highlight: notif.booking_id });
         if (info) {
-          setSelectedDate(new Date(info.booking_date + 'T00:00:00'));
-          setSelectedStaffId(info.artist_id);
+          params.set('date', info.booking_date);
+          params.set('staff', info.artist_id);
         }
-
-        setHighlightedBookingId(notif.booking_id);
+        router.push(`/bookings/chart?${params.toString()}`);
+      } else {
+        router.push('/bookings/chart');
       }
 
-      if (!pathname.includes('/bookings')) {
-        router.push('/bookings');
-      }
       onNavClick();
     },
-    [markAsRead, pathname, router, onNavClick, salonId]
+    [markAsRead, router, onNavClick, salonId]
   );
 
   return (
