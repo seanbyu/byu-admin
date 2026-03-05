@@ -11,7 +11,6 @@ import {
   useMarkAsRead,
   useMarkAllAsRead,
   useDeleteNotification,
-  useRealtimeNotifications,
   getRelativeTime,
   getNotificationTitle,
   getNotificationDetail,
@@ -34,9 +33,6 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
   const { user } = useAuthStore();
   const salonId = user?.salonId;
 
-  // Realtime 구독: notifications INSERT 시 캐시 즉시 무효화
-  useRealtimeNotifications();
-
   const { data: notifications = [], isLoading } = useNotifications(20);
   const { data: unreadCount = 0 } = useUnreadCount();
   const { mutate: markAsRead } = useMarkAsRead();
@@ -51,7 +47,9 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
 
       if (notif.booking_id && salonId) {
         // 예약 날짜·직원 정보를 URL 파라미터로 전달 → BookingsPageView에서 처리
+        const t0 = performance.now();
         const info = await getBookingInfo(salonId, notif.booking_id);
+        console.log(`[perf] getBookingInfo ${(performance.now() - t0).toFixed(1)}ms`);
         const params = new URLSearchParams({ highlight: notif.booking_id });
         if (info) {
           params.set('date', info.booking_date);

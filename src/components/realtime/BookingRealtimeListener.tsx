@@ -9,9 +9,10 @@ import { useTranslations } from 'next-intl';
 import { bookingKeys } from '@/features/bookings/hooks/queries';
 
 /**
- * Supabase Realtime으로 bookings 테이블 변경 감지
- * - INSERT: 새 예약 알림 (토스트 + 사운드)
- * - UPDATE/DELETE: 쿼리 무효화 (자동 갱신)
+ * Supabase Realtime으로 bookings / notifications 테이블 변경 감지
+ *
+ * - TIMED_OUT / CHANNEL_ERROR: 지수 백오프 자동 재연결 (3s → 6s → 12s ... 최대 30s)
+ * - visibilitychange: 탭 복귀 시 즉시 재연결
  */
 export function BookingRealtimeListener() {
   const queryClient = useQueryClient();
@@ -35,117 +36,136 @@ export function BookingRealtimeListener() {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // 알림음: 짧은 2음 차임
-      oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
-      oscillator.frequency.setValueAtTime(1174.66, audioContext.currentTime + 0.15); // D6
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(1174.66, audioContext.currentTime + 0.15);
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.4);
     } catch {
-      // 오디오 재생 실패 시 무시 (사용자 인터랙션 전 차단될 수 있음)
+      // 오디오 재생 실패 시 무시
     }
   }, []);
 
   useEffect(() => {
     if (!salonId) return;
 
-    // 1. bookings 테이블 구독 → 예약 목록 즉시 재조회 + 새 예약 알림
-    const bookingsChannel = supabase
-      .channel(`bookings:salon:${salonId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'bookings',
-          filter: `salon_id=eq.${salonId}`,
-        },
-        (payload) => {
-          // invalidateQueries는 stale 표시만 → 새로고침해야 반영됨
-          // refetchQueries로 즉시 재조회 강제
-          queryClient.refetchQueries({
-            queryKey: bookingKeys.list(salonId),
-            type: 'active',
-          });
+    let isMounted = true;
+    let retryCount = 0;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let channels: ReturnType<typeof supabase.channel>[] = [];
 
-          if (payload.eventType === 'INSERT') {
-            const newBooking = payload.new as Record<string, unknown>;
-            const meta = newBooking.booking_meta as Record<string, unknown> | null;
+    const removeChannels = () => {
+      channels.forEach((ch) => supabase.removeChannel(ch));
+      channels = [];
+    };
 
-            if (meta) {
-              const isAdmin = meta.channel === 'admin';
-              if (!isAdmin) {
-                playNotificationSound();
+    const scheduleRetry = () => {
+      if (!isMounted) return;
+      const delay = Math.min(3000 * Math.pow(2, retryCount), 30_000); // 3s→6s→12s→24s→30s
+      retryCount++;
+      retryTimer = setTimeout(() => {
+        if (isMounted) connect(); // eslint-disable-line @typescript-eslint/no-use-before-define
+      }, delay);
+    };
+
+    const connect = () => {
+      removeChannels();
+      if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+
+      // ── 1. bookings 채널 ────────────────────────────────────────────────
+      const bookingsChannel = supabase
+        .channel(`bookings:salon:${salonId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'bookings', filter: `salon_id=eq.${salonId}` },
+          (payload) => {
+            if (!isMounted) return;
+
+            const t0 = performance.now();
+            queryClient.refetchQueries({ queryKey: bookingKeys.list(salonId), type: 'active' });
+            console.log(`[perf] realtime:bookings→refetch ${(performance.now() - t0).toFixed(1)}ms`);
+
+            if (payload.eventType === 'INSERT') {
+              const meta = (payload.new as Record<string, unknown>).booking_meta as Record<string, unknown> | null;
+              if (meta) {
+                const isAdmin = meta.channel === 'admin';
+                if (!isAdmin) playNotificationSound();
+                toastRef.current.info(
+                  tRef.current(isAdmin ? 'booking.adminBookingAlert' : 'booking.newBookingAlert'),
+                  5000
+                );
               }
-              toastRef.current.info(
-                tRef.current(isAdmin ? 'booking.adminBookingAlert' : 'booking.newBookingAlert'),
-                5000
-              );
+            }
+
+            if (payload.eventType === 'UPDATE') {
+              const oldData = payload.old as Record<string, unknown>;
+              const newData = payload.new as Record<string, unknown>;
+
+              if (newData.status === 'CANCELLED') {
+                playNotificationSound();
+                toastRef.current.info(tRef.current('booking.bookingCancelledAlert'), 5000);
+              } else if (
+                (oldData.booking_date !== undefined && oldData.booking_date !== newData.booking_date) ||
+                (oldData.start_time  !== undefined && oldData.start_time  !== newData.start_time)
+              ) {
+                playNotificationSound();
+                toastRef.current.info(tRef.current('booking.bookingRescheduledAlert'), 5000);
+              }
             }
           }
-
-          if (payload.eventType === 'UPDATE') {
-            const oldData = payload.old as Record<string, unknown>;
-            const newData = payload.new as Record<string, unknown>;
-
-            // old에 booking_date가 있어야 비교 가능 (REPLICA IDENTITY FULL 필요)
-            // old에 해당 필드가 없으면 (undefined) 일정 변경 알림을 건너뜀
-            const hasOldDate = oldData.booking_date !== undefined;
-            const hasOldTime = oldData.start_time !== undefined;
-
-            if (
-              (hasOldDate && oldData.booking_date !== newData.booking_date) ||
-              (hasOldTime && oldData.start_time !== newData.start_time)
-            ) {
-              playNotificationSound();
-              toastRef.current.info(
-                tRef.current('booking.bookingRescheduledAlert'),
-                5000
-              );
-            }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            retryCount = 0; // 성공 시 재시도 카운터 초기화
+          } else if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
+            console.warn('[Realtime] bookings 채널 연결 실패:', status, `(재시도 ${retryCount + 1}회)`);
+            scheduleRetry();
           }
-        }
-      )
-      .subscribe((status) => {
-        // 구독 실패 시 콘솔 경고 (silent failure 방지)
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.warn('[Realtime] bookings 채널 연결 실패:', status);
-        }
-      });
+        });
 
-    // 2. notifications 테이블 구독 → 사이드바 알림 패널 즉시 갱신
-    const notificationsChannel = supabase
-      .channel(`notifications:salon:${salonId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `salon_id=eq.${salonId}`,
-        },
-        () => {
-          queryClient.refetchQueries({
-            queryKey: ['notifications', salonId],
-            type: 'active',
-          });
-          queryClient.refetchQueries({
-            queryKey: ['notifications', 'unread-count', salonId],
-            type: 'active',
-          });
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.warn('[Realtime] notifications 채널 연결 실패:', status);
-        }
-      });
+      // ── 2. notifications 채널 ───────────────────────────────────────────
+      const notificationsChannel = supabase
+        .channel(`notifications:salon:${salonId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'notifications', filter: `salon_id=eq.${salonId}` },
+          () => {
+            if (!isMounted) return;
+            const t0 = performance.now();
+            queryClient.refetchQueries({ queryKey: ['notifications', salonId], type: 'active' });
+            queryClient.refetchQueries({ queryKey: ['notifications', 'unread-count', salonId], type: 'active' });
+            console.log(`[perf] realtime:notifications→refetch ${(performance.now() - t0).toFixed(1)}ms`);
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
+            console.warn('[Realtime] notifications 채널 연결 실패:', status, `(재시도 ${retryCount + 1}회)`);
+            // bookings 채널의 scheduleRetry가 두 채널을 함께 재연결
+          }
+        });
+
+      channels = [bookingsChannel, notificationsChannel];
+    };
+
+    // 최초 연결
+    connect();
+
+    // 탭 복귀 시 재연결
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && isMounted) {
+        retryCount = 0;
+        connect();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      supabase.removeChannel(bookingsChannel);
-      supabase.removeChannel(notificationsChannel);
+      isMounted = false;
+      if (retryTimer) clearTimeout(retryTimer);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      removeChannels();
     };
   }, [salonId, queryClient, playNotificationSound]);
 

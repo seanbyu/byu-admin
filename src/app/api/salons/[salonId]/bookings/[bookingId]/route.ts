@@ -12,6 +12,21 @@ import { AppError, handleApiError, requireField } from "@/lib/errors";
 
 type RouteContext = { params: Promise<{ salonId: string; bookingId: string }> };
 
+// fire-and-forget: outbox 레코드를 즉시 처리 (await 하지 않아 응답 속도에 영향 없음)
+function triggerProcessOutbox() {
+  fetch(
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-outbox`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: "{}",
+    },
+  ).catch(() => {/* pg_cron이 1분 내 재시도 */});
+}
+
 // ─────────────────────────────────────────
 // GET /api/salons/[salonId]/bookings/[bookingId]
 // ─────────────────────────────────────────
@@ -46,15 +61,19 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
 //   { updates: { ... } }           — 일반 필드 업데이트
 // ─────────────────────────────────────────
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
+  const t0 = performance.now();
+  let action: string | undefined;
+
   try {
     const { bookingId } = await params;
     requireField(bookingId, "bookingId");
 
     const body = await req.json();
-    const { action, updates } = body as {
+    const { action: _action, updates } = body as {
       action?: "confirm" | "cancel" | "complete";
       updates?: Record<string, unknown>;
     };
+    action = _action;
 
     const supabase = createClient(req);
     const bookingService = new BookingService(supabase);
@@ -81,12 +100,14 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
             .update({ booking_meta: restMeta } as never)
             .eq("id", bookingId);
         }
+        triggerProcessOutbox();
         break;
       }
 
       // ─── 예약 취소 ───
       case "cancel": {
         result = await bookingService.cancelBooking(bookingId);
+        triggerProcessOutbox();
         break;
       }
 
@@ -107,8 +128,21 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       }
     }
 
+    console.log(JSON.stringify({
+      layer: "api-route",
+      operation: `booking-${action ?? "update"}`,
+      durationMs: +(performance.now() - t0).toFixed(1),
+      meta: { bookingId, action, hasUpdates: !!updates },
+    }));
+
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
+    console.log(JSON.stringify({
+      layer: "api-route",
+      operation: `booking-${action ?? "update"}`,
+      durationMs: +(performance.now() - t0).toFixed(1),
+      error: (error as Error).message,
+    }));
     return handleApiError(error);
   }
 }

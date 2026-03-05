@@ -204,12 +204,14 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   useEffect(() => {
     if (!highlightedBookingId) return;
 
+    const t0 = performance.now();
     // 렌더 완료 후 실제로 보이는 요소만 찾아 스크롤
     // (모바일 md:hidden div 와 데스크탑 tr 중 offsetParent !== null 인 것)
     const raf = requestAnimationFrame(() => {
       const all = document.querySelectorAll(`[data-booking-id="${highlightedBookingId}"]`);
       const el  = Array.from(all).find((e) => (e as HTMLElement).offsetParent !== null);
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      console.log(`[perf] highlight→scroll ${(performance.now() - t0).toFixed(1)}ms`);
     });
 
     const clearTimer = setTimeout(() => setHighlightedBookingId(null), 5000);

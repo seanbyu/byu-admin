@@ -132,10 +132,19 @@ export async function dispatchNotification(
     trigger_type: triggerType,
   };
 
+  const t0 = performance.now();
   const notificationIds: string[] = [];
 
+  // 중복 체크 병렬 실행 (순차 → 병렬로 개선)
+  const dupCheckStart = performance.now();
+  const [lineIsDuplicate, inAppIsDuplicate] = await Promise.all([
+    isDuplicateNotification(client, payload.bookingId, dbType, "LINE"),
+    isDuplicateNotification(client, payload.bookingId, dbType, "IN_APP"),
+  ]);
+  const dupCheckMs = +(performance.now() - dupCheckStart).toFixed(1);
+
   // LINE 알림
-  const lineIsDuplicate = await isDuplicateNotification(client, payload.bookingId, dbType, "LINE");
+  const insertStart = performance.now();
   if (!lineIsDuplicate) {
     const { data: lineNotif, error: lineErr } = await client
       .from("notifications")
@@ -160,7 +169,6 @@ export async function dispatchNotification(
   }
 
   // IN_APP 알림 (관리자 대상)
-  const inAppIsDuplicate = await isDuplicateNotification(client, payload.bookingId, dbType, "IN_APP");
   if (!inAppIsDuplicate) {
     await client.from("notifications").insert({
       booking_id: payload.bookingId,
@@ -174,15 +182,26 @@ export async function dispatchNotification(
       status: "PENDING",
     });
   }
+  const insertMs = +(performance.now() - insertStart).toFixed(1);
 
   // LINE Edge Function 즉시 호출 (fire-and-forget)
+  const edgeFnStart = performance.now();
   if (notificationIds.length > 0) {
     client.functions
       .invoke("send-line-notifications", { body: { notification_ids: notificationIds } })
       .catch((err: Error) => console.error(`[Notification] Edge Function error (${triggerType}):`, err));
   }
+  const edgeFnMs = +(performance.now() - edgeFnStart).toFixed(1);
 
-  console.log(`[Notification] Dispatched ${triggerType} (${locale}) for booking: ${payload.bookingId}`);
+  console.log(JSON.stringify({
+    layer: "app-trigger",
+    operation: "dispatchNotification",
+    durationMs: +(performance.now() - t0).toFixed(1),
+    breakdown: { dupCheckMs, insertMs, edgeFnMs },
+    skipped: { line: lineIsDuplicate, inApp: inAppIsDuplicate },
+    triggerType,
+    bookingId: payload.bookingId,
+  }));
 
   return { success: true, notificationIds };
 }
