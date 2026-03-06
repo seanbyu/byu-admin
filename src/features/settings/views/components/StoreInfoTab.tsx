@@ -109,15 +109,15 @@ const EditableField = memo(function EditableField({
   }
 
   return (
-    <div className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg gap-2">
+      <div className="flex items-center gap-2 min-w-0 flex-1">
         {icon}
-        <span className="text-secondary-900">{value || '-'}</span>
+        <span className="text-secondary-900 break-all text-sm">{value || '-'}</span>
       </div>
       {canEdit && (
         <button
           onClick={onStartEdit}
-          className="p-1.5 text-secondary-500 hover:text-secondary-700 hover:bg-secondary-200 rounded-lg transition-colors"
+          className="p-1.5 text-secondary-500 hover:text-secondary-700 hover:bg-secondary-200 rounded-lg transition-colors flex-shrink-0"
         >
           <Pencil size={16} />
         </button>

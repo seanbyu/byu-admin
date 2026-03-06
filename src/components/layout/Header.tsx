@@ -1,19 +1,20 @@
 'use client';
 
 import React from 'react';
-import { Menu, Globe } from 'lucide-react';
+import { Menu, Globe, Bell } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';
-import { useAuthStore } from '@/store/authStore';
 import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import { useRouter, usePathname } from '@/i18n/routing';
+import { useUnreadCount } from '@/features/notifications/hooks/useNotifications';
 
 export const Header: React.FC = () => {
   const { toggleSidebar } = useUIStore();
-  const { user } = useAuthStore();
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const { data: unreadCount = 0 } = useUnreadCount();
 
   const [showLangMenu, setShowLangMenu] = React.useState(false);
 
@@ -29,10 +30,30 @@ export const Header: React.FC = () => {
         >
           <Menu size={20} className="sm:w-[22px] sm:h-[22px]" />
         </button>
+        <Link
+          href="/dashboard"
+          className="text-base sm:text-lg font-bold tracking-wide text-secondary-900 hover:text-primary-600 transition-colors"
+        >
+          BYU
+        </Link>
       </div>
 
       {/* Right side */}
       <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+        {/* Notification */}
+        <button
+          onClick={() => router.push('/bookings/chart')}
+          className="relative flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
+          aria-label="Notifications"
+        >
+          <Bell size={18} className="sm:w-5 sm:h-5" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-error-500 text-white text-[10px] font-bold leading-none flex items-center justify-center">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </button>
+
         {/* Language selector */}
         <div className="relative">
           <button
@@ -62,23 +83,6 @@ export const Header: React.FC = () => {
               ))}
             </div>
           )}
-        </div>
-
-        {/* User info */}
-        <div className="flex items-center pl-1 sm:pl-2 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-secondary-100 flex items-center justify-center shrink-0">
-            <span className="text-secondary-700 font-semibold text-sm">
-              {user?.name?.[0]?.toUpperCase() ?? '?'}
-            </span>
-          </div>
-          <div className="ml-2 min-w-0 hidden md:block">
-            <p className="text-sm font-medium text-secondary-900 truncate max-w-[140px] lg:max-w-[200px]">
-              {user?.name}
-            </p>
-            <p className="text-xs text-secondary-500 truncate max-w-[140px] lg:max-w-[200px]">
-              {user?.email}
-            </p>
-          </div>
         </div>
       </div>
     </header>

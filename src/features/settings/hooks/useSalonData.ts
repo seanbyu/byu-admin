@@ -1,7 +1,6 @@
 'use client';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { settingsApi } from '../api';
 import { settingsKeys } from './useSettings';
 
@@ -24,8 +23,6 @@ export interface SalonData {
 // ============================================
 
 export function useSalonData(salonId: string) {
-  const queryClient = useQueryClient();
-
   const query = useQuery<SalonData | null>({
     queryKey: settingsKeys.storeInfoDirect(salonId),
     queryFn: async () => {
@@ -46,16 +43,10 @@ export function useSalonData(salonId: string) {
     staleTime: 0,
   });
 
-  const refetch = useCallback(async () => {
-    await queryClient.invalidateQueries({
-      queryKey: settingsKeys.storeInfoDirect(salonId),
-    });
-  }, [queryClient, salonId]);
-
   return {
     salonData: query.data,
     isLoading: query.isLoading,
     error: query.error,
-    refetch,
+    refetch: query.refetch,
   };
 }
