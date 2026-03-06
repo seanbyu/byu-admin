@@ -17,6 +17,7 @@
   "adminBookingAlert": "A new booking has been registered.",
   "bookingRescheduledAlert": "Customer has rescheduled their booking.",
   "bookingCancelledAlert": "A customer has cancelled their booking appointment.",
+  "rescheduleRequestAlert": "A customer has requested a schedule change.",
   "customer": "Customer",
   "designer": "Designer",
   "service": "Service",

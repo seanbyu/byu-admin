@@ -106,6 +106,19 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
       // ─── 예약 취소 ───
       case "cancel": {
+        // 트리거 발동 전 cancelled_by: 'ADMIN' 을 booking_meta에 기록
+        // → trg_on_booking_status_changed 에서 어드민 자신의 취소 시 IN_APP 알림 생성 안 함
+        const { data: cancelSnap } = await supabase
+          .from("bookings")
+          .select("booking_meta")
+          .eq("id", bookingId)
+          .single();
+        const cancelMeta = (cancelSnap?.booking_meta as Record<string, unknown> | null) ?? {};
+        await supabase
+          .from("bookings")
+          .update({ booking_meta: { ...cancelMeta, cancelled_by: "ADMIN" } } as never)
+          .eq("id", bookingId);
+
         result = await bookingService.cancelBooking(bookingId);
         triggerProcessOutbox();
         break;

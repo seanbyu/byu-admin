@@ -179,6 +179,9 @@ export function getNotificationTitle(
     case "BOOKING_CONFIRMED":
       return t("common.notifications.confirmedBooking");
     case "BOOKING_CANCELLED":
+      if (notification.metadata?.cancelled_by === "CUSTOMER") {
+        return t("common.notifications.customerCancelledBooking");
+      }
       return t("common.notifications.cancelledBooking");
     case "BOOKING_MODIFIED":
       return t("common.notifications.rescheduledBooking");
@@ -226,7 +229,11 @@ export function getNotificationDetail(
   if (meta.service_name) parts.push(meta.service_name);
   else if (meta.category_name) parts.push(meta.category_name);
   if (parts.length > 0) {
-    staffService = parts.join(' | ') + ' ' + t('common.notifications.pendingStatus');
+    const isCancelled = notification.notification_type === 'BOOKING_CANCELLED';
+    const statusLabel = isCancelled
+      ? t('common.notifications.cancelledStatus')
+      : t('common.notifications.pendingStatus');
+    staffService = parts.join(' | ') + ' ' + statusLabel;
   }
 
   return { dateTime, staffService };

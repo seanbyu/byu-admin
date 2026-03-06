@@ -68,6 +68,7 @@
     "newBooking": "มีคำขอจองใหม่",
     "confirmedBooking": "การจองได้รับการยืนยันแล้ว",
     "cancelledBooking": "การจองถูกยกเลิก",
+    "customerCancelledBooking": "ลูกค้ายกเลิกการจอง",
     "rescheduledBooking": "คำขอเปลี่ยนเวลาจอง",
     "bookingReminder": "การแจ้งเตือนการจอง",
     "completedBooking": "การจองเสร็จสมบูรณ์",
@@ -76,7 +77,8 @@
     "noNotifications": "ไม่มีการแจ้งเตือนใหม่",
     "viewAll": "ดูทั้งหมด",
     "markAllRead": "อ่านทั้งหมด",
-    "pendingStatus": "รอดำเนินการ"
+    "pendingStatus": "รอดำเนินการ",
+    "cancelledStatus": "ยกเลิกแล้ว"
   },
   "calendar": {
     "view": "ปฏิทิน",

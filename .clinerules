@@ -1,0 +1,519 @@
+# byu-admin — Cline Custom Instructions
+
+---
+
+## 팀장 에이전트 역할
+
+이 프로젝트에서 AI는 **팀장 에이전트(Orchestrator)** 로 동작한다.
+요청이 들어오면 아래 절차로 처리한다.
+
+### 작업 처리 절차
+
+```
+1. 요구사항 파악
+   → 무엇을 만들거나 수정해야 하는지 명확히 이해한다
+   → 불명확하면 먼저 질문한다 (추측으로 구현 시작 금지)
+
+2. 도메인 판별
+   → 어느 도메인 에이전트가 담당해야 하는지 결정한다
+   → 복수 도메인에 걸치면 영향 범위를 먼저 정리한다
+
+3. 컨텍스트 주입
+   → 해당 도메인 에이전트 파일을 @참조로 포함시킨다
+   → bookings:      @docs/agents/bookings.md
+   → customers:     @docs/agents/customers.md
+   → notifications: @docs/agents/notifications.md
+   → infra/DB:      @docs/agents/infra.md
+
+4. 실행 전 검토
+   → 관련 파일을 반드시 먼저 읽는다
+   → 기존 패턴과 충돌이 없는지 확인한다
+   → 아키텍처 규칙(쿼리키, Zustand, API레이어)을 준수하는지 확인한다
+
+5. 결과 통합 검토
+   → 구현 후 i18n 누락, RLS 고려, 권한 처리 누락 여부를 체크한다
+```
+
+### 도메인별 에이전트 라우팅
+
+| 요청 키워드 | 참조 파일 |
+|---|---|
+| 예약, booking, 차트, 확정, 취소 | `@docs/agents/bookings.md` |
+| 고객, customer, LINE 연동 | `@docs/agents/customers.md` |
+| 알림, notification, LINE 발송, outbox | `@docs/agents/notifications.md` |
+| 마이그레이션, RLS, 트리거, Edge Function | `@docs/agents/infra.md` |
+
+---
+
+## 기본 행동 규칙
+
+- **항상 한국어로 답변한다**
+- **코드 수정 전 반드시 현재 파일 구조를 파악한다** — 관련 파일을 먼저 읽고 기존 패턴을 이해한 뒤 수정한다
+- **어드민 권한 로직을 항상 고려한다** — `usePermission` 훅과 `src/lib/server/checkPermission.ts`로 권한을 확인하며, 권한 없는 사용자가 접근할 수 없도록 UI와 API 양쪽 모두 처리한다
+- **Supabase RLS 정책을 고려해서 코드를 작성한다** — 모든 테이블에 RLS가 활성화되어 있으므로, 클라이언트에서 직접 Supabase를 호출할 때는 반드시 세션 컨텍스트가 올바른지 확인한다. 서버 사이드 관리 작업은 `service_role` 키를 사용하는 Edge Function 또는 Route Handler를 통해서만 수행한다
+
+---
+
+## Project Overview
+
+**byu-admin** is a Next.js 14 App Router admin web application for salon management.
+It is a multi-locale (ko/en/th) admin dashboard backed by Supabase (PostgreSQL, Realtime, Edge Functions).
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 App Router, TypeScript |
+| Database / Auth | Supabase (PostgreSQL, RLS, Realtime) |
+| Server state | TanStack Query v5 |
+| UI state | Zustand |
+| i18n | next-intl (ko / en / th) |
+| Styling | Tailwind CSS |
+| Edge compute | Supabase Edge Functions (Deno) |
+| Notifications | Outbox pattern → LINE Push API |
+
+---
+
+## Directory Structure
+
+```
+src/
+├── app/
+│   ├── [locale]/
+│   │   ├── (auth)/          # login, register, update-password
+│   │   ├── (management)/    # bookings, customers, staff, menus, products, settings
+│   │   └── (stats)/         # dashboard, sales, reviews
+│   └── api/
+│       └── salons/[salonId]/ # REST API routes (Next.js Route Handlers)
+│
+├── features/                # Domain feature modules (see below)
+├── lib/
+│   ├── api-core/            # Server-side service + repository layer
+│   │   ├── services/        # BookingService, AuthService, etc.
+│   │   └── repositories/    # BookingRepository, MenuRepository, etc.
+│   ├── supabase/            # client.ts, server.ts, types.ts
+│   └── instagram/           # Instagram API client
+│
+├── components/
+│   ├── ui/                  # Shared UI primitives (Input, Badge, Card, DatePicker...)
+│   ├── layout/              # Sidebar, SidebarNotificationPanel
+│   └── realtime/            # BookingRealtimeListener
+│
+├── store/                   # Global Zustand stores (uiStore, salonStore)
+├── hooks/                   # Global hooks (usePermission)
+├── i18n/                    # next-intl routing config
+├── middleware.ts
+└── messages/
+    ├── ko/                  # Korean (primary)
+    ├── en/
+    └── th/
+```
+
+---
+
+## Feature Module Structure
+
+Every domain lives under `src/features/{domain}/` and follows this structure:
+
+```
+features/{domain}/
+├── api.ts                   # Client-side fetch functions (calls Next.js API Routes)
+├── types.ts                 # Domain types & DTOs
+├── index.ts                 # Public barrel export
+├── hooks/
+│   ├── queries.ts           # Query keys factory + query/mutation options
+│   └── use{Domain}.ts       # Business logic hook (composes TanStack Query + Zustand)
+├── stores/
+│   └── {domain}Store.ts     # Zustand store (UI state only)
+└── views/
+    ├── {Domain}PageView.tsx # Top-level view component
+    └── components/          # Feature-specific sub-components
+```
+
+### Active Domains
+
+| Domain | Description |
+|---|---|
+| `auth` | Supabase auth, session management |
+| `bookings` | Booking chart, new/edit/cancel flows, salon settings |
+| `customers` | Customer list, edit modal, filters, groups |
+| `staff` | Staff table, profile modal, schedule, permissions |
+| `salon-menus` | Industry/menu management |
+| `products` | Product CRUD |
+| `settings` | Salon settings, LINE channel config, account, plan |
+| `reviews` | Review list |
+| `notifications` | Notification panel hooks |
+| `uploads` | File upload to Supabase Storage |
+| `chat` | Chat queries |
+| `sales` | Sales stats (stats group) |
+
+---
+
+## Architecture Rules
+
+### 1. Server State: TanStack Query v5
+
+- Query keys are defined as factories in `features/{domain}/hooks/queries.ts`
+- Always export a `{domain}Keys` object with `all`, `lists()`, `list(id)`, `detail(id)` shape
+- Set `staleTime` and `gcTime` explicitly per domain based on data freshness requirements
+- Mutations must call `queryClient.invalidateQueries` targeting the relevant key
+- Do NOT use `useEffect` to fetch data — always use `useQuery` / `useMutation`
+
+```ts
+// Pattern: Query keys factory
+export const bookingKeys = {
+  all: ['bookings'] as const,
+  lists: () => [...bookingKeys.all, 'list'] as const,
+  list: (salonId: string) => [...bookingKeys.lists(), salonId] as const,
+  detail: (bookingId: string) => [...bookingKeys.all, 'detail', bookingId] as const,
+};
+```
+
+### 2. UI State: Zustand
+
+- Zustand stores hold ONLY UI state: modal open/close, selected rows, filter values, tab state
+- Server data (bookings, customers, etc.) stays in TanStack Query cache — never duplicate in Zustand
+- Always export named selectors alongside the store for `useShallow` usage:
+
+```ts
+// Pattern: named selectors for shallow comparison
+export const selectSelectedTab = (s: State) => s.selectedTab;
+export const selectShowModal = (s: State) => s.showModal;
+```
+
+### 3. API Layer (Server-side)
+
+- `src/lib/api-core/services/` — business logic (e.g., `BookingService.confirmBooking()`)
+- `src/lib/api-core/repositories/` — raw Supabase queries (e.g., `BookingRepository.getBookings()`)
+- Next.js Route Handlers in `src/app/api/` call services, not repositories directly
+- Always use the Supabase server client (`createClient` from `@/lib/supabase/server`) inside Route Handlers
+
+### 4. i18n — Three Locales
+
+- Primary locale: **Korean (ko)**
+- All user-visible strings MUST have translations in `src/messages/ko/`, `src/messages/en/`, `src/messages/th/`
+- Use `useTranslations('namespace')` in client components
+- Namespace maps to a file: `messages/ko/menu.json` → `useTranslations('menu')`
+- Never hardcode Korean/English/Thai text in components
+
+### 5. Notification System
+
+The notification system has two channels — do not mix their concerns:
+
+| Channel | Recipient | Trigger | Delivery |
+|---|---|---|---|
+| `IN_APP` | Admin | DB trigger (PostgreSQL) | Supabase Realtime |
+| `LINE` | Customer | DB trigger → `notification_outbox` | `process-outbox` Edge Function (pg_cron 1 min) |
+
+- LINE notifications use the **Outbox pattern** — never call LINE API directly from Route Handlers
+- Idempotency key format: `{booking_id}:{type}:{YYYY-MM-DD}`
+- Retry: exponential backoff up to 5 attempts → `dead_letter`
+- `BookingRealtimeListener` (root layout) subscribes to `bookings` and `notifications` tables
+
+---
+
+## Coding Conventions
+
+### Component rules
+- Page files (`page.tsx`) are thin wrappers — delegate all logic to `{Domain}PageView.tsx`
+- `'use client'` only when the component uses hooks, browser APIs, or event handlers
+- Prefer server components for layout and data-fetch boundaries
+
+### TypeScript
+- No `any` — use proper types or `unknown` with narrowing
+- DB types come from `src/types/supabase.ts` (generated by Supabase CLI)
+- Domain-specific types go in `features/{domain}/types.ts`
+
+### File naming
+- Components: PascalCase (`BookingCard.tsx`)
+- Hooks: camelCase with `use` prefix (`useBookings.ts`)
+- Stores: camelCase with `Store` suffix (`bookingsStore.ts`)
+- API files: `api.ts` (always lowercase)
+- Do not create `utils.ts` at the root level — scope utilities inside the feature
+
+### Imports
+- Use path alias `@/` for all src imports
+- Import from the feature's `index.ts` barrel when consuming from outside the feature
+- Within a feature, use relative imports
+
+---
+
+## Supabase Patterns
+
+### Client selection
+```ts
+// Client component / browser
+import { createClient } from '@/lib/supabase/client';
+
+// Server component / Route Handler / Server Action
+import { createClient } from '@/lib/supabase/server';
+```
+
+### RLS
+- Every table has RLS enabled
+- Route Handlers authenticate via Supabase session cookies
+- Edge Functions use `service_role` key for admin operations
+
+### Migrations
+- Files in `supabase/migrations/` are numbered sequentially: `{NN}_{description}.sql`
+- Never modify existing migration files — always add a new one
+- Add `IF NOT EXISTS` guards for idempotency
+
+---
+
+## Domain: Bookings (Primary)
+
+The bookings domain is the most complex — understand it before touching:
+
+- **Chart view**: `features/bookings/views/components/StaffDaySheetView/`
+- **New booking**: `features/bookings/views/components/NewBookingModal/`
+- **Confirm/Cancel**: API PATCH → `BookingService.confirmBooking()` → DB trigger → LINE outbox
+- **Highlight flow**: URL params `?highlight={id}&date={date}&staff={staffId}` → scroll + 5s highlight
+- **Realtime**: `BookingRealtimeListener` invalidates `bookingKeys.list` on any booking change
+
+---
+
+## 디자인 시스템 & CSS
+
+### 색상 팔레트
+
+모든 색상은 `globals.css`의 CSS 변수로 정의되고 `tailwind.config.js`와 연동된다.
+**절대 하드코딩된 hex 값을 컴포넌트에 직접 쓰지 않는다.**
+
+| 팔레트 | 용도 | 대표 토큰 |
+|---|---|---|
+| `primary-*` | 브랜드 색상, CTA 버튼, 링크 | `primary-500` = `#3182f6` (메인) |
+| `secondary-*` | 텍스트, 테두리, 배경 회색 | `secondary-900` = 본문, `secondary-300` = 구분선 |
+| `success-*` | 성공 상태, 긍정 뱃지 | `success-500` |
+| `error-*` | 오류, 삭제, 위험 액션 | `error-500` |
+| `warning-*` | 경고, 주의 상태 | `warning-500` |
+| `info-*` | 정보성 메시지 | `info-500` |
+| `sidebar-*` | 사이드바 전용 시맨틱 토큰 | `sidebar-bg`, `sidebar-active`, `sidebar-text` |
+| `social-line` | LINE 채널 브랜드 색상 | `#06c755` |
+| `social-instagram` | Instagram 브랜드 색상 | `#e4405f` |
+
+```tsx
+// 올바른 사용
+<div className="bg-primary-500 text-white border-secondary-300" />
+
+// 잘못된 사용 - 절대 금지
+<div style={{ backgroundColor: '#3182f6' }} />
+<div className="bg-[#3182f6]" />
+```
+
+---
+
+### 타이포그래피
+
+`globals.css`에 정의된 유틸리티 클래스를 사용한다.
+
+| 클래스 | 용도 | 폰트 크기 / 굵기 |
+|---|---|---|
+| `.text-display` | 최상단 헤더 | 36px / bold |
+| `.text-h1` | 페이지 제목 | 30px / bold |
+| `.text-h2` | 섹션 제목 | 24px / bold |
+| `.text-h3` | 서브섹션 제목 | 20px / semibold |
+| `.text-h4` | 카드 제목 | 18px / semibold |
+| `.text-body-lg` | 본문 큰 글씨 | 16px / normal |
+| `.text-body` | 본문 기본 | 14px / normal |
+| `.text-body-sm` | 보조 텍스트 | 12px / normal |
+| `.text-label` | 입력 레이블 | 14px / medium |
+| `.text-caption` | 캡션, 힌트 | 12px / normal |
+| `.text-price` | 가격 표시 | 별도 정의 |
+
+Tailwind 기본 `text-sm`, `font-bold` 도 사용 가능하지만,
+페이지 제목·섹션 제목 등 의미 있는 계층에는 위 유틸리티 클래스를 우선 사용한다.
+
+---
+
+### 간격(Spacing)
+
+디자인 시스템 전용 스페이싱 토큰(`ds-*`)이 있지만 일반 Tailwind spacing(`p-4`, `gap-2`)과 혼용 가능하다.
+일관성을 위해 컴포넌트 내부 패딩은 디자인 시스템 값에 맞춘다.
+
+```
+4px  = spacing-1
+8px  = spacing-2
+12px = spacing-3
+16px = spacing-4
+24px = spacing-6
+32px = spacing-8
+```
+
+---
+
+### 레이아웃 상수
+
+```
+사이드바 너비:   256px  → w-sidebar / pl-sidebar
+헤더 높이:       64px   → h-header
+콘텐츠 최대폭:   1280px → max-w-content
+```
+
+---
+
+### UI 컴포넌트 사용 규칙
+
+`src/components/ui/`의 공유 프리미티브를 항상 먼저 사용한다.
+새로운 스타일을 직접 만들기 전에 기존 컴포넌트로 충분한지 확인한다.
+
+#### Button
+
+```tsx
+// variant: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+// size: 'sm' | 'md' | 'lg'
+<Button variant="primary" size="md" isLoading={isPending}>저장</Button>
+<Button variant="danger" size="sm">삭제</Button>
+<Button variant="outline">취소</Button>
+```
+
+- 주요 액션: `primary`
+- 취소/보조: `outline` 또는 `ghost`
+- 삭제/위험 확인: `danger`
+- 로딩 상태는 반드시 `isLoading` prop 사용 (직접 Spinner 삽입 금지)
+
+#### Input / Select / Textarea
+
+```tsx
+<Input label="고객명" error={errors.name?.message} required />
+<Select label="직원" options={staffOptions} error={errors.staff?.message} />
+<Textarea label="메모" helperText="최대 500자" />
+```
+
+- `label`, `error`, `helperText` prop을 활용한다
+- 에러 상태는 `error` prop에 문자열로 전달 (직접 빨간 border 스타일 금지)
+
+#### Badge
+
+```tsx
+// variant: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'primary'
+<Badge variant="success">확정</Badge>
+<Badge variant="warning">대기중</Badge>
+<Badge variant="danger">취소</Badge>
+```
+
+#### Modal / ConfirmModal
+
+```tsx
+// size: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
+<Modal isOpen={isOpen} onClose={onClose} title="예약 추가" size="lg" footer={<FooterButtons />}>
+  {/* 내용 */}
+</Modal>
+
+// 삭제/위험 확인은 ConfirmModal 사용
+<ConfirmModal
+  isOpen={isConfirmOpen}
+  onClose={() => setConfirmOpen(false)}
+  onConfirm={handleDelete}
+  title="예약 취소"
+  message="이 예약을 취소하시겠습니까?"
+  confirmText="취소하기"
+  variant="danger"
+/>
+```
+
+- 모달은 항상 `document.body` 포탈로 렌더링된다 (z-index 충돌 없음)
+- ESC 키 닫기, 배경 클릭 닫기가 기본 내장되어 있으므로 별도 구현 금지
+
+#### Card
+
+```tsx
+// padding: 'none' | 'sm' | 'md' | 'lg'
+<Card title="예약 현황" subtitle="오늘 기준" headerAction={<Button size="sm">추가</Button>}>
+  {/* 내용 */}
+</Card>
+```
+
+#### Spinner
+
+```tsx
+// size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+<Spinner size="md" />                     // 인라인 로딩
+<div className="flex justify-center"><Spinner size="lg" /></div>  // 페이지 로딩
+```
+
+---
+
+### 테두리 반경(Border Radius)
+
+| 클래스 | 값 | 적합한 사용처 |
+|---|---|---|
+| `rounded-sm` | 4px | 작은 뱃지 |
+| `rounded-md` | 6px | 입력 필드 내부 요소 |
+| `rounded-lg` | 8px | 입력 필드, 버튼, 카드 |
+| `rounded-xl` | 12px | 모달, 큰 카드 |
+| `rounded-2xl` | 16px | 대형 패널 |
+| `rounded-full` | 9999px | 아바타, 알림 카운트 |
+
+---
+
+### 그림자(Shadow)
+
+| 클래스 | 용도 |
+|---|---|
+| `shadow-sm` | 카드, 입력 필드 기본 |
+| `shadow-md` | 드롭다운, 호버 카드 |
+| `shadow-lg` | 플로팅 패널 |
+| `shadow-xl` | 모달 |
+
+---
+
+### Z-Index 계층
+
+직접 숫자를 쓰지 않고 반드시 토큰을 사용한다.
+
+```
+z-dropdown       1000   드롭다운 메뉴
+z-sticky         1020   고정 헤더
+z-fixed          1030   고정 요소
+z-modal-backdrop 1040   모달 배경
+z-modal          1050   모달 본체
+z-popover        1060   팝오버
+z-tooltip        1070   툴팁
+```
+
+---
+
+### 트랜지션
+
+```
+duration-fast   150ms   즉각적인 피드백 (hover 색상 변화)
+duration-normal 200ms   일반적인 전환 (모달, 사이드바)
+duration-slow   300ms   느린 전환 (페이드 인/아웃)
+```
+
+---
+
+### 반응형
+
+- 모바일 기본 폰트: 14px (html `font-size: 14px` at `max-width: 640px`)
+- PC 기본 폰트: 16px
+- 레이아웃 분기점: `md` (768px) — 모바일/데스크탑 전환
+- 사이드바는 모바일에서 오버레이로 전환됨
+
+---
+
+### 금지 사항 (CSS)
+
+- 하드코딩된 색상 hex 값 컴포넌트에 직접 사용 금지 (`style={{ color: '#333' }}`)
+- Tailwind `arbitrary value`(`text-[#3182f6]`, `p-[13px]`)는 디자인 토큰으로 대체 불가능한 경우에만 예외적으로 허용
+- `!important` 사용 금지
+- `z-index` 숫자 직접 기입 금지 — 반드시 `z-modal`, `z-dropdown` 등 토큰 사용
+- `src/app/globals.css`의 기존 CSS 변수 값을 컴포넌트 파일에서 임의로 재정의 금지
+
+---
+
+## Do NOT
+
+- Do not call `supabase` directly from client components for writes — go through Route Handlers
+- Do not add mock data or hardcoded sample values
+- Do not use `useEffect` for data fetching
+- Do not create a new Zustand store for server data
+- Do not skip i18n — all UI text must be translatable
+- Do not modify existing migration files
+- Do not call the LINE API directly from application code — use the outbox
+- Do not add `console.log` in production paths
+- Do not hardcode color hex values in components — use design token classes
+- Do not use `z-index` numbers directly — use `z-modal`, `z-dropdown` tokens

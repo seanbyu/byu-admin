@@ -17,6 +17,7 @@
   "adminBookingAlert": "ลงทะเบียนการจองใหม่แล้ว",
   "bookingRescheduledAlert": "ลูกค้าเปลี่ยนเวลาการจอง",
   "bookingCancelledAlert": "ลูกค้ายกเลิกนัดหมายการจองแล้ว",
+  "rescheduleRequestAlert": "ลูกค้าขอเปลี่ยนเวลานัดหมาย",
   "customer": "ลูกค้า",
   "designer": "ช่างทำผม",
   "service": "บริการ",

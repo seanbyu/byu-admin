@@ -112,6 +112,17 @@ export function BookingRealtimeListener() {
               ) {
                 playNotificationSound();
                 toastRef.current.info(tRef.current('booking.bookingRescheduledAlert'), 5000);
+              } else {
+                const oldMeta = (oldData.booking_meta as Record<string, unknown> | null);
+                const newMeta = (newData.booking_meta as Record<string, unknown> | null);
+                if (!oldMeta?.reschedule_pending && newMeta?.reschedule_pending === true) {
+                  playNotificationSound();
+                  toastRef.current.info(tRef.current('booking.rescheduleRequestAlert'), 5000);
+                  // DB 트리거가 notifications 테이블에 IN_APP 알림을 생성하므로
+                  // bookings 채널을 통해 notifications 쿼리를 직접 갱신
+                  queryClient.invalidateQueries({ queryKey: ['notifications', salonId] });
+                  queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count', salonId] });
+                }
               }
             }
           }

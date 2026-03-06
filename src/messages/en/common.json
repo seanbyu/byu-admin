@@ -68,6 +68,7 @@
     "newBooking": "New booking request",
     "confirmedBooking": "Booking confirmed",
     "cancelledBooking": "Booking cancelled",
+    "customerCancelledBooking": "Customer cancelled the booking",
     "rescheduledBooking": "Booking reschedule request",
     "bookingReminder": "Booking reminder",
     "completedBooking": "Booking completed",
@@ -76,7 +77,8 @@
     "noNotifications": "No new notifications",
     "viewAll": "View all",
     "markAllRead": "Mark all read",
-    "pendingStatus": "Pending"
+    "pendingStatus": "Pending",
+    "cancelledStatus": "Cancelled"
   },
   "calendar": {
     "view": "Calendar",

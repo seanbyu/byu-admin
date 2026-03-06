@@ -17,6 +17,7 @@
   "adminBookingAlert": "새로운 예약을 등록했습니다.",
   "bookingRescheduledAlert": "고객 예약 일정을 변경했습니다.",
   "bookingCancelledAlert": "고객 예약 일정을 취소했습니다.",
+  "rescheduleRequestAlert": "고객이 일정 변경을 요청했습니다.",
   "customer": "고객",
   "designer": "직원",
   "service": "서비스",

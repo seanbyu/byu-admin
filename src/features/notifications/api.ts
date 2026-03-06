@@ -19,6 +19,7 @@ export interface NotificationMetadata {
   salon_name?: string;
   locale?: string;
   trigger_type?: string;
+  cancelled_by?: "ADMIN" | "CUSTOMER";
 }
 
 export interface Notification {

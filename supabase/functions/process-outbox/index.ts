@@ -33,6 +33,97 @@ function nextRetryAt(attempt: number): string {
   return new Date(Date.now() + delayMinutes * 60_000).toISOString();
 }
 
+type Locale = "ko" | "en" | "th";
+type NotifType = "BOOKING_CONFIRMED" | "BOOKING_MODIFIED" | "BOOKING_CANCELLED";
+
+interface MessageParams {
+  salon: string;
+  customer: string;
+  date: string;
+  artist: string;
+  service: string;
+}
+
+const MESSAGES: Record<NotifType, Record<Locale, {
+  title: (p: MessageParams) => string;
+  body:  (p: MessageParams) => string;
+}>> = {
+  BOOKING_CONFIRMED: {
+    ko: {
+      title: ({ salon }) => `${salon} 예약 확정`,
+      body:  ({ customer, date, artist, service }) =>
+        `${customer}님, ${date} ${artist}님과의 ${service} 예약이 확정되었습니다.`,
+    },
+    en: {
+      title: ({ salon }) => `${salon} Booking Confirmed`,
+      body:  ({ customer, date, artist, service }) =>
+        `Dear ${customer}, your ${service} appointment with ${artist} on ${date} has been confirmed.`,
+    },
+    th: {
+      title: ({ salon }) => `${salon} ยืนยันการจอง`,
+      body:  ({ customer, date, artist, service }) =>
+        `คุณ${customer} การนัดหมาย${service}กับ${artist} วันที่${date} ได้รับการยืนยันแล้ว`,
+    },
+  },
+  BOOKING_MODIFIED: {
+    ko: {
+      title: ({ salon }) => `${salon} 예약 변경 확정`,
+      body:  ({ customer, date, artist, service }) =>
+        `${customer}님, ${date} ${artist}님과의 ${service} 예약 변경이 확정되었습니다.`,
+    },
+    en: {
+      title: ({ salon }) => `${salon} Booking Change Confirmed`,
+      body:  ({ customer, date, artist, service }) =>
+        `Dear ${customer}, your ${service} appointment change with ${artist} on ${date} has been confirmed.`,
+    },
+    th: {
+      title: ({ salon }) => `${salon} ยืนยันการเปลี่ยนแปลงการจอง`,
+      body:  ({ customer, date, artist, service }) =>
+        `คุณ${customer} การเปลี่ยนแปลงนัดหมาย${service}กับ${artist} วันที่${date} ได้รับการยืนยันแล้ว`,
+    },
+  },
+  BOOKING_CANCELLED: {
+    ko: {
+      title: ({ salon }) => `${salon} 예약 취소`,
+      body:  ({ customer, date, service }) =>
+        `${customer}님, ${date} ${service} 예약이 취소되었습니다.`,
+    },
+    en: {
+      title: ({ salon }) => `${salon} Booking Cancelled`,
+      body:  ({ customer, date, service }) =>
+        `Dear ${customer}, your ${service} appointment on ${date} has been cancelled.`,
+    },
+    th: {
+      title: ({ salon }) => `${salon} ยกเลิกการจอง`,
+      body:  ({ customer, date, service }) =>
+        `คุณ${customer} การนัดหมาย${service} วันที่${date} ถูกยกเลิกแล้ว`,
+    },
+  },
+};
+
+function buildLineMessage(record: OutboxRecord): { type: string; text: string } {
+  const p = record.payload;
+  const locale = (p.locale ?? "ko") as Locale;
+  const notifType = record.notification_type as NotifType;
+  const template = MESSAGES[notifType]?.[locale] ?? MESSAGES[notifType]?.["ko"];
+
+  if (!template) {
+    return p.line_message ?? { type: "text", text: p.body ?? "" };
+  }
+
+  const params: MessageParams = {
+    salon:    p.salon_name    ?? "",
+    customer: p.customer_name ?? "",
+    date:     p.formatted_date ?? `${p.booking_date ?? ""} ${p.start_time ?? ""}`.trim(),
+    artist:   p.artist_name   ?? "",
+    service:  p.service_name  ?? "",
+  };
+
+  const title = template.title(params);
+  const body  = template.body(params);
+  return { type: "text", text: `${title}\n\n${body}` };
+}
+
 interface OutboxRecord {
   id:                      string;
   notification_id:         string | null;
@@ -43,9 +134,17 @@ interface OutboxRecord {
   recipient_line_user_id:  string | null;
   recipient_customer_id:   string | null;
   payload: {
-    title:        string;
-    body:         string;
-    line_message: { type: string; text: string };
+    locale?:         string;
+    salon_name?:     string;
+    customer_name?:  string;
+    artist_name?:    string;
+    service_name?:   string;
+    formatted_date?: string;
+    booking_date?:   string;
+    start_time?:     string;
+    // 구버전 payload 호환
+    line_message?:   { type: string; text: string };
+    body?:           string;
     [key: string]: unknown;
   };
   attempt_count: number;
@@ -185,7 +284,7 @@ serve(async (req: Request) => {
 
         // LINE Push 발송
         const lineApiStart = performance.now();
-        const result = await sendLinePush(token, record.recipient_line_user_id, record.payload.line_message);
+        const result = await sendLinePush(token, record.recipient_line_user_id, buildLineMessage(record));
         const recordLineApiMs = performance.now() - lineApiStart;
         timing.lineApiMs += recordLineApiMs;
 
