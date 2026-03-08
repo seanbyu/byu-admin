@@ -248,6 +248,7 @@ export default function MenuList({
                       <MenuItems
                         salonId={salonId}
                         categoryId={category.id}
+                        menus={allMenus.filter((m) => m.category_id === category.id)}
                         editingMenuId={editingMenuId}
                         editMenuData={editMenuData}
                         onEditMenu={canEdit ? handleStartEditMenu : undefined}
@@ -301,6 +302,7 @@ export default function MenuList({
                         <MenuItems
                           salonId={salonId}
                           categoryId={category.id}
+                          menus={allMenus.filter((m) => m.category_id === category.id)}
                           editingMenuId={editingMenuId}
                           editMenuData={editMenuData}
                           onEditMenu={canEdit ? handleStartEditMenu : undefined}

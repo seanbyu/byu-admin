@@ -26,6 +26,7 @@ export function useNotifications(limit = 10) {
     queryKey: ["notifications", salonId, limit],
     queryFn: () => getNotifications(salonId!, limit),
     enabled: !!salonId,
+    staleTime: 60 * 1000, // 1분간 fresh → 페이지 이동해도 re-fetch 없음
     refetchInterval: 5 * 60 * 1000, // Realtime이 주 업데이트, 5분은 연결 끊김 대비 fallback
   });
 }
@@ -41,6 +42,7 @@ export function useUnreadCount() {
     queryKey: ["notifications", "unread-count", salonId],
     queryFn: () => getUnreadCount(salonId!),
     enabled: !!salonId,
+    staleTime: 60 * 1000, // 1분간 fresh → 페이지 이동해도 re-fetch 없음
     refetchInterval: 5 * 60 * 1000, // Realtime이 주 업데이트, 5분은 연결 끊김 대비 fallback
   });
 }

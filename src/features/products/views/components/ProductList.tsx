@@ -187,6 +187,7 @@ export default function ProductList({
                 <ProductItems
                   salonId={salonId}
                   categoryId={category.id}
+                  products={allProducts.filter((p) => p.category_id === category.id)}
                   editingProductId={editingProductId}
                   editProductData={editProductData}
                   onEditProduct={canEdit ? handleStartEditProduct : undefined}

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Plus } from 'lucide-react';
-import { useMenus } from '../../hooks/useSalonMenus';
+import { useMenuMutations } from '../../hooks/useSalonMenus';
 import { SalonMenu } from '../../types';
 import {
   DndContext,
@@ -28,6 +28,7 @@ import SortableMenuRow from './SortableMenuRow';
 interface MenuItemsProps {
   salonId: string;
   categoryId: string;
+  menus: SalonMenu[];
   editingMenuId: string | null;
   editMenuData: { name: string; price: string; duration: string };
   onEditMenu?: (menu: any) => void;
@@ -45,6 +46,7 @@ interface MenuItemsProps {
 export default function MenuItems({
   salonId,
   categoryId,
+  menus: menusData,
   editingMenuId,
   editMenuData,
   onEditMenu,
@@ -55,12 +57,7 @@ export default function MenuItems({
   canDelete = true,
 }: MenuItemsProps) {
   const t = useTranslations('menu');
-  const {
-    data: menusData,
-    createMenu,
-    deleteMenu,
-    reorderMenus,
-  } = useMenus(salonId, categoryId);
+  const { createMenu, deleteMenu, reorderMenus } = useMenuMutations(salonId, categoryId);
 
   // Optimistic UI state for sorting
   const [orderedMenus, setOrderedMenus] = React.useState<SalonMenu[]>([]);

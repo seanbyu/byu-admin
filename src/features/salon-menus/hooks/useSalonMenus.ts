@@ -225,6 +225,66 @@ export const useCategories = (salonId: string) => {
 };
 
 // ============================================
+// Menu Mutations Only Hook (query 없이 mutation만 — N+1 방지용)
+// MenuItems에서 부모의 allMenus 캐시를 그대로 사용할 때 사용
+// ============================================
+export const useMenuMutations = (salonId: string, categoryId: string) => {
+  const queryClient = useQueryClient();
+
+  const invalidateMenus = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: menuKeys.list(salonId) });
+  }, [queryClient, salonId]);
+
+  const createMutation = useMutation({
+    mutationFn: useCallback(
+      (menuData: Omit<SalonMenu, 'id' | 'createdAt' | 'updatedAt' | 'displayOrder' | 'categoryId'>) =>
+        salonMenusApi.createMenu(salonId, categoryId, menuData),
+      [salonId, categoryId]
+    ),
+    onSuccess: invalidateMenus,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: useCallback(
+      (id: string) => salonMenusApi.deleteMenu(salonId, id),
+      [salonId]
+    ),
+    onSuccess: invalidateMenus,
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: useCallback(
+      (menus: { id: string; display_order: number }[]) =>
+        salonMenusApi.reorderMenus(salonId, menus),
+      [salonId]
+    ),
+    onSuccess: invalidateMenus,
+  });
+
+  const createMenu = useCallback(
+    (menuData: Omit<SalonMenu, 'id' | 'createdAt' | 'updatedAt' | 'displayOrder' | 'categoryId'>) =>
+      createMutation.mutateAsync(menuData),
+    [createMutation]
+  );
+
+  const deleteMenu = useCallback(
+    (id: string) => deleteMutation.mutateAsync(id),
+    [deleteMutation]
+  );
+
+  const reorderMenus = useCallback(
+    (menus: { id: string; display_order: number }[]) =>
+      reorderMutation.mutateAsync(menus),
+    [reorderMutation]
+  );
+
+  return useMemo(
+    () => ({ createMenu, deleteMenu, reorderMenus, isCreating: createMutation.isPending }),
+    [createMenu, deleteMenu, reorderMenus, createMutation.isPending]
+  );
+};
+
+// ============================================
 // Menus Hook
 // ============================================
 export const useMenus = (

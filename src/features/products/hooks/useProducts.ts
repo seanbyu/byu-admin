@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api';
 import { Product, ProductCategory } from '../types';
@@ -62,6 +63,40 @@ export function useProductCategories(salonId: string) {
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
   };
+}
+
+// ─── Product Mutations Only (N+1 방지용 — query 없이 mutation만) ───────────
+
+export function useProductMutations(salonId: string, categoryId: string) {
+  const queryClient = useQueryClient();
+
+  const invalidate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: productKeys.list(salonId) });
+  }, [queryClient, salonId]);
+
+  const createMutation = useMutation({
+    mutationFn: (params: { name: string; price: number; displayOrder: number }) =>
+      productsApi.createProduct(salonId, categoryId, params),
+    onSuccess: invalidate,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => productsApi.deleteProduct(salonId, id),
+    onSuccess: invalidate,
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: (products: { id: string; display_order: number }[]) =>
+      productsApi.reorderProducts(salonId, products),
+    onSuccess: invalidate,
+  });
+
+  return useMemo(() => ({
+    createProduct: createMutation.mutateAsync,
+    deleteProduct: deleteMutation.mutateAsync,
+    reorderProducts: reorderMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+  }), [createMutation, deleteMutation, reorderMutation]);
 }
 
 // ─── Products ─────────────────────────────────────────

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Plus } from 'lucide-react';
-import { useProducts } from '../../hooks/useProducts';
+import { useProductMutations } from '../../hooks/useProducts';
 import { Product } from '../../types';
 import {
   DndContext,
@@ -27,6 +27,7 @@ import SortableProductRow from './SortableProductRow';
 interface ProductItemsProps {
   salonId: string;
   categoryId: string;
+  products: Product[];
   editingProductId: string | null;
   editProductData: { name: string; price: string };
   onEditProduct?: (product: Product) => void;
@@ -40,6 +41,7 @@ interface ProductItemsProps {
 export default function ProductItems({
   salonId,
   categoryId,
+  products: productsData,
   editingProductId,
   editProductData,
   onEditProduct,
@@ -51,12 +53,7 @@ export default function ProductItems({
 }: ProductItemsProps) {
   const t = useTranslations('product');
   const tc = useTranslations('menu');
-  const {
-    products: productsData,
-    createProduct,
-    deleteProduct,
-    reorderProducts,
-  } = useProducts(salonId, categoryId);
+  const { createProduct, deleteProduct, reorderProducts } = useProductMutations(salonId, categoryId);
 
   const [orderedProducts, setOrderedProducts] = React.useState<Product[]>([]);
 
@@ -114,7 +111,6 @@ export default function ProductItems({
     try {
       const nextDisplayOrder = orderedProducts.length;
       await createProduct({
-        categoryId,
         name: newProduct.name,
         price: Number(newProduct.price),
         displayOrder: nextDisplayOrder,
