@@ -28,7 +28,7 @@ export interface NewBookingModalProps {
   businessHours: BusinessHours[];
   selectedStaffId: string;
   selectedServiceId: string;
-  designers: Array<{ value: string; label: string }>;
+  artists: Array<{ value: string; label: string }>;
   onDateChange: (date: Date) => void;
   onTimeChange: (time: string) => void;
   onStaffChange: (staffId: string) => void;

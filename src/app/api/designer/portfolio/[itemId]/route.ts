@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+import { createServiceClient } from '@/lib/supabase/server';
 import { createServerClient } from '@/lib/supabase/ssr';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+import { cookies } from 'next/headers';
+import { ArtistService } from '@/lib/api-core';
 
 async function getCurrentUser() {
   const cookieStore = await cookies();
   const supabaseAuth = createServerClient(
-    supabaseUrl,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
@@ -46,52 +44,20 @@ export async function PUT(
     const { itemId } = await params;
     const body = await req.json();
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // 소유권 확인
-    const { data: existingItem } = await supabase
-      .from('portfolio_items')
-      .select('designer_id')
-      .eq('id', itemId)
-      .single();
-
-    if (!existingItem || existingItem.designer_id !== user.id) {
-      return NextResponse.json(
-        { success: false, message: 'Portfolio item not found or unauthorized' },
-        { status: 404 }
-      );
-    }
-
-    // 업데이트 가능한 필드만 추출
-    const updates: Record<string, unknown> = {};
-    if (body.caption !== undefined) updates.caption = body.caption;
-    if (body.tags !== undefined) updates.tags = body.tags;
-    if (body.isPublic !== undefined) updates.is_public = body.isPublic;
-    updates.updated_at = new Date().toISOString();
-
-    const { data, error } = await supabase
-      .from('portfolio_items')
-      .update(updates)
-      .eq('id', itemId)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return NextResponse.json({
-      success: true,
-      data,
+    const supabase = createServiceClient();
+    const service = new ArtistService(supabase);
+    const data = await service.updatePortfolioItem(user.id, itemId, {
+      caption: body.caption,
+      tags: body.tags,
+      isPublic: body.isPublic,
     });
-  } catch (error) {
+
+    return NextResponse.json({ success: true, data });
+  } catch (error: any) {
     console.error('Portfolio Update Error:', error);
     const message = error instanceof Error ? error.message : 'Failed to update';
-
-    return NextResponse.json(
-      { success: false, message },
-      { status: 500 }
-    );
+    const status = error?.status === 404 ? 404 : 500;
+    return NextResponse.json({ success: false, message }, { status });
   }
 }
 
@@ -100,7 +66,7 @@ export async function PUT(
  * 포트폴리오 아이템 삭제
  */
 export async function DELETE(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
@@ -114,30 +80,15 @@ export async function DELETE(
     }
 
     const { itemId } = await params;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 소유권 확인 및 삭제
-    const { error } = await supabase
-      .from('portfolio_items')
-      .delete()
-      .eq('id', itemId)
-      .eq('designer_id', user.id);
+    const supabase = createServiceClient();
+    const service = new ArtistService(supabase);
+    await service.deletePortfolioItem(user.id, itemId);
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Portfolio item deleted',
-    });
+    return NextResponse.json({ success: true, message: 'Portfolio item deleted' });
   } catch (error) {
     console.error('Portfolio Delete Error:', error);
     const message = error instanceof Error ? error.message : 'Failed to delete';
-
-    return NextResponse.json(
-      { success: false, message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }

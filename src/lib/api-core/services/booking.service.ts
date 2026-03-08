@@ -180,4 +180,19 @@ export class BookingService {
   async deleteBooking(id: string): Promise<void> {
     return this.repository.deleteBooking(id);
   }
+
+  async getBookingSnapshot(
+    id: string,
+    salonId: string
+  ): Promise<{ booking_date: string; artist_id: string } | null> {
+    return this.repository.getBookingSnapshot(id, salonId);
+  }
+
+  async getBookingMeta(id: string): Promise<Record<string, unknown>> {
+    return this.repository.getBookingMeta(id);
+  }
+
+  async updateBookingMeta(id: string, meta: Record<string, unknown>): Promise<void> {
+    return this.repository.updateBookingMeta(id, meta);
+  }
 }

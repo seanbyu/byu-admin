@@ -1,37 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceClient } from '@/lib/supabase/server';
+import { StaffService } from '@/lib/api-core/services/staff.service';
 
-// Supabase Admin Client
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
-
-interface StaffOrderItem {
-  staffId: string;
-  displayOrder: number;
-}
-
-interface UpdateDisplayOrderRequest {
-  staffOrders: StaffOrderItem[];
-}
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ salonId: string }> }
 ) {
   try {
-    const { salonId } = await params;
-    const body: UpdateDisplayOrderRequest = await request.json();
-    const { staffOrders } = body;
+    await params; // salonId 사용하지 않지만 미래 확장을 위해 유지
+    const body = await request.json();
+    const { staffOrders } = body as { staffOrders: { staffId: string; displayOrder: number }[] };
 
-    // Validation
     if (!staffOrders || !Array.isArray(staffOrders) || staffOrders.length === 0) {
       return NextResponse.json(
         { error: 'staffOrders array is required' },
@@ -39,7 +19,6 @@ export async function PUT(
       );
     }
 
-    // Validate each item
     for (const item of staffOrders) {
       if (!item.staffId || typeof item.displayOrder !== 'number') {
         return NextResponse.json(
@@ -49,36 +28,13 @@ export async function PUT(
       }
     }
 
-    // Update each staff's display_order
-    const updates = staffOrders.map(({ staffId, displayOrder }) =>
-      supabaseAdmin
-        .from('staff_profiles')
-        .update({ display_order: displayOrder })
-        .eq('user_id', staffId)
-        .eq('salon_id', salonId)
-    );
+    const supabase = createServiceClient();
+    const service = new StaffService(supabase as any);
+    await service.updateStaffDisplayOrder(staffOrders);
 
-    const results = await Promise.all(updates);
-
-    // Check for errors
-    const errors = results.filter((r) => r.error);
-    if (errors.length > 0) {
-      console.error('Failed to update display order:', errors);
-      return NextResponse.json(
-        { error: 'Failed to update some staff display orders' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Display order updated successfully',
-    });
-  } catch (error) {
-    console.error('Update display order error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -28,7 +28,7 @@ function NewBookingModalComponent({
   businessHours,
   selectedStaffId,
   selectedServiceId,
-  designers,
+  artists,
   onDateChange,
   onTimeChange,
   onStaffChange,
@@ -99,9 +99,9 @@ function NewBookingModalComponent({
 
   // 선택된 직원 이름
   const selectedStaffName = useMemo(() => {
-    const staff = designers.find((d) => d.value === form.currentStaffId);
+    const staff = artists.find((d) => d.value === form.currentStaffId);
     return staff?.label || '';
-  }, [designers, form.currentStaffId]);
+  }, [artists, form.currentStaffId]);
 
   // 모달 닫기 핸들러
   const handleClose = useCallback(() => {
@@ -233,7 +233,7 @@ function NewBookingModalComponent({
             <Select
               label={t('booking.designer')}
               required
-              options={designers}
+              options={artists}
               value={form.currentStaffId}
               onChange={form.handleStaffChange}
               error={form.errors.staff}

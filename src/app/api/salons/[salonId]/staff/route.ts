@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createServiceClient } from '@/lib/supabase/server';
 import { StaffService } from '@/lib/api-core';
 import { checkPermission } from '@/lib/server/checkPermission';
 import { unstable_cache, revalidateTag } from 'next/cache';
@@ -13,9 +13,7 @@ export async function GET(
 
     const staffList = await unstable_cache(
       async () => {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-        const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+        const supabase = createServiceClient();
         const service = new StaffService(supabase);
         return service.getStaffList(salonId);
       },
@@ -45,10 +43,7 @@ export async function POST(
     const body = await req.json();
     const { action, ...data } = body;
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
-
+    const supabase = createServiceClient();
     const service = new StaffService(supabase);
     let result;
 

@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { createServiceClient } from '@/lib/supabase/server';
 import { SalonMenuService } from '@/lib/api-core';
 import { unstable_cache, revalidateTag } from 'next/cache';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 function makeMenuService() {
-  return new SalonMenuService(createServiceClient(supabaseUrl, supabaseServiceKey));
+  return new SalonMenuService(createServiceClient());
 }
 
 export async function GET(
@@ -66,7 +64,7 @@ export async function POST(
     const body = await req.json();
     const { action, ...data } = body;
 
-    const supabase = createServiceClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createServiceClient();
     const service = new SalonMenuService(supabase);
     let result;
 

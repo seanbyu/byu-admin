@@ -36,14 +36,10 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
     requireField(bookingId, "bookingId");
 
     const supabase = createClient(req);
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("booking_date, artist_id")
-      .eq("id", bookingId)
-      .eq("salon_id", salonId)
-      .single();
+    const bookingService = new BookingService(supabase);
+    const data = await bookingService.getBookingSnapshot(bookingId, salonId);
 
-    if (error || !data) throw new AppError("NOT_FOUND", "Booking not found");
+    if (!data) throw new AppError("NOT_FOUND", "Booking not found");
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
@@ -83,22 +79,14 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     switch (action) {
       // ─── 예약 확정 ───
       case "confirm": {
-        const { data: bookingSnap } = await supabase
-          .from("bookings")
-          .select("booking_meta")
-          .eq("id", bookingId)
-          .single();
-        const snapMeta = (bookingSnap?.booking_meta as Record<string, unknown> | null) ?? {};
+        const snapMeta = await bookingService.getBookingMeta(bookingId);
         const isReschedule = snapMeta.reschedule_pending === true;
 
         result = await bookingService.confirmBooking(bookingId);
 
         if (isReschedule) {
           const { reschedule_pending: _omit, ...restMeta } = snapMeta;
-          await supabase
-            .from("bookings")
-            .update({ booking_meta: restMeta } as never)
-            .eq("id", bookingId);
+          await bookingService.updateBookingMeta(bookingId, restMeta);
         }
         triggerProcessOutbox();
         break;
@@ -108,16 +96,8 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       case "cancel": {
         // 트리거 발동 전 cancelled_by: 'ADMIN' 을 booking_meta에 기록
         // → trg_on_booking_status_changed 에서 어드민 자신의 취소 시 IN_APP 알림 생성 안 함
-        const { data: cancelSnap } = await supabase
-          .from("bookings")
-          .select("booking_meta")
-          .eq("id", bookingId)
-          .single();
-        const cancelMeta = (cancelSnap?.booking_meta as Record<string, unknown> | null) ?? {};
-        await supabase
-          .from("bookings")
-          .update({ booking_meta: { ...cancelMeta, cancelled_by: "ADMIN" } } as never)
-          .eq("id", bookingId);
+        const cancelMeta = await bookingService.getBookingMeta(bookingId);
+        await bookingService.updateBookingMeta(bookingId, { ...cancelMeta, cancelled_by: "ADMIN" });
 
         result = await bookingService.cancelBooking(bookingId);
         triggerProcessOutbox();

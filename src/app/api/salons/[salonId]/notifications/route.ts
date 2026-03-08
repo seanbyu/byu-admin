@@ -4,12 +4,11 @@
  * GET   — 알림 목록 조회 + 미읽음 카운트
  * PATCH — 알림 읽음 처리 (단건 or 전체)
  * DELETE — 알림 삭제
- *
- * 클라이언트에서 Supabase 직접 접근 제거 → 이 Route 경유
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { NotificationPanelService } from "@/lib/api-core/services/notification-panel.service";
 import { handleApiError, requireField } from "@/lib/errors";
 
 type RouteContext = { params: Promise<{ salonId: string }> };
@@ -28,35 +27,15 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
     const unreadOnly = searchParams.get("unread_count") === "true";
 
     const supabase = createClient(req);
+    const service = new NotificationPanelService(supabase);
 
     if (unreadOnly) {
-      // 미읽음 카운트만 반환
-      const { count, error } = await supabase
-        .from("notifications")
-        .select("*", { count: "exact", head: true })
-        .eq("salon_id", salonId)
-        .eq("recipient_type", "ADMIN")
-        .eq("channel", "IN_APP")
-        .neq("status", "FAILED")
-        .is("read_at", null);
-
-      if (error) throw error;
-      return NextResponse.json({ success: true, data: { unreadCount: count ?? 0 } });
+      const unreadCount = await service.countUnread(salonId);
+      return NextResponse.json({ success: true, data: { unreadCount } });
     }
 
-    // 알림 목록 조회
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("id, title, body, notification_type, status, created_at, read_at, booking_id, metadata")
-      .eq("salon_id", salonId)
-      .eq("recipient_type", "ADMIN")
-      .eq("channel", "IN_APP")
-      .neq("status", "FAILED")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return NextResponse.json({ success: true, data: data ?? [] });
+    const data = await service.getAdminNotifications(salonId, limit);
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     return handleApiError(error);
   }
@@ -75,21 +54,8 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     const { id } = body as { id?: string };
 
     const supabase = createClient(req);
-    const readAt = new Date().toISOString();
-
-    let query = supabase
-      .from("notifications")
-      .update({ read_at: readAt } as never)
-      .eq("salon_id", salonId)
-      .eq("channel", "IN_APP")
-      .is("read_at", null);
-
-    if (id) {
-      query = query.eq("id", id);
-    }
-
-    const { error } = await query;
-    if (error) throw error;
+    const service = new NotificationPanelService(supabase);
+    await service.markAsRead(salonId, id);
 
     return NextResponse.json({ success: true, data: null });
   } catch (error) {
@@ -99,7 +65,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
 // ─────────────────────────────────────────
 // DELETE /api/salons/[salonId]/notifications
-// Body: { id: string }
+// Query: ?id=...
 // ─────────────────────────────────────────
 export async function DELETE(req: NextRequest, { params }: RouteContext) {
   try {
@@ -111,13 +77,9 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
     requireField(id, "id");
 
     const supabase = createClient(req);
-    const { error } = await supabase
-      .from("notifications")
-      .delete()
-      .eq("id", id)
-      .eq("salon_id", salonId); // salonId로 소유권 검증
+    const service = new NotificationPanelService(supabase);
+    await service.deleteNotification(salonId, id!);
 
-    if (error) throw error;
     return NextResponse.json({ success: true, data: null });
   } catch (error) {
     return handleApiError(error);

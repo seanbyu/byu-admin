@@ -80,6 +80,40 @@ export class BookingRepository extends BaseRepository {
     if (error) throw error;
   }
 
+  async getBookingSnapshot(
+    id: string,
+    salonId: string
+  ): Promise<{ booking_date: string; artist_id: string } | null> {
+    const { data, error } = await (this.supabase as any)
+      .from("bookings")
+      .select("booking_date, artist_id")
+      .eq("id", id)
+      .eq("salon_id", salonId)
+      .single();
+
+    if (error) return null;
+    return data;
+  }
+
+  async getBookingMeta(id: string): Promise<Record<string, unknown>> {
+    const { data } = await (this.supabase as any)
+      .from("bookings")
+      .select("booking_meta")
+      .eq("id", id)
+      .single();
+
+    return (data?.booking_meta as Record<string, unknown> | null) ?? {};
+  }
+
+  async updateBookingMeta(id: string, meta: Record<string, unknown>): Promise<void> {
+    const { error } = await (this.supabase as any)
+      .from("bookings")
+      .update({ booking_meta: meta })
+      .eq("id", id);
+
+    if (error) throw error;
+  }
+
   private transformBooking(booking: any): BookingResponse {
     return {
       id: booking.id,

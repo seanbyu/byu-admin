@@ -30,7 +30,7 @@ const STATUS_COLORS: Readonly<Record<BookingStatus, string>> = {
   [BookingStatus.NO_SHOW]: 'bg-secondary-100 text-secondary-700',
 } as const;
 
-export interface DesignerOption {
+export interface ArtistOption {
   value: string;
   label: string;
 }
@@ -144,7 +144,7 @@ export function useBookingsData(
   staffMembers: Staff[],
   _getStatusColor: (status: BookingStatus) => string
 ) {
-  const designers = useMemo<DesignerOption[]>(() => {
+  const artists = useMemo<ArtistOption[]>(() => {
     return staffMembers
       .filter((staff) => staff.isBookingEnabled)
       .map((staff) => ({
@@ -153,5 +153,5 @@ export function useBookingsData(
       }));
   }, [staffMembers]);
 
-  return useMemo(() => ({ designers }), [designers]);
+  return useMemo(() => ({ artists }), [artists]);
 }

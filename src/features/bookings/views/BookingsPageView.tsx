@@ -49,14 +49,14 @@ const parseLocalDate = (value: Date | string): Date => {
 const BookingFilters = memo(function BookingFilters({
   statusFilter,
   selectedStaffId,
-  designers,
+  artists,
   onStatusChange,
   onStaffChange,
   t,
 }: {
   statusFilter: string;
   selectedStaffId: string;
-  designers: Array<{ value: string; label: string }>;
+  artists: Array<{ value: string; label: string }>;
   onStatusChange: (status: string) => void;
   onStaffChange: (id: string) => void;
   t: (key: string) => string;
@@ -101,7 +101,7 @@ const BookingFilters = memo(function BookingFilters({
             >
               {t('common.all')}
             </button>
-            {designers.map((designer) => (
+            {artists.map((designer) => (
               <button
                 key={designer.value}
                 type="button"
@@ -175,7 +175,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     });
   }, [bookings, pageState.statusFilter, pageState.selectedStaffId]);
 
-  const { designers } = useBookingsData(
+  const { artists } = useBookingsData(
     filteredBookings,
     staffMembers,
     pageState.getStatusColor
@@ -273,7 +273,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
         <BookingFilters
           statusFilter={pageState.statusFilter}
           selectedStaffId={pageState.selectedStaffId}
-          designers={designers}
+          artists={artists}
           onStatusChange={pageState.setStatusFilter}
           onStaffChange={pageState.setSelectedStaffId}
           t={t}
@@ -315,7 +315,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
           businessHours={businessHours}
           selectedStaffId={pageState.selectedStaffId}
           selectedServiceId={pageState.selectedServiceId}
-          designers={designers}
+          artists={artists}
           onDateChange={pageState.setSelectedDate}
           onTimeChange={pageState.setSelectedTime}
           onStaffChange={pageState.setSelectedStaffId}
@@ -334,7 +334,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
           businessHours={businessHours}
           selectedStaffId={pageState.selectedBooking.staffId}
           selectedServiceId={pageState.selectedBooking.serviceId}
-          designers={designers}
+          artists={artists}
           onDateChange={pageState.setSelectedDate}
           onTimeChange={pageState.setSelectedTime}
           onStaffChange={pageState.setSelectedStaffId}

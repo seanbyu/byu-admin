@@ -56,7 +56,7 @@ export {
 export {
   useBookingsPageState,
   useBookingsData,
-  type DesignerOption,
+  type ArtistOption,
 } from './hooks/useBookingsPageState';
 
 // Components
