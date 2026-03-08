@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { ProductService } from '@/lib/api-core';
+import { unstable_cache, revalidateTag } from 'next/cache';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+function makeProductService() {
+  return new ProductService(createServiceClient(supabaseUrl, supabaseServiceKey));
+}
 
 export async function GET(
   req: NextRequest,
@@ -12,14 +20,20 @@ export async function GET(
     const type = searchParams.get('type');
     const categoryId = searchParams.get('categoryId');
 
-    const supabase = createClient(req);
-    const service = new ProductService(supabase);
-
     let data;
     if (type === 'categories') {
-      data = await service.getCategories(salonId);
+      data = await unstable_cache(
+        () => makeProductService().getCategories(salonId),
+        [`products-categories-${salonId}`],
+        { tags: [`products-${salonId}`], revalidate: 600 } // 10분
+      )();
     } else if (type === 'products') {
-      data = await service.getProducts(salonId, categoryId || undefined);
+      const cid = categoryId || 'all';
+      data = await unstable_cache(
+        () => makeProductService().getProducts(salonId, categoryId || undefined),
+        [`products-items-${salonId}-${cid}`],
+        { tags: [`products-${salonId}`], revalidate: 300 } // 5분
+      )();
     } else {
       return NextResponse.json(
         { success: false, message: 'Invalid request type' },
@@ -46,7 +60,7 @@ export async function POST(
     const body = await req.json();
     const { action, ...data } = body;
 
-    const supabase = createClient(req);
+    const supabase = createServiceClient(supabaseUrl, supabaseServiceKey);
     const service = new ProductService(supabase);
     let result;
 
@@ -82,6 +96,7 @@ export async function POST(
         );
     }
 
+    revalidateTag(`products-${salonId}`, 'default');
     return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
     console.error('Products API Error:', error);

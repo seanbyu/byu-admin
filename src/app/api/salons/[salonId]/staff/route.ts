@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { StaffService } from '@/lib/api-core';
 import { checkPermission } from '@/lib/server/checkPermission';
+import { unstable_cache, revalidateTag } from 'next/cache';
 
 export async function GET(
   req: NextRequest,
@@ -10,12 +11,17 @@ export async function GET(
   try {
     const { salonId } = await params;
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
-
-    const service = new StaffService(supabase);
-    const staffList = await service.getStaffList(salonId);
+    const staffList = await unstable_cache(
+      async () => {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+        const service = new StaffService(supabase);
+        return service.getStaffList(salonId);
+      },
+      [`staff-${salonId}`],
+      { tags: [`staff-${salonId}`], revalidate: 300 } // 5분
+    )();
 
     return NextResponse.json({
       success: true,
@@ -74,6 +80,7 @@ export async function POST(
         );
     }
 
+    revalidateTag(`staff-${salonId}`, 'default');
     return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
     console.error('API Error:', error);

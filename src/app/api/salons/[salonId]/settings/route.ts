@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { unstable_cache, revalidateTag } from 'next/cache';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -10,19 +11,22 @@ export async function GET(
 ) {
   try {
     const { salonId } = await params;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data, error } = await supabase
-      .from('salons')
-      .select('id, business_hours, holidays, settings')
-      .eq('id', salonId)
-      .single();
+    const data = await unstable_cache(
+      async () => {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        const { data, error } = await supabase
+          .from('salons')
+          .select('id, business_hours, holidays, settings')
+          .eq('id', salonId)
+          .single();
+        if (error) throw new Error(error.message);
+        return data;
+      },
+      [`settings-${salonId}`],
+      { tags: [`settings-${salonId}`], revalidate: 600 } // 10분
+    )();
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    // Transform business_hours from DB format to frontend format
     const businessHours = transformBusinessHoursFromDB(data.business_hours);
     const holidays = data.holidays || [];
 
@@ -91,6 +95,7 @@ export async function PATCH(
       throw new Error(error.message);
     }
 
+    revalidateTag(`settings-${salonId}`, 'default');
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('API Error:', error);

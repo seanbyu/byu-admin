@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { unstable_cache, revalidateTag } from 'next/cache';
 import type {
   CustomFilter,
   CreateCustomFilterDto,
   UpdateCustomFilterDto,
 } from '@/features/customers/types/filter.types';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // ============================================
 // GET - 필터 목록 조회
@@ -16,24 +20,24 @@ export async function GET(
 ) {
   try {
     const { salonId } = await params;
-    const supabase = createClient(req);
 
-    const { data, error } = await supabase
-      .from('customer_filters')
-      .select('*')
-      .eq('salon_id', salonId)
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
+    const data = await unstable_cache(
+      async () => {
+        const supabase = createServiceClient(supabaseUrl, supabaseServiceKey);
+        const { data, error } = await supabase
+          .from('customer_filters')
+          .select('*')
+          .eq('salon_id', salonId)
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+        if (error) throw new Error(error.message);
+        return data as CustomFilter[];
+      },
+      [`customer-filters-${salonId}`],
+      { tags: [`customer-filters-${salonId}`], revalidate: 600 } // 10분
+    )();
 
-    if (error) {
-      console.error('Customer filters query error:', error);
-      throw new Error(error.message);
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: data as CustomFilter[],
-    });
+    return NextResponse.json({ success: true, data });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Failed to fetch filters';
     return NextResponse.json(
@@ -53,7 +57,7 @@ export async function POST(
 ) {
   try {
     const { salonId } = await params;
-    const supabase = createClient(req);
+    const supabase = createServiceClient(supabaseUrl, supabaseServiceKey);
     const body = await req.json();
     const { action, ...data } = body;
 
@@ -193,6 +197,7 @@ export async function POST(
           { status: 400 }
         );
     }
+    revalidateTag(`customer-filters-${salonId}`, 'default');
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Operation failed';
     return NextResponse.json(

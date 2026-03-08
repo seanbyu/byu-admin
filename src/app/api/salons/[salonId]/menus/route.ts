@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server'; // Updated import
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { SalonMenuService } from '@/lib/api-core';
+import { unstable_cache, revalidateTag } from 'next/cache';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+function makeMenuService() {
+  return new SalonMenuService(createServiceClient(supabaseUrl, supabaseServiceKey));
+}
 
 export async function GET(
   req: NextRequest,
@@ -12,18 +20,26 @@ export async function GET(
     const type = searchParams.get('type');
     const categoryId = searchParams.get('categoryId');
 
-    const supabase = createClient(req);
-    const service = new SalonMenuService(supabase);
-
     let data;
     if (type === 'industries') {
-      data = await service.getIndustries(salonId);
+      data = await unstable_cache(
+        () => makeMenuService().getIndustries(salonId),
+        [`menus-industries-${salonId}`],
+        { tags: [`menus-${salonId}`], revalidate: 3600 } // 1시간 (업종은 거의 안 바뀜)
+      )();
     } else if (type === 'categories') {
-      data = await service.getCategories(salonId);
+      data = await unstable_cache(
+        () => makeMenuService().getCategories(salonId),
+        [`menus-categories-${salonId}`],
+        { tags: [`menus-${salonId}`], revalidate: 300 } // 5분
+      )();
     } else if (type === 'menus' || type === 'services') {
-      // Support both for transition or strictly 'menus'
-      // Prefer 'menus' but 'services' might be cached or used in transit
-      data = await service.getMenus(salonId, categoryId || undefined);
+      const cid = categoryId || 'all';
+      data = await unstable_cache(
+        () => makeMenuService().getMenus(salonId, categoryId || undefined),
+        [`menus-items-${salonId}-${cid}`],
+        { tags: [`menus-${salonId}`], revalidate: 180 } // 3분
+      )();
     } else {
       return NextResponse.json(
         { success: false, message: 'Invalid request type' },
@@ -50,7 +66,7 @@ export async function POST(
     const body = await req.json();
     const { action, ...data } = body;
 
-    const supabase = createClient(req);
+    const supabase = createServiceClient(supabaseUrl, supabaseServiceKey);
     const service = new SalonMenuService(supabase);
     let result;
 
@@ -108,6 +124,7 @@ export async function POST(
         );
     }
 
+    revalidateTag(`menus-${salonId}`, 'default');
     return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
     console.error('API Error:', error);
