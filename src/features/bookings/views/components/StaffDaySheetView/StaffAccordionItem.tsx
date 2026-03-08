@@ -7,6 +7,7 @@ import { Booking } from '../../../types';
 import { Staff } from '@/features/staff/types';
 import { formatPrice } from '@/lib/utils';
 import { StaffBookingTable } from './StaffBookingTable';
+import type { BookingNotificationStatus } from '@/app/api/salons/[salonId]/bookings/notification-status/route';
 
 export interface StaffAccordionItemProps {
   staff: Staff;
@@ -17,6 +18,7 @@ export interface StaffAccordionItemProps {
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
   highlightedBookingId?: string | null;
   serviceCategoryMap?: Record<string, string>;
+  notificationStatuses?: Record<string, BookingNotificationStatus>;
 }
 
 export const StaffAccordionItem = memo(function StaffAccordionItem({
@@ -28,6 +30,7 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
   onUpdateBooking,
   highlightedBookingId,
   serviceCategoryMap,
+  notificationStatuses,
 }: StaffAccordionItemProps) {
   const t = useTranslations();
   const [isOpen, setIsOpen] = useState(true);
@@ -118,6 +121,7 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
             onUpdateBooking={onUpdateBooking}
             highlightedBookingId={highlightedBookingId}
             serviceCategoryMap={serviceCategoryMap}
+            notificationStatuses={notificationStatuses}
           />
         </div>
       )}

@@ -11,6 +11,7 @@
 import { apiClient } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
 import type { ApiResponse, Booking } from "@/types";
+import type { BookingNotificationStatus } from "@/app/api/salons/[salonId]/bookings/notification-status/route";
 
 // 단건 예약 경로
 const bookingPath = (salonId: string, bookingId: string) =>
@@ -51,4 +52,13 @@ export const createBookingsApi = () => ({
   // ─── 예약 삭제 ───
   deleteBooking: (salonId: string, bookingId: string): Promise<ApiResponse<null>> =>
     apiClient.delete(bookingPath(salonId, bookingId)),
+
+  // ─── LINE 발송 상태 조회 ───
+  getNotificationStatuses: (
+    salonId: string,
+    date: string // YYYY-MM-DD
+  ): Promise<ApiResponse<Record<string, BookingNotificationStatus>>> =>
+    apiClient.get(
+      `${endpoints.salons.bookings.path(salonId)}/notification-status?date=${date}`
+    ),
 });

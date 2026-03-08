@@ -13,6 +13,7 @@ import { Booking } from '../types';
 import { useBookings } from '../hooks/useBookings';
 import { useBookingsPageState, useBookingsData } from '../hooks/useBookingsPageState';
 import { salonSettingsKeys, SALON_SETTINGS_QUERY_OPTIONS } from '../hooks/queries';
+import { useBookingNotificationStatuses } from '../hooks/useBookingNotificationStatuses';
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
@@ -153,6 +154,13 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     [settingsResponse?.data?.settings?.slot_duration_minutes]
   );
 
+  const selectedDateStr = useMemo(() => {
+    const d = pageState.selectedDate;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, [pageState.selectedDate]);
+
+  const { data: notificationStatuses } = useBookingNotificationStatuses(salonId, selectedDateStr);
+
   const businessHours = useMemo(
     () => settingsResponse?.data?.businessHours || [],
     [settingsResponse?.data?.businessHours]
@@ -290,6 +298,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
               onAddBooking={handleSheetAddBooking}
               onUpdateBooking={handleSheetUpdateBooking}
               highlightedBookingId={highlightedBookingId}
+              notificationStatuses={notificationStatuses}
             />
           )}
         </Card>

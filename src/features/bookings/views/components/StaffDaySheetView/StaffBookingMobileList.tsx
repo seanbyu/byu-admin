@@ -8,6 +8,7 @@ import { cn, formatPrice } from '@/lib/utils';
 import { stripCountryCode, PAYMENT_METHOD_KEYS, isKnownPaymentMethod } from './utils';
 import { InlineStatusSelect } from './InlineStatusSelect';
 import { SalesRegistrationModal } from '../SalesRegistrationModal';
+import type { BookingNotificationStatus } from '@/app/api/salons/[salonId]/bookings/notification-status/route';
 
 export interface StaffBookingMobileListProps {
   timeSlots: string[];
@@ -17,6 +18,7 @@ export interface StaffBookingMobileListProps {
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
   highlightedBookingId?: string | null;
   serviceCategoryMap?: Record<string, string>;
+  notificationStatuses?: Record<string, BookingNotificationStatus>;
 }
 
 export const StaffBookingMobileList = memo(function StaffBookingMobileList({
@@ -27,6 +29,7 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
   onUpdateBooking,
   highlightedBookingId,
   serviceCategoryMap,
+  notificationStatuses,
 }: StaffBookingMobileListProps) {
   const t = useTranslations();
 
@@ -145,6 +148,19 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
                   </div>
                 </div>
               </div>
+
+              {/* LINE 알림 상태 */}
+              {notificationStatuses && (
+                <div className="mt-1.5 flex items-center gap-3 text-[11px]">
+                  <span className="text-secondary-400">LINE</span>
+                  <span className={notificationStatuses[booking.id]?.confirmed ? 'text-success-600' : 'text-secondary-300'}>
+                    확정 {notificationStatuses[booking.id]?.confirmed ? '✓ 발송' : '—'}
+                  </span>
+                  <span className={notificationStatuses[booking.id]?.reminded ? 'text-success-600' : 'text-secondary-300'}>
+                    당일 {notificationStatuses[booking.id]?.reminded ? '✓ 발송' : '—'}
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>

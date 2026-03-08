@@ -34,7 +34,7 @@ function nextRetryAt(attempt: number): string {
 }
 
 type Locale = "ko" | "en" | "th";
-type NotifType = "BOOKING_CONFIRMED" | "BOOKING_MODIFIED" | "BOOKING_CANCELLED";
+type NotifType = "BOOKING_CONFIRMED" | "BOOKING_MODIFIED" | "BOOKING_CANCELLED" | "BOOKING_REMINDER";
 
 interface MessageParams {
   salon: string;
@@ -97,6 +97,23 @@ const MESSAGES: Record<NotifType, Record<Locale, {
       title: ({ salon }) => `${salon} ยกเลิกการจอง`,
       body:  ({ customer, date, service }) =>
         `คุณ${customer} การนัดหมาย${service} วันที่${date} ถูกยกเลิกแล้ว`,
+    },
+  },
+  BOOKING_REMINDER: {
+    ko: {
+      title: ({ salon }) => `${salon} 예약 당일 안내`,
+      body:  ({ customer, artist, service, date }) =>
+        `${customer}님, 오늘 ${date} ${artist}님과의 ${service} 예약이 있습니다. 방문 기다리겠습니다!`,
+    },
+    en: {
+      title: ({ salon }) => `${salon} Appointment Reminder`,
+      body:  ({ customer, artist, service, date }) =>
+        `Dear ${customer}, you have a ${service} appointment with ${artist} today at ${date}. We look forward to seeing you!`,
+    },
+    th: {
+      title: ({ salon }) => `${salon} แจ้งเตือนนัดหมายวันนี้`,
+      body:  ({ customer, artist, service, date }) =>
+        `คุณ${customer} วันนี้เวลา${date} คุณมีนัดหมาย${service}กับ${artist} เราตั้งตารอต้อนรับคุณ!`,
     },
   },
 };

@@ -15,6 +15,8 @@ export const bookingKeys = {
     [...bookingKeys.list(salonId), filters] as const,
   details: () => [...bookingKeys.all, 'detail'] as const,
   detail: (bookingId: string) => [...bookingKeys.details(), bookingId] as const,
+  notificationStatuses: (salonId: string, date: string) =>
+    [...bookingKeys.all, 'notification-status', salonId, date] as const,
 };
 
 export const salonSettingsKeys = {

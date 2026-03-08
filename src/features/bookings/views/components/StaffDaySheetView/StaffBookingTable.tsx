@@ -14,6 +14,7 @@ import {
 import { InlineStatusSelect } from './InlineStatusSelect';
 import { SalesRegistrationModal } from '../SalesRegistrationModal';
 import { StaffBookingMobileList } from './StaffBookingMobileList';
+import type { BookingNotificationStatus } from '@/app/api/salons/[salonId]/bookings/notification-status/route';
 
 export interface StaffBookingTableProps {
   timeSlots: string[];
@@ -23,6 +24,7 @@ export interface StaffBookingTableProps {
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
   highlightedBookingId?: string | null;
   serviceCategoryMap?: Record<string, string>;
+  notificationStatuses?: Record<string, BookingNotificationStatus>;
 }
 
 export const StaffBookingTable = memo(function StaffBookingTable({
@@ -33,6 +35,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
   onUpdateBooking,
   highlightedBookingId,
   serviceCategoryMap,
+  notificationStatuses,
 }: StaffBookingTableProps) {
   const t = useTranslations();
 
@@ -88,6 +91,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
         onUpdateBooking={onUpdateBooking}
         highlightedBookingId={highlightedBookingId}
         serviceCategoryMap={serviceCategoryMap}
+        notificationStatuses={notificationStatuses}
       />
 
       <div className="hidden md:block overflow-x-auto">
@@ -123,6 +127,14 @@ export const StaffBookingTable = memo(function StaffBookingTable({
               </th>
               <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-left font-medium text-secondary-600 w-28">
                 {t('booking.product')}
+              </th>
+              <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-center font-medium text-secondary-600 w-20">
+                LINE<br />
+                <span className="font-normal text-[10px] text-secondary-400">확정</span>
+              </th>
+              <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-center font-medium text-secondary-600 w-20">
+                LINE<br />
+                <span className="font-normal text-[10px] text-secondary-400">당일</span>
               </th>
             </tr>
           </thead>
@@ -205,6 +217,28 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-600 text-xs">
                       {booking.productName || '—'}
                     </td>
+                    {/* LINE 확정 알림 상태 */}
+                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
+                      {notificationStatuses?.[booking.id]?.confirmed ? (
+                        <span className="inline-flex items-center gap-0.5 text-success-600">
+                          <span>✓</span>
+                          <span className="text-[10px]">발송</span>
+                        </span>
+                      ) : (
+                        <span className="text-secondary-300">—</span>
+                      )}
+                    </td>
+                    {/* LINE 당일 리마인더 상태 */}
+                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
+                      {notificationStatuses?.[booking.id]?.reminded ? (
+                        <span className="inline-flex items-center gap-0.5 text-success-600">
+                          <span>✓</span>
+                          <span className="text-[10px]">발송</span>
+                        </span>
+                      ) : (
+                        <span className="text-secondary-300">—</span>
+                      )}
+                    </td>
                   </tr>
                 ) : (
                   <tr
@@ -217,6 +251,8 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-300 text-xs select-none">
                       {isHovered ? `+ ${t('booking.addBooking')}` : ''}
                     </td>
+                    <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
+                    <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
@@ -240,7 +276,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     </td>
                     <td
                       className="border-x border-b border-secondary-200 px-2 lg:px-3 py-1.5 text-secondary-300 text-xs"
-                      colSpan={9}
+                      colSpan={11}
                     >
                       + {t('booking.addBooking')}
                     </td>
@@ -267,6 +303,8 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                 <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-right text-sm font-bold text-secondary-900">
                   {totalProductAmount > 0 ? formatPrice(totalProductAmount) : '—'}
                 </td>
+                <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
+                <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
                 <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
               </tr>
             </tbody>

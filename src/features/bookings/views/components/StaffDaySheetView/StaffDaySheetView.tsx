@@ -11,6 +11,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useServiceCategoryMap } from '../../../hooks/useMenuMaps';
 import { DAY_KEYS, DAY_SHORT_TRANSLATION_KEYS, generateTimeSlots } from './utils';
 import { StaffAccordionItem } from './StaffAccordionItem';
+import type { BookingNotificationStatus } from '@/app/api/salons/[salonId]/bookings/notification-status/route';
 
 export interface StaffDaySheetViewProps {
   bookings: Booking[];
@@ -24,6 +25,7 @@ export interface StaffDaySheetViewProps {
   onAddBooking: (staffId: string, time?: string) => void;
   onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
   highlightedBookingId?: string | null;
+  notificationStatuses?: Record<string, BookingNotificationStatus>;
 }
 
 export const StaffDaySheetView = memo(function StaffDaySheetView({
@@ -38,6 +40,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
   onAddBooking,
   onUpdateBooking,
   highlightedBookingId,
+  notificationStatuses,
 }: StaffDaySheetViewProps) {
   const t = useTranslations();
   const { user } = useAuthStore();
@@ -244,6 +247,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
           onUpdateBooking={onUpdateBooking}
           highlightedBookingId={highlightedBookingId}
           serviceCategoryMap={serviceCategoryMap}
+          notificationStatuses={notificationStatuses}
         />
       ))}
     </div>
