@@ -5,7 +5,7 @@ import { unstable_cache, revalidateTag } from 'next/cache';
 
 
 function makeProductService() {
-  return new ProductService(createServiceClient(supabaseUrl, supabaseServiceKey));
+  return new ProductService(createServiceClient());
 }
 
 export async function GET(
@@ -58,7 +58,7 @@ export async function POST(
     const body = await req.json();
     const { action, ...data } = body;
 
-    const supabase = createServiceClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createServiceClient();
     const service = new ProductService(supabase);
     let result;
 
