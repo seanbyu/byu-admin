@@ -98,6 +98,7 @@
     "verifySuccess": "LINE 연동이 검증되었습니다",
     "verifyFailed": "LINE 연동 검증에 실패했습니다",
     "lastVerified": "마지막 검증: {date}",
+    "messagingApiNotice": "아래 정보는 LINE Developers Console의 Messaging API 채널에서 확인할 수 있습니다. LINE Login 채널이 아닌 Messaging API 채널의 정보를 입력해주세요.",
     "liffIdHint": "LIFF 앱을 사용하는 경우 입력하세요 (예약 웹앱용)",
     "helpTitle": "LINE 연동 방법",
     "helpStep1": "LINE Developers Console에서 Messaging API 채널을 생성합니다",

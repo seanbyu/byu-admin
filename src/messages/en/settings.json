@@ -97,6 +97,7 @@
     "verifySuccess": "LINE connection verified successfully",
     "verifyFailed": "LINE connection verification failed",
     "lastVerified": "Last verified: {date}",
+    "messagingApiNotice": "The information below can be found in the Messaging API channel on LINE Developers Console. Please enter the Messaging API channel details, not the LINE Login channel.",
     "liffIdHint": "Enter if using a LIFF app (for booking web app)",
     "helpTitle": "How to connect LINE",
     "helpStep1": "Create a Messaging API channel in the LINE Developers Console",

@@ -382,6 +382,14 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
       {isEditing && (
         <Card title={t('settings.line.channelSettings')} padding="sm" className="sm:p-6">
           <div className="space-y-4">
+            {/* Messaging API 안내 배너 */}
+            <div className="flex items-start gap-2 p-3 bg-[#06C755]/8 border border-[#06C755]/30 rounded-lg">
+              <LineIcon size={16} />
+              <p className="text-xs text-secondary-700 leading-relaxed">
+                {t('settings.line.messagingApiNotice')}
+              </p>
+            </div>
+
             {/* Channel ID */}
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-1.5">

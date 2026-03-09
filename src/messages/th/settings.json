@@ -90,6 +90,7 @@
     "verifySuccess": "ตรวจสอบการเชื่อมต่อ LINE สำเร็จ",
     "verifyFailed": "ตรวจสอบการเชื่อมต่อ LINE ล้มเหลว",
     "lastVerified": "ตรวจสอบล่าสุด: {date}",
+    "messagingApiNotice": "ข้อมูลด้านล่างสามารถดูได้จากช่อง Messaging API ใน LINE Developers Console กรุณากรอกข้อมูลจากช่อง Messaging API ไม่ใช่ช่อง LINE Login",
     "liffIdHint": "กรอกหากใช้แอป LIFF (สำหรับเว็บแอปจอง)",
     "helpTitle": "วิธีเชื่อมต่อ LINE",
     "helpStep1": "สร้างช่อง Messaging API ใน LINE Developers Console",
