@@ -27,7 +27,5 @@ export {
   usePasswordChange,
 } from './hooks/useSettings';
 
-export { useSalonData } from './hooks/useSalonData';
-
 // Views
 export { default as SettingsPageView } from './views/SettingsPageView';

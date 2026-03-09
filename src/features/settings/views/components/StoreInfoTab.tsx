@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Pencil, Check, X, MapPin } from 'lucide-react';
 import { StoreInfo } from '../../types';
-import { useSalonData } from '../../hooks/useSalonData';
 import {
   useSettingsUIStore,
   selectEditingField,
@@ -238,7 +237,7 @@ const StoreImageSection = memo(function StoreImageSection({
 // ============================================
 
 interface StoreInfoTabProps {
-  salonId: string;
+  storeInfo: StoreInfo | null;
   isLoading: boolean;
   isUpdating: boolean;
   isUploadingImage: boolean;
@@ -253,7 +252,7 @@ interface StoreInfoTabProps {
 // ============================================
 
 export function StoreInfoTab({
-  salonId,
+  storeInfo,
   isLoading,
   isUpdating,
   isUploadingImage,
@@ -269,38 +268,27 @@ export function StoreInfoTab({
   const tempValue = useSettingsUIStore(selectTempValue);
   const actions = useSettingsUIStore(selectSettingsActions);
 
-  // Server data
-  const { salonData, isLoading: isSalonDataLoading, refetch } = useSalonData(salonId);
+  const instagramUrl = storeInfo?.instagramUrl || '';
 
-  // Derived data
-  const instagramUrl = salonData?.settings?.instagram_url || '';
-
-  // Combined loading state - 두 데이터 소스 모두 체크
-  const isDataLoading = isLoading || isSalonDataLoading;
-
-  // Save handlers
+  // Save handlers (mutation onSuccess가 캐시 invalidation 처리)
   const handleSaveName = useCallback(async () => {
     if (tempValue.trim()) {
       await onSave({ name: tempValue.trim() });
-      await refetch();
     }
     actions.finishEditing();
-  }, [tempValue, onSave, refetch, actions]);
+  }, [tempValue, onSave, actions]);
 
   const handleSaveAddress = useCallback(async () => {
     await onSave({ address: tempValue.trim() });
-    await refetch();
     actions.finishEditing();
-  }, [tempValue, onSave, refetch, actions]);
+  }, [tempValue, onSave, actions]);
 
   const handleSaveInstagram = useCallback(async () => {
     await onSave({ instagramUrl: tempValue.trim() });
-    await refetch();
     actions.finishEditing();
-  }, [tempValue, onSave, refetch, actions]);
+  }, [tempValue, onSave, actions]);
 
-  // Loading state - 두 데이터 소스 모두 로딩 완료될 때까지 대기
-  if (isDataLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-secondary-500">{t('common.loading')}</div>
@@ -308,8 +296,7 @@ export function StoreInfoTab({
     );
   }
 
-  // Error state - 데이터를 가져오지 못한 경우
-  if (!salonData) {
+  if (!storeInfo) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-secondary-500">{t('common.error')}</div>
@@ -321,8 +308,8 @@ export function StoreInfoTab({
     <div className="space-y-4 sm:space-y-6">
       {/* Store Image Section */}
       <StoreImageSection
-        imageUrl={salonData?.cover_image_url || null}
-        altText={salonData?.name || ''}
+        imageUrl={storeInfo.imageUrl || null}
+        altText={storeInfo.name || ''}
         isUploading={isUploadingImage}
         onUpload={onUploadImage}
         onDelete={onDeleteImage}
@@ -338,11 +325,11 @@ export function StoreInfoTab({
               {t('settings.store.name')}
             </label>
             <EditableField
-              value={salonData?.name || ''}
+              value={storeInfo.name || ''}
               isEditing={editingField === 'name'}
               tempValue={tempValue}
               isUpdating={isUpdating}
-              onStartEdit={() => actions.startEditing('name', salonData?.name || '')}
+              onStartEdit={() => actions.startEditing('name', storeInfo.name || '')}
               onSave={handleSaveName}
               onCancel={actions.cancelEditing}
               onTempValueChange={actions.updateTempValue}
@@ -356,13 +343,13 @@ export function StoreInfoTab({
               {t('settings.store.address')}
             </label>
             <EditableField
-              value={salonData?.address || ''}
+              value={storeInfo.address || ''}
               placeholder={t('settings.store.addressPlaceholder')}
               isEditing={editingField === 'address'}
               tempValue={tempValue}
               isUpdating={isUpdating}
               icon={<MapPin size={18} className="text-secondary-400 flex-shrink-0" />}
-              onStartEdit={() => actions.startEditing('address', salonData?.address || '')}
+              onStartEdit={() => actions.startEditing('address', storeInfo.address || '')}
               onSave={handleSaveAddress}
               onCancel={actions.cancelEditing}
               onTempValueChange={actions.updateTempValue}

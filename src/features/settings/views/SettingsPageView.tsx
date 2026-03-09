@@ -209,7 +209,7 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
         <div className="mt-4 sm:mt-6">
           {activeTab === 'store' && (
             <StoreInfoTab
-              salonId={salonId}
+              storeInfo={storeInfoQuery.storeInfo}
               isLoading={storeInfoQuery.isLoading}
               isUpdating={storeInfoQuery.isUpdating}
               isUploadingImage={storeInfoQuery.isUploadingImage}

@@ -12,7 +12,6 @@ import { StoreInfo, Plan, Subscription } from '../types';
 export const settingsKeys = {
   all: ['settings'] as const,
   storeInfo: (salonId: string) => [...settingsKeys.all, 'store', salonId] as const,
-  storeInfoDirect: (salonId: string) => ['salon-store-info', salonId] as const,
   plans: () => [...settingsKeys.all, 'plans'] as const,
   subscription: (salonId: string) => [...settingsKeys.all, 'subscription', salonId] as const,
   account: (userId: string) => [...settingsKeys.all, 'account', userId] as const,
@@ -35,7 +34,6 @@ export function useStoreInfo(salonId: string, options?: { enabled?: boolean }) {
   // 모든 관련 쿼리 무효화 함수
   const invalidateAllStoreQueries = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: settingsKeys.storeInfo(salonId) });
-    queryClient.invalidateQueries({ queryKey: settingsKeys.storeInfoDirect(salonId) });
     queryClient.invalidateQueries({ queryKey: ['salon', salonId] });
   }, [queryClient, salonId]);
 
