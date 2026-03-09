@@ -4,9 +4,9 @@ import { useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { Holiday } from '@/types';
-import { useSalonSettings, useBusinessHoursMutation, useHolidaysMutation } from '../../hooks/useSalonSettings';
+import { useSalonSettings, useBusinessHoursMutation, useHolidaysMutation, useCategoryLastBookingMutation } from '../../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../../stores/settingsStore';
-import { BusinessSettingsCard, HolidaySettingsCard } from './booking-settings';
+import { BusinessSettingsCard, HolidaySettingsCard, CategoryCutoffCard } from './booking-settings';
 
 interface ShopSettingsSectionProps {
   salonId: string;
@@ -21,9 +21,11 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
   // Mutations
   const businessHoursMutation = useBusinessHoursMutation(salonId);
   const holidaysMutation = useHolidaysMutation(salonId);
+  const categoryLastBookingMutation = useCategoryLastBookingMutation(salonId);
 
   // Local state for save feedback
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [cutoffSaveSuccess, setCutoffSaveSuccess] = useState(false);
 
   // Zustand store for form state
   const {
@@ -33,6 +35,7 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     cancellationHours,
     holidays,
     newHoliday,
+    categoryLastBookingTimes,
     initializeFromServer,
     toggleDayOpen,
     setDayTime,
@@ -42,6 +45,7 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     setNewHolidayField,
     addHoliday,
     removeHoliday,
+    setCategoryLastBookingTime,
     markClean,
   } = useSettingsFormStore();
 
@@ -123,45 +127,69 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     }
   }, [businessHours, slotDuration, bookingAdvanceDays, cancellationHours, businessHoursMutation, markClean]);
 
+  const handleSaveCutoff = useCallback(async () => {
+    try {
+      await categoryLastBookingMutation.mutateCategoryLastBookingTimes(categoryLastBookingTimes);
+      setCutoffSaveSuccess(true);
+      setTimeout(() => setCutoffSaveSuccess(false), 3000);
+    } catch (error) {
+      console.error('Failed to save category cutoff times:', error);
+    }
+  }, [categoryLastBookingTimes, categoryLastBookingMutation]);
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="p-5">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-secondary-500">{t('common.loading')}</div>
-          </div>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-secondary-500">{t('common.loading')}</div>
-          </div>
-        </Card>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="p-5">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-secondary-500">{t('common.loading')}</div>
+            </div>
+          </Card>
+          <Card className="p-5">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-secondary-500">{t('common.loading')}</div>
+            </div>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <BusinessSettingsCard
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <BusinessSettingsCard
+          businessHours={businessHours}
+          slotDuration={slotDuration}
+          bookingAdvanceDays={bookingAdvanceDays}
+          cancellationHours={cancellationHours}
+          onToggleDay={handleToggleDay}
+          onTimeChange={handleTimeChange}
+          onSlotDurationChange={setSlotDuration}
+          onBookingAdvanceDaysChange={setBookingAdvanceDays}
+          onCancellationHoursChange={setCancellationHours}
+          onSave={handleSave}
+          isSaving={businessHoursMutation.isPending}
+          saveSuccess={saveSuccess}
+        />
+        <HolidaySettingsCard
+          holidays={holidays}
+          newHoliday={newHoliday}
+          onNewHolidayChange={handleNewHolidayChange}
+          onAddHoliday={handleAddHoliday}
+          onRemoveHoliday={handleRemoveHoliday}
+        />
+      </div>
+      <CategoryCutoffCard
+        salonId={salonId}
         businessHours={businessHours}
         slotDuration={slotDuration}
-        bookingAdvanceDays={bookingAdvanceDays}
-        cancellationHours={cancellationHours}
-        onToggleDay={handleToggleDay}
-        onTimeChange={handleTimeChange}
-        onSlotDurationChange={setSlotDuration}
-        onBookingAdvanceDaysChange={setBookingAdvanceDays}
-        onCancellationHoursChange={setCancellationHours}
-        onSave={handleSave}
-        isSaving={businessHoursMutation.isPending}
-        saveSuccess={saveSuccess}
-      />
-      <HolidaySettingsCard
-        holidays={holidays}
-        newHoliday={newHoliday}
-        onNewHolidayChange={handleNewHolidayChange}
-        onAddHoliday={handleAddHoliday}
-        onRemoveHoliday={handleRemoveHoliday}
+        categoryLastBookingTimes={categoryLastBookingTimes}
+        onCutoffChange={setCategoryLastBookingTime}
+        onSave={handleSaveCutoff}
+        isSaving={categoryLastBookingMutation.isPending}
+        saveSuccess={cutoffSaveSuccess}
       />
     </div>
   );

@@ -85,7 +85,11 @@
     "cancellation6h": "6시간 전",
     "cancellation12h": "12시간 전",
     "cancellation24h": "24시간 전",
-    "cancellation48h": "48시간 전"
+    "cancellation48h": "48시간 전",
+    "categoryLastBooking": "카테고리별 마지막 예약 시간",
+    "categoryLastBookingDesc": "시술 시간이 긴 카테고리의 마지막 예약 가능 시간을 설정합니다",
+    "categoryLastBookingNone": "제한 없음",
+    "categoryLastBookingNoCategories": "등록된 카테고리가 없습니다"
   },
   "placeholders": {
     "customerName": "고객 이름을 입력하세요",

@@ -85,7 +85,11 @@
     "cancellation6h": "6 ชั่วโมงก่อน",
     "cancellation12h": "12 ชั่วโมงก่อน",
     "cancellation24h": "24 ชั่วโมงก่อน",
-    "cancellation48h": "48 ชั่วโมงก่อน"
+    "cancellation48h": "48 ชั่วโมงก่อน",
+    "categoryLastBooking": "เวลาจองสุดท้ายตามหมวดหมู่",
+    "categoryLastBookingDesc": "ตั้งเวลาจองสุดท้ายสำหรับหมวดหมู่ที่มีระยะเวลาให้บริการนาน",
+    "categoryLastBookingNone": "ไม่จำกัด",
+    "categoryLastBookingNoCategories": "ไม่มีหมวดหมู่ที่ลงทะเบียน"
   },
   "placeholders": {
     "customerName": "กรอกชื่อลูกค้า",
@@ -161,7 +165,8 @@
       "noStaff": "ไม่มีพนักงานที่ลงทะเบียน",
       "hint": "พนักงานที่ปิดการจองจะไม่แสดงให้ลูกค้าเห็นในระหว่างการจองออนไลน์",
       "scheduleButton": "ตารางเวลา",
-      "bookingAllowed": "อนุญาตจอง"
+      "bookingAllowed": "อนุญาตจอง",
+      "orderHint": "ลากเพื่อเปลี่ยนลำดับพนักงาน ลำดับที่เปลี่ยนจะแสดงบนหน้าการจองของลูกค้า"
     },
     "interpreter": {
       "title": "บริการล่าม",

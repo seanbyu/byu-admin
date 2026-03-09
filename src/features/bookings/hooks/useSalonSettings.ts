@@ -28,6 +28,7 @@ export interface SalonSettings {
   interpreter_enabled?: boolean;
   supported_languages?: SupportedLanguage[];
   contact_channels?: ContactChannels;
+  category_last_booking_times?: Record<string, string>;
 }
 
 export interface SalonSettingsData {
@@ -139,6 +140,21 @@ export function useInterpreterSettingsMutation(salonId: string) {
         settings: {
           interpreter_enabled: interpreterEnabled,
           supported_languages: supportedLanguages,
+        },
+      }),
+  };
+}
+
+// Category last booking times mutation
+export function useCategoryLastBookingMutation(salonId: string) {
+  const mutation = useSalonSettingsMutation(salonId);
+
+  return {
+    ...mutation,
+    mutateCategoryLastBookingTimes: (times: Record<string, string>) =>
+      mutation.mutateAsync({
+        settings: {
+          category_last_booking_times: times,
         },
       }),
   };

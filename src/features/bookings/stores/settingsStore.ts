@@ -35,6 +35,9 @@ interface SettingsFormState {
   // Contact Channels Form
   contactChannels: ContactChannels;
 
+  // Category Last Booking Times
+  categoryLastBookingTimes: Record<string, string>;
+
   // Form status
   isDirty: boolean;
 
@@ -62,6 +65,9 @@ interface SettingsFormState {
   toggleContactChannel: (channel: 'line' | 'instagram') => void;
   setContactChannelId: (channel: 'line' | 'instagram', id: string) => void;
 
+  // Category Last Booking Times Actions
+  setCategoryLastBookingTime: (categoryId: string, time: string) => void;
+
   // Initialize from server data
   initializeFromServer: (data: {
     businessHours?: BusinessHours[];
@@ -73,6 +79,7 @@ interface SettingsFormState {
       interpreter_enabled?: boolean;
       supported_languages?: SupportedLanguage[];
       contact_channels?: ContactChannels;
+      category_last_booking_times?: Record<string, string>;
     };
   }) => void;
 
@@ -102,6 +109,7 @@ const initialState = {
   interpreterEnabled: false,
   supportedLanguages: [] as SupportedLanguage[],
   contactChannels: initialContactChannels,
+  categoryLastBookingTimes: {} as Record<string, string>,
   isDirty: false,
 };
 
@@ -265,6 +273,20 @@ export const useSettingsFormStore = create<SettingsFormState>()(
           'setContactChannelId'
         ),
 
+      // Category Last Booking Times Actions
+      setCategoryLastBookingTime: (categoryId, time) =>
+        set(
+          (state) => ({
+            categoryLastBookingTimes: time
+              ? { ...state.categoryLastBookingTimes, [categoryId]: time }
+              : Object.fromEntries(
+                  Object.entries(state.categoryLastBookingTimes).filter(([k]) => k !== categoryId)
+                ),
+          }),
+          false,
+          'setCategoryLastBookingTime'
+        ),
+
       // Initialize from server data
       initializeFromServer: (data) =>
         set(
@@ -277,6 +299,7 @@ export const useSettingsFormStore = create<SettingsFormState>()(
             interpreterEnabled: data.settings?.interpreter_enabled || false,
             supportedLanguages: (data.settings?.supported_languages as SupportedLanguage[]) || [],
             contactChannels: data.settings?.contact_channels || initialContactChannels,
+            categoryLastBookingTimes: (data.settings?.category_last_booking_times as Record<string, string>) || {},
             isDirty: false,
           },
           false,

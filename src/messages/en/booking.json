@@ -85,7 +85,11 @@
     "cancellation6h": "6 hours before",
     "cancellation12h": "12 hours before",
     "cancellation24h": "24 hours before",
-    "cancellation48h": "48 hours before"
+    "cancellation48h": "48 hours before",
+    "categoryLastBooking": "Last Booking Time by Category",
+    "categoryLastBookingDesc": "Set the last available booking time for categories with longer service durations",
+    "categoryLastBookingNone": "No limit",
+    "categoryLastBookingNoCategories": "No categories registered"
   },
   "placeholders": {
     "customerName": "Enter customer name",

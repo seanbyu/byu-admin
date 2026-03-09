@@ -202,8 +202,10 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     if (staffParam) setSelectedStaffId(staffParam);
     setHighlightedBookingId(highlightParam);
 
-    // URL 파라미터 정리 (히스토리에 파라미터 남기지 않음)
-    router.replace('/bookings/chart');
+    // router.replace 대신 history API로 URL 정리
+    // router.replace는 useSearchParams() 재서스펜스를 유발해 Suspense fallback 스피너가
+    // 차트 위에 순간 표시되는 현상(간헐적 UI 미로드)을 일으킴
+    window.history.replaceState(null, '', window.location.pathname);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [highlightParam, isLoading, isSettingsLoading]);
 
@@ -236,7 +238,10 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     [pageState.setSelectedStaffId, pageState.setSelectedTime, pageState.openNewBookingModal]
   );
 
-  if (isLoading) {
+  // salonId가 아직 없으면 (auth hydration 전) 렌더 차단
+  // → enabled:false 쿼리가 isLoading=false를 반환해 businessHours=[]로 차트가
+  //   "영업시간을 설정해주세요" 상태로 잠깐 보이는 현상 방지
+  if (!salonId || isLoading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
         <Spinner size="xl" />
