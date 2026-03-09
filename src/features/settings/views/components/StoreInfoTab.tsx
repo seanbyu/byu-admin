@@ -107,11 +107,24 @@ const EditableField = memo(function EditableField({
     );
   }
 
+  const isUrl = value.startsWith('http://') || value.startsWith('https://');
+
   return (
     <div className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg gap-2">
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {icon}
-        <span className="text-secondary-900 break-all text-sm">{value || '-'}</span>
+        {isUrl ? (
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-600 break-all text-sm underline"
+          >
+            {value}
+          </a>
+        ) : (
+          <span className="text-secondary-900 break-all text-sm">{value || '-'}</span>
+        )}
       </div>
       {canEdit && (
         <button
