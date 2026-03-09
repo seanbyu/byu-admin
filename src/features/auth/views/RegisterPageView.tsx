@@ -11,22 +11,10 @@ import { PasswordInput, PasswordConfirmInput, validatePassword } from '@/compone
 import { Check, Loader2, ChevronLeft } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { Select } from '@/components/ui/Select';
-import { CheckStatus } from '../types';
+import { RegisterForm } from '../types';
 import { useRegistration } from '../hooks/useAuth';
 import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
-
-interface RegisterForm {
-  email: string; // Changed from id to email
-  password: string;
-  confirmPassword: string;
-  name: string;
-  salonName: string;
-  countryCode: string;
-  phone: string;
-  otp?: string;
-  industryNames: string[];
-}
 
 export default function RegisterPageView() {
   const router = useRouter();

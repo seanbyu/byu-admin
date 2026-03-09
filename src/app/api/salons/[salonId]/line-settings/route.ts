@@ -10,7 +10,7 @@ export async function GET(
   try {
     const { salonId } = await params;
     const supabase = createServiceClient();
-    const service = new LineSettingsService(supabase as any);
+    const service = new LineSettingsService(supabase);
     const data = await service.getLineSettings(salonId);
     return NextResponse.json({ success: true, data });
   } catch (error: unknown) {
@@ -29,7 +29,7 @@ export async function POST(
     const { action, ...data } = body;
 
     const supabase = createServiceClient();
-    const service = new LineSettingsService(supabase as any);
+    const service = new LineSettingsService(supabase);
     let result;
 
     switch (action) {

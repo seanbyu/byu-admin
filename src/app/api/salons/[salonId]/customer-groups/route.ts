@@ -10,7 +10,7 @@ export async function GET(
   try {
     const { salonId } = await params;
     const supabase = createClient(req);
-    const service = new CustomerGroupService(supabase as any);
+    const service = new CustomerGroupService(supabase);
     const data = await service.getCustomerGroups(salonId);
     return NextResponse.json({ success: true, data });
   } catch (error: unknown) {

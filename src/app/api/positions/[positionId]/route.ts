@@ -21,10 +21,10 @@ export async function PATCH(
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: 500 }
     );
   }
@@ -42,10 +42,10 @@ export async function DELETE(
     await service.deletePosition(positionId);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: 500 }
     );
   }

@@ -1,7 +1,6 @@
 import { Booking } from '../../../types';
 
-export type PaymentMethod = 'CARD' | 'CASH' | 'TRANSFER' | '';
-export type DiscountType = 'percent' | 'fixed';
+export type { PaymentMethod, DiscountType } from '../../../types';
 export type SalesTab = 'service' | 'product';
 
 export interface CategoryPriceItem {

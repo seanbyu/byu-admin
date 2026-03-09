@@ -2,22 +2,7 @@ import React from 'react';
 import { Booking } from '../../../types';
 import { BusinessHours } from '@/types';
 
-export type CustomerType = 'local' | 'foreign';
-
-export interface ExistingCustomer {
-  id: string;
-  name: string;
-  phone: string;
-}
-
-export interface ServiceInfo {
-  id: string;
-  name: string;
-  category_id: string;
-  duration_minutes?: number;
-  base_price?: number;
-  price?: number;
-}
+export type { CustomerType, ExistingCustomer, ServiceInfo } from '../../../types';
 
 export interface NewBookingModalProps {
   isOpen: boolean;

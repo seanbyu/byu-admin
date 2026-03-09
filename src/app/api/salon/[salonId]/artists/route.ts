@@ -16,7 +16,7 @@ export async function GET(
     const includePortfolio = req.nextUrl.searchParams.get('includePortfolio') === 'true';
 
     const supabase = createServiceClient();
-    const service = new ArtistService(supabase as any);
+    const service = new ArtistService(supabase);
     const data = await service.getArtists(salonId, includePortfolio);
 
     return NextResponse.json({ success: true, data });

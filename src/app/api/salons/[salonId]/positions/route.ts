@@ -10,7 +10,7 @@ export async function GET(
   try {
     const { salonId } = await params;
     const supabase = createServiceClient();
-    const service = new PositionService(supabase as any);
+    const service = new PositionService(supabase);
     const data = await service.getPositions(salonId);
     return NextResponse.json({ success: true, data });
   } catch (error: unknown) {
@@ -27,7 +27,7 @@ export async function POST(
     const { salonId } = await params;
     const body = await req.json();
     const supabase = createServiceClient();
-    const service = new PositionService(supabase as any);
+    const service = new PositionService(supabase);
     const data = await service.createPosition(salonId, {
       name: body.name,
       name_en: body.name_en,

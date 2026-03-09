@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { BookingStatus } from '@/types';
-import { Booking } from '../types';
+import { Booking, ArtistOption } from '../types';
 import { Staff } from '@/features/staff/types';
 import {
   useBookingsUIStore,
@@ -29,11 +29,6 @@ const STATUS_COLORS: Readonly<Record<BookingStatus, string>> = {
   [BookingStatus.CANCELLED]: 'bg-error-100 text-error-700',
   [BookingStatus.NO_SHOW]: 'bg-secondary-100 text-secondary-700',
 } as const;
-
-export interface ArtistOption {
-  value: string;
-  label: string;
-}
 
 interface UseBookingsPageStateReturn {
   // Modal states

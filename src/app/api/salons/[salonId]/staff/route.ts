@@ -25,11 +25,11 @@ export async function GET(
       success: true,
       data: staffList,
     });
-  } catch (error: any) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message || 'Internal Server Error' },
-      { status: error.message === 'Salon ID is required' ? 400 : 500 }
+      { success: false, message },
+      { status: message === 'Salon ID is required' ? 400 : 500 }
     );
   }
 }
@@ -77,10 +77,10 @@ export async function POST(
 
     revalidateTag(`staff-${salonId}`, 'default');
     return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: 500 }
     );
   }

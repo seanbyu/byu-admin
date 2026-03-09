@@ -24,7 +24,7 @@ export async function GET(
     }
 
     const supabase = createServiceClient();
-    const service = new NotificationPanelService(supabase as any);
+    const service = new NotificationPanelService(supabase);
     const statusMap = await service.getBookingNotificationStatuses(salonId, date);
 
     return NextResponse.json({ success: true, data: statusMap });

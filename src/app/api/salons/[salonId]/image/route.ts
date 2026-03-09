@@ -41,10 +41,10 @@ export async function POST(
     const imageUrl = await service.uploadCoverImage(salonId, file);
 
     return NextResponse.json({ success: true, data: { imageUrl } });
-  } catch (error: any) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message || 'Internal Server Error' },
+      { success: false, message },
       { status: 500 }
     );
   }
@@ -63,11 +63,11 @@ export async function DELETE(
     await service.deleteCoverImage(salonId);
 
     return NextResponse.json({ success: true, message: 'Image deleted successfully' });
-  } catch (error: any) {
-    console.error('API Error:', error);
-    const status = error?.status === 404 ? 404 : 500;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    const status = error instanceof Error && 'status' in error && (error as Error & { status: number }).status === 404 ? 404 : 500;
     return NextResponse.json(
-      { success: false, message: error.message || 'Internal Server Error' },
+      { success: false, message },
       { status }
     );
   }

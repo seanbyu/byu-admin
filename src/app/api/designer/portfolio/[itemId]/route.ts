@@ -53,10 +53,9 @@ export async function PUT(
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    console.error('Portfolio Update Error:', error);
+  } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Failed to update';
-    const status = error?.status === 404 ? 404 : 500;
+    const status = error instanceof Error && 'status' in error && (error as Error & { status: number }).status === 404 ? 404 : 500;
     return NextResponse.json({ success: false, message }, { status });
   }
 }
@@ -87,7 +86,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: 'Portfolio item deleted' });
   } catch (error) {
-    console.error('Portfolio Delete Error:', error);
     const message = error instanceof Error ? error.message : 'Failed to delete';
     return NextResponse.json({ success: false, message }, { status: 500 });
   }

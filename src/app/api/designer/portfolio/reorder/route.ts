@@ -52,10 +52,9 @@ export async function PATCH(req: NextRequest) {
     await service.reorderPortfolio(user.id, itemOrders);
 
     return NextResponse.json({ success: true, message: 'Portfolio reordered successfully' });
-  } catch (error: any) {
-    console.error('Portfolio Reorder Error:', error);
+  } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Failed to reorder';
-    const status = error?.status === 403 ? 403 : 500;
+    const status = error instanceof Error && 'status' in error && (error as Error & { status: number }).status === 403 ? 403 : 500;
     return NextResponse.json({ success: false, message }, { status });
   }
 }

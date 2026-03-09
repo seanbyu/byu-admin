@@ -29,7 +29,7 @@ export async function PUT(
     }
 
     const supabase = createServiceClient();
-    const service = new StaffService(supabase as any);
+    const service = new StaffService(supabase);
     await service.updateStaffDisplayOrder(staffOrders);
 
     return NextResponse.json({ success: true });

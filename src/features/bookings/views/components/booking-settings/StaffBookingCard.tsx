@@ -9,6 +9,7 @@ import { useStaff } from '@/features/staff/hooks/useStaff';
 import { Staff } from '@/features/staff/types';
 import { Check, Users, Calendar, GripVertical } from 'lucide-react';
 import { StaffScheduleEditModal } from '../StaffScheduleEditModal';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface StaffBookingCardProps {
   salonId: string;
@@ -18,6 +19,7 @@ export const StaffBookingCard = memo(function StaffBookingCard({
   salonId,
 }: StaffBookingCardProps) {
   const t = useTranslations();
+  const toast = useToast();
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [selectedStaffForSchedule, setSelectedStaffForSchedule] = useState<Staff | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -39,8 +41,8 @@ export const StaffBookingCard = memo(function StaffBookingCard({
         });
         setSaveSuccess(staffId);
         setTimeout(() => setSaveSuccess(null), 2000);
-      } catch (error) {
-        console.error('Failed to update booking status:', error);
+      } catch {
+        toast.error(t('common.error'));
       }
     },
     [updateStaff]
@@ -109,8 +111,8 @@ export const StaffBookingCard = memo(function StaffBookingCard({
         await updateDisplayOrder(staffOrders);
         setSaveSuccess('order');
         setTimeout(() => setSaveSuccess(null), 2000);
-      } catch (error) {
-        console.error('Failed to update display order:', error);
+      } catch {
+        toast.error(t('common.error'));
       }
 
       handleDragEnd();

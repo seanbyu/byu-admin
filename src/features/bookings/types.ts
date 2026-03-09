@@ -1,5 +1,50 @@
 import { BookingStatus } from '@/types';
 
+// ============================================
+// Customer
+// ============================================
+
+export type CustomerType = 'local' | 'foreign';
+
+export interface ExistingCustomer {
+  id: string;
+  name: string;
+  phone: string;
+}
+
+// ============================================
+// Service
+// ============================================
+
+export interface ServiceInfo {
+  id: string;
+  name: string;
+  category_id: string;
+  duration_minutes?: number;
+  base_price?: number;
+  price?: number;
+}
+
+// ============================================
+// Sales
+// ============================================
+
+export type PaymentMethod = 'CARD' | 'CASH' | 'TRANSFER' | '';
+export type DiscountType = 'percent' | 'fixed';
+
+// ============================================
+// UI
+// ============================================
+
+export interface ArtistOption {
+  value: string;
+  label: string;
+}
+
+// ============================================
+// Products
+// ============================================
+
 export interface SalonProduct {
   id: string;
   salonId: string;

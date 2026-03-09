@@ -46,10 +46,10 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: 500 }
     );
   }
@@ -124,10 +124,10 @@ export async function POST(
 
     revalidateTag(`menus-${salonId}`, 'default');
     return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: 500 }
     );
   }

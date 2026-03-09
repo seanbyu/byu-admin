@@ -3,8 +3,6 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { StaffService } from '@/lib/api-core';
 import { checkPermission } from '@/lib/server/checkPermission';
 
-const supabase = createServiceClient();
-
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ salonId: string; staffId: string }> }
@@ -13,14 +11,15 @@ export async function PATCH(
     const { salonId, staffId } = await params;
     const body = await req.json();
 
+    const supabase = createServiceClient();
     const service = new StaffService(supabase);
     await service.updateStaff(salonId, staffId, body);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Update Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: 500 }
     );
   }
@@ -39,14 +38,15 @@ export async function DELETE(
       return NextResponse.json({ success: false, message: permCheck.error }, { status: 403 });
     }
 
+    const supabase = createServiceClient();
     const service = new StaffService(supabase);
     await service.hardDeleteStaff(staffId, salonId, permCheck.userId!);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Delete Error:', error);
-    const isBusinessError = error.message?.startsWith('ERROR_');
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    const isBusinessError = message.startsWith('ERROR_');
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: isBusinessError ? 400 : 500 }
     );
   }
@@ -64,6 +64,7 @@ export async function POST(
     const authHeader = req.headers.get('Authorization');
     const token = authHeader?.replace('Bearer ', '') || '';
 
+    const supabase = createServiceClient();
     const service = new StaffService(supabase);
 
     switch (action) {
@@ -88,10 +89,7 @@ export async function POST(
         if (!permCheck.authorized) {
           return NextResponse.json({ success: false, message: permCheck.error }, { status: 403 });
         }
-        const { error } = await (supabase.from('users') as any)
-          .update({ role: data.role })
-          .eq('id', staffId);
-        if (error) throw error;
+        await service.updateStaffRole(staffId, data.role);
         break;
       }
       default:
@@ -99,11 +97,11 @@ export async function POST(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Staff action Error:', error);
-    const isBusinessError = error.message?.startsWith('ERROR_');
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    const isBusinessError = message.startsWith('ERROR_');
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: isBusinessError ? 400 : 500 }
     );
   }

@@ -9,33 +9,10 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { useAuthStore } from '@/store/authStore';
 import { useLogin } from '../hooks/useAuth';
 import { Scissors } from 'lucide-react';
-import { User } from '@/types';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 import { LanguageSelectModal } from './LanguageSelectModal';
-
-type AuthErrorCode =
-  | 'INVALID_CREDENTIALS'
-  | 'LOGIN_FAILED'
-  | 'LOGIN_ERROR'
-  | 'SIGNUP_FAILED'
-  | 'SIGNUP_ERROR'
-  | 'SALON_PENDING_APPROVAL'
-  | 'SALON_REJECTED'
-  | 'STAFF_RESIGNED';
-
-interface AuthResponse {
-  user: User | null;
-  token: string | null;
-  error?: string;
-  errorCode?: AuthErrorCode;
-}
-
-interface LoginForm {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-}
+import type { AuthErrorCode, AuthResponse, LoginForm } from '../types';
 
 export default function LoginPageView() {
   const router = useRouter();

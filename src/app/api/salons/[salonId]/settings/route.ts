@@ -14,7 +14,7 @@ export async function GET(
     const data = await unstable_cache(
       async () => {
         const supabase = createServiceClient();
-        const service = new SettingsService(supabase as any);
+        const service = new SettingsService(supabase);
         return service.getSalonSettings(salonId);
       },
       [`settings-${salonId}`],
@@ -37,7 +37,7 @@ export async function PATCH(
     const body = await req.json();
 
     const supabase = createServiceClient();
-    const service = new SettingsService(supabase as any);
+    const service = new SettingsService(supabase);
 
     await service.updateSalonSettings(salonId, {
       businessHours: body.businessHours,

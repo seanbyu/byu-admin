@@ -13,10 +13,10 @@ export async function GET(
   try {
     const chartData = await service.getCustomerChart(salonId, customerId);
     return NextResponse.json({ success: true, data: chartData });
-  } catch (error: any) {
-    console.error('Customer chart error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message },
       { status: 500 }
     );
   }

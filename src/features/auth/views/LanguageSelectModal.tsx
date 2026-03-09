@@ -4,36 +4,8 @@ import { useState } from 'react';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const LANGUAGES = [
-  {
-    code: 'en',
-    label: 'English',
-    flag: '🇺🇸',
-    confirmText: 'Continue',
-    title: 'Select Language',
-  },
-  {
-    code: 'ko',
-    label: '한국어',
-    flag: '🇰🇷',
-    confirmText: '계속하기',
-    title: '언어 선택',
-  },
-  {
-    code: 'th',
-    label: 'ไทย',
-    flag: '🇹🇭',
-    confirmText: 'ดำเนินการต่อ',
-    title: 'เลือกภาษา',
-  },
-] as const;
-
-type LangCode = (typeof LANGUAGES)[number]['code'];
-
-interface LanguageSelectModalProps {
-  onClose: () => void;
-}
+import { LANGUAGES } from '../constants';
+import type { LangCode, LanguageSelectModalProps } from '../types';
 
 export function LanguageSelectModal({ onClose }: LanguageSelectModalProps) {
   const router = useRouter();

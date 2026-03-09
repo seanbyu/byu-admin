@@ -22,7 +22,7 @@ export async function GET(
     const data = await unstable_cache(
       async () => {
         const supabase = createServiceClient();
-        const service = new CustomerFilterService(supabase as any);
+        const service = new CustomerFilterService(supabase);
         return service.getFilters(salonId);
       },
       [`customer-filters-${salonId}`],
@@ -47,7 +47,7 @@ export async function POST(
   try {
     const { salonId } = await params;
     const supabase = createServiceClient();
-    const service = new CustomerFilterService(supabase as any);
+    const service = new CustomerFilterService(supabase);
     const body = await req.json();
     const { action, ...data } = body;
 

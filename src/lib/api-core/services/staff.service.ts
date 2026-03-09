@@ -20,6 +20,10 @@ export class StaffService {
     return this.repository.updateStaff(salonId, staffId, updates);
   }
 
+  async updateStaffRole(staffId: string, role: string): Promise<{ success: boolean }> {
+    return this.repository.updateStaffRole(staffId, role);
+  }
+
   async updateStaffDisplayOrder(
     staffOrders: { staffId: string; displayOrder: number }[]
   ): Promise<{ success: boolean }> {

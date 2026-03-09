@@ -583,6 +583,14 @@ export class StaffRepository extends BaseRepository {
    * Bulk update staff display order
    * @param staffOrders Array of { staffId, displayOrder }
    */
+  async updateStaffRole(staffId: string, role: string): Promise<{ success: boolean }> {
+    const { error } = await (this.supabase.from('users') as ReturnType<typeof this.supabase.from>)
+      .update({ role })
+      .eq('id', staffId);
+    if (error) throw error;
+    return { success: true };
+  }
+
   async updateStaffDisplayOrder(
     staffOrders: { staffId: string; displayOrder: number }[]
   ): Promise<{ success: boolean }> {
