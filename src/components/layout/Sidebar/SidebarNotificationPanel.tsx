@@ -45,11 +45,12 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
         markAsRead(notif.id);
       }
 
+      // 모바일: await 이전에 사이드바를 즉시 닫아 "두 번 탭" 현상 방지
+      onNavClick();
+
       if (notif.booking_id && salonId) {
         // 예약 날짜·직원 정보를 URL 파라미터로 전달 → BookingsPageView에서 처리
-        const t0 = performance.now();
         const info = await getBookingInfo(salonId, notif.booking_id);
-        console.log(`[perf] getBookingInfo ${(performance.now() - t0).toFixed(1)}ms`);
         const params = new URLSearchParams({ highlight: notif.booking_id });
         if (info) {
           params.set('date', info.booking_date);
@@ -59,8 +60,6 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
       } else {
         router.push('/bookings/chart');
       }
-
-      onNavClick();
     },
     [markAsRead, router, onNavClick, salonId]
   );
