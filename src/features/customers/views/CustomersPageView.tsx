@@ -274,10 +274,8 @@ export default function CustomersPageView() {
   const handleCustomerClick = useCallback(
     (customerId: string) => {
       const customer = customers.find((c) => c.id === customerId);
-      const customerNo = customer?.customer_number;
-      if (customerNo) {
-        router.push(`/customers/detail/${customerNo}`);
-      }
+      const dest = customer?.customer_number ?? customerId;
+      router.push(`/customers/detail/${dest}`);
     },
     [router, customers]
   );

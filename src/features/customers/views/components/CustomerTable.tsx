@@ -256,6 +256,27 @@ export const CustomerTable = memo(function CustomerTable({
         },
       },
       {
+        key: 'line_status',
+        header: 'LINE',
+        render: (customer: CustomerListItem) => {
+          if (!customer.line_user_id) {
+            return <span className="text-secondary-300 text-xs">—</span>;
+          }
+          if (customer.line_blocked) {
+            return (
+              <Badge variant="danger" size="sm">
+                {t('customer.lineBlocked')}
+              </Badge>
+            );
+          }
+          return (
+            <Badge variant="success" size="sm">
+              {t('customer.lineFriend')}
+            </Badge>
+          );
+        },
+      },
+      {
         key: 'notes',
         header: t('customer.field.notes'),
         render: (customer: CustomerListItem) => (

@@ -44,6 +44,10 @@ export interface Customer {
   customer_number?: string; // Custom customer number
   primary_artist_id?: string; // 담당자 ID
 
+  // LINE
+  line_user_id?: string | null;
+  line_blocked?: boolean;
+
   // Visit tracking
   last_visit?: Date | string | null;
   total_visits: number;

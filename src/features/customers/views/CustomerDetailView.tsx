@@ -70,7 +70,7 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
 
   const customer = useMemo(() => {
     if (!listData?.customers) return undefined;
-    return listData.customers.find((c) => c.customer_number === customerNo);
+    return listData.customers.find((c) => c.customer_number === customerNo || c.id === customerNo);
   }, [listData, customerNo]);
 
   const isLoadingCustomer = isLoadingList;

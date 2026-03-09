@@ -78,13 +78,26 @@ export class NotificationRepository extends BaseRepository {
     salonId: string,
     date: string
   ): Promise<Record<string, BookingNotificationStatus>> {
+    // idempotency_key의 날짜는 트리거 실행 시점(NOW())으로, 예약 날짜와 다를 수 있음
+    // → 해당 날짜의 booking_id를 먼저 조회한 뒤, booking_id 기준으로 outbox 조회
+    const { data: bookingData, error: bookingError } = await (this.supabase as any)
+      .from('bookings')
+      .select('id')
+      .eq('salon_id', salonId)
+      .eq('booking_date', date);
+
+    if (bookingError) throw bookingError;
+
+    const bookingIds = ((bookingData ?? []) as Array<{ id: string }>).map((b) => b.id);
+    if (bookingIds.length === 0) return {};
+
     const { data, error } = await (this.supabase as any)
       .from('notification_outbox')
       .select('booking_id, notification_type, status')
       .eq('salon_id', salonId)
       .eq('channel', 'LINE')
       .in('notification_type', ['BOOKING_CONFIRMED', 'BOOKING_MODIFIED', 'BOOKING_REMINDER'])
-      .like('idempotency_key', `%:${date}`)
+      .in('booking_id', bookingIds)
       .in('status', ['sent', 'pending', 'sending']);
 
     if (error) throw error;

@@ -65,6 +65,8 @@ export interface Booking {
   customerId: string;
   customerName: string;
   customerPhone: string;
+  customerLineUserId?: string | null;
+  customerLineBlocked?: boolean;
   salonId: string;
   staffId: string;
   staffName: string;

@@ -164,7 +164,16 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                       {booking.serviceName?.includes(', ') ? booking.serviceName : (serviceCategoryMap?.[booking.serviceId] || booking.serviceName)}
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-700">
-                      {booking.customerName}
+                      <div className="flex items-center gap-1">
+                        <span>{booking.customerName}</span>
+                        {booking.customerLineUserId ? (
+                          booking.customerLineBlocked ? (
+                            <span className="inline-block w-2 h-2 rounded-full bg-error-400 shrink-0" title="LINE 차단" />
+                          ) : (
+                            <span className="inline-block w-2 h-2 rounded-full bg-success-500 shrink-0" title="LINE 친구" />
+                          )
+                        ) : null}
+                      </div>
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-500 text-xs">
                       {booking.customerPhone ? stripCountryCode(booking.customerPhone) : '—'}
