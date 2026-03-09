@@ -119,11 +119,11 @@ export const StaffBookingTable = memo(function StaffBookingTable({
               </th>
               <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-center font-medium text-secondary-600 w-20">
                 LINE<br />
-                <span className="font-normal text-[10px] text-secondary-400">확정</span>
+                <span className="font-normal text-[10px] text-secondary-400">{t('booking.line.confirmed')}</span>
               </th>
               <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-center font-medium text-secondary-600 w-20">
                 LINE<br />
-                <span className="font-normal text-[10px] text-secondary-400">당일</span>
+                <span className="font-normal text-[10px] text-secondary-400">{t('booking.line.reminder')}</span>
               </th>
             </tr>
           </thead>
@@ -212,11 +212,11 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     {/* LINE 확정 알림 상태 */}
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
                       {!booking.customerLineUserId || booking.customerLineBlocked ? (
-                        <span className="text-[10px] text-secondary-400">발송불가</span>
+                        <span className="text-[10px] text-secondary-400">{t('booking.line.cannotSend')}</span>
                       ) : notificationStatuses?.[booking.id]?.confirmed ? (
                         <span className="inline-flex items-center gap-0.5 text-success-600">
                           <span>✓</span>
-                          <span className="text-[10px]">발송</span>
+                          <span className="text-[10px]">{t('booking.line.sent')}</span>
                         </span>
                       ) : (
                         <span className="text-secondary-300">—</span>
@@ -225,11 +225,11 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     {/* LINE 당일 리마인더 상태 */}
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
                       {!booking.customerLineUserId || booking.customerLineBlocked ? (
-                        <span className="text-[10px] text-secondary-400">발송불가</span>
+                        <span className="text-[10px] text-secondary-400">{t('booking.line.cannotSend')}</span>
                       ) : notificationStatuses?.[booking.id]?.reminded ? (
                         <span className="inline-flex items-center gap-0.5 text-success-600">
                           <span>✓</span>
-                          <span className="text-[10px]">발송</span>
+                          <span className="text-[10px]">{t('booking.line.sent')}</span>
                         </span>
                       ) : (
                         <span className="text-secondary-300">—</span>

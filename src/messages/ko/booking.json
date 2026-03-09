@@ -147,6 +147,12 @@
     "deleteConfirmTitle": "매출을 삭제하시겠습니까?",
     "deleteConfirmDescription": "삭제된 매출 정보는 복구할 수 없습니다."
   },
+  "line": {
+    "confirmed": "확정",
+    "reminder": "당일",
+    "sent": "발송",
+    "cannotSend": "발송불가"
+  },
   "settings": {
     "description": "온라인 예약 관련 설정을 관리합니다",
     "staffBooking": {

@@ -147,6 +147,12 @@
     "deleteConfirmTitle": "ลบยอดขายหรือไม่?",
     "deleteConfirmDescription": "ข้อมูลยอดขายที่ลบแล้วไม่สามารถกู้คืนได้"
   },
+  "line": {
+    "confirmed": "ยืนยัน",
+    "reminder": "วันนั้น",
+    "sent": "ส่งแล้ว",
+    "cannotSend": "ส่งไม่ได้"
+  },
   "settings": {
     "description": "จัดการการตั้งค่าการจองออนไลน์",
     "staffBooking": {

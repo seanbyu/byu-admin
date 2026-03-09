@@ -147,6 +147,12 @@
     "deleteConfirmTitle": "Delete sales?",
     "deleteConfirmDescription": "Deleted sales information cannot be recovered."
   },
+  "line": {
+    "confirmed": "Confirm",
+    "reminder": "Same-day",
+    "sent": "Sent",
+    "cannotSend": "N/A"
+  },
   "settings": {
     "description": "Manage online booking settings",
     "staffBooking": {
