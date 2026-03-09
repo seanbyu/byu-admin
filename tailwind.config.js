@@ -1,5 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  future: {
+    // 모바일 터치 기기에서 hover: 클래스가 첫 탭에 활성화되어
+    // 두 번 탭해야 클릭이 동작하는 문제를 방지.
+    // hover:가 @media (hover: hover)로 감싸져 실제 hover 지원 기기에서만 적용됨.
+    hoverOnlyWhenSupported: true,
+  },
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
