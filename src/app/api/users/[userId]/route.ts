@@ -12,7 +12,7 @@ export async function PATCH(
     const supabase = createServiceClient();
 
     // Build update object
-    const updates: Record<string, any> = {};
+    const updates: { name?: string; phone?: string; updated_at?: string } = {};
 
     if (body.name !== undefined) updates.name = body.name;
     if (body.phone !== undefined) updates.phone = body.phone;

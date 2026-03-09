@@ -40,8 +40,8 @@ export class MenuRepository extends BaseRepository {
 
       if (error) throw error;
 
-      const selected: IndustryItem[] = (data || []).map((item: DBSalonIndustry) => ({
-        id: item.industry_id,
+      const selected: IndustryItem[] = (data || []).map((item) => ({
+        id: item.industry_id ?? "",
         name: item.industries?.name || "",
         displayOrder: item.display_order,
       }));

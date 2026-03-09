@@ -16,7 +16,7 @@ export class UserRepository extends BaseRepository {
       .single();
 
     if (error) throw error;
-    return data as DBUser;
+    return data as unknown as DBUser;
   }
 
   async updateProfile(
@@ -32,6 +32,6 @@ export class UserRepository extends BaseRepository {
       .single();
 
     if (error) throw error;
-    return data as DBUser;
+    return data as unknown as DBUser;
   }
 }

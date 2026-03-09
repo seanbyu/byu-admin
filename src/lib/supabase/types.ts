@@ -1,4 +1,7 @@
 export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)";
+  };
   public: {
     Tables: {
       users: {
@@ -36,6 +39,7 @@ export type Database = {
           is_active?: boolean;
           updated_at?: string;
         };
+        Relationships: [];
       };
       customers: {
         Row: {
@@ -62,6 +66,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       appointments: {
         Row: {
@@ -97,6 +102,37 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
+      };
+      designer_instagram_tokens: {
+        Row: {
+          id: string;
+          designer_id: string;
+          instagram_user_id: string;
+          access_token: string;
+          expires_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          designer_id: string;
+          instagram_user_id: string;
+          access_token: string;
+          expires_at: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          designer_id?: string;
+          instagram_user_id?: string;
+          access_token?: string;
+          expires_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
     };
     Views: {

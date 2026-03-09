@@ -131,7 +131,7 @@ export class StaffRepository extends BaseRepository {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const typedProfiles = profiles as StaffProfileWithUser[];
+    const typedProfiles = profiles as unknown as StaffProfileWithUser[];
 
     const filteredProfiles = typedProfiles.filter((profile) => {
       const user = profile.users;

@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/lib/supabase/types";
+import { Database } from "@/types/supabase";
 import { UserRole, BusinessHours, Holiday, StaffPermission } from "@/types";
 
 // ============================================
@@ -379,6 +379,8 @@ export interface BookingResponse {
   customerId: string;
   customerName: string;
   customerPhone: string;
+  customerLineUserId?: string | null;
+  customerLineBlocked?: boolean;
   salonId: string;
   staffId: string;
   staffName: string;

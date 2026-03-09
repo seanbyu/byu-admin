@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 
 
 const INSTAGRAM_APP_ID = process.env.INSTAGRAM_APP_ID;
@@ -95,18 +96,22 @@ export async function GET(req: NextRequest) {
 
     // DB에 토큰 저장 (디자이너 ID가 있는 경우)
     if (designerId) {
-      const supabase = createServiceClient();
+      const supabase = createClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      );
 
       await supabase
         .from('designer_instagram_tokens')
         .upsert({
-          artist_id: designerId,
+          designer_id: designerId,
           instagram_user_id: userId.toString(),
           access_token: longLivedToken,
           expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
           updated_at: new Date().toISOString(),
         }, {
-          onConflict: 'artist_id',
+          onConflict: 'designer_id',
         });
     }
 

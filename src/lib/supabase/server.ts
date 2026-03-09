@@ -1,6 +1,6 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { NextRequest } from 'next/server';
-import { Database } from '@/lib/supabase/types';
+import { Database } from '@/types/supabase';
 
 /**
  * Service Role 클라이언트 — RLS 우회, Route Handler 전용

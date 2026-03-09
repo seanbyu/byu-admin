@@ -1,8 +1,9 @@
 import React from 'react';
 import { Booking } from '../../../types';
+import type { CustomerType, ExistingCustomer, ServiceInfo } from '../../../types';
 import { BusinessHours } from '@/types';
 
-export type { CustomerType, ExistingCustomer, ServiceInfo } from '../../../types';
+export type { CustomerType, ExistingCustomer, ServiceInfo };
 
 export interface NewBookingModalProps {
   isOpen: boolean;

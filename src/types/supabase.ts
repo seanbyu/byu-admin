@@ -238,6 +238,36 @@ export type Database = {
           },
         ]
       }
+      designer_instagram_tokens: {
+        Row: {
+          id: string
+          designer_id: string
+          instagram_user_id: string
+          access_token: string
+          expires_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          designer_id: string
+          instagram_user_id: string
+          access_token: string
+          expires_at: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          designer_id?: string
+          instagram_user_id?: string
+          access_token?: string
+          expires_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       industries: {
         Row: {
           created_at: string | null

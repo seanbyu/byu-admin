@@ -210,7 +210,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
               <span className="text-sm font-medium text-secondary-700">{dateLabel}</span>
               <ReactDatePicker
                 selected={new Date(selectedDate)}
-                onChange={(date) => date && onDateChange(date)}
+                onChange={(date: Date | null) => date && onDateChange(date)}
                 customInput={<CalendarIconButton />}
                 locale={locale}
                 showPopperArrow={false}
