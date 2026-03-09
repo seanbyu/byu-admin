@@ -70,7 +70,7 @@ export const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-screen bg-sidebar-bg border-r border-sidebar-border transition-transform duration-300 xl:relative',
+          'fixed top-0 left-0 z-50 h-dvh bg-sidebar-bg border-r border-sidebar-border transition-transform duration-300 xl:relative',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'
         )}
         style={{ width: 'clamp(220px, 78vw, var(--sidebar-width))' }}
