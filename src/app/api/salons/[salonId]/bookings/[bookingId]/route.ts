@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { BookingService } from "@/lib/api-core";
+import type { DBBooking } from "@/lib/api-core/types";
 import { AppError, handleApiError, requireField } from "@/lib/errors";
 
 type RouteContext = { params: Promise<{ salonId: string; bookingId: string }> };
@@ -61,7 +62,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   let action: string | undefined;
 
   try {
-    const { bookingId } = await params;
+    const { salonId, bookingId } = await params;
     requireField(bookingId, "bookingId");
 
     const body = await req.json();
@@ -117,6 +118,16 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         }
 
         result = await bookingService.updateBooking(bookingId, updates);
+
+        // 매출 등록/삭제 시 payments 테이블 동기화
+        const bookingMeta = (updates as Record<string, unknown>).bookingMeta as Record<string, unknown> | undefined;
+        if (bookingMeta && typeof bookingMeta.sales_registered === 'boolean') {
+          if (bookingMeta.sales_registered) {
+            await bookingService.upsertPaymentForSales(salonId, bookingId, result as DBBooking, bookingMeta);
+          } else {
+            await bookingService.cancelPaymentForSales(bookingId);
+          }
+        }
         break;
       }
     }

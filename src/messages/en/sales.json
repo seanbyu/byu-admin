@@ -18,5 +18,6 @@
   "startDate": "Start Date",
   "endDate": "End Date",
   "salesList": "Sales List",
-  "noData": "No sales data for this period."
+  "noData": "No sales data for this period.",
+  "unregistered": "Unregistered"
 }

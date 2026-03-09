@@ -8,6 +8,7 @@ import type { Booking } from '@/features/bookings/types';
 
 interface Props {
   bookings: Booking[];
+  onRowClick?: (booking: Booking) => void;
 }
 
 const PAYMENT_BADGE: Record<string, 'info' | 'success' | 'warning' | 'default'> = {
@@ -16,7 +17,13 @@ const PAYMENT_BADGE: Record<string, 'info' | 'success' | 'warning' | 'default'> 
   TRANSFER: 'warning',
 };
 
-export function SalesTable({ bookings }: Props) {
+const PAYMENT_I18N_KEYS: Record<string, string> = {
+  CARD: 'booking.paymentMethodCard',
+  CASH: 'booking.paymentMethodCash',
+  TRANSFER: 'booking.paymentMethodTransfer',
+};
+
+export function SalesTable({ bookings, onRowClick }: Props) {
   const t = useTranslations();
 
   return (
@@ -41,8 +48,15 @@ export function SalesTable({ bookings }: Props) {
               {bookings.map((b) => {
                 const date = typeof b.date === 'string' ? b.date : b.date.toLocaleDateString();
                 const payBadge = PAYMENT_BADGE[b.paymentMethod ?? ''] ?? 'default';
+                const payLabel = b.paymentMethod
+                  ? t(PAYMENT_I18N_KEYS[b.paymentMethod] ?? b.paymentMethod)
+                  : null;
                 return (
-                  <tr key={b.id} className="hover:bg-secondary-50">
+                  <tr
+                    key={b.id}
+                    onClick={() => onRowClick?.(b)}
+                    className={`hover:bg-primary-50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+                  >
                     <td className="border border-secondary-200 px-3 py-2 text-secondary-700">{date}</td>
                     <td className="border border-secondary-200 px-3 py-2 text-secondary-600">{b.startTime}</td>
                     <td className="border border-secondary-200 px-3 py-2 font-medium text-secondary-800">{b.customerName}</td>
@@ -54,9 +68,9 @@ export function SalesTable({ bookings }: Props) {
                       {formatPrice((b.price || 0) + (b.productAmount || 0))}
                     </td>
                     <td className="border border-secondary-200 px-3 py-2 text-center">
-                      {b.paymentMethod ? (
+                      {payLabel ? (
                         <Badge variant={payBadge} className="text-xs">
-                          {b.paymentMethod}
+                          {payLabel}
                         </Badge>
                       ) : (
                         <span className="text-secondary-300 text-xs">—</span>

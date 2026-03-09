@@ -156,11 +156,12 @@ class ApiClient {
         }
       }
 
-      throw new ApiError(
-        data?.error || data?.message || 'An error occurred',
-        data?.errorCode,
-        response.status
-      );
+      const errorMessage =
+        (typeof data?.error === 'string' ? data.error : data?.error?.message) ||
+        data?.message ||
+        'An error occurred';
+      const errorCode = data?.errorCode || data?.error?.code;
+      throw new ApiError(errorMessage, errorCode, response.status);
     }
 
     return data as ApiResponse<T>;

@@ -7,6 +7,7 @@ import {
   DBBooking,
 } from "../types";
 
+
 // Frontend에서 받는 예약 데이터 타입 (camelCase)
 interface CreateBookingInput {
   salonId: string;
@@ -143,6 +144,10 @@ export class BookingService {
       if (key === 'bookingMeta') {
         if (value && typeof value === 'object') {
           result['booking_meta'] = { ...(result['booking_meta'] || {}), ...value };
+          // sales_registered 전용 컬럼도 동기화 (JSONB 대비 인덱스 성능)
+          if (typeof value.sales_registered === 'boolean') {
+            result['sales_registered'] = value.sales_registered;
+          }
         }
         continue;
       }
@@ -197,5 +202,25 @@ export class BookingService {
 
   async updateBookingMeta(id: string, meta: Record<string, unknown>): Promise<void> {
     return this.repository.updateBookingMeta(id, meta);
+  }
+
+  /**
+   * 매출 등록 시 payments 테이블에 FULL_PAYMENT 기록
+   * 기존 레코드가 있으면 삭제 후 재생성 (금액 수정 반영)
+   */
+  async upsertPaymentForSales(
+    salonId: string,
+    bookingId: string,
+    booking: DBBooking,
+    meta: Record<string, unknown>
+  ): Promise<void> {
+    return this.repository.upsertPaymentRecord(salonId, bookingId, booking, meta);
+  }
+
+  /**
+   * 매출 삭제 시 payments 레코드를 CANCELLED 처리 (감사 이력 보존)
+   */
+  async cancelPaymentForSales(bookingId: string): Promise<void> {
+    return this.repository.cancelPaymentRecord(bookingId);
   }
 }

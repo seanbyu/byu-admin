@@ -51,7 +51,14 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
         bookingsApi.updateBooking(salonId, id, updates),
       [salonId]
     ),
-    onSuccess: invalidateBookings,
+    onSuccess: (_, variables) => {
+      invalidateBookings();
+      // 매출 등록/삭제 시 sales 캐시도 무효화
+      const bookingMeta = (variables.updates as Record<string, any>)?.bookingMeta;
+      if (bookingMeta && typeof bookingMeta.sales_registered === 'boolean') {
+        queryClient.invalidateQueries({ queryKey: ['sales'] });
+      }
+    },
   });
 
   // Cancel booking

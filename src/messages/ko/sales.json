@@ -18,5 +18,6 @@
   "startDate": "시작일",
   "endDate": "종료일",
   "salesList": "매출 목록",
-  "noData": "해당 기간에 매출 데이터가 없습니다."
+  "noData": "해당 기간에 매출 데이터가 없습니다.",
+  "unregistered": "미등록"
 }

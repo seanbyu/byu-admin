@@ -15,7 +15,8 @@ export function SalesFilterBar({ filters, onPreset, onCustomRange }: Props) {
   const t = useTranslations('sales');
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col items-end gap-1.5">
+      {/* 프리셋 버튼 */}
       <div className="flex rounded-lg border border-secondary-200 overflow-hidden text-sm">
         {PRESETS.map((p) => (
           <button
@@ -33,7 +34,8 @@ export function SalesFilterBar({ filters, onPreset, onCustomRange }: Props) {
         ))}
       </div>
 
-      {filters.preset === 'custom' && (
+      {/* 날짜 범위 */}
+      {filters.preset === 'custom' ? (
         <div className="flex items-center gap-1.5 text-sm">
           <input
             type="date"
@@ -50,13 +52,11 @@ export function SalesFilterBar({ filters, onPreset, onCustomRange }: Props) {
             className="border border-secondary-300 rounded-lg px-2 py-1.5 text-secondary-800 focus:outline-none focus:ring-1 focus:ring-primary-500"
           />
         </div>
+      ) : (
+        <span className="text-xs text-secondary-400">
+          {`${filters.startDate} ~ ${filters.endDate}`}
+        </span>
       )}
-
-      <span className="text-xs text-secondary-400 ml-1">
-        {filters.startDate === filters.endDate
-          ? filters.startDate
-          : `${filters.startDate} ~ ${filters.endDate}`}
-      </span>
     </div>
   );
 }

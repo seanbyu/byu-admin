@@ -32,20 +32,19 @@ function buildPresetDates(preset: SalesPreset): { startDate: string; endDate: st
     const start = new Date(today);
     const day = today.getDay();
     start.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
-    return { startDate: toLocalDateString(start), endDate: todayStr };
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    return { startDate: toLocalDateString(start), endDate: toLocalDateString(end) };
   }
   if (preset === 'month') {
     const start = new Date(today.getFullYear(), today.getMonth(), 1);
-    return { startDate: toLocalDateString(start), endDate: todayStr };
+    const end = new Date(today.getFullYear(), today.getMonth() + 1, 0); // 해당 월 마지막 날
+    return { startDate: toLocalDateString(start), endDate: toLocalDateString(end) };
   }
   return { startDate: todayStr, endDate: todayStr };
 }
 
-const PAYMENT_LABELS: Record<string, string> = {
-  CARD: 'CARD',
-  CASH: 'CASH',
-  TRANSFER: 'TRANSFER',
-};
+const KNOWN_METHODS = new Set(['CARD', 'CASH', 'TRANSFER']);
 
 export function useSales(salonId: string) {
   const [filters, setFilters] = useState<SalesFilters>(() => {
@@ -75,16 +74,17 @@ export function useSales(salonId: string) {
   const byPayment = useMemo<SalesByPayment[]>(() => {
     const map = new Map<string, { amount: number; count: number }>();
     for (const b of bookings) {
-      const method = b.paymentMethod || '';
-      const label = PAYMENT_LABELS[method] || '미등록';
-      const prev = map.get(label) ?? { amount: 0, count: 0 };
-      map.set(label, {
+      const method = b.paymentMethod && KNOWN_METHODS.has(b.paymentMethod)
+        ? b.paymentMethod
+        : 'UNKNOWN';
+      const prev = map.get(method) ?? { amount: 0, count: 0 };
+      map.set(method, {
         amount: prev.amount + (b.price || 0) + (b.productAmount || 0),
         count: prev.count + 1,
       });
     }
     return Array.from(map.entries())
-      .map(([label, v]) => ({ method: label, label, amount: v.amount, count: v.count }))
+      .map(([method, v]) => ({ method, label: method, amount: v.amount, count: v.count }))
       .sort((a, b) => b.amount - a.amount);
   }, [bookings]);
 

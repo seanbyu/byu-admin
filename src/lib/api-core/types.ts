@@ -125,7 +125,10 @@ export interface DBBooking {
   // 제품 관련 필드
   product_id: string | null;
   product_amount: number;
+  product_name: string | null;
   store_sales_amount: number;
+  // 매출 등록 전용 컬럼 (JSONB 대비 성능 개선)
+  sales_registered: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -260,7 +263,9 @@ export interface UpdateBookingDto {
   paid_at?: string;
   product_id?: string | null;
   product_amount?: number;
+  product_name?: string | null;
   store_sales_amount?: number;
+  sales_registered?: boolean;
   booking_meta?: Record<string, any>;
 }
 
@@ -391,6 +396,7 @@ export interface BookingResponse {
   productName: string | null;
   productAmount: number;
   storeSalesAmount: number;
+  salesRegistered: boolean;
   bookingMeta?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
