@@ -1,11 +1,7 @@
 'use client';
 
-import { memo, useMemo, useCallback, forwardRef } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
-import ReactDatePicker, { registerLocale } from 'react-datepicker';
-import { ko, enUS, th } from 'date-fns/locale';
-import 'react-datepicker/dist/react-datepicker.css';
+import { memo, useMemo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Booking } from '../../../types';
 import { Staff } from '@/features/staff/types';
 import { BusinessHours } from '@/types';
@@ -14,25 +10,8 @@ import { useAuthStore } from '@/store/authStore';
 import { useServiceCategoryMap } from '../../../hooks/useMenuMaps';
 import { DAY_KEYS, DAY_SHORT_TRANSLATION_KEYS, generateTimeSlots } from './utils';
 import { StaffAccordionItem } from './StaffAccordionItem';
+import { CalendarDropdown } from './CalendarDropdown';
 import type { BookingNotificationStatus } from '@/app/api/salons/[salonId]/bookings/notification-status/route';
-
-registerLocale('ko', ko);
-registerLocale('en', enUS);
-registerLocale('th', th);
-
-const CalendarIconButton = forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
-  (props, ref) => (
-    <button
-      type="button"
-      ref={ref}
-      {...props}
-      className="flex h-7 w-7 items-center justify-center rounded-md border border-secondary-200 text-secondary-400 hover:bg-secondary-50"
-    >
-      <Calendar size={13} />
-    </button>
-  )
-);
-CalendarIconButton.displayName = 'CalendarIconButton';
 
 export interface StaffDaySheetViewProps {
   bookings: Booking[];
@@ -64,7 +43,6 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
   notificationStatuses,
 }: StaffDaySheetViewProps) {
   const t = useTranslations();
-  const locale = useLocale();
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
@@ -171,18 +149,6 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
     });
   }, [businessHours, getDayShortLabel, selectedDate, t]);
 
-  const handlePrevDate = useCallback(() => {
-    const prev = new Date(selectedDate);
-    prev.setDate(prev.getDate() - 7);
-    onDateChange(prev);
-  }, [selectedDate, onDateChange]);
-
-  const handleNextDate = useCallback(() => {
-    const next = new Date(selectedDate);
-    next.setDate(next.getDate() + 7);
-    onDateChange(next);
-  }, [selectedDate, onDateChange]);
-
   if (bookingEnabledStaff.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-secondary-400">
@@ -195,49 +161,25 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
     <div className="space-y-3">
       {/* 날짜 네비게이터 */}
       <div className="space-y-2">
-        {/* 날짜 컨트롤 행 */}
-        <div className="flex flex-col items-center gap-1">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handlePrevDate}
-              aria-label={t('booking.previousDay')}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-secondary-200 text-secondary-500 hover:bg-secondary-50"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-secondary-700">{dateLabel}</span>
-              <ReactDatePicker
-                selected={new Date(selectedDate)}
-                onChange={(date: Date | null) => date && onDateChange(date)}
-                customInput={<CalendarIconButton />}
-                locale={locale}
-                showPopperArrow={false}
-                popperPlacement="bottom"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleNextDate}
-              aria-label={t('booking.nextDay')}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-secondary-200 text-secondary-500 hover:bg-secondary-50"
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
+        {/* 달력 드롭다운 */}
+        <CalendarDropdown
+          selectedDate={selectedDate}
+          onDateChange={onDateChange}
+          businessHours={businessHours}
+          dateLabel={dateLabel}
+        />
 
-          <div className="flex items-center gap-2 text-xs text-secondary-400">
-            <span>{visibleStaff.length}{t('booking.staffCount')}</span>
-            {todayBusinessHours && (
-              <span>{todayBusinessHours.openTime}–{todayBusinessHours.closeTime}</span>
-            )}
-            {isClosed && (
-              <span className="font-medium text-error-500 bg-error-50 px-1.5 py-0.5 rounded">
-                {t('booking.closedDayNotice')}
-              </span>
-            )}
-          </div>
+        {/* 인원 수 / 영업시간 / 휴무 안내 */}
+        <div className="flex items-center gap-2 text-xs text-secondary-400 px-1">
+          <span>{visibleStaff.length}{t('booking.staffCount')}</span>
+          {todayBusinessHours && (
+            <span>{todayBusinessHours.openTime}–{todayBusinessHours.closeTime}</span>
+          )}
+          {isClosed && (
+            <span className="font-medium text-error-500 bg-error-50 px-1.5 py-0.5 rounded">
+              {t('booking.closedDayNotice')}
+            </span>
+          )}
         </div>
 
         {/* 주간 날짜 칩 */}
