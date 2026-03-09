@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { cn, formatDate } from '@/lib/utils';
 import { BusinessHours } from '@/types';
@@ -11,14 +11,12 @@ interface CalendarDropdownProps {
   selectedDate: Date;
   onDateChange: (date: Date) => void;
   businessHours: BusinessHours[];
-  dateLabel: string;
 }
 
 export const CalendarDropdown = memo(function CalendarDropdown({
   selectedDate,
   onDateChange,
   businessHours,
-  dateLabel,
 }: CalendarDropdownProps) {
   const t = useTranslations();
   const locale = useLocale();
@@ -90,29 +88,24 @@ export const CalendarDropdown = memo(function CalendarDropdown({
   );
 
   return (
-    <div ref={containerRef} className="relative w-full">
-      {/* 트리거 버튼 */}
+    <div ref={containerRef} className="relative">
+      {/* 아이콘 트리거 */}
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
         className={cn(
-          'w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 text-left transition-colors',
+          'flex h-7 w-7 items-center justify-center rounded-md border transition-colors',
           isOpen
-            ? 'border-primary-400 bg-primary-50'
-            : 'border-secondary-200 bg-white hover:border-primary-300'
+            ? 'border-primary-400 bg-primary-50 text-primary-500'
+            : 'border-secondary-200 text-secondary-400 hover:bg-secondary-50'
         )}
       >
-        <span className="text-sm font-semibold text-secondary-800">{dateLabel}</span>
-        {isOpen ? (
-          <ChevronUp size={16} className="text-primary-500 flex-shrink-0" />
-        ) : (
-          <ChevronDown size={16} className="text-secondary-400 flex-shrink-0" />
-        )}
+        <CalendarDays size={13} />
       </button>
 
       {/* 달력 패널 */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-xl border border-secondary-200 shadow-lg z-dropdown p-4">
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-2xl border border-secondary-200 shadow-xl z-dropdown p-4">
           {/* 월 네비게이션 */}
           <div className="flex items-center justify-between mb-4">
             <button
