@@ -211,7 +211,9 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     </td>
                     {/* LINE 확정 알림 상태 */}
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
-                      {notificationStatuses?.[booking.id]?.confirmed ? (
+                      {!booking.customerLineUserId || booking.customerLineBlocked ? (
+                        <span className="text-[10px] text-secondary-400">발송불가</span>
+                      ) : notificationStatuses?.[booking.id]?.confirmed ? (
                         <span className="inline-flex items-center gap-0.5 text-success-600">
                           <span>✓</span>
                           <span className="text-[10px]">발송</span>
@@ -222,7 +224,9 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     </td>
                     {/* LINE 당일 리마인더 상태 */}
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
-                      {notificationStatuses?.[booking.id]?.reminded ? (
+                      {!booking.customerLineUserId || booking.customerLineBlocked ? (
+                        <span className="text-[10px] text-secondary-400">발송불가</span>
+                      ) : notificationStatuses?.[booking.id]?.reminded ? (
                         <span className="inline-flex items-center gap-0.5 text-success-600">
                           <span>✓</span>
                           <span className="text-[10px]">발송</span>

@@ -153,12 +153,18 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
               {notificationStatuses && (
                 <div className="mt-1.5 flex items-center gap-3 text-[11px]">
                   <span className="text-secondary-400">LINE</span>
-                  <span className={notificationStatuses[booking.id]?.confirmed ? 'text-success-600' : 'text-secondary-300'}>
-                    확정 {notificationStatuses[booking.id]?.confirmed ? '✓ 발송' : '—'}
-                  </span>
-                  <span className={notificationStatuses[booking.id]?.reminded ? 'text-success-600' : 'text-secondary-300'}>
-                    당일 {notificationStatuses[booking.id]?.reminded ? '✓ 발송' : '—'}
-                  </span>
+                  {!booking.customerLineUserId || booking.customerLineBlocked ? (
+                    <span className="text-secondary-400">발송불가</span>
+                  ) : (
+                    <>
+                      <span className={notificationStatuses[booking.id]?.confirmed ? 'text-success-600' : 'text-secondary-300'}>
+                        확정 {notificationStatuses[booking.id]?.confirmed ? '✓ 발송' : '—'}
+                      </span>
+                      <span className={notificationStatuses[booking.id]?.reminded ? 'text-success-600' : 'text-secondary-300'}>
+                        당일 {notificationStatuses[booking.id]?.reminded ? '✓ 발송' : '—'}
+                      </span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
