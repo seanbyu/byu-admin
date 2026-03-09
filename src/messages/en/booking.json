@@ -46,8 +46,8 @@
   "phone": "Phone",
   "walkIn": "Walk-in",
   "pageDescription": "Manage bookings and add new reservations",
-  "previousDay": "Previous day",
-  "nextDay": "Next day",
+  "previousDay": "Previous week",
+  "nextDay": "Next week",
   "sheetDateHeader": "{month}/{day}/{year} ({weekday})",
   "sheetDateChip": "{day} ({weekday})",
   "dayShort": {

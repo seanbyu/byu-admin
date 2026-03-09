@@ -46,8 +46,8 @@
   "phone": "โทรศัพท์",
   "walkIn": "เดินเข้ามา",
   "pageDescription": "จัดการการจองและเพิ่มการจองใหม่",
-  "previousDay": "วันก่อนหน้า",
-  "nextDay": "วันถัดไป",
+  "previousDay": "สัปดาห์ก่อนหน้า",
+  "nextDay": "สัปดาห์ถัดไป",
   "sheetDateHeader": "{day}/{month}/{year} ({weekday})",
   "sheetDateChip": "{day} ({weekday})",
   "dayShort": {

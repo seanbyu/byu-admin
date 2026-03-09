@@ -1,4 +1,4 @@
-import { Booking } from '../../../types';
+import { Booking, DiscountType } from '../../../types';
 
 export type { PaymentMethod, DiscountType } from '../../../types';
 export type SalesTab = 'service' | 'product';

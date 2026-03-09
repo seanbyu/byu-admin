@@ -58,11 +58,6 @@ export const StaffBookingTable = memo(function StaffBookingTable({
     [bookingsByTime]
   );
 
-  const totalProductAmount = useMemo(
-    () => Object.values(bookingsByTime).reduce((sum, b) => sum + (b.productAmount || 0), 0),
-    [bookingsByTime]
-  );
-
   const bookingCount = Object.keys(bookingsByTime).length;
 
   // 정규 슬롯 + 정규 슬롯 밖의 예약 시간 병합 (정렬)
@@ -121,12 +116,6 @@ export const StaffBookingTable = memo(function StaffBookingTable({
               </th>
               <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-center font-medium text-secondary-600 w-32">
                 {t('booking.paymentMethod')}
-              </th>
-              <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-right font-medium text-secondary-600 w-28">
-                {t('booking.productAmount')}
-              </th>
-              <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-left font-medium text-secondary-600 w-28">
-                {t('booking.product')}
               </th>
               <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-center font-medium text-secondary-600 w-20">
                 LINE<br />
@@ -211,12 +200,6 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                           : booking.paymentMethod
                         : '—'}
                     </td>
-                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-right text-secondary-700">
-                      {booking.productAmount > 0 ? formatPrice(booking.productAmount) : '—'}
-                    </td>
-                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-600 text-xs">
-                      {booking.productName || '—'}
-                    </td>
                     {/* LINE 확정 알림 상태 */}
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
                       {notificationStatuses?.[booking.id]?.confirmed ? (
@@ -259,8 +242,6 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
-                    <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
-                    <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
                   </tr>
                 )}
 
@@ -276,7 +257,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     </td>
                     <td
                       className="border-x border-b border-secondary-200 px-2 lg:px-3 py-1.5 text-secondary-300 text-xs"
-                      colSpan={11}
+                      colSpan={9}
                     >
                       + {t('booking.addBooking')}
                     </td>
@@ -298,10 +279,6 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                 </td>
                 <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-right text-sm font-bold text-secondary-900">
                   {formatPrice(totalPrice)}
-                </td>
-                <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
-                <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-right text-sm font-bold text-secondary-900">
-                  {totalProductAmount > 0 ? formatPrice(totalProductAmount) : '—'}
                 </td>
                 <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
                 <td className="border border-secondary-200 px-2 lg:px-3 py-2" />
