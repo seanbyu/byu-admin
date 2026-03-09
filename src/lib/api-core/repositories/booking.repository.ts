@@ -1,16 +1,21 @@
 import { BaseRepository } from "./base.repository";
 import {
   DBBooking,
-  DBBookingWithRelations,
   CreateBookingDto,
   UpdateBookingDto,
   BookingResponse,
 } from "../types";
 
+interface BookingFilters {
+  startDate?: string;  // YYYY-MM-DD
+  endDate?: string;    // YYYY-MM-DD
+  salesOnly?: boolean; // booking_meta.sales_registered === true
+}
+
 // Note: bookings table may not be in generated types yet, so we use 'any' cast
 export class BookingRepository extends BaseRepository {
-  async getBookings(salonId: string): Promise<BookingResponse[]> {
-    const { data, error } = await (this.supabase as any)
+  async getBookings(salonId: string, filters?: BookingFilters): Promise<BookingResponse[]> {
+    let query = (this.supabase as any)
       .from("bookings")
       .select(`
         *,
@@ -22,9 +27,19 @@ export class BookingRepository extends BaseRepository {
       .eq("salon_id", salonId)
       .order("booking_date", { ascending: false });
 
+    if (filters?.startDate) {
+      query = query.gte("booking_date", filters.startDate);
+    }
+    if (filters?.endDate) {
+      query = query.lte("booking_date", filters.endDate);
+    }
+    if (filters?.salesOnly) {
+      query = query.filter("booking_meta->>sales_registered", "eq", "true");
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
 
-    // Transform to frontend format
     return (data || []).map((booking: any) =>
       this.transformBooking(booking)
     );
@@ -133,9 +148,8 @@ export class BookingRepository extends BaseRepository {
       source: "ONLINE",
       notes: booking.customer_notes ?? null,
       paymentMethod: booking.payment_method ?? null,
-      // 아래 필드들은 migration 24_booking_products.sql 적용 후 실제 데이터 반영
       productId: booking.product_id ?? null,
-      productName: booking.product?.name ?? null,
+      productName: booking.product_name ?? booking.product?.name ?? null,
       productAmount: Number(booking.product_amount) || 0,
       storeSalesAmount: Number(booking.store_sales_amount) || 0,
       bookingMeta: booking.booking_meta ?? undefined,

@@ -1,14 +1,22 @@
 {
   "title": "Sales Management",
   "totalRevenue": "Total Revenue",
-  "totalBookings": "Total Bookings",
+  "serviceRevenue": "Service Revenue",
+  "productRevenue": "Product Revenue",
+  "totalBookings": "Total Count",
+  "bookingUnit": "",
   "period": "Period",
-  "daily": "Daily",
-  "weekly": "Weekly",
-  "monthly": "Monthly",
+  "today": "Today",
+  "week": "This Week",
+  "month": "This Month",
   "custom": "Custom",
   "byMenu": "By Service",
-  "byStaff": "By Designer",
+  "byStaff": "By Staff",
+  "byPayment": "By Payment",
+  "staffName": "Staff",
+  "count": "Count",
   "startDate": "Start Date",
-  "endDate": "End Date"
+  "endDate": "End Date",
+  "salesList": "Sales List",
+  "noData": "No sales data for this period."
 }

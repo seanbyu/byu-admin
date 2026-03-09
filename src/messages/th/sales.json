@@ -1,14 +1,22 @@
 {
   "title": "จัดการยอดขาย",
   "totalRevenue": "รายได้รวม",
-  "totalBookings": "จำนวนการจองทั้งหมด",
+  "serviceRevenue": "รายได้บริการ",
+  "productRevenue": "รายได้สินค้า",
+  "totalBookings": "จำนวนทั้งหมด",
+  "bookingUnit": "รายการ",
   "period": "ช่วงเวลา",
-  "daily": "รายวัน",
-  "weekly": "รายสัปดาห์",
-  "monthly": "รายเดือน",
+  "today": "วันนี้",
+  "week": "สัปดาห์นี้",
+  "month": "เดือนนี้",
   "custom": "กำหนดเอง",
   "byMenu": "ตามบริการ",
-  "byStaff": "ตามช่างทำผม",
+  "byStaff": "ตามพนักงาน",
+  "byPayment": "ตามวิธีชำระ",
+  "staffName": "พนักงาน",
+  "count": "จำนวน",
   "startDate": "วันที่เริ่มต้น",
-  "endDate": "วันที่สิ้นสุด"
+  "endDate": "วันที่สิ้นสุด",
+  "salesList": "รายการยอดขาย",
+  "noData": "ไม่มีข้อมูลยอดขายในช่วงเวลานี้"
 }

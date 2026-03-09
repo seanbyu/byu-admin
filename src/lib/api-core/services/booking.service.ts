@@ -34,8 +34,11 @@ export class BookingService {
     this.repository = new BookingRepository(this.client);
   }
 
-  async getBookings(salonId: string): Promise<BookingResponse[]> {
-    return this.repository.getBookings(salonId);
+  async getBookings(
+    salonId: string,
+    filters?: { startDate?: string; endDate?: string; salesOnly?: boolean }
+  ): Promise<BookingResponse[]> {
+    return this.repository.getBookings(salonId, filters);
   }
 
   async createBooking(

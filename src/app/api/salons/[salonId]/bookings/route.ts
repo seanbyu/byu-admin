@@ -22,9 +22,14 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
     const { salonId } = await params;
     requireField(salonId, "salonId");
 
+    const searchParams = req.nextUrl.searchParams;
+    const startDate = searchParams.get('start_date') || undefined;
+    const endDate = searchParams.get('end_date') || undefined;
+    const salesOnly = searchParams.get('sales_only') === 'true';
+
     const supabase = createClient(req);
     const service = new BookingService(supabase);
-    const bookings = await service.getBookings(salonId);
+    const bookings = await service.getBookings(salonId, { startDate, endDate, salesOnly });
 
     return NextResponse.json({ success: true, data: bookings });
   } catch (error) {

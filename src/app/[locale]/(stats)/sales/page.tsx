@@ -1,12 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { SalesPageView } from '@/features/sales/views/SalesPageView';
 
 export default function SalesPage() {
-  const t = useTranslations('common');
-  return (
-    <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-      <div className="text-secondary-500">{t('pages.sales')} - {t('comingSoon')}</div>
-    </div>
-  );
+  return <SalesPageView />;
 }
