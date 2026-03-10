@@ -124,7 +124,7 @@ class ApiClient {
       return false;
     }
 
-    useAuthStore.getState().setToken(data.session.access_token);
+    // Supabase SDK가 내부적으로 새 토큰을 관리 — Zustand 업데이트 불필요
     return true;
   }
 
