@@ -68,7 +68,6 @@ export default function StaffPermissionModal({
 }: StaffPermissionModalProps) {
   const t = useTranslations();
   const [permissions, setPermissions] = useState<StaffPermission[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (staff) {
@@ -101,18 +100,9 @@ export default function StaffPermissionModal({
     );
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!staff) return;
-    setIsSaving(true);
-    try {
-      await onSave(staff.id, permissions);
-      onClose();
-    } catch (error) {
-      console.error('Failed to save permissions', error);
-      alert(t('staff.permissionModal.saveFailed'));
-    } finally {
-      setIsSaving(false);
-    }
+    onSave(staff.id, permissions);
   };
 
   // 권한 행 렌더링
@@ -182,12 +172,12 @@ export default function StaffPermissionModal({
       size="lg"
       footer={
         <div className="flex justify-end space-x-3">
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
+          <Button variant="outline" onClick={onClose}>
             {readOnly ? t('common.close') : t('common.cancel')}
           </Button>
           {!readOnly && (
-            <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? t('common.saving') : t('common.save')}
+            <Button variant="primary" onClick={handleSave}>
+              {t('common.save')}
             </Button>
           )}
         </div>

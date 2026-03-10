@@ -115,11 +115,11 @@ export function useStaffActions({
     [handleUpdateStaff]
   );
 
-  // 권한 저장
+  // 권한 저장 — optimistic update가 이미 적용되므로 모달 먼저 닫고 background 저장
   const handlePermissionSave = useCallback(
     async (id: string, permissions: StaffPermission[]) => {
-      await handleUpdateStaff(id, { permissions });
       clearSelectedStaff();
+      await handleUpdateStaff(id, { permissions });
     },
     [handleUpdateStaff, clearSelectedStaff]
   );
