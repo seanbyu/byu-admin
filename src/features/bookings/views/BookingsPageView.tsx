@@ -2,7 +2,6 @@
 
 import { useMemo, useCallback, useEffect, memo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -12,15 +11,14 @@ import { BookingStatus } from '@/types';
 import { Booking } from '../types';
 import { useBookings } from '../hooks/useBookings';
 import { useBookingsPageState, useBookingsData } from '../hooks/useBookingsPageState';
-import { salonSettingsKeys, SALON_SETTINGS_QUERY_OPTIONS } from '../hooks/queries';
 import { useBookingNotificationStatuses } from '../hooks/useBookingNotificationStatuses';
+import { useSalonSettings } from '../hooks/useSalonSettings';
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useRouter } from '@/i18n/routing';
 import { Plus } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
-import { salonsApi } from '@/features/salons/api';
 import { StaffDaySheetView } from './components/StaffDaySheetView';
 
 // bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
@@ -142,16 +140,11 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     enabled: !!salonId,
   });
 
-  const { data: settingsResponse, isLoading: isSettingsLoading } = useQuery({
-    queryKey: salonSettingsKeys.detail(salonId),
-    queryFn: () => salonsApi.getSettings(salonId),
-    enabled: !!salonId,
-    ...SALON_SETTINGS_QUERY_OPTIONS,
-  });
+  const { data: settingsData, isLoading: isSettingsLoading } = useSalonSettings(salonId);
 
   const slotDuration = useMemo(
-    () => settingsResponse?.data?.settings?.slot_duration_minutes || 30,
-    [settingsResponse?.data?.settings?.slot_duration_minutes]
+    () => settingsData?.settings?.slot_duration_minutes || 30,
+    [settingsData?.settings?.slot_duration_minutes]
   );
 
   const selectedDateStr = useMemo(() => {
@@ -162,8 +155,8 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   const { data: notificationStatuses } = useBookingNotificationStatuses(salonId, selectedDateStr);
 
   const businessHours = useMemo(
-    () => settingsResponse?.data?.businessHours || [],
-    [settingsResponse?.data?.businessHours]
+    () => settingsData?.businessHours || [],
+    [settingsData?.businessHours]
   );
 
   // 상태·직원 필터만 적용 (날짜 필터는 현황판 내부에서 처리)
@@ -239,7 +232,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   // salonId가 아직 없으면 (auth hydration 전) 렌더 차단
   // → enabled:false 쿼리가 isLoading=false를 반환해 businessHours=[]로 차트가
   //   "영업시간을 설정해주세요" 상태로 잠깐 보이는 현상 방지
-  if (!salonId || isLoading || isStaffLoading || isSettingsLoading || !settingsResponse) {
+  if (!salonId || isLoading || isStaffLoading || isSettingsLoading || !settingsData) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
         <Spinner size="xl" />
