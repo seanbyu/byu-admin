@@ -6,7 +6,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { supabase } from '@/lib/supabase/client';
 
 export function AuthInitializer() {
-  const { login, setToken, logout } = useAuthStore();
+  const { login, logout } = useAuthStore();
 
   useEffect(() => {
     let mounted = true;
@@ -49,14 +49,11 @@ export function AuthInitializer() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'TOKEN_REFRESHED' && session?.access_token) {
-        setToken(session.access_token);
-        return;
-      }
+      // TOKEN_REFRESHED: Supabase SDK가 토큰을 자체 관리 — Zustand 업데이트 불필요
 
       if (event === 'SIGNED_IN' && session) {
         const user = await getCurrentUser();
-        if (user) login(user, session.access_token);
+        if (user) login(user);
       } else if (event === 'SIGNED_OUT') {
         logout();
       }
@@ -66,7 +63,7 @@ export function AuthInitializer() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [login, setToken, logout]);
+  }, [login, logout]);
 
   return null; // This component doesn't render anything
 }

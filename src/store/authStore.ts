@@ -34,11 +34,10 @@ const createDynamicStorage = (): StateStorage => ({
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   rememberMe: boolean;
-  login: (user: User, token: string, rememberMe?: boolean) => void;
-  setToken: (token: string | null) => void;
+  // token은 Supabase SDK가 관리 — Zustand에 저장하지 않음
+  login: (user: User, _token?: string, rememberMe?: boolean) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
   setRememberMe: (value: boolean) => void;
@@ -51,12 +50,11 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
       rememberMe: true, // 기본값: 로그인 상태 유지
       staffCache: null,
 
-      login: (user, token, rememberMe) => {
+      login: (user, _token, rememberMe) => {
         set((state) => {
           const resolvedRememberMe = rememberMe ?? state.rememberMe;
 
@@ -65,25 +63,15 @@ export const useAuthStore = create<AuthState>()(
 
           return {
             user,
-            token,
             isAuthenticated: true,
             rememberMe: resolvedRememberMe,
           };
         });
       },
 
-      setToken: (token) => {
-        set((state) => ({
-          token,
-          isAuthenticated: Boolean(token && state.user),
-        }));
-      },
-
       logout: () => {
-        // 상태 초기화
         set({
           user: null,
-          token: null,
           isAuthenticated: false,
         });
 
@@ -104,12 +92,31 @@ export const useAuthStore = create<AuthState>()(
         set({ rememberMe: value });
       },
 
-      // set staff cache
       setStaffCache: (staff) => set({ staffCache: staff }),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => createDynamicStorage()),
+      // email, phone 등 PII와 token은 스토리지에 저장하지 않음
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        rememberMe: state.rememberMe,
+        user: state.user
+          ? {
+              id: state.user.id,
+              salonId: state.user.salonId,
+              name: state.user.name,
+              role: state.user.role,
+              permissions: state.user.permissions,
+              isOwner: state.user.isOwner,
+              isActive: state.user.isActive,
+              isApproved: state.user.isApproved,
+              profileImage: state.user.profileImage,
+              // email, phone은 저장 제외 (PII)
+            }
+          : null,
+        // staffCache는 저장 불필요 (세션마다 서버에서 재조회)
+      }),
     }
   )
 );
