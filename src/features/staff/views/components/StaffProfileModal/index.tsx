@@ -52,7 +52,7 @@ function StaffProfileModal({
     setValue,
     watch,
     reset,
-    formState: { isSubmitting, errors },
+    formState: { errors },
   } = useForm<ProfileFormData>();
 
   const profileImage = watch('profileImage');
@@ -85,30 +85,25 @@ function StaffProfileModal({
     }
   }, [isOpen, staff, reset]);
 
-  // 폼 제출 핸들러
-  const onSubmit = useCallback(async (data: ProfileFormData) => {
-    try {
-      const specialtiesArray = data.specialties
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
+  // 폼 제출 핸들러 — optimistic update가 즉시 반영되므로 모달 먼저 닫고 background 저장
+  const onSubmit = useCallback((data: ProfileFormData) => {
+    const specialtiesArray = data.specialties
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
 
-      await onSave(staff.id, {
-        name: data.name,
-        phone: data.phone,
-        positionId: selectedPositionId,
-        description: data.description,
-        experience: Number(data.experience),
-        specialties: specialtiesArray,
-        profileImage: data.profileImage,
-        socialLinks: socialLinks, // controlled state 사용
-      });
-      onClose();
-    } catch (error) {
-      console.error('Failed to update profile:', error);
-      alert(t('staff.profileModal.updateFailed'));
-    }
-  }, [staff.id, selectedPositionId, socialLinks, onSave, onClose, t]);
+    onClose();
+    onSave(staff.id, {
+      name: data.name,
+      phone: data.phone,
+      positionId: selectedPositionId,
+      description: data.description,
+      experience: Number(data.experience),
+      specialties: specialtiesArray,
+      profileImage: data.profileImage,
+      socialLinks: socialLinks,
+    });
+  }, [staff.id, selectedPositionId, socialLinks, onSave, onClose]);
 
   // 이미지 변경 핸들러
   const handleImageChange = useCallback((url: string) => {
@@ -224,7 +219,7 @@ function StaffProfileModal({
           <Button
             variant="primary"
             type="submit"
-            isLoading={isSubmitting || isCreating}
+            isLoading={isCreating}
           >
             {t('common.save')}
           </Button>
