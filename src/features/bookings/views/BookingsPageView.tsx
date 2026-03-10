@@ -138,7 +138,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     enabled: !!salonId,
   });
 
-  const { staffData: staffMembers } = useStaff(salonId, {
+  const { staffData: staffMembers, isLoading: isStaffLoading } = useStaff(salonId, {
     enabled: !!salonId,
   });
 
@@ -214,14 +214,12 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   useEffect(() => {
     if (!highlightedBookingId) return;
 
-    const t0 = performance.now();
     // 렌더 완료 후 실제로 보이는 요소만 찾아 스크롤
     // (모바일 md:hidden div 와 데스크탑 tr 중 offsetParent !== null 인 것)
     const raf = requestAnimationFrame(() => {
       const all = document.querySelectorAll(`[data-booking-id="${highlightedBookingId}"]`);
       const el  = Array.from(all).find((e) => (e as HTMLElement).offsetParent !== null);
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      console.log(`[perf] highlight→scroll ${(performance.now() - t0).toFixed(1)}ms`);
     });
 
     const clearTimer = setTimeout(() => setHighlightedBookingId(null), 5000);
@@ -241,7 +239,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   // salonId가 아직 없으면 (auth hydration 전) 렌더 차단
   // → enabled:false 쿼리가 isLoading=false를 반환해 businessHours=[]로 차트가
   //   "영업시간을 설정해주세요" 상태로 잠깐 보이는 현상 방지
-  if (!salonId || isLoading) {
+  if (!salonId || isLoading || isStaffLoading || isSettingsLoading || !settingsResponse) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
         <Spinner size="xl" />
@@ -286,26 +284,20 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
 
         {/* 현황판 */}
         <Card>
-          {isSettingsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner size="lg" />
-            </div>
-          ) : (
-            <StaffDaySheetView
-              bookings={filteredBookings}
-              staffMembers={staffMembers}
-              selectedDate={pageState.selectedDate}
-              selectedStaffId={pageState.selectedStaffId}
-              onDateChange={pageState.setSelectedDate}
-              businessHours={businessHours}
-              slotDuration={slotDuration}
-              onBookingClick={pageState.openBookingDetailModal}
-              onAddBooking={handleSheetAddBooking}
-              onUpdateBooking={handleSheetUpdateBooking}
-              highlightedBookingId={highlightedBookingId}
-              notificationStatuses={notificationStatuses}
-            />
-          )}
+          <StaffDaySheetView
+            bookings={filteredBookings}
+            staffMembers={staffMembers}
+            selectedDate={pageState.selectedDate}
+            selectedStaffId={pageState.selectedStaffId}
+            onDateChange={pageState.setSelectedDate}
+            businessHours={businessHours}
+            slotDuration={slotDuration}
+            onBookingClick={pageState.openBookingDetailModal}
+            onAddBooking={handleSheetAddBooking}
+            onUpdateBooking={handleSheetUpdateBooking}
+            highlightedBookingId={highlightedBookingId}
+            notificationStatuses={notificationStatuses}
+          />
         </Card>
       </div>
 
