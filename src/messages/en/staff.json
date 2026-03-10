@@ -191,6 +191,8 @@
     "registered": "Employee has been registered!",
     "resigned": "Employee has been terminated.",
     "softResigned": "Employee resignation scheduled. Will be deleted in 1 week.",
-    "resignationCancelled": "Resignation has been cancelled."
+    "resignationCancelled": "Resignation has been cancelled.",
+    "permissionSaved": "Permissions saved.",
+    "profileSaved": "Profile saved."
   }
 }

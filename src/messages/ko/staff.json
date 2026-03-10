@@ -191,6 +191,8 @@
     "registered": "직원이 등록되었습니다!",
     "resigned": "직원이 퇴사 처리되었습니다.",
     "softResigned": "직원이 퇴사 예정 처리되었습니다. 1주일 후 자동 삭제됩니다.",
-    "resignationCancelled": "퇴사 예정이 취소되었습니다."
+    "resignationCancelled": "퇴사 예정이 취소되었습니다.",
+    "permissionSaved": "권한이 저장되었습니다.",
+    "profileSaved": "프로필이 저장되었습니다."
   }
 }

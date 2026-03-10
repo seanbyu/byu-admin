@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { useToast } from '@/components/ui/ToastProvider';
 import { staffApi } from '../api';
 import { Staff, StaffPermission } from '../types';
 
@@ -31,6 +32,7 @@ export function useStaffActions({
   clearSelectedStaff,
 }: UseStaffActionsParams): UseStaffActionsReturn {
   const t = useTranslations('staff');
+  const toast = useToast();
 
   // 기본 업데이트 핸들러
   const handleUpdateStaff = useCallback(
@@ -39,22 +41,22 @@ export function useStaffActions({
         await updateStaff({ staffId, updates });
       } catch (err) {
         console.error(err);
-        alert(t('errors.updateFailed'));
+        toast.error(t('errors.updateFailed'));
       }
     },
-    [updateStaff, t]
+    [updateStaff, t, toast]
   );
 
   // 에러 처리 헬퍼
   const handleResignError = useCallback((error: string) => {
     if (error === 'ERROR_CANNOT_DELETE_SELF') {
-      alert(t('errors.cannotDeleteSelf'));
+      toast.error(t('errors.cannotDeleteSelf'));
     } else if (error === 'ERROR_CANNOT_DELETE_OWNER') {
-      alert(t('errors.cannotDeleteOwner'));
+      toast.error(t('errors.cannotDeleteOwner'));
     } else {
-      alert(error);
+      toast.error(error);
     }
-  }, [t]);
+  }, [t, toast]);
 
   // 퇴사 예정 처리 (1주일 유예)
   const handleSoftResign = useCallback(
@@ -63,14 +65,14 @@ export function useStaffActions({
 
       try {
         await staffApi.softDelete(salonId, staffId);
-        alert(t('success.softResigned'));
+        toast.success(t('success.softResigned'));
         refetch();
       } catch (err: any) {
         console.error(err);
         handleResignError(err.message || t('errors.deleteFailed'));
       }
     },
-    [salonId, refetch, t, handleResignError]
+    [salonId, refetch, t, toast, handleResignError]
   );
 
   // 즉시 퇴사 처리 (완전 삭제)
@@ -80,14 +82,14 @@ export function useStaffActions({
 
       try {
         await staffApi.hardDelete(salonId, staffId);
-        alert(t('success.resigned'));
+        toast.success(t('success.resigned'));
         refetch();
       } catch (err: any) {
         console.error(err);
         handleResignError(err.message || t('errors.deleteFailed'));
       }
     },
-    [salonId, refetch, t, handleResignError]
+    [salonId, refetch, t, toast, handleResignError]
   );
 
   // 퇴사 예정 취소
@@ -97,14 +99,14 @@ export function useStaffActions({
 
       try {
         await staffApi.cancelResignation(salonId, staffId);
-        alert(t('success.resignationCancelled'));
+        toast.success(t('success.resignationCancelled'));
         refetch();
       } catch (err: any) {
         console.error(err);
-        alert(err.message || t('errors.cancelFailed'));
+        toast.error(err.message || t('errors.cancelFailed'));
       }
     },
-    [salonId, refetch, t]
+    [salonId, refetch, t, toast]
   );
 
   // 예약 허용 토글
@@ -119,24 +121,36 @@ export function useStaffActions({
   const handlePermissionSave = useCallback(
     async (id: string, permissions: StaffPermission[]) => {
       clearSelectedStaff();
-      await handleUpdateStaff(id, { permissions });
+      try {
+        await updateStaff({ staffId: id, updates: { permissions } });
+        toast.success(t('success.permissionSaved'));
+      } catch (err) {
+        console.error(err);
+        toast.error(t('errors.updateFailed'));
+      }
     },
-    [handleUpdateStaff, clearSelectedStaff]
+    [updateStaff, clearSelectedStaff, t, toast]
   );
 
-  // 프로필 저장 (에러 시 throw하여 모달에서 처리)
+  // 프로필 저장 — optimistic update가 이미 적용되므로 모달 먼저 닫고 background 저장
   const handleProfileSave = useCallback(
     async (id: string, updates: Partial<Staff>) => {
-      await updateStaff({ staffId: id, updates });
+      try {
+        await updateStaff({ staffId: id, updates });
+        toast.success(t('success.profileSaved'));
+      } catch (err) {
+        console.error(err);
+        toast.error(t('profileModal.updateFailed'));
+      }
     },
-    [updateStaff]
+    [updateStaff, t, toast]
   );
 
   // 직원 생성 성공
   const handleCreateSuccess = useCallback(() => {
-    alert(t('success.registered'));
+    toast.success(t('success.registered'));
     refetch();
-  }, [refetch, t]);
+  }, [refetch, t, toast]);
 
   // 역할 변경
   const handleRoleChange = useCallback(
@@ -146,10 +160,10 @@ export function useStaffActions({
         refetch();
       } catch (err) {
         console.error(err);
-        alert(t('errors.updateFailed'));
+        toast.error(t('errors.updateFailed'));
       }
     },
-    [salonId, refetch, t]
+    [salonId, refetch, t, toast]
   );
 
   return useMemo(
