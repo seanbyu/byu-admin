@@ -72,10 +72,6 @@ export function useSalonMenusView(salonId: string): UseSalonMenusViewReturn {
       try {
         const isSelected = selectedIndustryIds.includes(industryId);
         await toggleIndustry({ industryId, isSelected });
-
-        if (!isSelected) {
-          alert(t('success.industryAdded'));
-        }
       } catch (error) {
         console.error(error);
         alert(t('errors.industryChangeError'));

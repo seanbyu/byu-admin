@@ -1,10 +1,11 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Check, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { useToast } from '@/components/ui/ToastProvider';
 import { Industry } from '../../types';
 
 interface IndustrySelectionModalProps {
@@ -76,6 +77,12 @@ function IndustrySelectionModalComponent({
   onToggleIndustry,
 }: IndustrySelectionModalProps) {
   const t = useTranslations();
+  const toast = useToast();
+
+  const handleComplete = useCallback(() => {
+    onClose();
+    toast.success(t('menu.success.industrySettingsComplete'));
+  }, [onClose, toast, t]);
 
   return (
     <Modal
@@ -85,7 +92,7 @@ function IndustrySelectionModalComponent({
       size="lg"
       footer={
         <div className="flex justify-end">
-          <Button onClick={onClose} className="px-6">
+          <Button onClick={handleComplete} className="px-6">
             {t('common.complete')}
           </Button>
         </div>
