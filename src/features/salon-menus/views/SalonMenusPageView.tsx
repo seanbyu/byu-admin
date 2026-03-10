@@ -59,15 +59,6 @@ export default function SalonMenusPageView({
     handleReorderIndustries,
   } = useSalonMenusView(salonId);
 
-  // js-early-exit: 로딩 상태 조기 반환
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <Spinner size="xl" />
-      </div>
-    );
-  }
-
   return (
     <div className="p-3 sm:p-4 md:p-6 xl:p-8 max-w-7xl mx-auto">
         {/* Header */}
@@ -106,7 +97,11 @@ export default function SalonMenusPageView({
 
         {/* Main Content Area */}
         <div className="bg-white rounded-lg shadow-sm border border-secondary-200 min-h-[460px] md:min-h-[520px] xl:min-h-[600px]">
-          {salonId ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[460px] md:h-[520px] xl:h-[600px]">
+              <Spinner size="xl" />
+            </div>
+          ) : salonId ? (
             <MenuList
               salonId={salonId}
               orderedIndustries={selectedIndustries}

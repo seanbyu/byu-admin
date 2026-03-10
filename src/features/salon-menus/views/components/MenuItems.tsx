@@ -59,18 +59,18 @@ export default function MenuItems({
   const t = useTranslations('menu');
   const { createMenu, deleteMenu, reorderMenus } = useMenuMutations(salonId, categoryId);
 
-  // Optimistic UI state for sorting
-  const [orderedMenus, setOrderedMenus] = React.useState<SalonMenu[]>([]);
-
-  React.useEffect(() => {
-    if (menusData) {
-      // Sort by display_order if available, otherwise by creation/default
-      const sorted = [...menusData].sort(
+  // 서버 데이터 정렬 (useEffect 없이 동기적으로 파생)
+  const serverSortedMenus = React.useMemo(
+    () =>
+      [...(menusData || [])].sort(
         (a, b) => (a.display_order || 0) - (b.display_order || 0)
-      );
-      setOrderedMenus(sorted);
-    }
-  }, [menusData]);
+      ),
+    [menusData]
+  );
+
+  // 드래그 중 낙관적 순서 오버라이드 (null = 서버 데이터 사용)
+  const [dragOrderedMenus, setDragOrderedMenus] = React.useState<SalonMenu[] | null>(null);
+  const orderedMenus = dragOrderedMenus ?? serverSortedMenus;
 
   const [isAdding, setIsAdding] = useState(false);
   const [newMenu, setNewMenu] = useState({
@@ -90,20 +90,19 @@ export default function MenuItems({
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      setOrderedMenus((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
-        const newOrder = arrayMove(items, oldIndex, newIndex);
+      const oldIndex = orderedMenus.findIndex((item) => item.id === active.id);
+      const newIndex = orderedMenus.findIndex((item) => item.id === over?.id);
+      const newOrder = arrayMove(orderedMenus, oldIndex, newIndex);
 
-        // Call API
-        const menusToUpdate = newOrder.map((menu, index) => ({
-          id: menu.id,
-          display_order: index,
-        }));
-        reorderMenus(menusToUpdate);
+      setDragOrderedMenus(newOrder); // 낙관적 순서 업데이트
 
-        return newOrder;
-      });
+      const menusToUpdate = newOrder.map((menu, index) => ({
+        id: menu.id,
+        display_order: index,
+      }));
+
+      await reorderMenus(menusToUpdate);
+      setDragOrderedMenus(null); // API 완료 후 서버 데이터로 복귀
     }
   };
 

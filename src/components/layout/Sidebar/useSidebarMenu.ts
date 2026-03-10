@@ -132,14 +132,17 @@ export function useSidebarMenu(): MenuItem[] {
     ];
 
     const checkPermission = (item: MenuItem): boolean => {
-      if (user?.role && !item.roles.includes(user.role)) {
+      // user not yet loaded → show all items to prevent CLS from empty→full menu flash
+      if (!user) return true;
+
+      if (!item.roles.includes(user.role)) {
         return false;
       }
-      if (user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.ADMIN) {
+      if (user.role === UserRole.SUPER_ADMIN || user.role === UserRole.ADMIN) {
         return true;
       }
       if (item.permissionKey) {
-        if (!user?.permissions) return false;
+        if (!user.permissions) return false;
         const perm = user.permissions.find((p) => p.module === item.permissionKey);
         return perm?.canRead ?? false;
       }
@@ -151,7 +154,8 @@ export function useSidebarMenu(): MenuItem[] {
         .map((item) => {
           if (item.subItems) {
             const visibleSubItems = filterMenuItems(item.subItems);
-            if (user?.role && !item.roles.includes(user.role)) return null;
+            // Only apply role filtering when user is loaded
+            if (user && !item.roles.includes(user.role)) return null;
             if (visibleSubItems.length > 0) {
               return { ...item, subItems: visibleSubItems };
             }

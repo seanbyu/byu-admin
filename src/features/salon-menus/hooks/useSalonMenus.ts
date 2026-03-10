@@ -331,7 +331,24 @@ export const useMenus = (
         salonMenusApi.updateMenu(salonId, id, updates),
       [salonId]
     ),
-    onSuccess: invalidateMenus,
+    onSuccess: (_data, { id, updates }) => {
+      // refetch 없이 캐시를 직접 업데이트 → 저장 후 버벅거림 방지
+      queryClient.setQueryData<SalonMenu[]>(
+        menuKeys.listByCategory(salonId, undefined),
+        (old) =>
+          old?.map((menu) =>
+            menu.id === id
+              ? {
+                  ...menu,
+                  name: updates.name ?? menu.name,
+                  base_price: updates.price ?? menu.base_price,
+                  price: updates.price ?? menu.price,
+                  duration_minutes: updates.duration ?? menu.duration_minutes,
+                }
+              : menu
+          )
+      );
+    },
   });
 
   const deleteMutation = useMutation({
