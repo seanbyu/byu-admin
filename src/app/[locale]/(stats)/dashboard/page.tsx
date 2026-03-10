@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
@@ -16,56 +15,49 @@ import {
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { DashboardSkeleton } from '@/components/ui/Skeleton';
-
-interface Stats {
-  todayBookings: number;
-  todayRevenue: number;
-  totalCustomers: number;
-  monthlyRevenue: number;
-  pendingBookings: number;
-  completedBookings: number;
-  cancelledBookings: number;
-}
+import { EmptyState } from '@/components/ui/EmptyState';
+import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 
 export default function DashboardPage() {
   const t = useTranslations();
-  const { data: user, isLoading } = useUser();
-  // const { user } = useAuthStore(); // Replaced by useUser
-  const [stats, setStats] = useState<Stats>({
-    todayBookings: 12,
-    todayRevenue: 45000,
-    totalCustomers: 358,
-    monthlyRevenue: 1250000,
-    pendingBookings: 5,
-    completedBookings: 234,
-    cancelledBookings: 12,
-  });
+  const { data: user } = useUser();
+  const { user: authUser } = useAuthStore();
+  const salonId = authUser?.salonId || '';
+
+  const {
+    isLoading,
+    todayStats,
+    monthlyRevenue,
+    totalCustomers,
+    topStaff,
+    recentBookings,
+  } = useDashboard(salonId);
 
   const statCards = [
     {
       title: t('common.dashboard.todayBookings'),
-      value: stats.todayBookings,
+      value: todayStats.total,
       icon: Calendar,
       color: 'text-info-600',
       bgColor: 'bg-info-50',
     },
     {
       title: t('common.dashboard.todayRevenue'),
-      value: formatPrice(stats.todayRevenue),
+      value: formatPrice(todayStats.revenue),
       icon: DollarSign,
       color: 'text-success-600',
       bgColor: 'bg-success-50',
     },
     {
       title: t('common.dashboard.totalCustomers'),
-      value: stats.totalCustomers,
+      value: totalCustomers,
       icon: Users,
       color: 'text-primary-600',
       bgColor: 'bg-primary-50',
     },
     {
       title: t('common.dashboard.monthlyRevenue'),
-      value: formatPrice(stats.monthlyRevenue),
+      value: formatPrice(monthlyRevenue),
       icon: TrendingUp,
       color: 'text-primary-600',
       bgColor: 'bg-primary-50',
@@ -75,19 +67,19 @@ export default function DashboardPage() {
   const bookingStats = [
     {
       title: t('common.dashboard.pending'),
-      value: stats.pendingBookings,
+      value: todayStats.pending,
       icon: Clock,
       color: 'text-warning-600',
     },
     {
       title: t('common.dashboard.completed'),
-      value: stats.completedBookings,
+      value: todayStats.completed,
       icon: CheckCircle,
       color: 'text-success-600',
     },
     {
       title: t('common.dashboard.cancelled'),
-      value: stats.cancelledBookings,
+      value: todayStats.cancelled,
       icon: XCircle,
       color: 'text-error-600',
     },
@@ -99,126 +91,116 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-        {/* Welcome */}
-        <div>
-          <h1 className="text-3xl font-bold text-secondary-900">
-            {t('nav.dashboard')}
-          </h1>
-          <p className="text-secondary-600 mt-1">{t('common.dashboard.welcome', { name: user?.name || '' })}</p>
-        </div>
+      {/* Welcome */}
+      <div>
+        <h1 className="text-3xl font-bold text-secondary-900">
+          {t('nav.dashboard')}
+        </h1>
+        <p className="text-secondary-600 mt-1">
+          {t('common.dashboard.welcome', { name: user?.name || '' })}
+        </p>
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statCards.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={index}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-secondary-600 mb-1">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold text-secondary-900">
-                      {stat.value}
-                    </p>
-                  </div>
-                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`w-6 h-6 ${stat.color}`} />
-                  </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-secondary-600 mb-1">{stat.title}</p>
+                  <p className="text-2xl font-bold text-secondary-900">{stat.value}</p>
                 </div>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Booking Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {bookingStats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={index}>
-                <div className="flex items-center">
-                  <Icon className={`w-8 h-8 ${stat.color} mr-4`} />
-                  <div>
-                    <p className="text-sm text-secondary-600">{stat.title}</p>
-                    <p className="text-xl font-bold text-secondary-900">
-                      {stat.value} {t('common.dashboard.cases')}
-                    </p>
-                  </div>
+                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                  <Icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
-              </Card>
-            );
-          })}
-        </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
 
-        {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Bookings */}
-          <Card title={t('common.dashboard.recentBookings')} className="h-full">
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((_, index) => (
+      {/* Booking Status (오늘 기준) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {bookingStats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index}>
+              <div className="flex items-center">
+                <Icon className={`w-8 h-8 ${stat.color} mr-4`} />
+                <div>
+                  <p className="text-sm text-secondary-600">{stat.title}</p>
+                  <p className="text-xl font-bold text-secondary-900">
+                    {stat.value} {t('common.dashboard.cases')}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 오늘 최근 예약 */}
+        <Card title={t('common.dashboard.recentBookings')} className="h-full">
+          {recentBookings.length === 0 ? (
+            <EmptyState message={t('booking.noBookings')} size="sm" />
+          ) : (
+            <div className="space-y-0">
+              {recentBookings.map((booking) => (
                 <div
-                  key={index}
+                  key={booking.id}
                   className="flex items-center justify-between py-3 border-b border-secondary-100 last:border-0"
                 >
                   <div>
-                    <p className="font-medium text-secondary-900">
-                      Sample {t('common.dashboard.customer')}
-                    </p>
-                    <p className="text-sm text-secondary-600">
-                      Haircut · Staff
+                    <p className="font-medium text-secondary-900">{booking.customerName}</p>
+                    <p className="text-sm text-secondary-500">
+                      {booking.serviceName} · {booking.staffName}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-secondary-900">
-                      14:00
-                    </p>
-                    <p className="text-xs text-secondary-600">{t('common.dashboard.today')}</p>
+                    <p className="text-sm font-medium text-secondary-900">{booking.startTime}</p>
+                    <p className="text-xs text-secondary-500">{t('common.dashboard.today')}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </Card>
+          )}
+        </Card>
 
-          {/* Top Staff */}
-          <Card title={t('common.dashboard.topStaffThisMonth')} className="h-full">
-            <div className="space-y-4">
-              {[
-                { name: 'Staff A', bookings: 45, revenue: 3500000 },
-                { name: 'Staff B', bookings: 42, revenue: 3200000 },
-                { name: 'Staff C', bookings: 38, revenue: 2900000 },
-                { name: 'Staff D', bookings: 35, revenue: 2700000 },
-                { name: 'Staff E', bookings: 32, revenue: 2500000 },
-              ].map((designer, index) => (
+        {/* 이번 달 상위 직원 */}
+        <Card title={t('common.dashboard.topStaffThisMonth')} className="h-full">
+          {topStaff.length === 0 ? (
+            <EmptyState message={t('common.noData')} size="sm" />
+          ) : (
+            <div className="space-y-0">
+              {topStaff.map((staff, index) => (
                 <div
-                  key={index}
+                  key={staff.staffId}
                   className="flex items-center justify-between py-3 border-b border-secondary-100 last:border-0"
                 >
                   <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center mr-3">
-                      <span className="text-sm font-semibold text-primary-700">
-                        {index + 1}
-                      </span>
+                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center mr-3 shrink-0">
+                      <span className="text-sm font-semibold text-primary-700">{index + 1}</span>
                     </div>
                     <div>
-                      <p className="font-medium text-secondary-900">
-                        {designer.name}
-                      </p>
-                      <p className="text-sm text-secondary-600">
-                        {designer.bookings} {t('common.dashboard.cases')}
+                      <p className="font-medium text-secondary-900">{staff.staffName}</p>
+                      <p className="text-sm text-secondary-500">
+                        {staff.count} {t('common.dashboard.cases')}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-secondary-900">
-                      {formatPrice(designer.revenue)}
-                    </p>
-                  </div>
+                  <p className="text-sm font-medium text-secondary-900">
+                    {formatPrice(staff.total)}
+                  </p>
                 </div>
               ))}
             </div>
-          </Card>
-        </div>
+          )}
+        </Card>
       </div>
+    </div>
   );
 }
