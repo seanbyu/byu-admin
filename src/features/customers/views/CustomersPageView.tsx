@@ -4,7 +4,7 @@ import { useMemo, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/Card';
-import { Spinner } from '@/components/ui/Spinner';
+import { TablePageSkeleton } from '@/components/ui/Skeleton';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
@@ -302,11 +302,7 @@ export default function CustomersPageView() {
 
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <Spinner size="xl" />
-      </div>
-    );
+    return <TablePageSkeleton />;
   }
 
   // js-early-exit: 에러 상태 조기 반환

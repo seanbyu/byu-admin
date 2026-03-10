@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
-import { Spinner } from '@/components/ui/Spinner';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Plus } from 'lucide-react';
 import { useCategories, useMenus } from '../../hooks/useSalonMenus';
 import { SalonIndustry } from '../../types';
@@ -185,29 +185,28 @@ export default function MenuList({
           />
         )}
 
-        {isLoading ? (
-          <div className="flex justify-center py-4">
-            <Spinner size="md" />
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg border border-dashed border-secondary-200">
-            <p className="text-secondary-500 mb-2">{t('noCategories')}</p>
-            {canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // 첫 번째 업종을 기본값으로 설정
-                  if (orderedIndustries.length > 0) {
-                    setSelectedIndustryForCreate(orderedIndustries[0].id);
-                  }
-                  setIsCreating(true);
-                }}
-              >
-                <Plus className="w-4 h-4 mr-2" /> {t('addCategory')}
-              </Button>
-            )}
-          </div>
+        {categories.length === 0 && !isLoading ? (
+          <EmptyState
+            message={t('noCategories')}
+            size="lg"
+            bordered
+            action={
+              canEdit ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (orderedIndustries.length > 0) {
+                      setSelectedIndustryForCreate(orderedIndustries[0].id);
+                    }
+                    setIsCreating(true);
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> {t('addCategory')}
+                </Button>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="space-y-5 md:space-y-6 xl:space-y-8">
             {orderedIndustries.map((industry) => {

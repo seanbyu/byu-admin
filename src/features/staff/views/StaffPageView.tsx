@@ -8,6 +8,7 @@ import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useStaff } from '../hooks/useStaff';
 import { useStaffPageState, useStaffPermissions } from '../hooks/useStaffPageState';
 import { useStaffActions } from '../hooks/useStaffActions';
+import { TablePageSkeleton } from '@/components/ui/Skeleton';
 import { StaffPageHeader } from './components/StaffPageHeader';
 import { StaffTable } from './components/StaffTable';
 
@@ -71,11 +72,7 @@ export default function StaffPageView() {
 
   // js-early-exit: 로딩 상태 조기 반환
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <div className="text-secondary-500">{t('common.loading')}</div>
-      </div>
-    );
+    return <TablePageSkeleton />;
   }
 
   // js-early-exit: 에러 상태 조기 반환

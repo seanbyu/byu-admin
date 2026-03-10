@@ -18,7 +18,7 @@ import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useRouter } from '@/i18n/routing';
 import { Plus } from 'lucide-react';
-import { Spinner } from '@/components/ui/Spinner';
+import { BookingsChartSkeleton } from '@/components/ui/Skeleton';
 import { StaffDaySheetView } from './components/StaffDaySheetView';
 
 // bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
@@ -233,11 +233,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   // → enabled:false 쿼리가 isLoading=false를 반환해 businessHours=[]로 차트가
   //   "영업시간을 설정해주세요" 상태로 잠깐 보이는 현상 방지
   if (!salonId || isLoading || isStaffLoading || isSettingsLoading || !settingsData) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <Spinner size="xl" />
-      </div>
-    );
+    return <BookingsChartSkeleton />;
   }
 
   return (

@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { AccountTabProps } from '../../types';
+import { SettingsTabSkeleton } from '@/components/ui/Skeleton';
 import { AccountFormSection } from './AccountFormSection';
 import { PasswordChangeSection } from './PasswordChangeSection';
 
@@ -24,11 +25,7 @@ export function AccountTab({
   const t = useTranslations();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-secondary-500">{t('common.loading')}</div>
-      </div>
-    );
+    return <SettingsTabSkeleton />;
   }
 
   return (

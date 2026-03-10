@@ -10,6 +10,8 @@ import { Staff } from '@/features/staff/types';
 import { Check, Users, Calendar, GripVertical } from 'lucide-react';
 import { StaffScheduleEditModal } from '../StaffScheduleEditModal';
 import { useToast } from '@/components/ui/ToastProvider';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { AccordionCardSkeleton } from '@/components/ui/Skeleton';
 
 interface StaffBookingCardProps {
   salonId: string;
@@ -121,13 +123,7 @@ export const StaffBookingCard = memo(function StaffBookingCard({
   );
 
   if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="text-secondary-500">{t('common.loading')}</div>
-        </div>
-      </Card>
-    );
+    return <AccordionCardSkeleton />;
   }
 
   return (
@@ -153,9 +149,7 @@ export const StaffBookingCard = memo(function StaffBookingCard({
         </p>
 
         {staffList.length === 0 ? (
-          <div className="text-center py-6 text-sm text-secondary-500 bg-secondary-50 rounded-lg">
-            {t('booking.settings.staffBooking.noStaff')}
-          </div>
+          <EmptyState message={t('booking.settings.staffBooking.noStaff')} size="sm" className="bg-secondary-50 rounded-lg" />
         ) : (
           <div className="space-y-2">
             {staffList.map((staff, index) => (

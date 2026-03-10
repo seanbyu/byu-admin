@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card } from '@/components/ui/Card';
+import { AccordionCardSkeleton } from '@/components/ui/Skeleton';
 import { useSalonSettings, useContactChannelsMutation } from '../../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../../stores/settingsStore';
 import { ContactChannelsCard } from './booking-settings';
@@ -68,13 +68,7 @@ export function ContactChannelsSection({ salonId }: ContactChannelsSectionProps)
   }, [contactChannels, contactChannelsMutation, markClean]);
 
   if (isLoading) {
-    return (
-      <Card className="p-5">
-        <div className="flex items-center justify-center py-8">
-          <div className="text-secondary-500">{t('common.loading')}</div>
-        </div>
-      </Card>
-    );
+    return <AccordionCardSkeleton />;
   }
 
   return (

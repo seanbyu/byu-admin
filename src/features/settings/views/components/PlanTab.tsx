@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import { Plan, Subscription } from '../../types';
+import { SettingsTabSkeleton } from '@/components/ui/Skeleton';
 
 // ============================================
 // Formatters - 컴포넌트 외부에 hoisted
@@ -235,11 +236,7 @@ export function PlanTab({
   const t = useTranslations();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-secondary-500">{t('common.loading')}</div>
-      </div>
-    );
+    return <SettingsTabSkeleton />;
   }
 
   return (

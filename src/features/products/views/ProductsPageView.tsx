@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import ProductList from './components/ProductList';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 function LoadingState() {
   const t = useTranslations('common');
@@ -12,7 +13,7 @@ function LoadingState() {
 
 function NoSalonState() {
   const t = useTranslations('common');
-  return <div className="p-8">{t('noData')}</div>;
+  return <EmptyState message={t('noData')} size="lg" />;
 }
 
 export default function ProductsPageView() {

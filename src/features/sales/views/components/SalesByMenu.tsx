@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { formatPrice } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
+import { EmptyState } from '@/components/ui/EmptyState';
 import type { SalesByMenu as SalesByMenuType } from '../../types';
 
 interface Props {
@@ -16,7 +17,7 @@ export function SalesByMenu({ data, totalRevenue }: Props) {
   return (
     <Card title={t('byMenu')} padding="sm">
       {data.length === 0 ? (
-        <p className="text-sm text-secondary-400 py-4 text-center">{t('noData')}</p>
+        <EmptyState message={t('noData')} size="sm" />
       ) : (
         <div className="space-y-2 pt-2">
           {data.map((item, i) => {

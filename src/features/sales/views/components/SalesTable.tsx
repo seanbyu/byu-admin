@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { formatPrice } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import type { Booking } from '@/features/bookings/types';
 
 interface Props {
@@ -29,7 +30,7 @@ export function SalesTable({ bookings, onRowClick }: Props) {
   return (
     <Card title={t('sales.salesList')} padding="sm">
       {bookings.length === 0 ? (
-        <p className="text-sm text-secondary-400 py-6 text-center">{t('sales.noData')}</p>
+        <EmptyState message={t('sales.noData')} size="sm" />
       ) : (
         <div className="overflow-x-auto pt-1">
           <table className="w-full text-sm border-collapse min-w-[700px]">

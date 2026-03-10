@@ -3,6 +3,7 @@
 import { memo, useMemo, useCallback, useState } from 'react';
 import { Table } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useTranslations } from 'next-intl';
 import { formatDate, formatPrice, formatPhoneDisplay as formatPhoneUtil } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
@@ -406,9 +407,7 @@ export const CustomerTable = memo(function CustomerTable({
       {/* Mobile: 카드 리스트 */}
       <div className="md:hidden space-y-3">
         {customers.length === 0 ? (
-          <div className="rounded-lg border border-secondary-200 bg-white py-8 text-center text-sm text-secondary-500">
-            {t('customer.noCustomers')}
-          </div>
+          <EmptyState message={t('customer.noCustomers')} size="md" bordered />
         ) : (
           customers.map((customer) => {
             const displayPhone = formatPhoneDisplay(customer.phone) ?? '-';

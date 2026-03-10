@@ -3,6 +3,7 @@
 import { memo, useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Booking } from '../../../types';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { BookingStatus } from '@/types';
 import { cn, formatPrice } from '@/lib/utils';
 import { stripCountryCode, PAYMENT_METHOD_KEYS, isKnownPaymentMethod } from './utils';
@@ -63,9 +64,7 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
   return (
     <div className="md:hidden border border-secondary-200 rounded-lg overflow-hidden">
       {sortedBookings.length === 0 ? (
-        <div className="px-4 py-6 text-center text-sm text-secondary-400">
-          {t('booking.noBookings')}
-        </div>
+        <EmptyState message={t('booking.noBookings')} size="sm" />
       ) : (
         <div className="divide-y divide-secondary-100">
           {sortedBookings.map((booking) => (

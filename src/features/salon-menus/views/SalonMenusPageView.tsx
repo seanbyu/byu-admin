@@ -4,7 +4,8 @@ import { memo } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
-import { Spinner } from '@/components/ui/Spinner';
+import { MenuContentSkeleton } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useSalonMenusView } from '../hooks/useSalonMenusView';
 import { PageHeader } from './components/PageHeader';
@@ -21,7 +22,7 @@ const IndustrySelectionModal = dynamic(
 // 살롱 정보 없음 컴포넌트 (rendering-hoist-jsx)
 function NoSalonState() {
   const t = useTranslations('common');
-  return <div className="p-8">{t('noData')}</div>;
+  return <EmptyState message={t('noData')} size="lg" />;
 }
 
 interface SalonMenusPageViewProps {
@@ -98,9 +99,7 @@ export default function SalonMenusPageView({
         {/* Main Content Area */}
         <div className="bg-white rounded-lg shadow-sm border border-secondary-200 min-h-[460px] md:min-h-[520px] xl:min-h-[600px]">
           {isLoading ? (
-            <div className="flex items-center justify-center h-[460px] md:h-[520px] xl:h-[600px]">
-              <Spinner size="xl" />
-            </div>
+            <MenuContentSkeleton />
           ) : salonId ? (
             <MenuList
               salonId={salonId}

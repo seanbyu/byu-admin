@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
-import { Spinner } from '@/components/ui/Spinner';
+import { ProductListContentSkeleton } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Plus } from 'lucide-react';
 import { useProductCategories, useProducts } from '../../hooks/useProducts';
 import { ProductCategory, Product } from '../../types';
@@ -154,22 +155,20 @@ export default function ProductList({
         )}
 
         {isLoading ? (
-          <div className="flex justify-center py-4">
-            <Spinner size="md" />
-          </div>
+          <ProductListContentSkeleton />
         ) : categories.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg border border-dashed border-secondary-200">
-            <p className="text-secondary-500 mb-2">{t('noProducts')}</p>
-            {canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsCreating(true)}
-              >
-                <Plus className="w-4 h-4 mr-2" /> {t('addProductCategory')}
-              </Button>
-            )}
-          </div>
+          <EmptyState
+            message={t('noProducts')}
+            size="lg"
+            bordered
+            action={
+              canEdit ? (
+                <Button variant="outline" size="sm" onClick={() => setIsCreating(true)}>
+                  <Plus className="w-4 h-4 mr-2" /> {t('addProductCategory')}
+                </Button>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="space-y-5 md:space-y-6 xl:space-y-8">
             {displayCategories.map((category) => (

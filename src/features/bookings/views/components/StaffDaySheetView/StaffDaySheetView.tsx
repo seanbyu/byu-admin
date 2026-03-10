@@ -3,6 +3,7 @@
 import { memo, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Booking } from '../../../types';
 import { Staff } from '@/features/staff/types';
 import { BusinessHours } from '@/types';
@@ -163,11 +164,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
   }, [selectedDate, onDateChange]);
 
   if (bookingEnabledStaff.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-secondary-400">
-        <p>{t('booking.noStaff')}</p>
-      </div>
-    );
+    return <EmptyState message={t('booking.noStaff')} size="lg" />;
   }
 
   return (

@@ -3,6 +3,7 @@
 import { memo, useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Booking } from '../../../types';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { BookingStatus } from '@/types';
 import { cn, formatPrice } from '@/lib/utils';
 import {
@@ -69,11 +70,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
   }, [timeSlots, bookingsByTime]);
 
   if (timeSlots.length === 0) {
-    return (
-      <div className="py-6 text-center text-sm text-secondary-400">
-        {t('booking.noBusinessHours')}
-      </div>
-    );
+    return <EmptyState message={t('booking.noBusinessHours')} size="sm" />;
   }
 
   return (

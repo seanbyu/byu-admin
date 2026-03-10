@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { Spinner } from '@/components/ui/Spinner';
+import { SalesPageSkeleton } from '@/components/ui/Skeleton';
 import { createBookingsApi } from '@/features/bookings/api';
 import { SalesRegistrationModal } from '@/features/bookings/views/components/SalesRegistrationModal';
 import { useSales } from '../hooks/useSales';
@@ -66,9 +66,7 @@ export function SalesPageView() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Spinner size="lg" />
-        </div>
+        <SalesPageSkeleton />
       ) : (
         <>
           {/* 요약 카드 */}

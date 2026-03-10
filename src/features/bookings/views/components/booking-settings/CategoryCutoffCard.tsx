@@ -6,6 +6,7 @@ import { Clock, Check, ChevronDown } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { BusinessHours } from '@/types';
 import { useCategories } from '@/features/salon-menus/hooks/useSalonMenus';
 
@@ -115,21 +116,17 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
           </p>
 
           {isLoading ? (
-            <div className="text-center py-6 text-secondary-400 text-sm">
-              {t('common.loading')}
-            </div>
+            <EmptyState message={t('common.loading')} size="sm" />
           ) : categories.length === 0 ? (
-            <div className="text-center py-6 text-secondary-400 text-sm">
-              {t('booking.shopSettingsModal.categoryLastBookingNoCategories')}
-            </div>
+            <EmptyState message={t('booking.shopSettingsModal.categoryLastBookingNoCategories')} size="sm" />
           ) : (
             <div className="bg-secondary-50 rounded-lg p-3 space-y-0">
               {categories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between py-2 border-b border-secondary-200 last:border-b-0"
+                  className="flex items-center gap-3 py-3 border-b border-secondary-200 last:border-b-0"
                 >
-                  <span className="text-sm text-secondary-700">{category.name}</span>
+                  <span className="text-sm text-secondary-700 w-28 shrink-0">{category.name}</span>
                   <Select
                     options={[
                       {
@@ -140,8 +137,8 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
                     ]}
                     value={categoryLastBookingTimes[category.id] ?? ''}
                     onChange={(e) => onCutoffChange(category.id, e.target.value)}
-                    className="w-[120px]"
                     showPlaceholder={false}
+                    className="w-32"
                   />
                 </div>
               ))}

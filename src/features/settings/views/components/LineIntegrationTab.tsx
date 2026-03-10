@@ -5,9 +5,17 @@ import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Check, AlertCircle, ExternalLink, Eye, EyeOff, Trash2 } from 'lucide-react';
+import {
+  Check,
+  AlertCircle,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Trash2,
+} from 'lucide-react';
 import { useLineSettings } from '../../hooks/useLineSettings';
 import { useToast } from '@/components/ui/ToastProvider';
+import { SettingsTabSkeleton } from '@/components/ui/Skeleton';
 
 // ============================================
 // LINE Icon Component
@@ -122,7 +130,10 @@ interface LineIntegrationTabProps {
   canEdit?: boolean;
 }
 
-export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationTabProps) {
+export function LineIntegrationTab({
+  salonId,
+  canEdit = true,
+}: LineIntegrationTabProps) {
   const t = useTranslations();
   const toast = useToast();
   const {
@@ -200,7 +211,10 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
       if (result.success) {
         toast.success(t('settings.line.verifySuccess'));
       } else {
-        toast.error(t('settings.line.verifyFailed') + (result.error ? `: ${result.error}` : ''));
+        toast.error(
+          t('settings.line.verifyFailed') +
+            (result.error ? `: ${result.error}` : '')
+        );
       }
     } catch (err) {
       console.error('[LineIntegrationTab] 검증 예외:', err);
@@ -211,7 +225,9 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
   const handleToggle = useCallback(async () => {
     try {
       await toggle(!isActive);
-      toast.success(isActive ? t('settings.line.deactivated') : t('settings.line.activated'));
+      toast.success(
+        isActive ? t('settings.line.deactivated') : t('settings.line.activated')
+      );
     } catch {
       toast.error(t('common.error'));
     }
@@ -229,11 +245,7 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
   }, [remove, toast, t]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-secondary-500">{t('common.loading')}</div>
-      </div>
-    );
+    return <SettingsTabSkeleton />;
   }
 
   const isNewSetup = !isConnected && !isEditing;
@@ -256,7 +268,12 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
               </p>
             </div>
           </div>
-          <StatusBadge isConnected={isConnected} isVerified={isVerified} isActive={isActive} t={t} />
+          <StatusBadge
+            isConnected={isConnected}
+            isVerified={isVerified}
+            isActive={isActive}
+            t={t}
+          />
         </div>
 
         {/* Connected & Not Editing: Show summary */}
@@ -265,20 +282,28 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
             <div className="bg-secondary-50 rounded-lg p-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-secondary-500">Channel ID</span>
-                <span className="font-mono text-secondary-900">{settings?.lineChannelId}</span>
+                <span className="font-mono text-secondary-900">
+                  {settings?.lineChannelId}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-secondary-500">Channel Secret</span>
-                <span className="font-mono text-secondary-900">{'•'.repeat(16)}</span>
+                <span className="font-mono text-secondary-900">
+                  {'•'.repeat(16)}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-secondary-500">Access Token</span>
-                <span className="font-mono text-secondary-900">{'•'.repeat(16)}</span>
+                <span className="font-mono text-secondary-900">
+                  {'•'.repeat(16)}
+                </span>
               </div>
               {settings?.liffId && (
                 <div className="flex justify-between text-sm">
                   <span className="text-secondary-500">LIFF ID</span>
-                  <span className="font-mono text-secondary-900">{settings.liffId}</span>
+                  <span className="font-mono text-secondary-900">
+                    {settings.liffId}
+                  </span>
                 </div>
               )}
             </div>
@@ -304,7 +329,9 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
                     onClick={handleToggle}
                     isLoading={isToggling}
                   >
-                    {isActive ? t('settings.line.deactivate') : t('settings.line.activate')}
+                    {isActive
+                      ? t('settings.line.deactivate')
+                      : t('settings.line.activate')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -380,7 +407,11 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
 
       {/* Edit Form */}
       {isEditing && (
-        <Card title={t('settings.line.channelSettings')} padding="sm" className="sm:p-6">
+        <Card
+          title={t('settings.line.channelSettings')}
+          padding="sm"
+          className="sm:p-6"
+        >
           <div className="space-y-4">
             {/* Messaging API 안내 배너 */}
             <div className="flex items-start gap-2 p-3 bg-[#06C755]/8 border border-[#06C755]/30 rounded-lg">
@@ -426,7 +457,9 @@ export function LineIntegrationTab({ salonId, canEdit = true }: LineIntegrationT
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-1.5">
                 LIFF ID
-                <span className="text-secondary-400 text-xs ml-1">({t('common.optional')})</span>
+                <span className="text-secondary-400 text-xs ml-1">
+                  ({t('common.optional')})
+                </span>
               </label>
               <Input
                 type="text"

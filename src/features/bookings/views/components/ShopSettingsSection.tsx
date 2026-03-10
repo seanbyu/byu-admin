@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useCallback, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { Card } from '@/components/ui/Card';
+import { ShopSettingsSkeleton } from '@/components/ui/Skeleton';
 import { Holiday } from '@/types';
 import { useSalonSettings, useBusinessHoursMutation, useHolidaysMutation } from '../../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../../stores/settingsStore';
@@ -13,8 +12,6 @@ interface ShopSettingsSectionProps {
 }
 
 export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
-  const t = useTranslations();
-
   // Tanstack Query - fetch settings
   const { data, isLoading } = useSalonSettings(salonId);
 
@@ -124,22 +121,7 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
   }, [businessHours, slotDuration, bookingAdvanceDays, cancellationHours, businessHoursMutation, markClean]);
 
   if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card className="p-5">
-            <div className="flex items-center justify-center py-12">
-              <div className="text-secondary-500">{t('common.loading')}</div>
-            </div>
-          </Card>
-          <Card className="p-5">
-            <div className="flex items-center justify-center py-12">
-              <div className="text-secondary-500">{t('common.loading')}</div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
+    return <ShopSettingsSkeleton />;
   }
 
   return (

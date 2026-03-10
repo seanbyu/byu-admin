@@ -160,7 +160,7 @@
   "settings": {
     "description": "Manage online booking settings",
     "staffBooking": {
-      "title": "Staff Booking Settings",
+      "title": "Online Booking Settings",
       "description": "Set which staff members can be selected for online bookings.",
       "noStaff": "No staff members registered.",
       "hint": "Staff with booking disabled will not be shown to customers during online booking.",

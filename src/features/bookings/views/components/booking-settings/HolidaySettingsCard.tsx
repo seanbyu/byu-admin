@@ -8,6 +8,7 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { Card } from '@/components/ui/Card';
 import { Holiday } from '@/types';
 import { Trash2, Plus, CalendarOff } from 'lucide-react';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface HolidaySettingsCardProps {
   holidays: Holiday[];
@@ -109,9 +110,7 @@ export const HolidaySettingsCard = memo(function HolidaySettingsCard({
               ))}
             </div>
           ) : (
-            <p className="text-xs text-secondary-400 text-center py-6 bg-secondary-50 rounded-lg">
-              {t('booking.shopSettingsModal.noClosedDays')}
-            </p>
+            <EmptyState message={t('booking.shopSettingsModal.noClosedDays')} size="sm" className="bg-secondary-50 rounded-lg" />
           )}
         </div>
       </div>

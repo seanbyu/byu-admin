@@ -15,6 +15,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import { DashboardSkeleton } from '@/components/ui/Skeleton';
 
 interface Stats {
   todayBookings: number;
@@ -91,6 +92,10 @@ export default function DashboardPage() {
       color: 'text-error-600',
     },
   ];
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Pencil, Check, X, MapPin } from 'lucide-react';
 import { StoreInfo } from '../../types';
+import { SettingsTabSkeleton } from '@/components/ui/Skeleton';
 import {
   useSettingsUIStore,
   selectEditingField,
@@ -302,11 +303,7 @@ export function StoreInfoTab({
   }, [tempValue, onSave, actions]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-secondary-500">{t('common.loading')}</div>
-      </div>
-    );
+    return <SettingsTabSkeleton />;
   }
 
   if (!storeInfo) {

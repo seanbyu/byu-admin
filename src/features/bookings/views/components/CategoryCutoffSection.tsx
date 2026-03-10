@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useCallback, useState } from 'react';
-import { Card } from '@/components/ui/Card';
-import { useTranslations } from 'next-intl';
+import { AccordionCardSkeleton } from '@/components/ui/Skeleton';
 import { useSalonSettings, useCategoryLastBookingMutation } from '../../hooks/useSalonSettings';
 import { CategoryCutoffCard } from './booking-settings';
 
@@ -11,8 +10,6 @@ interface CategoryCutoffSectionProps {
 }
 
 export function CategoryCutoffSection({ salonId }: CategoryCutoffSectionProps) {
-  const t = useTranslations();
-
   const { data, isLoading } = useSalonSettings(salonId);
   const mutation = useCategoryLastBookingMutation(salonId);
 
@@ -46,13 +43,7 @@ export function CategoryCutoffSection({ salonId }: CategoryCutoffSectionProps) {
   }, [categoryLastBookingTimes, mutation]);
 
   if (isLoading) {
-    return (
-      <Card className="p-5">
-        <div className="flex items-center justify-center py-8">
-          <div className="text-secondary-500">{t('common.loading')}</div>
-        </div>
-      </Card>
-    );
+    return <AccordionCardSkeleton />;
   }
 
   return (
