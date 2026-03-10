@@ -7,6 +7,7 @@ import { ShopSettingsSection } from '@/features/bookings/views/components/ShopSe
 import { StaffBookingSection } from '@/features/bookings/views/components/StaffBookingSection';
 import { InterpreterServiceSection } from '@/features/bookings/views/components/InterpreterServiceSection';
 import { ContactChannelsSection } from '@/features/bookings/views/components/ContactChannelsSection';
+import { CategoryCutoffSection } from '@/features/bookings/views/components/CategoryCutoffSection';
 
 export default function OnlineBookingSettingsPage() {
   const t = useTranslations();
@@ -41,6 +42,9 @@ export default function OnlineBookingSettingsPage() {
 
       {/* 문의 채널 설정 */}
       <ContactChannelsSection salonId={salonId} />
+
+      {/* 카테고리별 마지막 예약 시간 */}
+      <CategoryCutoffSection salonId={salonId} />
 
       {/* 샵 영업 설정 */}
       <ShopSettingsSection salonId={salonId} />

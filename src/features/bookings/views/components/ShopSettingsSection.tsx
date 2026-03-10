@@ -4,9 +4,9 @@ import { useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { Holiday } from '@/types';
-import { useSalonSettings, useBusinessHoursMutation, useHolidaysMutation, useCategoryLastBookingMutation } from '../../hooks/useSalonSettings';
+import { useSalonSettings, useBusinessHoursMutation, useHolidaysMutation } from '../../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../../stores/settingsStore';
-import { BusinessSettingsCard, HolidaySettingsCard, CategoryCutoffCard } from './booking-settings';
+import { BusinessSettingsCard, HolidaySettingsCard } from './booking-settings';
 
 interface ShopSettingsSectionProps {
   salonId: string;
@@ -21,11 +21,9 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
   // Mutations
   const businessHoursMutation = useBusinessHoursMutation(salonId);
   const holidaysMutation = useHolidaysMutation(salonId);
-  const categoryLastBookingMutation = useCategoryLastBookingMutation(salonId);
 
   // Local state for save feedback
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [cutoffSaveSuccess, setCutoffSaveSuccess] = useState(false);
 
   // Zustand store for form state
   const {
@@ -35,7 +33,6 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     cancellationHours,
     holidays,
     newHoliday,
-    categoryLastBookingTimes,
     initializeFromServer,
     toggleDayOpen,
     setDayTime,
@@ -45,7 +42,6 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     setNewHolidayField,
     addHoliday,
     removeHoliday,
-    setCategoryLastBookingTime,
     markClean,
   } = useSettingsFormStore();
 
@@ -127,16 +123,6 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     }
   }, [businessHours, slotDuration, bookingAdvanceDays, cancellationHours, businessHoursMutation, markClean]);
 
-  const handleSaveCutoff = useCallback(async () => {
-    try {
-      await categoryLastBookingMutation.mutateCategoryLastBookingTimes(categoryLastBookingTimes);
-      setCutoffSaveSuccess(true);
-      setTimeout(() => setCutoffSaveSuccess(false), 3000);
-    } catch (error) {
-      console.error('Failed to save category cutoff times:', error);
-    }
-  }, [categoryLastBookingTimes, categoryLastBookingMutation]);
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -181,16 +167,6 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
           onRemoveHoliday={handleRemoveHoliday}
         />
       </div>
-      <CategoryCutoffCard
-        salonId={salonId}
-        businessHours={businessHours}
-        slotDuration={slotDuration}
-        categoryLastBookingTimes={categoryLastBookingTimes}
-        onCutoffChange={setCategoryLastBookingTime}
-        onSave={handleSaveCutoff}
-        isSaving={categoryLastBookingMutation.isPending}
-        saveSuccess={cutoffSaveSuccess}
-      />
     </div>
   );
 }

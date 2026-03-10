@@ -1,8 +1,8 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Clock, Check } from 'lucide-react';
+import { Clock, Check, ChevronDown } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
@@ -32,6 +32,7 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
 }: CategoryCutoffCardProps) {
   const t = useTranslations();
   const { categories, isLoading } = useCategories(salonId);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // 영업 시간 기반 시간 옵션 생성
   const timeOptions = useMemo(() => {
@@ -62,67 +63,92 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
 
   return (
     <Card className="p-5">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="flex items-center gap-2 text-left"
+          aria-expanded={isExpanded}
+        >
           <Clock size={18} className="text-secondary-600" />
           <h2 className="text-base font-semibold text-secondary-900">
             {t('booking.shopSettingsModal.categoryLastBooking')}
           </h2>
-        </div>
-        <div className="flex items-center gap-2">
-          {saveSuccess && (
-            <span className="flex items-center gap-1 text-xs text-success-600">
-              <Check size={14} />
-            </span>
-          )}
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onSave}
-            disabled={isSaving || isLoading}
+          <ChevronDown
+            size={16}
+            className={`text-secondary-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        <div className="min-w-[120px] flex justify-end">
+          <div
+            className={`flex items-center gap-2 transition-all duration-200 ${
+              isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
+            }`}
           >
-            {isSaving ? t('common.saving') : t('common.save')}
-          </Button>
+            {saveSuccess && (
+              <span className="flex items-center gap-1 text-xs text-success-600">
+                <Check size={14} />
+              </span>
+            )}
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onSave}
+              disabled={isSaving || isLoading}
+            >
+              {isSaving ? t('common.saving') : t('common.save')}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <p className="text-xs text-secondary-400 mb-4">
-        {t('booking.shopSettingsModal.categoryLastBookingDesc')}
-      </p>
+      <div
+        aria-hidden={!isExpanded}
+        className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin-top] duration-300 ease-out ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'
+        }`}
+      >
+        <div className="min-h-0">
+          <p className="text-xs text-secondary-500 mb-4">
+            {t('booking.shopSettingsModal.categoryLastBookingDesc')}
+          </p>
 
-      {isLoading ? (
-        <div className="text-center py-6 text-secondary-400 text-sm">
-          {t('common.loading')}
-        </div>
-      ) : categories.length === 0 ? (
-        <div className="text-center py-6 text-secondary-400 text-sm">
-          {t('booking.shopSettingsModal.categoryLastBookingNoCategories')}
-        </div>
-      ) : (
-        <div className="bg-secondary-50 rounded-lg p-3 space-y-0">
-          {categories.map((category) => (
-            <div
-              key={category.id}
-              className="flex items-center justify-between py-2 border-b border-secondary-200 last:border-b-0"
-            >
-              <span className="text-sm text-secondary-700">{category.name}</span>
-              <Select
-                options={[
-                  {
-                    value: '',
-                    label: t('booking.shopSettingsModal.categoryLastBookingNone'),
-                  },
-                  ...timeOptions,
-                ]}
-                value={categoryLastBookingTimes[category.id] ?? ''}
-                onChange={(e) => onCutoffChange(category.id, e.target.value)}
-                className="w-[120px]"
-                showPlaceholder={false}
-              />
+          {isLoading ? (
+            <div className="text-center py-6 text-secondary-400 text-sm">
+              {t('common.loading')}
             </div>
-          ))}
+          ) : categories.length === 0 ? (
+            <div className="text-center py-6 text-secondary-400 text-sm">
+              {t('booking.shopSettingsModal.categoryLastBookingNoCategories')}
+            </div>
+          ) : (
+            <div className="bg-secondary-50 rounded-lg p-3 space-y-0">
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  className="flex items-center justify-between py-2 border-b border-secondary-200 last:border-b-0"
+                >
+                  <span className="text-sm text-secondary-700">{category.name}</span>
+                  <Select
+                    options={[
+                      {
+                        value: '',
+                        label: t('booking.shopSettingsModal.categoryLastBookingNone'),
+                      },
+                      ...timeOptions,
+                    ]}
+                    value={categoryLastBookingTimes[category.id] ?? ''}
+                    onChange={(e) => onCutoffChange(category.id, e.target.value)}
+                    className="w-[120px]"
+                    showPlaceholder={false}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </Card>
   );
 });
