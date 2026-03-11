@@ -206,6 +206,9 @@ html {
   body {
     @apply bg-white text-secondary-900;
     font-feature-settings: 'ss03', 'cv02', 'cv11';
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
   }
 }
 
