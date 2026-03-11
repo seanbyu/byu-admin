@@ -7,6 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { useRouter, usePathname } from '@/i18n/routing';
 import { useUnreadCount } from '@/features/notifications/hooks/useNotifications';
+import { HeaderNotificationDropdown } from './HeaderNotificationDropdown';
 
 export const Header: React.FC = () => {
   const { toggleSidebar } = useUIStore();
@@ -17,6 +18,7 @@ export const Header: React.FC = () => {
   const { data: unreadCount = 0 } = useUnreadCount();
 
   const [showLangMenu, setShowLangMenu] = React.useState(false);
+  const [showNotifMenu, setShowNotifMenu] = React.useState(false);
 
   const languages = ['ko', 'en', 'th'] as const;
 
@@ -40,10 +42,27 @@ export const Header: React.FC = () => {
 
       {/* Right side */}
       <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
-        {/* Notification */}
+        {/* Notification — 모바일/태블릿: 드롭다운, 데스크톱(xl+): 차트 이동 */}
+        <div className="relative xl:hidden">
+          <button
+            onClick={() => setShowNotifMenu((prev) => !prev)}
+            className="relative flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
+            aria-label="Notifications"
+          >
+            <Bell size={18} className="sm:w-5 sm:h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-error-500 text-white text-[10px] font-bold leading-none flex items-center justify-center">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+          {showNotifMenu && (
+            <HeaderNotificationDropdown onClose={() => setShowNotifMenu(false)} />
+          )}
+        </div>
         <button
           onClick={() => router.push('/bookings/chart')}
-          className="relative flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
+          className="relative hidden xl:flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
           aria-label="Notifications"
         >
           <Bell size={18} className="sm:w-5 sm:h-5" />
