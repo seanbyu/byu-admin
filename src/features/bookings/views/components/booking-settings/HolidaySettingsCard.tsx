@@ -28,7 +28,7 @@ export const HolidaySettingsCard = memo(function HolidaySettingsCard({
   const t = useTranslations();
 
   return (
-    <Card className="p-5">
+    <Card padding="none" className="p-3 sm:p-5">
       <div className="flex items-center gap-2 mb-4">
         <CalendarOff size={18} className="text-secondary-600" />
         <h2 className="text-base font-semibold text-secondary-900">
@@ -49,7 +49,11 @@ export const HolidaySettingsCard = memo(function HolidaySettingsCard({
               label={t('common.form.endDate')}
               value={newHoliday.endDate}
               onChange={(date) => onNewHolidayChange('endDate', date)}
-              minDate={newHoliday.startDate ? new Date(newHoliday.startDate) : undefined}
+              minDate={
+                newHoliday.startDate
+                  ? new Date(newHoliday.startDate)
+                  : undefined
+              }
             />
           </div>
           <div className="flex gap-2">
@@ -110,7 +114,11 @@ export const HolidaySettingsCard = memo(function HolidaySettingsCard({
               ))}
             </div>
           ) : (
-            <EmptyState message={t('booking.shopSettingsModal.noClosedDays')} size="sm" className="bg-secondary-50 rounded-lg" />
+            <EmptyState
+              message={t('booking.shopSettingsModal.noClosedDays')}
+              size="sm"
+              className="bg-secondary-50 rounded-lg"
+            />
           )}
         </div>
       </div>

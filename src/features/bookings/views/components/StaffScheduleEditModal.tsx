@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { BusinessHours, Holiday } from '@/types';
 import { Staff } from '@/features/staff/types';
 import { RotateCcw, Check } from 'lucide-react';
-import { createStaffApi } from '@/features/staff/api';
+import { staffApi } from '@/features/staff/api';
 import { salonsApi } from '@/features/salons/api';
 import { getDefaultWorkHours } from '../../utils';
 import { WorkHoursEditor, HolidayManager } from './schedule';
@@ -109,8 +109,7 @@ export function StaffScheduleEditModal({
         return wh;
       });
 
-      const staffApi = createStaffApi();
-      await staffApi.updateStaff(salonId, staff.id, {
+      await staffApi.update(salonId, staff.id, {
         workHours: adjustedWorkHours,
         holidays,
       });
@@ -132,8 +131,24 @@ export function StaffScheduleEditModal({
       onClose={onClose}
       title={`${staff.name} - ${t('staff.schedule.title')}`}
       size="lg"
+      footer={
+        <div className="flex items-center justify-end gap-3">
+          {saveSuccess && (
+            <span className="flex items-center gap-1 text-sm text-success-600 mr-auto">
+              <Check size={16} />
+              {t('common.saved')}
+            </span>
+          )}
+          <Button variant="outline" onClick={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button variant="primary" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? t('common.saving') : t('common.save')}
+          </Button>
+        </div>
+      }
     >
-      <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+      <div className="space-y-6">
         {/* 업무 시간 설정 */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -172,26 +187,6 @@ export function StaffScheduleEditModal({
             onRemoveHoliday={(id) => setHolidays((prev) => prev.filter((h) => h.id !== id))}
           />
         </div>
-      </div>
-
-      {/* 하단 버튼 */}
-      <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-secondary-200">
-        {saveSuccess && (
-          <span className="flex items-center gap-1 text-sm text-success-600 mr-2">
-            <Check size={16} />
-            {t('common.saved')}
-          </span>
-        )}
-        <Button variant="outline" onClick={onClose}>
-          {t('common.cancel')}
-        </Button>
-        <Button
-          variant="primary"
-          onClick={handleSave}
-          disabled={isSaving}
-        >
-          {isSaving ? t('common.saving') : t('common.save')}
-        </Button>
       </div>
     </Modal>
   );

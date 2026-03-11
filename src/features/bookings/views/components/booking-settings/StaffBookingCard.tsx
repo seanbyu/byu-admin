@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Switch } from '@/components/ui/Switch';
 import { useStaff } from '@/features/staff/hooks/useStaff';
 import { Staff } from '@/features/staff/types';
-import { Check, Users, Calendar, GripVertical } from 'lucide-react';
+import { Users, Calendar, GripVertical } from 'lucide-react';
 import { StaffScheduleEditModal } from '../StaffScheduleEditModal';
 import { useToast } from '@/components/ui/ToastProvider';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -22,32 +22,34 @@ export const StaffBookingCard = memo(function StaffBookingCard({
 }: StaffBookingCardProps) {
   const t = useTranslations();
   const toast = useToast();
-  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [selectedStaffForSchedule, setSelectedStaffForSchedule] = useState<Staff | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-  const { staffData, isLoading, updateStaff, updateDisplayOrder, isUpdating, isUpdatingOrder, refetch } = useStaff(salonId, {
+  const { staffData, isLoading, updateStaff, updateDisplayOrder, isUpdatingOrder, refetch } = useStaff(salonId, {
     enabled: !!salonId,
   });
 
   const staffList = staffData;
   const dragItemRef = useRef<number | null>(null);
+  const [updatingStaffId, setUpdatingStaffId] = useState<string | null>(null);
 
   const handleBookingToggle = useCallback(
     async (staffId: string, enabled: boolean) => {
+      setUpdatingStaffId(staffId);
       try {
         await updateStaff({
           staffId,
           updates: { isBookingEnabled: enabled },
         });
-        setSaveSuccess(staffId);
-        setTimeout(() => setSaveSuccess(null), 2000);
+        toast.success(enabled ? t('booking.settings.staffBooking.bookingEnabled') : t('booking.settings.staffBooking.bookingDisabled'));
       } catch {
         toast.error(t('common.error'));
+      } finally {
+        setUpdatingStaffId(null);
       }
     },
-    [updateStaff]
+    [updateStaff, toast, t]
   );
 
   const handleOpenScheduleModal = useCallback((staff: Staff) => {
@@ -111,8 +113,7 @@ export const StaffBookingCard = memo(function StaffBookingCard({
 
       try {
         await updateDisplayOrder(staffOrders);
-        setSaveSuccess('order');
-        setTimeout(() => setSaveSuccess(null), 2000);
+        toast.success(t('booking.settings.staffBooking.orderSaved'));
       } catch {
         toast.error(t('common.error'));
       }
@@ -128,7 +129,7 @@ export const StaffBookingCard = memo(function StaffBookingCard({
 
   return (
     <>
-      <Card className="p-5">
+      <Card padding="none" className="p-3 sm:p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Users size={18} className="text-secondary-600" />
@@ -136,12 +137,6 @@ export const StaffBookingCard = memo(function StaffBookingCard({
               {t('booking.settings.staffBooking.title')}
             </h2>
           </div>
-          {saveSuccess === 'order' && (
-            <div className="flex items-center gap-1 text-success-600">
-              <Check size={14} />
-              <span className="text-xs">{t('common.saved')}</span>
-            </div>
-          )}
         </div>
 
         <p className="text-xs text-secondary-500 mb-3">
@@ -206,15 +201,12 @@ export const StaffBookingCard = memo(function StaffBookingCard({
 
                   {/* 예약 허용 토글 */}
                   <div className="flex items-center gap-1.5">
-                    {saveSuccess === staff.id && (
-                      <Check size={12} className="text-success-600" />
-                    )}
                     <span className="text-xs text-secondary-500 hidden sm:inline">
                       {t('booking.settings.staffBooking.bookingAllowed')}
                     </span>
                     <Switch
                       checked={staff.isBookingEnabled}
-                      disabled={isUpdating}
+                      disabled={updatingStaffId === staff.id}
                       onCheckedChange={(checked) => handleBookingToggle(staff.id, checked)}
                     />
                   </div>

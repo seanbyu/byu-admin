@@ -63,7 +63,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-modal flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 transition-opacity duration-normal"
+        className="absolute inset-0 bg-black/50 modal-backdrop-enter"
         onClick={onClose}
       />
 
@@ -75,7 +75,7 @@ export const Modal: React.FC<ModalProps> = ({
           'sm:mx-4 sm:w-auto',
           'flex flex-col',
           'max-h-[85dvh] sm:max-h-[calc(100vh-80px)]',
-          'animate-in slide-in-from-bottom sm:zoom-in-95 duration-normal',
+          'modal-enter',
           sizes[size]
         )}
       >

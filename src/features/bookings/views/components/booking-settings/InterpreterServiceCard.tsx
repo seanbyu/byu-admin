@@ -30,7 +30,7 @@ export const InterpreterServiceCard = memo(function InterpreterServiceCard({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card className="p-5">
+    <Card padding="none" className="p-3 sm:p-5">
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -51,7 +51,9 @@ export const InterpreterServiceCard = memo(function InterpreterServiceCard({
         <div className="min-w-[120px] flex justify-end">
           <div
             className={`flex items-center gap-2 transition-all duration-200 ${
-              isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
+              isExpanded
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-1 pointer-events-none'
             }`}
           >
             {saveSuccess && (
@@ -59,7 +61,12 @@ export const InterpreterServiceCard = memo(function InterpreterServiceCard({
                 <Check size={14} />
               </span>
             )}
-            <Button variant="primary" size="sm" onClick={onSave} disabled={isSaving}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onSave}
+              disabled={isSaving}
+            >
               {isSaving ? t('common.saving') : t('common.save')}
             </Button>
           </div>
@@ -69,7 +76,9 @@ export const InterpreterServiceCard = memo(function InterpreterServiceCard({
       <div
         aria-hidden={!isExpanded}
         className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin-top] duration-300 ease-out ${
-          isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'
+          isExpanded
+            ? 'grid-rows-[1fr] opacity-100 mt-4'
+            : 'grid-rows-[0fr] opacity-0 mt-0'
         }`}
       >
         <div className="space-y-4 min-h-0">
@@ -128,7 +137,9 @@ export const InterpreterServiceCard = memo(function InterpreterServiceCard({
                             : 'border-secondary-300'
                         }`}
                       >
-                        {isSelected && <Check size={12} className="text-white" />}
+                        {isSelected && (
+                          <Check size={12} className="text-white" />
+                        )}
                       </span>
                       <span className="text-sm">
                         {t(`booking.settings.interpreter.languages.${lang}`)}

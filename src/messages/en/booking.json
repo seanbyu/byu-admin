@@ -166,6 +166,9 @@
       "hint": "Staff with booking disabled will not be shown to customers during online booking.",
       "scheduleButton": "Schedule",
       "bookingAllowed": "Booking",
+      "bookingEnabled": "Booking enabled.",
+      "bookingDisabled": "Booking disabled.",
+      "orderSaved": "Order saved.",
       "orderHint": "Drag to reorder staff. The order will be reflected on the customer booking page."
     },
     "interpreter": {

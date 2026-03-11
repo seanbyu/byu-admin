@@ -610,3 +610,50 @@ html {
 .booking-highlight {
   animation: booking-highlight-blink 0.6s ease-in-out 5;
 }
+
+/* ===================================
+   MODAL ANIMATION
+   바텀시트(모바일) / 다이얼로그(데스크톱) 진입 애니메이션
+   =================================== */
+@keyframes modal-slide-up {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes modal-scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 모바일: 아래에서 부드럽게 올라오기 */
+.modal-enter {
+  animation: modal-slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* 데스크톱: 살짝 확대되며 나타나기 */
+@media (min-width: 640px) {
+  .modal-enter {
+    animation: modal-scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+.modal-backdrop-enter {
+  animation: modal-backdrop-in 0.25s ease forwards;
+}

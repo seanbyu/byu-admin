@@ -55,7 +55,7 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card className="p-5">
+    <Card padding="none" className="p-3 sm:p-5">
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -76,7 +76,9 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
         <div className="min-w-[120px] flex justify-end">
           <div
             className={`flex items-center gap-2 transition-all duration-200 ${
-              isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
+              isExpanded
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-1 pointer-events-none'
             }`}
           >
             {saveSuccess && (
@@ -84,7 +86,12 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
                 <Check size={14} />
               </span>
             )}
-            <Button variant="primary" size="sm" onClick={onSave} disabled={isSaving}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onSave}
+              disabled={isSaving}
+            >
               {isSaving ? t('common.saving') : t('common.save')}
             </Button>
           </div>
@@ -94,7 +101,9 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
       <div
         aria-hidden={!isExpanded}
         className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin-top] duration-300 ease-out ${
-          isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'
+          isExpanded
+            ? 'grid-rows-[1fr] opacity-100 mt-4'
+            : 'grid-rows-[0fr] opacity-0 mt-0'
         }`}
       >
         <div className="min-h-0">
@@ -108,13 +117,17 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <LineIcon className="text-social-line" />
-                  <span className="text-sm font-medium text-secondary-900">LINE</span>
+                  <span className="text-sm font-medium text-secondary-900">
+                    LINE
+                  </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => onToggleChannel('line')}
                   className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
-                    contactChannels.line?.enabled ? 'bg-social-line' : 'bg-secondary-300'
+                    contactChannels.line?.enabled
+                      ? 'bg-social-line'
+                      : 'bg-secondary-300'
                   }`}
                 >
                   <span
@@ -128,7 +141,9 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
               {contactChannels.line?.enabled && (
                 <div>
                   <Input
-                    placeholder={t('booking.settings.contactChannels.linePlaceholder')}
+                    placeholder={t(
+                      'booking.settings.contactChannels.linePlaceholder'
+                    )}
                     value={contactChannels.line?.id || ''}
                     onChange={(e) => onChannelIdChange('line', e.target.value)}
                     className="bg-white"
@@ -145,13 +160,17 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <InstagramIcon className="text-social-instagram" />
-                  <span className="text-sm font-medium text-secondary-900">Instagram</span>
+                  <span className="text-sm font-medium text-secondary-900">
+                    Instagram
+                  </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => onToggleChannel('instagram')}
                   className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
-                    contactChannels.instagram?.enabled ? 'bg-social-instagram' : 'bg-secondary-300'
+                    contactChannels.instagram?.enabled
+                      ? 'bg-social-instagram'
+                      : 'bg-secondary-300'
                   }`}
                 >
                   <span
@@ -165,9 +184,13 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
               {contactChannels.instagram?.enabled && (
                 <div>
                   <Input
-                    placeholder={t('booking.settings.contactChannels.instagramPlaceholder')}
+                    placeholder={t(
+                      'booking.settings.contactChannels.instagramPlaceholder'
+                    )}
                     value={contactChannels.instagram?.id || ''}
-                    onChange={(e) => onChannelIdChange('instagram', e.target.value)}
+                    onChange={(e) =>
+                      onChannelIdChange('instagram', e.target.value)
+                    }
                     className="bg-white"
                   />
                   <p className="text-xs text-secondary-400 mt-1.5">

@@ -63,7 +63,7 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
   }, [businessHours, slotDuration]);
 
   return (
-    <Card className="p-5">
+    <Card padding="none" className="p-3 sm:p-5">
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -84,7 +84,9 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
         <div className="min-w-[120px] flex justify-end">
           <div
             className={`flex items-center gap-2 transition-all duration-200 ${
-              isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
+              isExpanded
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-1 pointer-events-none'
             }`}
           >
             {saveSuccess && (
@@ -107,7 +109,9 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
       <div
         aria-hidden={!isExpanded}
         className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin-top] duration-300 ease-out ${
-          isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'
+          isExpanded
+            ? 'grid-rows-[1fr] opacity-100 mt-4'
+            : 'grid-rows-[0fr] opacity-0 mt-0'
         }`}
       >
         <div className="min-h-0">
@@ -118,7 +122,12 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
           {isLoading ? (
             <EmptyState message={t('common.loading')} size="sm" />
           ) : categories.length === 0 ? (
-            <EmptyState message={t('booking.shopSettingsModal.categoryLastBookingNoCategories')} size="sm" />
+            <EmptyState
+              message={t(
+                'booking.shopSettingsModal.categoryLastBookingNoCategories'
+              )}
+              size="sm"
+            />
           ) : (
             <div className="bg-secondary-50 rounded-lg p-3 space-y-0">
               {categories.map((category) => (
@@ -126,17 +135,23 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
                   key={category.id}
                   className="flex items-center gap-3 py-3 border-b border-secondary-200 last:border-b-0"
                 >
-                  <span className="text-sm text-secondary-700 w-28 shrink-0">{category.name}</span>
+                  <span className="text-sm text-secondary-700 w-28 shrink-0">
+                    {category.name}
+                  </span>
                   <Select
                     options={[
                       {
                         value: '',
-                        label: t('booking.shopSettingsModal.categoryLastBookingNone'),
+                        label: t(
+                          'booking.shopSettingsModal.categoryLastBookingNone'
+                        ),
                       },
                       ...timeOptions,
                     ]}
                     value={categoryLastBookingTimes[category.id] ?? ''}
-                    onChange={(e) => onCutoffChange(category.id, e.target.value)}
+                    onChange={(e) =>
+                      onCutoffChange(category.id, e.target.value)
+                    }
                     showPlaceholder={false}
                     className="w-32"
                   />
