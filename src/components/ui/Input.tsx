@@ -32,7 +32,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           lang={isDateTimeInput ? locale : undefined}
           className={cn(
             // Base styles
-            'w-full px-3 py-2 text-[16px] sm:text-sm',
+            'w-full px-3 py-2 text-sm',
             'border rounded-lg',
             'text-secondary-900 placeholder:text-secondary-400',
             'transition-colors duration-fast',
