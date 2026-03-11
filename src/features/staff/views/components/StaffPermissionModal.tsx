@@ -68,6 +68,7 @@ export default function StaffPermissionModal({
 }: StaffPermissionModalProps) {
   const t = useTranslations();
   const [permissions, setPermissions] = useState<StaffPermission[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (staff) {
@@ -100,9 +101,17 @@ export default function StaffPermissionModal({
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!staff) return;
-    onSave(staff.id, permissions);
+    setIsSaving(true);
+    try {
+      await onSave(staff.id, permissions);
+      onClose();
+    } catch {
+      // 에러 toast는 useStaffActions에서 처리
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // 권한 행 렌더링
@@ -172,11 +181,11 @@ export default function StaffPermissionModal({
       size="lg"
       footer={
         <div className="flex justify-end space-x-3">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={isSaving}>
             {readOnly ? t('common.close') : t('common.cancel')}
           </Button>
           {!readOnly && (
-            <Button variant="primary" onClick={handleSave}>
+            <Button variant="primary" onClick={handleSave} isLoading={isSaving}>
               {t('common.save')}
             </Button>
           )}

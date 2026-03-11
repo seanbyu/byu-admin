@@ -10,7 +10,6 @@ interface UseStaffActionsParams {
   salonId: string;
   updateStaff: (params: { staffId: string; updates: Partial<Staff> }) => Promise<unknown>;
   refetch: () => void;
-  clearSelectedStaff: () => void;
 }
 
 interface UseStaffActionsReturn {
@@ -29,7 +28,6 @@ export function useStaffActions({
   salonId,
   updateStaff,
   refetch,
-  clearSelectedStaff,
 }: UseStaffActionsParams): UseStaffActionsReturn {
   const t = useTranslations('staff');
   const toast = useToast();
@@ -117,22 +115,22 @@ export function useStaffActions({
     [handleUpdateStaff]
   );
 
-  // 권한 저장 — optimistic update가 이미 적용되므로 모달 먼저 닫고 background 저장
+  // 권한 저장 — API 완료 후 toast (모달 닫기는 모달 내부에서 처리)
   const handlePermissionSave = useCallback(
     async (id: string, permissions: StaffPermission[]) => {
-      clearSelectedStaff();
       try {
         await updateStaff({ staffId: id, updates: { permissions } });
         toast.success(t('success.permissionSaved'));
       } catch (err) {
         console.error(err);
         toast.error(t('errors.updateFailed'));
+        throw err;
       }
     },
-    [updateStaff, clearSelectedStaff, t, toast]
+    [updateStaff, t, toast]
   );
 
-  // 프로필 저장 — optimistic update가 이미 적용되므로 모달 먼저 닫고 background 저장
+  // 프로필 저장 — API 완료 후 toast (모달 닫기는 모달 내부에서 처리)
   const handleProfileSave = useCallback(
     async (id: string, updates: Partial<Staff>) => {
       try {
@@ -140,7 +138,8 @@ export function useStaffActions({
         toast.success(t('success.profileSaved'));
       } catch (err) {
         console.error(err);
-        toast.error(t('profileModal.updateFailed'));
+        toast.error(t('errors.updateFailed'));
+        throw err;
       }
     },
     [updateStaff, t, toast]

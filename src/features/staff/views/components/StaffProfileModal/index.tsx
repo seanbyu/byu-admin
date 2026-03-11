@@ -85,24 +85,33 @@ function StaffProfileModal({
     }
   }, [isOpen, staff, reset]);
 
-  // 폼 제출 핸들러 — optimistic update가 즉시 반영되므로 모달 먼저 닫고 background 저장
-  const onSubmit = useCallback((data: ProfileFormData) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  // 폼 제출 핸들러 — API 완료 후 모달 닫기
+  const onSubmit = useCallback(async (data: ProfileFormData) => {
     const specialtiesArray = data.specialties
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
 
-    onClose();
-    onSave(staff.id, {
-      name: data.name,
-      phone: data.phone,
-      positionId: selectedPositionId,
-      description: data.description,
-      experience: Number(data.experience),
-      specialties: specialtiesArray,
-      profileImage: data.profileImage,
-      socialLinks: socialLinks,
-    });
+    setIsSaving(true);
+    try {
+      await onSave(staff.id, {
+        name: data.name,
+        phone: data.phone,
+        positionId: selectedPositionId,
+        description: data.description,
+        experience: Number(data.experience),
+        specialties: specialtiesArray,
+        profileImage: data.profileImage,
+        socialLinks: socialLinks,
+      });
+      onClose();
+    } catch {
+      // 에러 toast는 useStaffActions에서 처리
+    } finally {
+      setIsSaving(false);
+    }
   }, [staff.id, selectedPositionId, socialLinks, onSave, onClose]);
 
   // 이미지 변경 핸들러
@@ -213,13 +222,13 @@ function StaffProfileModal({
 
         {/* 버튼 */}
         <div className="flex justify-end space-x-3 pt-4 border-t border-secondary-200 mt-6">
-          <Button variant="outline" type="button" onClick={onClose}>
+          <Button variant="outline" type="button" onClick={onClose} disabled={isSaving}>
             {t('common.cancel')}
           </Button>
           <Button
             variant="primary"
             type="submit"
-            isLoading={isCreating}
+            isLoading={isSaving || isCreating}
           >
             {t('common.save')}
           </Button>

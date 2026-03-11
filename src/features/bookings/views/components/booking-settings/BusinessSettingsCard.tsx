@@ -143,28 +143,28 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
             .map((bh) => (
               <div
                 key={bh.dayOfWeek}
-                className="flex items-center justify-between px-3 py-2.5 bg-white"
+                className="flex items-center gap-3 px-3 py-2.5 bg-white"
               >
-                {/* 왼쪽: 토글 + 요일 */}
-                <div className="flex items-center gap-2.5">
-                  <Switch
-                    checked={bh.isOpen}
-                    onCheckedChange={() => onToggleDay(bh.dayOfWeek)}
-                  />
-                  <span
-                    className={`text-sm font-medium w-10 shrink-0 ${
-                      bh.dayOfWeek === 0
-                        ? 'text-error-500'
-                        : bh.dayOfWeek === 6
-                          ? 'text-info-500'
-                          : 'text-secondary-700'
-                    }`}
-                  >
-                    {t(DAY_KEYS[bh.dayOfWeek])}
-                  </span>
-                </div>
+                {/* 토글 */}
+                <Switch
+                  checked={bh.isOpen}
+                  onCheckedChange={() => onToggleDay(bh.dayOfWeek)}
+                />
 
-                {/* 오른쪽: 시간 선택 */}
+                {/* 요일 */}
+                <span
+                  className={`text-sm font-medium w-10 shrink-0 ${
+                    bh.dayOfWeek === 0
+                      ? 'text-error-500'
+                      : bh.dayOfWeek === 6
+                        ? 'text-info-500'
+                        : 'text-secondary-700'
+                  }`}
+                >
+                  {t(DAY_KEYS[bh.dayOfWeek])}
+                </span>
+
+                {/* 시간 선택 */}
                 {bh.isOpen ? (
                   <div className="flex items-center gap-1.5">
                     <Select

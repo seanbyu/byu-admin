@@ -64,7 +64,6 @@ export default function StaffPageView() {
     salonId,
     updateStaff,
     refetch,
-    clearSelectedStaff: pageState.clearSelectedStaff,
   });
 
   // 현재 직원 수 메모이제이션
