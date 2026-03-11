@@ -122,19 +122,23 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="text-secondary-400">{t('booking.price')}</span>
-                  <div
-                    className="text-secondary-800 font-medium cursor-pointer hover:text-primary-600"
-                    onClick={(e) => handleOpenSales(e, booking)}
-                  >
-                    {booking.price > 0
-                      ? formatPrice(booking.price)
-                      : t('booking.salesModal.registerSales')}
-                    {booking.bookingMeta?.sales_registered && (
-                      <span className="ml-1 text-primary-500 text-[10px]">
-                        {t('booking.salesModal.editSales')}
-                      </span>
-                    )}
-                  </div>
+                  {booking.status === BookingStatus.CANCELLED ? (
+                    <div className="text-secondary-300 font-medium">—</div>
+                  ) : (
+                    <div
+                      className="text-secondary-800 font-medium cursor-pointer hover:text-primary-600"
+                      onClick={(e) => handleOpenSales(e, booking)}
+                    >
+                      {booking.price > 0
+                        ? formatPrice(booking.price)
+                        : t('booking.salesModal.registerSales')}
+                      {booking.bookingMeta?.sales_registered && (
+                        <span className="ml-1 text-primary-500 text-[10px]">
+                          {t('booking.salesModal.editSales')}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="text-right">
                   <span className="text-secondary-400">{t('booking.paymentMethod')}</span>

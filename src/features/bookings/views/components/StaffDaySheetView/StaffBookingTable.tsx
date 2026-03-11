@@ -55,7 +55,11 @@ export const StaffBookingTable = memo(function StaffBookingTable({
   }, []);
 
   const totalPrice = useMemo(
-    () => Object.values(bookingsByTime).reduce((sum, b) => sum + (b.price || 0), 0),
+    () =>
+      Object.values(bookingsByTime).reduce(
+        (sum, b) => (b.status === BookingStatus.CANCELLED ? sum : sum + (b.price || 0)),
+        0
+      ),
     [bookingsByTime]
   );
 
@@ -187,17 +191,26 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                       />
                     </td>
                     <td
-                      className="border border-secondary-200 px-2 lg:px-3 py-2 text-right text-secondary-700 group/price relative cursor-pointer hover:bg-primary-50"
-                      onClick={(e) => handleOpenSales(e, booking)}
+                      className={cn(
+                        'border border-secondary-200 px-2 lg:px-3 py-2 text-right text-secondary-700 relative',
+                        booking.status !== BookingStatus.CANCELLED && 'group/price cursor-pointer hover:bg-primary-50'
+                      )}
+                      onClick={booking.status !== BookingStatus.CANCELLED ? (e) => handleOpenSales(e, booking) : undefined}
                     >
-                      <span className="group-hover/price:hidden">
-                        {booking.price > 0 ? formatPrice(booking.price) : '—'}
-                      </span>
-                      <span className="hidden group-hover/price:inline text-primary-600 text-xs font-medium">
-                        {booking.bookingMeta?.sales_registered
-                          ? t('booking.salesModal.editSales')
-                          : t('booking.salesModal.registerSales')}
-                      </span>
+                      {booking.status === BookingStatus.CANCELLED ? (
+                        <span className="text-secondary-300">—</span>
+                      ) : (
+                        <>
+                          <span className="group-hover/price:hidden">
+                            {booking.price > 0 ? formatPrice(booking.price) : '—'}
+                          </span>
+                          <span className="hidden group-hover/price:inline text-primary-600 text-xs font-medium">
+                            {booking.bookingMeta?.sales_registered
+                              ? t('booking.salesModal.editSales')
+                              : t('booking.salesModal.registerSales')}
+                          </span>
+                        </>
+                      )}
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-secondary-600 text-xs">
                       {booking.paymentMethod

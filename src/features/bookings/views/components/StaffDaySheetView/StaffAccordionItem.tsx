@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { Booking } from '../../../types';
 import { Staff } from '@/features/staff/types';
+import { BookingStatus } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import { StaffBookingTable } from './StaffBookingTable';
 import type { BookingNotificationStatus } from '@/app/api/salons/[salonId]/bookings/notification-status/route';
@@ -67,7 +68,11 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
   const bookingCount = Object.keys(bookingsByTime).length;
 
   const totalPrice = useMemo(
-    () => Object.values(bookingsByTime).reduce((sum, b) => sum + (b.price || 0), 0),
+    () =>
+      Object.values(bookingsByTime).reduce(
+        (sum, b) => (b.status === BookingStatus.CANCELLED ? sum : sum + (b.price || 0)),
+        0
+      ),
     [bookingsByTime]
   );
 
