@@ -8,6 +8,7 @@
    =================================== */
 html {
   font-size: 16px; /* PC 기본 (1rem = 16px) */
+  overscroll-behavior: none;
 }
 
 @media (max-width: 640px) {
