@@ -23,10 +23,13 @@ export default function LoginPageView() {
 
   const handleLangModalClose = () => {
     setShowLangModal(false);
-    // 모달 닫힌 후 input 자동 포커스 → 키보드 팝업/줌 방지
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
+    // React 리렌더링 후 브라우저가 input에 자동 포커스하는 것을 차단
+    // setTimeout(0)으로 DOM 업데이트 완료 시점에 blur 실행
+    setTimeout(() => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    }, 0);
   };
   const rememberMeRef = useRef(true); // 로그인 상태 유지 값 저장용
 

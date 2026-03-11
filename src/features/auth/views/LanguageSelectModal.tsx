@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,7 +14,9 @@ export function LanguageSelectModal({ onClose }: LanguageSelectModalProps) {
 
   const selectedLang = LANGUAGES.find((l) => l.code === selected)!;
 
-  const handleConfirm = () => {
+  const handleConfirm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // 버튼 포커스 즉시 해제 → 모달 닫힌 후 input 자동 포커스 전파 차단
+    e.currentTarget.blur();
     router.push(pathname, { locale: selected });
     onClose();
   };
