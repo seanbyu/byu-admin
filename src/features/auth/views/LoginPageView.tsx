@@ -20,6 +20,14 @@ export default function LoginPageView() {
   const { login } = useAuthStore();
   const [error, setError] = useState('');
   const [showLangModal, setShowLangModal] = useState(true);
+
+  const handleLangModalClose = () => {
+    setShowLangModal(false);
+    // 모달 닫힌 후 input 자동 포커스 → 키보드 팝업/줌 방지
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
   const rememberMeRef = useRef(true); // 로그인 상태 유지 값 저장용
 
   const {
@@ -75,7 +83,7 @@ export default function LoginPageView() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 px-4 relative">
-      {showLangModal && <LanguageSelectModal onClose={() => setShowLangModal(false)} />}
+      {showLangModal && <LanguageSelectModal onClose={handleLangModalClose} />}
       <LanguageSwitcher className="absolute top-4 right-4" />
       <div className="max-w-md w-full">
         {/* Logo */}
