@@ -7,7 +7,10 @@ import { Input } from '@/components/ui/Input';
 
 interface CreateProductCategoryFormProps {
   categoriesCount: number;
-  onCreateCategory: (data: { name: string; displayOrder: number }) => Promise<void>;
+  onCreateCategory: (data: {
+    name: string;
+    displayOrder: number;
+  }) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -44,7 +47,12 @@ export default function CreateProductCategoryForm({
         <Button size="sm" className="h-10 sm:h-9" onClick={handleCreate}>
           {t('common.save')}
         </Button>
-        <Button size="sm" className="h-10 sm:h-9" variant="ghost" onClick={onCancel}>
+        <Button
+          size="sm"
+          className="h-10 sm:h-9"
+          variant="ghost"
+          onClick={onCancel}
+        >
           {t('common.cancel')}
         </Button>
       </div>
