@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/Select';
 import { Plus } from 'lucide-react';
 import { useMenuMutations } from '../../hooks/useSalonMenus';
 import { SalonMenu } from '../../types';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   DndContext,
   closestCenter,
@@ -57,6 +58,7 @@ export default function MenuItems({
   canDelete = true,
 }: MenuItemsProps) {
   const t = useTranslations('menu');
+  const toast = useToast();
   const { createMenu, deleteMenu, reorderMenus } = useMenuMutations(salonId, categoryId);
 
   // 서버 데이터 정렬 (useEffect 없이 동기적으로 파생)
@@ -80,13 +82,15 @@ export default function MenuItems({
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
@@ -94,15 +98,21 @@ export default function MenuItems({
       const newIndex = orderedMenus.findIndex((item) => item.id === over?.id);
       const newOrder = arrayMove(orderedMenus, oldIndex, newIndex);
 
-      setDragOrderedMenus(newOrder); // 낙관적 순서 업데이트
+      setDragOrderedMenus(newOrder);
 
       const menusToUpdate = newOrder.map((menu, index) => ({
         id: menu.id,
         display_order: index,
       }));
 
-      await reorderMenus(menusToUpdate);
-      setDragOrderedMenus(null); // API 완료 후 서버 데이터로 복귀
+      // Optimistic: 즉시 토스트, 백그라운드 API 호출
+      toast.success(t('success.orderSaved'));
+      reorderMenus(menusToUpdate)
+        .then(() => setDragOrderedMenus(null))
+        .catch(() => {
+          setDragOrderedMenus(null);
+          toast.error(t('errors.orderChangeFailed'));
+        });
     }
   };
 

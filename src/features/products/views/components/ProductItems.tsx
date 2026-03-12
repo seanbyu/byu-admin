@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Plus } from 'lucide-react';
 import { useProductMutations } from '../../hooks/useProducts';
 import { Product } from '../../types';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   DndContext,
   closestCenter,
@@ -53,6 +54,7 @@ export default function ProductItems({
 }: ProductItemsProps) {
   const t = useTranslations('product');
   const tc = useTranslations('menu');
+  const toast = useToast();
   const { createProduct, deleteProduct, reorderProducts } = useProductMutations(salonId, categoryId);
 
   const [orderedProducts, setOrderedProducts] = React.useState<Product[]>([]);
@@ -73,28 +75,33 @@ export default function ProductItems({
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      setOrderedProducts((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
-        const newOrder = arrayMove(items, oldIndex, newIndex);
+      const oldIndex = orderedProducts.findIndex((item) => item.id === active.id);
+      const newIndex = orderedProducts.findIndex((item) => item.id === over?.id);
+      const newOrder = arrayMove(orderedProducts, oldIndex, newIndex);
 
-        const productsToUpdate = newOrder.map((product, index) => ({
-          id: product.id,
-          display_order: index,
-        }));
-        reorderProducts(productsToUpdate);
+      setOrderedProducts(newOrder);
 
-        return newOrder;
+      const productsToUpdate = newOrder.map((product, index) => ({
+        id: product.id,
+        display_order: index,
+      }));
+
+      // Optimistic: 즉시 토스트, 백그라운드 API 호출
+      toast.success(tc('success.orderSaved'));
+      reorderProducts(productsToUpdate).catch(() => {
+        toast.error(tc('errors.orderChangeFailed'));
       });
     }
   };

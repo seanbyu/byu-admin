@@ -53,7 +53,8 @@
   },
   "success": {
     "industryAdded": "업종이 추가되었습니다. 직원 관리 메뉴에서 해당 업종의 기본 직급이 자동으로 생성되었는지 확인해보세요.",
-    "industrySettingsComplete": "업종 설정이 완료되었습니다."
+    "industrySettingsComplete": "업종 설정이 완료되었습니다.",
+    "orderSaved": "순서가 변경되었습니다."
   },
   "unit": {
     "minutes": "분",

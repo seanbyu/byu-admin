@@ -53,7 +53,8 @@
   },
   "success": {
     "industryAdded": "Industry added. Please check if default positions were created in Staff Management.",
-    "industrySettingsComplete": "Industry settings saved."
+    "industrySettingsComplete": "Industry settings saved.",
+    "orderSaved": "Order updated."
   },
   "unit": {
     "minutes": "min",
