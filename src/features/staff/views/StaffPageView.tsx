@@ -91,7 +91,7 @@ export default function StaffPageView() {
         <StaffPageHeader
           isAdmin={isAdmin}
           onInviteClick={pageState.openInviteModal}
-          canAddStaff={canWriteStaff}
+          canAddStaff={isAdmin}
         />
 
         {/* Staff Table */}
