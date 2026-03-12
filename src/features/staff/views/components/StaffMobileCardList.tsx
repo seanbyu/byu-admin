@@ -74,7 +74,6 @@ function StaffMobileActionSheet({
   const isProtectedRole =
     staff.role === 'SUPER_ADMIN' || staff.role === 'ADMIN';
   const canManageResignation =
-    isAdmin &&
     !isProtectedRole &&
     (isResigned
       ? Boolean(onCancelResignation)
@@ -225,7 +224,6 @@ export const StaffMobileCardList = memo(function StaffMobileCardList({
           const isProtectedRole =
             member.role === 'SUPER_ADMIN' || member.role === 'ADMIN';
           const canManageResignation =
-            isAdmin &&
             !isProtectedRole &&
             (isResigned
               ? Boolean(onCancelResignation)

@@ -166,7 +166,7 @@ export const StaffTableRow = memo(function StaffTableRow({
         {member.role === 'ADMIN' || member.role === 'SUPER_ADMIN' ? '-' : formatDate(member.createdAt)}
       </td>
       <td className="px-6 py-4 text-center">
-        {isAdmin && member.role !== 'SUPER_ADMIN' && member.role !== 'ADMIN' ? (
+        {member.role !== 'SUPER_ADMIN' && member.role !== 'ADMIN' ? (
           isResigned ? (
             // 퇴사 예정 직원: 취소 버튼 표시
             onCancelResignation ? (
