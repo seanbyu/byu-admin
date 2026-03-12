@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { ModalActions } from '@/components/ui/ModalActions';
 import { Spinner } from '@/components/ui/Spinner';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -149,14 +150,24 @@ export function ShopSettingsModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t('booking.shopSettingsModal.title')} size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t('booking.shopSettingsModal.title')}
+      size="lg"
+      footer={
+        !isLoading ? (
+          <ModalActions onCancel={onClose} onSave={handleSave} isSaving={isSaving} />
+        ) : undefined
+      }
+    >
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Spinner size="lg" />
         </div>
       ) : (
         <>
-          <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+          <div className="space-y-6">
             {/* 영업 시간 설정 */}
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 mb-4">
@@ -320,15 +331,6 @@ export function ShopSettingsModal({
             </div>
           </div>
 
-          {/* 하단 버튼 */}
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-secondary-200">
-            <Button variant="outline" onClick={onClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? t('common.saving') : t('common.save')}
-            </Button>
-          </div>
         </>
       )}
     </Modal>

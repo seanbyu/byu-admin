@@ -28,10 +28,10 @@ export const StaffPageHeader = memo(function StaffPageHeader({
   return (
     <div className="flex flex-col gap-2 md:gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
-        <h1 className="text-base sm:text-lg md:text-xl xl:text-xl font-bold text-secondary-900">
+        <h1 className="text-h1">
           {t('title')}
         </h1>
-        <div className="mt-1.5 sm:mt-2 text-xs md:text-sm text-secondary-600">
+        <div className="mt-1.5 sm:mt-2 text-body">
           <p className="md:hidden">• {t(GUIDE_MESSAGE_KEYS[0])}</p>
           <div className="hidden md:block space-y-1">
             {GUIDE_MESSAGE_KEYS.map((key) => (

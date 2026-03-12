@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useMutation } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { ModalActions } from '@/components/ui/ModalActions';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { supabase } from '@/lib/supabase/client';
@@ -204,8 +205,17 @@ function CreateStaffModal({
       onClose={onClose}
       title={t('staff.createModal.title')}
       size="md"
+      footer={
+        <ModalActions
+          onCancel={onClose}
+          formId="create-staff-form"
+          saveLabel={t('staff.createModal.createAccount')}
+          isSaving={createStaffMutation.isPending}
+          saveDisabled={isLimitReached}
+        />
+      }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form id="create-staff-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="bg-primary-50 p-3 rounded-md text-sm text-primary-700 mb-4">
           <p className="font-semibold">
             {t('staff.createModal.currentCount')}: {currentStaffCount} / {MAX_FREE_STAFF}
@@ -321,25 +331,6 @@ function CreateStaffModal({
           </div>
         )}
 
-        {/* 버튼 */}
-        <div className="flex justify-end pt-4 space-x-3">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={onClose}
-            disabled={createStaffMutation.isPending}
-          >
-            {t('common.cancel')}
-          </Button>
-          <Button
-            variant="primary"
-            type="submit"
-            disabled={isLimitReached}
-            isLoading={createStaffMutation.isPending}
-          >
-            {t('staff.createModal.createAccount')}
-          </Button>
-        </div>
       </form>
     </Modal>
   );

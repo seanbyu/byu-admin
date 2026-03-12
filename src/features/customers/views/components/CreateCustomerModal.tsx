@@ -3,10 +3,10 @@
 import { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
+import { ModalActions } from '@/components/ui/ModalActions';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
-import { Button } from '@/components/ui/Button';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { Spinner } from '@/components/ui/Spinner';
 import { useTranslations } from 'next-intl';
@@ -223,13 +223,22 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
   const isInitialLoading = isLoadingStaff || isLoadingNextNumber;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t('customer.create.title')}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t('customer.create.title')}
+      footer={
+        !isInitialLoading ? (
+          <ModalActions onCancel={onClose} formId="create-customer-form" isSaving={isCreating} />
+        ) : undefined
+      }
+    >
       {isInitialLoading ? (
         <div className="flex items-center justify-center py-12">
           <Spinner size="lg" />
         </div>
       ) : (
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="create-customer-form" onSubmit={handleSubmit} className="space-y-4">
         {/* 고객 이름 */}
         <div>
           <label className="block text-sm font-medium text-secondary-700 mb-1">
@@ -394,15 +403,6 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
           />
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button type="button" variant="outline" onClick={onClose}>
-            {t('common.cancel')}
-          </Button>
-          <Button type="submit" isLoading={isCreating}>
-            {t('common.save')}
-          </Button>
-        </div>
       </form>
       )}
     </Modal>

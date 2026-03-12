@@ -44,6 +44,7 @@ export function getErrorCode(error: unknown): string | undefined {
 
 class ApiClient {
   private baseUrl: string;
+  private static readonly SESSION_TIMEOUT_MS = 1500;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -61,9 +62,9 @@ class ApiClient {
         return session?.access_token ?? null;
       });
 
-      // 10초 이내 응답 없으면 null 반환 (토큰 갱신 네트워크 지연 대비)
+      // 세션 조회 지연 시 API 전체가 멈추지 않도록 짧은 타임아웃 적용
       const timeoutPromise = new Promise<null>((resolve) =>
-        setTimeout(() => resolve(null), 10000)
+        setTimeout(() => resolve(null), ApiClient.SESSION_TIMEOUT_MS)
       );
 
       return await Promise.race([sessionPromise, timeoutPromise]);

@@ -33,7 +33,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={cn(
             // Base styles
             'w-full px-3 py-2 text-sm',
-            'border rounded-lg',
+            'bg-white border rounded-lg',
             'text-secondary-900 placeholder:text-secondary-400',
             'transition-colors duration-fast',
             // Focus styles

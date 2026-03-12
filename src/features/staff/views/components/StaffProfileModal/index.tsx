@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
+import { ModalActions } from '@/components/ui/ModalActions';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { useStaffPositions } from '../../../hooks/useStaffPositions';
@@ -135,8 +135,15 @@ function StaffProfileModal({
       onClose={onClose}
       title={`${staff.name} ${t('staff.profile')}`}
       size="lg"
+      footer={
+        <ModalActions
+          onCancel={onClose}
+          formId="staff-profile-form"
+          isSaving={isSaving || isCreating}
+        />
+      }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form id="staff-profile-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* 이름 */}
         <Input
           label={t('staff.profileModal.name')}
@@ -220,19 +227,6 @@ function StaffProfileModal({
           onChange={handleSocialLinkChange}
         />
 
-        {/* 버튼 */}
-        <div className="flex justify-end space-x-3 pt-4 border-t border-secondary-200 mt-6">
-          <Button variant="outline" type="button" onClick={onClose} disabled={isSaving}>
-            {t('common.cancel')}
-          </Button>
-          <Button
-            variant="primary"
-            type="submit"
-            isLoading={isSaving || isCreating}
-          >
-            {t('common.save')}
-          </Button>
-        </div>
       </form>
     </Modal>
   );

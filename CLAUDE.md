@@ -162,6 +162,16 @@ z-dropdown(1000) z-sticky(1020) z-fixed(1030)
 z-modal-backdrop(1040) z-modal(1050) z-popover(1060) z-tooltip(1070)
 ```
 
+### 크로스 브라우저 CSS 규칙
+- **CSS는 항상 최상위(`globals.css` 또는 디자인 토큰 변수)에서 참조하여 적용한다** — 컴포넌트 내 인라인 스타일 또는 임의 값 직접 작성 금지
+- **iOS Safari / Android Chrome / 데스크톱 Chrome·Firefox 동시 지원** 을 기본으로 한다
+- `type="date"` / `type="time"` 등 네이티브 입력 요소는 반드시 `bg-white` 명시 — iOS Safari는 부모 배경을 투과해 보여줌
+- 플렉스·그리드 레이아웃에서 iOS 구버전 호환이 필요하면 `-webkit-` 벤더 프리픽스 포함
+- 스크롤 관련: `-webkit-overflow-scrolling: touch` 대신 `overscroll-behavior` 사용
+- 입력 요소 포커스 시 iOS 자동 줌 방지 — `font-size` 최소 16px (또는 `touch-action: manipulation`)
+- `-webkit-appearance: none` 은 네이티브 날짜 picker가 필요한 경우 사용 금지 — 대신 스타일 오버라이드로 처리
+- CSS 변수(`var(--*)`) 사용 시 반드시 fallback 값 제공: `var(--color-primary, #3182f6)`
+
 ---
 
 ## i18n 규칙

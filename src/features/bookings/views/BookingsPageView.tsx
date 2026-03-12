@@ -242,10 +242,10 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
         {/* 헤더 */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-secondary-900">
+            <h1 className="text-h1">
               {t(isChart ? 'booking.chartTitle' : 'booking.title')}
             </h1>
-            <p className="text-sm md:text-base text-secondary-600 mt-1">
+            <p className="text-body mt-1">
               {t(isChart ? 'booking.chartDescription' : 'booking.pageDescription')}
             </p>
           </div>

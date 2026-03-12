@@ -29,10 +29,10 @@ export default function ProductsPageView() {
     <div className="p-3 sm:p-4 md:p-6 xl:p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-3 md:mb-5 xl:mb-6">
-        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-secondary-900">
+        <h1 className="text-h1">
           {t('title')}
         </h1>
-        <p className="text-xs sm:text-sm text-secondary-500 mt-1">
+        <p className="text-body mt-1">
           {t('pageDescription')}
         </p>
       </div>

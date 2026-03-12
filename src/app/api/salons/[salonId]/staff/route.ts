@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { StaffService } from '@/lib/api-core';
 import { checkPermission } from '@/lib/server/checkPermission';
-import { unstable_cache, revalidateTag } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 
 export async function GET(
   req: NextRequest,
@@ -75,7 +75,6 @@ export async function POST(
         );
     }
 
-    revalidateTag(`staff-${salonId}`);
     return NextResponse.json({ success: true, data: result });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal Server Error';

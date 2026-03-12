@@ -42,14 +42,15 @@ export function useStaffPositions(
   // Create mutation with optimistic update
   const createMutation = useMutation({
     mutationFn: (dto: CreatePositionDto) => positionApi.create(salonId, dto),
+    retry: 0,
 
     onMutate: async (newPosition) => {
       await queryClient.cancelQueries({ queryKey });
-      const previousData = queryClient.getQueryData<StaffPosition[]>(queryKey);
+      const previousData = queryClient.getQueryData(queryKey);
 
       // Optimistic: 임시 ID로 추가
-      queryClient.setQueryData<StaffPosition[]>(queryKey, (old) => {
-        if (!old) return old;
+      queryClient.setQueryData(queryKey, (old: unknown) => {
+        if (!Array.isArray(old)) return old;
         const tempPosition: StaffPosition = {
           id: `temp-${Date.now()}`,
           salonId,
@@ -76,13 +77,14 @@ export function useStaffPositions(
   const updateMutation = useMutation({
     mutationFn: ({ positionId, dto }: UpdatePositionParams) =>
       positionApi.update(positionId, dto),
+    retry: 0,
 
     onMutate: async ({ positionId, dto }) => {
       await queryClient.cancelQueries({ queryKey });
-      const previousData = queryClient.getQueryData<StaffPosition[]>(queryKey);
+      const previousData = queryClient.getQueryData(queryKey);
 
-      queryClient.setQueryData<StaffPosition[]>(queryKey, (old) => {
-        if (!old) return old;
+      queryClient.setQueryData(queryKey, (old: unknown) => {
+        if (!Array.isArray(old)) return old;
         return old.map((pos) =>
           pos.id === positionId
             ? { ...pos, ...dto, updatedAt: new Date() }
@@ -105,13 +107,14 @@ export function useStaffPositions(
   // Delete mutation with optimistic update
   const deleteMutation = useMutation({
     mutationFn: (positionId: string) => positionApi.delete(positionId),
+    retry: 0,
 
     onMutate: async (positionId) => {
       await queryClient.cancelQueries({ queryKey });
-      const previousData = queryClient.getQueryData<StaffPosition[]>(queryKey);
+      const previousData = queryClient.getQueryData(queryKey);
 
-      queryClient.setQueryData<StaffPosition[]>(queryKey, (old) => {
-        if (!old) return old;
+      queryClient.setQueryData(queryKey, (old: unknown) => {
+        if (!Array.isArray(old)) return old;
         return old.filter((pos) => pos.id !== positionId);
       });
 

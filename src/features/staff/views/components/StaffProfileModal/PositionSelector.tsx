@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronDown, Plus, X, Pencil, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { useToast } from '@/components/ui/ToastProvider';
 import { StaffPosition } from '../../../types';
 import { PositionSelectorProps } from './types';
 
@@ -20,6 +21,7 @@ export const PositionSelector = memo(function PositionSelector({
   isDeleting,
 }: PositionSelectorProps) {
   const t = useTranslations();
+  const toast = useToast();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [showDropdown, setShowDropdown] = useState(false);
@@ -107,10 +109,11 @@ export const PositionSelector = memo(function PositionSelector({
       setNewPositionName('');
       setNewPositionNameEn('');
       setNewPositionNameTh('');
+      toast.success(t('staff.profileModal.position.saved'));
     } catch (error) {
       console.error('Failed to create position:', error);
     }
-  }, [newPositionName, newPositionNameEn, newPositionNameTh, positions.length, onCreatePosition, onSelect]);
+  }, [newPositionName, newPositionNameEn, newPositionNameTh, positions.length, onCreatePosition, onSelect, toast, t]);
 
   const handleStartEdit = useCallback((e: React.MouseEvent, position: StaffPosition) => {
     e.stopPropagation();
@@ -141,10 +144,11 @@ export const PositionSelector = memo(function PositionSelector({
         },
       });
       setIsEditingPosition(null);
+      toast.success(t('staff.profileModal.position.saved'));
     } catch (error) {
       console.error('Failed to update position:', error);
     }
-  }, [isEditingPosition, editPositionName, editPositionNameEn, editPositionNameTh, onUpdatePosition]);
+  }, [isEditingPosition, editPositionName, editPositionNameEn, editPositionNameTh, onUpdatePosition, toast, t]);
 
   const handleDeleteClick = useCallback((e: React.MouseEvent, position: StaffPosition) => {
     e.stopPropagation();

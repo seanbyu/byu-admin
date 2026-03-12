@@ -289,7 +289,7 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-secondary-900 md:text-xl">
+          <h1 className="text-h1">
             {t('customer.detail.title')}
           </h1>
         </div>

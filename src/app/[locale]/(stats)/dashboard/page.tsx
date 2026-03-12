@@ -90,13 +90,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Welcome */}
       <div>
-        <h1 className="text-3xl font-bold text-secondary-900">
+        <h1 className="text-h1">
           {t('nav.dashboard')}
         </h1>
-        <p className="text-secondary-600 mt-1">
+        <p className="text-body mt-1">
           {t('common.dashboard.welcome', { name: user?.name || '' })}
         </p>
       </div>
@@ -109,11 +109,11 @@ export default function DashboardPage() {
             <Card key={index}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-secondary-600 mb-1">{stat.title}</p>
-                  <p className="text-2xl font-bold text-secondary-900">{stat.value}</p>
+                  <p className="text-body mb-1">{stat.title}</p>
+                  <p className="text-h2">{stat.value}</p>
                 </div>
-                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
+                <div className={`p-2 sm:p-3 rounded-lg ${stat.bgColor}`}>
+                  <Icon className={`w-4 h-4 sm:w-6 sm:h-6 ${stat.color}`} />
                 </div>
               </div>
             </Card>
@@ -128,9 +128,9 @@ export default function DashboardPage() {
           return (
             <Card key={index}>
               <div className="flex items-center">
-                <Icon className={`w-8 h-8 ${stat.color} mr-4`} />
+                <Icon className={`w-5 h-5 sm:w-8 sm:h-8 ${stat.color} mr-3 sm:mr-4`} />
                 <div>
-                  <p className="text-sm text-secondary-600">{stat.title}</p>
+                  <p className="text-body">{stat.title}</p>
                   <p className="text-xl font-bold text-secondary-900">
                     {stat.value} {t('common.dashboard.cases')}
                   </p>
@@ -144,7 +144,10 @@ export default function DashboardPage() {
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 오늘 최근 예약 */}
-        <Card title={t('common.dashboard.recentBookings')} className="h-full">
+        <Card className="h-full">
+          <h3 className="text-h4 mb-3">
+            {t('common.dashboard.recentBookings')}
+          </h3>
           {recentBookings.length === 0 ? (
             <EmptyState message={t('booking.noBookings')} size="sm" />
           ) : (
@@ -155,7 +158,7 @@ export default function DashboardPage() {
                   className="flex items-center justify-between py-3 border-b border-secondary-100 last:border-0"
                 >
                   <div>
-                    <p className="font-medium text-secondary-900">{booking.customerName}</p>
+                    <p className="text-base font-medium text-secondary-900">{booking.customerName}</p>
                     <p className="text-sm text-secondary-500">
                       {booking.serviceName} · {booking.staffName}
                     </p>
@@ -171,7 +174,10 @@ export default function DashboardPage() {
         </Card>
 
         {/* 이번 달 상위 직원 */}
-        <Card title={t('common.dashboard.topStaffThisMonth')} className="h-full">
+        <Card className="h-full">
+          <h3 className="text-h4 mb-3">
+            {t('common.dashboard.topStaffThisMonth')}
+          </h3>
           {topStaff.length === 0 ? (
             <EmptyState message={t('common.noData')} size="sm" />
           ) : (
@@ -186,7 +192,7 @@ export default function DashboardPage() {
                       <span className="text-sm font-semibold text-primary-700">{index + 1}</span>
                     </div>
                     <div>
-                      <p className="font-medium text-secondary-900">{staff.staffName}</p>
+                      <p className="text-base font-medium text-secondary-900">{staff.staffName}</p>
                       <p className="text-sm text-secondary-500">
                         {staff.count} {t('common.dashboard.cases')}
                       </p>

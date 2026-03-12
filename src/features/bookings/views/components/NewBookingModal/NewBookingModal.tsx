@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { ModalActions } from '@/components/ui/ModalActions';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -211,8 +212,27 @@ function NewBookingModalComponent({
         onClose={handleClose}
         title={isEditMode ? t('booking.detail') : t('booking.new')}
         size="lg"
+        footer={
+          canWriteBooking ? (
+            <ModalActions
+              onCancel={handleClose}
+              cancelDisabled={isLoading}
+              formId="new-booking-form"
+              isSaving={isLoading}
+              destructiveAction={
+                isEditMode && canDeleteBooking ? (
+                  <Button variant="danger" type="button" onClick={() => setShowDeleteConfirm(true)} disabled={isLoading}>
+                    {t('common.delete')}
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : (
+            <ModalActions onCancel={handleClose} cancelDisabled={isLoading} />
+          )
+        }
       >
-        <form className="space-y-4 text-secondary-800" onSubmit={bookingSave.handleSubmit}>
+        <form id="new-booking-form" className="space-y-4 text-secondary-800" onSubmit={bookingSave.handleSubmit}>
           {/* 고객 정보 섹션 */}
           <CustomerSection
             customerName={form.customerName}
@@ -324,37 +344,6 @@ function NewBookingModalComponent({
             />
           </div>
 
-          {/* 버튼 */}
-          <div className="flex items-center justify-between pt-4">
-            {/* 삭제 버튼 (수정 모드 + 삭제 권한이 있을 때만 표시) */}
-            <div>
-              {isEditMode && canDeleteBooking && (
-                <Button
-                  variant="danger"
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={isLoading}
-                >
-                  {t('common.delete')}
-                </Button>
-              )}
-            </div>
-            <div className="flex space-x-3">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={handleClose}
-                disabled={isLoading}
-              >
-                {t('common.cancel')}
-              </Button>
-              {canWriteBooking && (
-                <Button variant="primary" type="submit" disabled={isLoading}>
-                  {isLoading ? t('common.saving') : t('common.save')}
-                </Button>
-              )}
-            </div>
-          </div>
         </form>
       </Modal>
 

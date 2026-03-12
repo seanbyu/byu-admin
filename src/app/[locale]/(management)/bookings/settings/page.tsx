@@ -37,10 +37,10 @@ export default function OnlineBookingSettingsPage() {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-secondary-900">
+        <h1 className="text-h1">
           {t('nav.onlineBookingSettings')}
         </h1>
-        <p className="text-sm text-secondary-600 mt-2">
+        <p className="text-body mt-2">
           {t('booking.settings.description')}
         </p>
       </div>

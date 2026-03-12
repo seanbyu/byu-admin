@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { ModalActions } from '@/components/ui/ModalActions';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -156,6 +157,25 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
             : t('booking.salesModal.title')
         }
         size="sm"
+        footer={
+          canWriteSales ? (
+            <ModalActions
+              onCancel={onClose}
+              onSave={handleSave}
+              saveLabel={isSalesRegistered ? t('booking.salesModal.editSales') : t('booking.salesModal.registerSales')}
+              saveDisabled={selectedServiceIds.length === 0}
+              destructiveAction={
+                isSalesRegistered && canDeleteSales ? (
+                  <Button variant="danger" type="button" onClick={() => setShowDeleteConfirm(true)}>
+                    {t('booking.salesModal.deleteSales')}
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : (
+            <ModalActions onCancel={onClose} />
+          )
+        }
       >
         <div className="space-y-4 text-secondary-800">
           {/* 예약 정보 헤더 */}
@@ -347,37 +367,6 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
             </span>
           </div>
 
-          {/* 버튼 */}
-          <div
-            className={`flex ${isSalesRegistered && canDeleteSales ? 'justify-between' : 'justify-end'} pt-2`}
-          >
-            {isSalesRegistered && canDeleteSales && (
-              <Button
-                variant="danger"
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                {t('booking.salesModal.deleteSales')}
-              </Button>
-            )}
-            <div className="flex space-x-3">
-              <Button variant="outline" type="button" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              {canWriteSales && (
-                <Button
-                  variant="primary"
-                  type="button"
-                  onClick={handleSave}
-                  disabled={selectedServiceIds.length === 0}
-                >
-                  {isSalesRegistered
-                    ? t('booking.salesModal.editSales')
-                    : t('booking.salesModal.registerSales')}
-                </Button>
-              )}
-            </div>
-          </div>
         </div>
       </Modal>
 

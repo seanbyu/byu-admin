@@ -3,7 +3,7 @@
 import { memo, useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
+import { ModalActions } from '@/components/ui/ModalActions';
 import { Input } from '@/components/ui/Input';
 import { Product, ProductFormData } from '../../types';
 
@@ -67,6 +67,14 @@ export const ProductFormModal = memo(function ProductFormModal({
       onClose={onClose}
       title={isEdit ? t('product.editProduct') : t('product.addProduct')}
       size="sm"
+      footer={
+        <ModalActions
+          onCancel={onClose}
+          onSave={handleSubmit}
+          isSaving={isLoading}
+          saveDisabled={!name.trim()}
+        />
+      }
     >
       <div className="space-y-4">
         {/* 제품명 */}
@@ -134,20 +142,6 @@ export const ProductFormModal = memo(function ProductFormModal({
           </button>
         </div>
 
-        {/* 버튼 */}
-        <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outline" type="button" onClick={onClose}>
-            {t('common.cancel')}
-          </Button>
-          <Button
-            variant="primary"
-            type="button"
-            onClick={handleSubmit}
-            disabled={!name.trim() || isLoading}
-          >
-            {t('common.save')}
-          </Button>
-        </div>
       </div>
     </Modal>
   );

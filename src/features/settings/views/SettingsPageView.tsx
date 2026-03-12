@@ -194,7 +194,7 @@ export default function SettingsPageView({ initialTab = 'account' }: SettingsPag
     <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="px-1">
-          <h1 className="text-xl sm:text-2xl font-bold text-secondary-900">
+          <h1 className="text-h1">
             {t('settings.title')}
           </h1>
         </div>

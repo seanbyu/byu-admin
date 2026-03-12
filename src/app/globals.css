@@ -228,34 +228,46 @@ html {
 
   /* Heading 1 */
   .text-h1 {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-base); /* 모바일: 14px */
     font-weight: var(--font-weight-bold);
     line-height: var(--line-height-tight);
     @apply text-secondary-900;
+    @media (min-width: 640px) {
+      font-size: var(--font-size-3xl); /* sm+: 30px */
+    }
   }
 
   /* Heading 2 */
   .text-h2 {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-base); /* 모바일: 14px */
     font-weight: var(--font-weight-bold);
     line-height: var(--line-height-snug);
     @apply text-secondary-900;
+    @media (min-width: 640px) {
+      font-size: var(--font-size-2xl); /* sm+: 24px */
+    }
   }
 
   /* Heading 3 */
   .text-h3 {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-sm); /* 모바일: 12.25px */
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-snug);
     @apply text-secondary-900;
+    @media (min-width: 640px) {
+      font-size: var(--font-size-xl); /* sm+: 20px */
+    }
   }
 
   /* Heading 4 */
   .text-h4 {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-sm); /* 모바일: 12.25px */
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-normal);
     @apply text-secondary-900;
+    @media (min-width: 640px) {
+      font-size: var(--font-size-lg); /* sm+: 18px */
+    }
   }
 
   /* Body Large */

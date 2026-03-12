@@ -531,10 +531,10 @@ export const CustomerPageHeader = memo(function CustomerPageHeader({
       {/* Title and Add Button */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-secondary-900 sm:text-2xl lg:text-3xl">
+          <h1 className="text-h1">
             {t('customer.title')}
           </h1>
-          <p className="mt-1 text-sm text-secondary-600 sm:text-base">
+          <p className="mt-1 text-body">
             {t('customer.pageDescription')}
           </p>
         </div>
