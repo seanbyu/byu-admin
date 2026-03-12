@@ -57,9 +57,9 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+      <div className="relative flex items-center space-x-2 sm:space-x-3 md:space-x-4">
         {/* Notification — 모바일/태블릿: 드롭다운, 데스크톱(xl+): 차트 이동 */}
-        <div className="relative xl:hidden">
+        <div className="xl:hidden">
           <button
             onClick={() => setShowNotifMenu((prev) => !prev)}
             className="relative flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
@@ -72,11 +72,8 @@ export const Header: React.FC = () => {
               </span>
             )}
           </button>
-          {showNotifMenu && (
-            <HeaderNotificationDropdown onClose={() => setShowNotifMenu(false)} />
-          )}
         </div>
-        <div className="relative hidden xl:block">
+        <div className="hidden xl:block">
           <button
             onClick={() => setShowNotifMenu((prev) => !prev)}
             className="relative flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
@@ -89,10 +86,10 @@ export const Header: React.FC = () => {
               </span>
             )}
           </button>
-          {showNotifMenu && (
-            <HeaderNotificationDropdown onClose={() => setShowNotifMenu(false)} />
-          )}
         </div>
+        {showNotifMenu && (
+          <HeaderNotificationDropdown onClose={() => setShowNotifMenu(false)} />
+        )}
 
         {/* Language selector */}
         <div className="relative">

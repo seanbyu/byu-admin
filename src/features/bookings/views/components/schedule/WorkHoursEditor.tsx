@@ -46,7 +46,7 @@ export function WorkHoursEditor({
               {/* 요일 */}
               <span
                 className={cn(
-                  'w-10 flex-shrink-0 text-sm font-medium',
+                  'w-12 flex-shrink-0 text-sm font-medium',
                   wh.dayOfWeek === 0
                     ? 'text-error-500'
                     : wh.dayOfWeek === 6
@@ -70,7 +70,7 @@ export function WorkHoursEditor({
                       onChange={(e) => onTimeChange(wh.dayOfWeek, 'openTime', e.target.value)}
                       options={TIME_OPTIONS}
                       showPlaceholder={false}
-                      className="h-8 w-[80px] px-2 py-1 text-sm rounded-md"
+                      className="h-8 w-[72px] sm:w-[80px] px-2 py-1 text-sm rounded-md"
                     />
                     <span className="text-secondary-400 text-xs">~</span>
                     <Select
@@ -78,7 +78,7 @@ export function WorkHoursEditor({
                       onChange={(e) => onTimeChange(wh.dayOfWeek, 'closeTime', e.target.value)}
                       options={TIME_OPTIONS}
                       showPlaceholder={false}
-                      className="h-8 w-[80px] px-2 py-1 text-sm rounded-md"
+                      className="h-8 w-[72px] sm:w-[80px] px-2 py-1 text-sm rounded-md"
                     />
                   </div>
                 ) : (

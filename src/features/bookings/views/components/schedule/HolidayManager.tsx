@@ -45,8 +45,8 @@ export function HolidayManager({
       {/* 입력 폼 */}
       <div className="p-4 space-y-3 bg-secondary-50">
         {/* 날짜 2열 */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="min-w-0">
             <label className="block text-xs font-medium text-secondary-600 mb-1">
               {t('common.form.startDate')}
             </label>
@@ -56,10 +56,10 @@ export function HolidayManager({
               onChange={(e) =>
                 setNewHoliday((prev) => ({ ...prev, startDate: e.target.value }))
               }
-              className="h-9 px-2 text-sm"
+              className="h-9 px-2 text-sm min-w-0"
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label className="block text-xs font-medium text-secondary-600 mb-1">
               {t('common.form.endDate')}
             </label>
@@ -70,7 +70,7 @@ export function HolidayManager({
               onChange={(e) =>
                 setNewHoliday((prev) => ({ ...prev, endDate: e.target.value }))
               }
-              className="h-9 px-2 text-sm"
+              className="h-9 px-2 text-sm min-w-0"
             />
           </div>
         </div>
