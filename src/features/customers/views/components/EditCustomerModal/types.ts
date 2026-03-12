@@ -49,6 +49,7 @@ export interface CustomerInfoFormProps {
   showDeleteConfirm: boolean;
   staffList: StaffSelectItem[];
   isLoadingStaff: boolean;
+  canDelete?: boolean;
   onFormDataChange: (data: Partial<CustomerFormData>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onDelete: () => void;

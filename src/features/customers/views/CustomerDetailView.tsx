@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Button } from '@/components/ui/Button';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { ArrowLeft } from 'lucide-react';
 import { useCustomers } from '../hooks/useCustomers';
 import { useStaff } from '@/features/staff/hooks/useStaff';
@@ -62,6 +63,9 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
   const router = useRouter();
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
+
+  const { canDelete } = usePermission();
+  const canDeleteCustomer = canDelete(PermissionModules.CUSTOMERS);
 
   // 고객 목록에서 고객번호로 고객 찾기 (TanStack Query 캐시 활용)
   const { data: listData, isLoading: isLoadingList } = useQuery(
@@ -303,6 +307,7 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
                 showDeleteConfirm={showDeleteConfirm}
                 staffList={eligibleStaff}
                 isLoadingStaff={isLoadingStaff}
+                canDelete={canDeleteCustomer}
                 onFormDataChange={handleFormDataChange}
                 onSubmit={handleSubmit}
                 onDelete={handleDelete}

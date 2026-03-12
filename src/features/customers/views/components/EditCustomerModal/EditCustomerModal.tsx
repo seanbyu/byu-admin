@@ -4,6 +4,7 @@ import { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useCustomers } from '../../../hooks/useCustomers';
 import { useStaff } from '@/features/staff/hooks/useStaff';
 import type { UpdateCustomerDto } from '../../../types';
@@ -31,6 +32,9 @@ export const EditCustomerModal = memo(function EditCustomerModal({
   const t = useTranslations();
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
+
+  const { canDelete } = usePermission();
+  const canDeleteCustomer = canDelete(PermissionModules.CUSTOMERS);
 
   const { updateCustomer, isUpdating, deleteCustomer, isDeleting } =
     useCustomers({ salon_id: salonId });
@@ -192,6 +196,7 @@ export const EditCustomerModal = memo(function EditCustomerModal({
             showDeleteConfirm={showDeleteConfirm}
             staffList={eligibleStaff}
             isLoadingStaff={isLoadingStaff}
+            canDelete={canDeleteCustomer}
             onFormDataChange={handleFormDataChange}
             onSubmit={handleSubmit}
             onDelete={handleDelete}

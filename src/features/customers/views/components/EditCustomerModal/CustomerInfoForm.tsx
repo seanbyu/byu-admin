@@ -18,6 +18,7 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
   showDeleteConfirm,
   staffList,
   isLoadingStaff,
+  canDelete = false,
   onFormDataChange,
   onSubmit,
   onDelete,
@@ -180,7 +181,7 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
       </div>
 
       {/* Delete Confirmation */}
-      {showDeleteConfirm && (
+      {canDelete && showDeleteConfirm && (
         <div className="bg-error-50 border border-error-200 rounded-lg p-3">
           <p className="mb-1 text-sm font-semibold text-error-800">
             {t('customer.delete.confirm')}
@@ -214,16 +215,18 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
 
       {/* Actions */}
       <div className="flex items-center justify-between gap-2 pt-2">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => onShowDeleteConfirm(true)}
-          disabled={showDeleteConfirm}
-          className="h-8 px-2 text-xs text-error-600 hover:bg-error-50 hover:text-error-700"
-        >
-          <Trash2 className="w-3.5 h-3.5 mr-1" />
-          {t('customer.delete.button')}
-        </Button>
+        {canDelete && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => onShowDeleteConfirm(true)}
+            disabled={showDeleteConfirm}
+            className="h-8 px-2 text-xs text-error-600 hover:bg-error-50 hover:text-error-700"
+          >
+            <Trash2 className="w-3.5 h-3.5 mr-1" />
+            {t('customer.delete.button')}
+          </Button>
+        )}
         <div className="flex space-x-2">
           <Button
             type="button"
