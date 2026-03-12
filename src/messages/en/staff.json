@@ -177,6 +177,7 @@
     "closed": "Closed",
     "salonClosed": "Salon Closed",
     "reasonPlaceholder": "e.g., Annual leave",
+    "datePlaceholder": "YYYY. MM. DD.",
     "workHoursHint": "Salon closed days are automatically disabled",
     "resetToSalonDefaults": "Reset to Salon Defaults"
   },

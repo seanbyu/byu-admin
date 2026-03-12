@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Holiday } from '@/types';
 import { getTodayString } from '../../../utils';
 
@@ -50,12 +51,12 @@ export function HolidayManager({
             <label className="block text-[11px] font-medium text-secondary-600 mb-1">
               {t('common.form.startDate')}
             </label>
-            <Input
-              type="date"
+            <DatePicker
               value={newHoliday.startDate}
-              onChange={(e) =>
-                setNewHoliday((prev) => ({ ...prev, startDate: e.target.value }))
+              onChange={(date) =>
+                setNewHoliday((prev) => ({ ...prev, startDate: date }))
               }
+              placeholder={t('staff.schedule.datePlaceholder')}
               className="h-9 px-2 text-[13px] min-w-0"
             />
           </div>
@@ -63,13 +64,17 @@ export function HolidayManager({
             <label className="block text-[11px] font-medium text-secondary-600 mb-1">
               {t('common.form.endDate')}
             </label>
-            <Input
-              type="date"
+            <DatePicker
               value={newHoliday.endDate}
-              min={newHoliday.startDate}
-              onChange={(e) =>
-                setNewHoliday((prev) => ({ ...prev, endDate: e.target.value }))
+              minDate={
+                newHoliday.startDate
+                  ? new Date(newHoliday.startDate)
+                  : undefined
               }
+              onChange={(date) =>
+                setNewHoliday((prev) => ({ ...prev, endDate: date }))
+              }
+              placeholder={t('staff.schedule.datePlaceholder')}
               className="h-9 px-2 text-[13px] min-w-0"
             />
           </div>

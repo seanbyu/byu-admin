@@ -177,6 +177,7 @@
     "closed": "휴무",
     "salonClosed": "매장 휴무",
     "reasonPlaceholder": "예: 연차",
+    "datePlaceholder": "연도. 월. 일.",
     "workHoursHint": "매장 휴무일은 자동으로 비활성화됩니다",
     "resetToSalonDefaults": "매장 기본값으로 초기화"
   },

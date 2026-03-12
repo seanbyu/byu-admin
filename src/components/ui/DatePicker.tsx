@@ -5,6 +5,7 @@ import ReactDatePicker, { registerLocale } from 'react-datepicker';
 import { useLocale, useTranslations } from 'next-intl';
 import { ko, enUS, th } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { Calendar } from 'lucide-react';
 import 'react-datepicker/dist/react-datepicker.css';
 
 // 로케일 등록
@@ -63,35 +64,41 @@ export function DatePicker({
           {required && <span className="text-error-500 ml-1">*</span>}
         </label>
       )}
-      <ReactDatePicker
-        selected={selectedDate}
-        onChange={handleChange}
-        locale={locale}
-        dateFormat="yyyy-MM-dd"
-        placeholderText={placeholder || t('common.select')}
-        disabled={disabled}
-        minDate={minDate}
-        maxDate={maxDate}
-        className={cn(
-          // Base styles
-          'w-full px-3 py-2 text-sm',
-          'border rounded-lg',
-          'text-secondary-900 placeholder:text-secondary-400',
-          'transition-colors duration-fast',
-          // Focus styles
-          'focus:outline-none focus:ring-2 focus:border-transparent',
-          // Disabled styles
-          'disabled:bg-secondary-100 disabled:cursor-not-allowed',
-          // Error or default border
-          error
-            ? 'border-error-500 focus:ring-error-500'
-            : 'border-secondary-300 focus:ring-primary-500',
-          className
-        )}
-        wrapperClassName="w-full"
-        showPopperArrow={false}
-        popperPlacement="bottom-start"
-      />
+      <div className="relative">
+        <ReactDatePicker
+          selected={selectedDate}
+          onChange={handleChange}
+          locale={locale}
+          dateFormat="yyyy-MM-dd"
+          placeholderText={placeholder || t('common.select')}
+          disabled={disabled}
+          minDate={minDate}
+          maxDate={maxDate}
+          className={cn(
+            // Base styles
+            'w-full px-3 py-2 pr-9 text-sm',
+            'border rounded-lg',
+            'text-secondary-900 placeholder:text-secondary-400',
+            'transition-colors duration-fast',
+            // Focus styles
+            'focus:outline-none focus:ring-2 focus:border-transparent',
+            // Disabled styles
+            'disabled:bg-secondary-100 disabled:cursor-not-allowed',
+            // Error or default border
+            error
+              ? 'border-error-500 focus:ring-error-500'
+              : 'border-secondary-300 focus:ring-primary-500',
+            className
+          )}
+          wrapperClassName="w-full"
+          showPopperArrow={false}
+          popperPlacement="bottom-start"
+        />
+        <Calendar
+          size={15}
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-secondary-500"
+        />
+      </div>
       {error && <p className="mt-1 text-sm text-error-600">{error}</p>}
     </div>
   );

@@ -177,6 +177,7 @@
     "closed": "ปิด",
     "salonClosed": "ร้านปิด",
     "reasonPlaceholder": "เช่น ลาพักร้อน",
+    "datePlaceholder": "ปี. เดือน. วัน.",
     "workHoursHint": "วันปิดร้านจะถูกปิดใช้งานโดยอัตโนมัติ",
     "resetToSalonDefaults": "รีเซ็ตเป็นค่าเริ่มต้นร้าน"
   },
