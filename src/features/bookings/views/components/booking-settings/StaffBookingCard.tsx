@@ -171,7 +171,7 @@ export const StaffBookingCard = memo(function StaffBookingCard({
   );
 
   const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
+    (event: DragEndEvent) => {
       const { active, over } = event;
       if (!over || active.id === over.id) return;
 
@@ -184,12 +184,13 @@ export const StaffBookingCard = memo(function StaffBookingCard({
         displayOrder: index,
       }));
 
-      try {
-        await updateDisplayOrder(staffOrders);
-        toast.success(t('booking.settings.staffBooking.orderSaved'));
-      } catch {
+      // Optimistic: onMutate에서 캐시가 즉시 업데이트되므로 토스트도 즉시 표시
+      toast.success(t('booking.settings.staffBooking.orderSaved'));
+
+      // 백그라운드 API 호출 — 실패 시에만 에러 토스트
+      updateDisplayOrder(staffOrders).catch(() => {
         toast.error(t('common.error'));
-      }
+      });
     },
     [staffList, updateDisplayOrder, toast, t]
   );
