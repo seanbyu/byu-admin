@@ -94,7 +94,7 @@ export default function LoginPageView() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-full mb-4">
             <Scissors className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-secondary-900">Salon Admin</h1>
+          <h1 className="text-3xl font-bold text-secondary-900">BYU</h1>
           <p className="text-secondary-600 mt-2">{t('subtitle')}</p>
         </div>
 

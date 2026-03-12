@@ -3,6 +3,7 @@
 import React from 'react';
 import { Menu, Globe, Bell } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';
+import { useAuthStore } from '@/store/authStore';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { useRouter, usePathname } from '@/i18n/routing';
@@ -11,6 +12,7 @@ import { HeaderNotificationDropdown } from './HeaderNotificationDropdown';
 
 export const Header: React.FC = () => {
   const { toggleSidebar } = useUIStore();
+  const { user } = useAuthStore();
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
@@ -21,6 +23,14 @@ export const Header: React.FC = () => {
   const [showNotifMenu, setShowNotifMenu] = React.useState(false);
 
   const languages = ['ko', 'en', 'th'] as const;
+  const roleLabelMap: Record<string, string> = {
+    SUPER_ADMIN: t('staff.roles.admin'),
+    ADMIN: t('staff.roles.admin'),
+    MANAGER: t('staff.roles.manager'),
+    ARTIST: t('staff.roles.artist'),
+    STAFF: t('staff.roles.staff'),
+  };
+  const roleLabel = user?.role ? roleLabelMap[user.role] : '';
 
   return (
     <header className="bg-white border-b border-secondary-200 h-16 flex items-center justify-between px-3 sm:px-4 md:px-5 xl:px-6">
@@ -34,9 +44,15 @@ export const Header: React.FC = () => {
         </button>
         <Link
           href="/dashboard"
-          className="text-base sm:text-lg font-bold tracking-wide text-secondary-900 hover:text-primary-600 transition-colors"
+          className="min-w-0 hover:text-primary-600 transition-colors"
         >
-          BYU
+          <p className="text-sm sm:text-base font-semibold text-secondary-900 truncate">
+            {user?.name || ' '}
+            {roleLabel ? ` (${roleLabel})` : ''}
+          </p>
+          <p className="text-[11px] sm:text-xs text-secondary-500 truncate">
+            {user?.email || ' '}
+          </p>
         </Link>
       </div>
 
@@ -60,18 +76,23 @@ export const Header: React.FC = () => {
             <HeaderNotificationDropdown onClose={() => setShowNotifMenu(false)} />
           )}
         </div>
-        <button
-          onClick={() => router.push('/bookings/chart')}
-          className="relative hidden xl:flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
-          aria-label="Notifications"
-        >
-          <Bell size={18} className="sm:w-5 sm:h-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-error-500 text-white text-[10px] font-bold leading-none flex items-center justify-center">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
+        <div className="relative hidden xl:block">
+          <button
+            onClick={() => setShowNotifMenu((prev) => !prev)}
+            className="relative flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
+            aria-label="Notifications"
+          >
+            <Bell size={18} className="sm:w-5 sm:h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-error-500 text-white text-[10px] font-bold leading-none flex items-center justify-center">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+          {showNotifMenu && (
+            <HeaderNotificationDropdown onClose={() => setShowNotifMenu(false)} />
           )}
-        </button>
+        </div>
 
         {/* Language selector */}
         <div className="relative">

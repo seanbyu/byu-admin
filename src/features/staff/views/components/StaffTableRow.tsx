@@ -116,6 +116,8 @@ export const StaffTableRow = memo(function StaffTableRow({
   const rowClassName = isResigned
     ? 'hover:bg-error-50 bg-error-50'
     : 'hover:bg-secondary-50';
+  const tableActionButtonClass =
+    'h-8 px-3 text-xs rounded-lg border-secondary-300 text-secondary-700 hover:bg-secondary-50';
 
   return (
     <tr className={rowClassName}>
@@ -208,7 +210,7 @@ export const StaffTableRow = memo(function StaffTableRow({
         {member.role === 'SUPER_ADMIN' || member.role === 'ADMIN' ? (
           <Badge
             variant="default"
-            className="bg-secondary-100 text-secondary-500 font-normal"
+            className="h-8 px-3 text-xs rounded-lg border border-secondary-300 bg-secondary-50 text-secondary-500 font-medium"
           >
             {t('actions.allPermissions')}
           </Badge>
@@ -217,7 +219,7 @@ export const StaffTableRow = memo(function StaffTableRow({
             <Button
               variant="outline"
               size="sm"
-              className="bg-secondary-800 text-white hover:bg-secondary-700 h-8 px-3 text-xs rounded-full border-transparent"
+              className={tableActionButtonClass}
               onClick={handlePermissionClick}
             >
               {t('actions.setPermissions')}
@@ -226,7 +228,7 @@ export const StaffTableRow = memo(function StaffTableRow({
             <Button
               variant="outline"
               size="sm"
-              className="h-8 px-3 text-xs rounded-full"
+              className={tableActionButtonClass}
               onClick={handlePermissionClick}
             >
               {t('actions.viewPermissions')}
@@ -241,7 +243,7 @@ export const StaffTableRow = memo(function StaffTableRow({
           <Button
             variant="outline"
             size="sm"
-            className="h-8 px-3 text-xs cursor-pointer focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className={`${tableActionButtonClass} cursor-pointer focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0`}
             onClick={handleProfileEditClick}
           >
             {t('actions.edit')}

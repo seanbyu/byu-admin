@@ -171,6 +171,9 @@ export const PositionSelector = memo(function PositionSelector({
         <label className="block text-sm font-medium text-secondary-700">
           {t('staff.profileModal.positionTitle')}
         </label>
+        <p className="text-xs text-secondary-500">
+          {t('staff.profileModal.positionTitleHint')}
+        </p>
 
         {!isCreatingNew ? (
           <div className="relative" ref={dropdownRef}>

@@ -19,7 +19,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Salon Admin - Salon Booking Management System',
+  title: 'BYU - Salon Booking Management System',
   description: 'Comprehensive booking and management platform for hair salons',
   icons: {
     icon: '/icon.svg',

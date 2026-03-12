@@ -29,12 +29,6 @@ export const Sidebar: React.FC = () => {
   const filteredMenuItems = useSidebarMenu();
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
-  // Responsive: desktop(xl+) fixed open, tablet/mobile drawer closed by default
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    setSidebarOpen(window.innerWidth >= 1280);
-  }, [setSidebarOpen]);
-
   const { data: salon } = useQuery<{ name: string } | null>({
     queryKey: ['salon', user?.salonId],
     queryFn: async () => {
@@ -47,9 +41,15 @@ export const Sidebar: React.FC = () => {
       return data;
     },
     enabled: !!user?.salonId,
-    staleTime: 1000 * 60 * 10, // 10분
-    gcTime: 1000 * 60 * 30, // 30분
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
   });
+
+  // Responsive: desktop(xl+) fixed open, tablet/mobile drawer closed by default
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setSidebarOpen(window.innerWidth >= 1280);
+  }, [setSidebarOpen]);
 
   const handleNavLinkClick = React.useCallback(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 1280) {
@@ -85,7 +85,7 @@ export const Sidebar: React.FC = () => {
             >
               <Scissors className="w-5 h-5 md:w-6 md:h-6 xl:w-7 xl:h-7 text-sidebar-accent shrink-0" />
               <span className="ml-2 text-sm md:text-base xl:text-lg font-bold text-sidebar-text truncate">
-                {salon?.name || 'Salon Admin'}
+                {salon?.name || 'BYU'}
               </span>
             </Link>
             <button
