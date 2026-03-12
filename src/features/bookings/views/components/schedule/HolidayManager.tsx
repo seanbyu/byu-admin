@@ -45,9 +45,9 @@ export function HolidayManager({
       {/* 입력 폼 */}
       <div className="p-4 space-y-3 bg-secondary-50">
         {/* 날짜 2열 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div className="min-w-0">
-            <label className="block text-xs font-medium text-secondary-600 mb-1">
+            <label className="block text-[11px] font-medium text-secondary-600 mb-1">
               {t('common.form.startDate')}
             </label>
             <Input
@@ -56,11 +56,11 @@ export function HolidayManager({
               onChange={(e) =>
                 setNewHoliday((prev) => ({ ...prev, startDate: e.target.value }))
               }
-              className="h-9 px-2 text-sm min-w-0"
+              className="h-9 px-2 text-[13px] min-w-0"
             />
           </div>
           <div className="min-w-0">
-            <label className="block text-xs font-medium text-secondary-600 mb-1">
+            <label className="block text-[11px] font-medium text-secondary-600 mb-1">
               {t('common.form.endDate')}
             </label>
             <Input
@@ -70,7 +70,7 @@ export function HolidayManager({
               onChange={(e) =>
                 setNewHoliday((prev) => ({ ...prev, endDate: e.target.value }))
               }
-              className="h-9 px-2 text-sm min-w-0"
+              className="h-9 px-2 text-[13px] min-w-0"
             />
           </div>
         </div>
@@ -78,7 +78,7 @@ export function HolidayManager({
         {/* 사유 + 추가 버튼 */}
         <div className="flex gap-2 items-end">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-secondary-600 mb-1">
+            <label className="block text-[11px] font-medium text-secondary-600 mb-1">
               {t('common.form.reason')}
             </label>
             <Input
@@ -88,7 +88,7 @@ export function HolidayManager({
               onChange={(e) =>
                 setNewHoliday((prev) => ({ ...prev, reason: e.target.value }))
               }
-              className="h-9 px-2 text-sm"
+              className="h-9 px-2 text-[13px]"
             />
           </div>
           <Button
