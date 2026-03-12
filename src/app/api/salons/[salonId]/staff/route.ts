@@ -75,7 +75,7 @@ export async function POST(
         );
     }
 
-    revalidateTag(`staff-${salonId}`, 'default');
+    revalidateTag(`staff-${salonId}`);
     return NextResponse.json({ success: true, data: result });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal Server Error';

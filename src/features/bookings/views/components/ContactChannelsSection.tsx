@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { AccordionCardSkeleton } from '@/components/ui/Skeleton';
-import { useSalonSettings, useContactChannelsMutation } from '../../hooks/useSalonSettings';
+import { useSalonSettings, useContactChannelsMutation, ContactChannels } from '../../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../../stores/settingsStore';
 import { ContactChannelsCard } from './booking-settings';
 
@@ -56,6 +56,20 @@ export function ContactChannelsSection({ salonId }: ContactChannelsSectionProps)
     [setContactChannelId]
   );
 
+  const isDirty = useMemo(() => {
+    if (!data?.settings) return false;
+    const server = (data.settings.contact_channels as ContactChannels) ?? {
+      line: { enabled: false, id: '' },
+      instagram: { enabled: false, id: '' },
+    };
+    return (
+      contactChannels.line?.enabled !== server.line?.enabled ||
+      (contactChannels.line?.id ?? '') !== (server.line?.id ?? '') ||
+      contactChannels.instagram?.enabled !== server.instagram?.enabled ||
+      (contactChannels.instagram?.id ?? '') !== (server.instagram?.id ?? '')
+    );
+  }, [data, contactChannels]);
+
   const handleSave = useCallback(async () => {
     try {
       await contactChannelsMutation.mutateContactChannels(contactChannels);
@@ -79,6 +93,7 @@ export function ContactChannelsSection({ salonId }: ContactChannelsSectionProps)
       onSave={handleSave}
       isSaving={contactChannelsMutation.isPending}
       saveSuccess={saveSuccess}
+      isDirty={isDirty}
     />
   );
 }

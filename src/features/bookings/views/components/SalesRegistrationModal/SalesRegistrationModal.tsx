@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { ServiceSelector } from '../ServiceSelector';
 import { ProductSelector } from '../ProductSelector';
 import { Booking } from '../../../types';
@@ -24,6 +25,9 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
 }: SalesRegistrationModalProps) {
   const t = useTranslations();
   const toast = useToast();
+  const { canWrite, canDelete } = usePermission();
+  const canWriteSales = canWrite(PermissionModules.SALES);
+  const canDeleteSales = canDelete(PermissionModules.SALES);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
@@ -345,9 +349,9 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
 
           {/* 버튼 */}
           <div
-            className={`flex ${isSalesRegistered ? 'justify-between' : 'justify-end'} pt-2`}
+            className={`flex ${isSalesRegistered && canDeleteSales ? 'justify-between' : 'justify-end'} pt-2`}
           >
-            {isSalesRegistered && (
+            {isSalesRegistered && canDeleteSales && (
               <Button
                 variant="danger"
                 type="button"
@@ -360,16 +364,18 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
               <Button variant="outline" type="button" onClick={onClose}>
                 {t('common.cancel')}
               </Button>
-              <Button
-                variant="primary"
-                type="button"
-                onClick={handleSave}
-                disabled={selectedServiceIds.length === 0}
-              >
-                {isSalesRegistered
-                  ? t('booking.salesModal.editSales')
-                  : t('booking.salesModal.registerSales')}
-              </Button>
+              {canWriteSales && (
+                <Button
+                  variant="primary"
+                  type="button"
+                  onClick={handleSave}
+                  disabled={selectedServiceIds.length === 0}
+                >
+                  {isSalesRegistered
+                    ? t('booking.salesModal.editSales')
+                    : t('booking.salesModal.registerSales')}
+                </Button>
+              )}
             </div>
           </div>
         </div>

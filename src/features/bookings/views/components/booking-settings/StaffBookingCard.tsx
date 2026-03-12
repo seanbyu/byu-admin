@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button';
 import { Switch } from '@/components/ui/Switch';
 import { useStaff } from '@/features/staff/hooks/useStaff';
 import { Staff } from '@/features/staff/types';
+import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { Users, Calendar, GripVertical } from 'lucide-react';
 import { StaffScheduleEditModal } from '../StaffScheduleEditModal';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -37,6 +39,8 @@ interface StaffBookingCardProps {
 interface SortableStaffRowProps {
   staff: Staff;
   updatingStaffId: string | null;
+  canEdit: boolean;
+  canDrag: boolean;
   onToggle: (staffId: string, enabled: boolean) => void;
   onOpenSchedule: (staff: Staff) => void;
 }
@@ -44,12 +48,15 @@ interface SortableStaffRowProps {
 const SortableStaffRow = memo(function SortableStaffRow({
   staff,
   updatingStaffId,
+  canEdit,
+  canDrag,
   onToggle,
   onOpenSchedule,
 }: SortableStaffRowProps) {
   const t = useTranslations();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: staff.id,
+    disabled: !canDrag,
   });
 
   const style = {
@@ -68,16 +75,20 @@ const SortableStaffRow = memo(function SortableStaffRow({
       }`}
     >
       <div className="flex items-center gap-2.5">
-        {/* 드래그 핸들 — 터치/마우스 모두 지원 */}
-        <button
-          type="button"
-          {...attributes}
-          {...listeners}
-          className="touch-none text-secondary-400 hover:text-secondary-600 cursor-grab active:cursor-grabbing p-0.5"
-          aria-label="drag handle"
-        >
-          <GripVertical size={16} />
-        </button>
+        {/* 드래그 핸들 — canDrag 일 때만 표시 */}
+        {canDrag ? (
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="touch-none text-secondary-400 hover:text-secondary-600 cursor-grab active:cursor-grabbing p-0.5"
+            aria-label="drag handle"
+          >
+            <GripVertical size={16} />
+          </button>
+        ) : (
+          <div className="w-5" />
+        )}
 
         {staff.profileImage ? (
           <img
@@ -99,15 +110,17 @@ const SortableStaffRow = memo(function SortableStaffRow({
       </div>
 
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onOpenSchedule(staff)}
-          className="flex items-center gap-1 h-7 text-xs px-2"
-        >
-          <Calendar size={12} />
-          <span className="hidden sm:inline">{t('booking.settings.staffBooking.scheduleButton')}</span>
-        </Button>
+        {canEdit && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenSchedule(staff)}
+            className="flex items-center gap-1 h-7 text-xs px-2"
+          >
+            <Calendar size={12} />
+            <span className="hidden sm:inline">{t('booking.settings.staffBooking.scheduleButton')}</span>
+          </Button>
+        )}
 
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-secondary-500 hidden sm:inline">
@@ -115,8 +128,8 @@ const SortableStaffRow = memo(function SortableStaffRow({
           </span>
           <Switch
             checked={staff.isBookingEnabled}
-            disabled={updatingStaffId === staff.id}
-            onCheckedChange={(checked) => onToggle(staff.id, checked)}
+            disabled={!canEdit || updatingStaffId === staff.id}
+            onCheckedChange={(checked) => canEdit && onToggle(staff.id, checked)}
           />
         </div>
       </div>
@@ -129,6 +142,9 @@ export const StaffBookingCard = memo(function StaffBookingCard({
 }: StaffBookingCardProps) {
   const t = useTranslations();
   const toast = useToast();
+  const { user } = useAuthStore();
+  const { isAdmin, canWrite } = usePermission();
+  const canWriteBookingSettings = canWrite(PermissionModules.MY_SCHEDULE);
   const [selectedStaffForSchedule, setSelectedStaffForSchedule] = useState<Staff | null>(null);
   const [updatingStaffId, setUpdatingStaffId] = useState<string | null>(null);
 
@@ -244,15 +260,21 @@ export const StaffBookingCard = memo(function StaffBookingCard({
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-2">
-                {staffList.map((staff) => (
-                  <SortableStaffRow
-                    key={staff.id}
-                    staff={staff}
-                    updatingStaffId={updatingStaffId}
-                    onToggle={handleBookingToggle}
-                    onOpenSchedule={handleOpenScheduleModal}
-                  />
-                ))}
+                {staffList.map((staff) => {
+                  const isOwnEntry = staff.userId === user?.id;
+                  const canEdit = isAdmin || (canWriteBookingSettings && isOwnEntry);
+                  return (
+                    <SortableStaffRow
+                      key={staff.id}
+                      staff={staff}
+                      updatingStaffId={updatingStaffId}
+                      canEdit={canEdit}
+                      canDrag={isAdmin}
+                      onToggle={handleBookingToggle}
+                      onOpenSchedule={handleOpenScheduleModal}
+                    />
+                  );
+                })}
               </div>
             </SortableContext>
           </DndContext>

@@ -113,6 +113,8 @@
     "menus": "จัดการเมนู",
     "reviews": "จัดการรีวิว",
     "sales": "จัดการยอดขาย",
+    "booking_settings": "การตั้งค่าการจองออนไลน์",
+    "my_schedule": "ตั้งค่าตารางงาน (ส่วนตัว)",
     "settings": "ตั้งค่า"
   },
   "profileModal": {
@@ -135,6 +137,7 @@
     "introduction": "แนะนำตัว",
     "introPlaceholder": "กรอกข้อมูลแนะนำพนักงาน",
     "positionTitle": "ตำแหน่ง/ชื่อเรียก",
+    "positionTitleHint": "ตำแหน่งที่จะแสดงในการจองออนไลน์",
     "positionTitlePlaceholder": "เลือกตำแหน่ง",
     "socialMedia": "โซเชียลมีเดีย",
     "updateFailed": "ไม่สามารถอัปเดตโปรไฟล์",

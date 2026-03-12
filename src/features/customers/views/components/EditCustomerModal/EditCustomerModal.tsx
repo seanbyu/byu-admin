@@ -33,7 +33,8 @@ export const EditCustomerModal = memo(function EditCustomerModal({
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
-  const { canDelete } = usePermission();
+  const { canWrite, canDelete } = usePermission();
+  const canWriteCustomer = canWrite(PermissionModules.CUSTOMERS);
   const canDeleteCustomer = canDelete(PermissionModules.CUSTOMERS);
 
   const { updateCustomer, isUpdating, deleteCustomer, isDeleting } =
@@ -196,6 +197,7 @@ export const EditCustomerModal = memo(function EditCustomerModal({
             showDeleteConfirm={showDeleteConfirm}
             staffList={eligibleStaff}
             isLoadingStaff={isLoadingStaff}
+            canWrite={canWriteCustomer}
             canDelete={canDeleteCustomer}
             onFormDataChange={handleFormDataChange}
             onSubmit={handleSubmit}

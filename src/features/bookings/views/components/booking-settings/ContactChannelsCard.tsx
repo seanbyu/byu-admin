@@ -41,6 +41,7 @@ interface ContactChannelsCardProps {
   onSave: () => void;
   isSaving: boolean;
   saveSuccess: boolean;
+  isDirty: boolean;
 }
 
 export const ContactChannelsCard = memo(function ContactChannelsCard({
@@ -50,6 +51,7 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
   onSave,
   isSaving,
   saveSuccess,
+  isDirty,
 }: ContactChannelsCardProps) {
   const t = useTranslations();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -90,7 +92,7 @@ export const ContactChannelsCard = memo(function ContactChannelsCard({
               variant="primary"
               size="sm"
               onClick={onSave}
-              disabled={isSaving}
+              disabled={isSaving || !isDirty}
             >
               {isSaving ? t('common.saving') : t('common.save')}
             </Button>

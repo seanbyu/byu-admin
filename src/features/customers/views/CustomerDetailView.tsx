@@ -64,7 +64,8 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
 
-  const { canDelete } = usePermission();
+  const { canWrite, canDelete } = usePermission();
+  const canWriteCustomer = canWrite(PermissionModules.CUSTOMERS);
   const canDeleteCustomer = canDelete(PermissionModules.CUSTOMERS);
 
   // 고객 목록에서 고객번호로 고객 찾기 (TanStack Query 캐시 활용)
@@ -307,6 +308,7 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
                 showDeleteConfirm={showDeleteConfirm}
                 staffList={eligibleStaff}
                 isLoadingStaff={isLoadingStaff}
+                canWrite={canWriteCustomer}
                 canDelete={canDeleteCustomer}
                 onFormDataChange={handleFormDataChange}
                 onSubmit={handleSubmit}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { AccordionCardSkeleton } from '@/components/ui/Skeleton';
 import { useSalonSettings, useInterpreterSettingsMutation } from '../../hooks/useSalonSettings';
 import { useSettingsFormStore } from '../../stores/settingsStore';
@@ -52,6 +52,15 @@ export function InterpreterServiceSection({ salonId }: InterpreterServiceSection
     [toggleLanguage]
   );
 
+  const isDirty = useMemo(() => {
+    if (!data?.settings) return false;
+    const serverEnabled = data.settings.interpreter_enabled ?? false;
+    const serverLanguages = (data.settings.supported_languages as SupportedLanguage[]) ?? [];
+    const sortedCurrent = [...supportedLanguages].sort().join(',');
+    const sortedServer = [...serverLanguages].sort().join(',');
+    return interpreterEnabled !== serverEnabled || sortedCurrent !== sortedServer;
+  }, [data, interpreterEnabled, supportedLanguages]);
+
   const handleSave = useCallback(async () => {
     try {
       await interpreterMutation.mutateInterpreterSettings(
@@ -79,6 +88,7 @@ export function InterpreterServiceSection({ salonId }: InterpreterServiceSection
       onSave={handleSave}
       isSaving={interpreterMutation.isPending}
       saveSuccess={saveSuccess}
+      isDirty={isDirty}
     />
   );
 }

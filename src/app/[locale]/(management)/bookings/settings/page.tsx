@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { Spinner } from '@/components/ui/Spinner';
 import { ShopSettingsSection } from '@/features/bookings/views/components/ShopSettingsSection';
 import { StaffBookingSection } from '@/features/bookings/views/components/StaffBookingSection';
@@ -13,11 +14,21 @@ export default function OnlineBookingSettingsPage() {
   const t = useTranslations();
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
+  const { canRead, isAdmin } = usePermission();
+  const canViewBookingSettings = isAdmin || canRead(PermissionModules.BOOKING_SETTINGS);
 
   if (!salonId) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!canViewBookingSettings) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+        <p className="text-secondary-500 text-sm">{t('common.noPermission')}</p>
       </div>
     );
   }

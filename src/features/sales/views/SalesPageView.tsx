@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { SalesPageSkeleton } from '@/components/ui/Skeleton';
 import { createBookingsApi } from '@/features/bookings/api';
 import { SalesRegistrationModal } from '@/features/bookings/views/components/SalesRegistrationModal';
@@ -23,6 +24,8 @@ export function SalesPageView() {
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
   const queryClient = useQueryClient();
+  const { canWrite } = usePermission();
+  const canWriteSales = canWrite(PermissionModules.SALES);
 
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
@@ -83,7 +86,10 @@ export function SalesPageView() {
           <SalesByMenu data={byMenu} totalRevenue={summary.serviceRevenue} />
 
           {/* 매출 목록 */}
-          <SalesTable bookings={bookings} onRowClick={setSelectedBooking} />
+          <SalesTable
+            bookings={bookings}
+            onRowClick={canWriteSales ? setSelectedBooking : undefined}
+          />
         </>
       )}
 

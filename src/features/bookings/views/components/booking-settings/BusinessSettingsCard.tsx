@@ -27,6 +27,7 @@ interface BusinessSettingsCardProps {
   onSave: () => void;
   isSaving: boolean;
   saveSuccess: boolean;
+  isDirty: boolean;
 }
 
 export const BusinessSettingsCard = memo(function BusinessSettingsCard({
@@ -42,6 +43,7 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
   onSave,
   isSaving,
   saveSuccess,
+  isDirty,
 }: BusinessSettingsCardProps) {
   const t = useTranslations();
 
@@ -61,7 +63,7 @@ export const BusinessSettingsCard = memo(function BusinessSettingsCard({
               <Check size={14} />
             </span>
           )}
-          <Button variant="primary" size="sm" onClick={onSave} disabled={isSaving}>
+          <Button variant="primary" size="sm" onClick={onSave} disabled={isSaving || !isDirty}>
             {isSaving ? t('common.saving') : t('common.save')}
           </Button>
         </div>

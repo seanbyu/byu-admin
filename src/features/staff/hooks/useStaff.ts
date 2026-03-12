@@ -79,16 +79,26 @@ export function useStaff(salonId: string, options?: UseStaffOptions) {
       return { previousData };
     },
 
+    // 성공 시 서버 응답으로 캐시를 확정 업데이트
+    // (unstable_cache revalidateTag 타이밍 이슈로 refetch 시 stale 데이터가
+    //  반환될 수 있어 invalidateQueries 대신 직접 캐시 업데이트)
+    onSuccess: (data, { staffId }) => {
+      if (data?.data) {
+        queryClient.setQueryData<StaffListCache>(listQueryKey, (old) =>
+          mapStaffListCache(old, (list) =>
+            list.map((staff) =>
+              staff.id === staffId ? { ...staff, ...data.data } : staff
+            )
+          )
+        );
+      }
+    },
+
     // 에러 시 롤백
     onError: (_err, _variables, context) => {
       if (context?.previousData) {
         queryClient.setQueryData(listQueryKey, context.previousData);
       }
-    },
-
-    // 성공/실패 후 무효화로 서버 데이터와 동기화
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: listQueryKey });
     },
   });
 

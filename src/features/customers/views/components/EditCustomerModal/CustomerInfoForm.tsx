@@ -18,6 +18,7 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
   showDeleteConfirm,
   staffList,
   isLoadingStaff,
+  canWrite = true,
   canDelete = false,
   onFormDataChange,
   onSubmit,
@@ -236,13 +237,15 @@ export const CustomerInfoForm = memo(function CustomerInfoForm({
           >
             {t('common.cancel')}
           </Button>
-          <Button
-            type="submit"
-            isLoading={isUpdating}
-            className="h-8 min-w-[60px] px-3 text-xs"
-          >
-            {t('common.save')}
-          </Button>
+          {canWrite && (
+            <Button
+              type="submit"
+              isLoading={isUpdating}
+              className="h-8 min-w-[60px] px-3 text-xs"
+            >
+              {t('common.save')}
+            </Button>
+          )}
         </div>
       </div>
     </form>

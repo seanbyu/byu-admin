@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { ShopSettingsSkeleton } from '@/components/ui/Skeleton';
 import { Holiday } from '@/types';
 import { useSalonSettings, useBusinessHoursMutation, useHolidaysMutation } from '../../hooks/useSalonSettings';
@@ -104,6 +104,19 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
     [removeHoliday, holidays, holidaysMutation]
   );
 
+  const isDirty = useMemo(() => {
+    if (!data) return false;
+    if (slotDuration !== (data.settings?.slot_duration_minutes ?? 30)) return true;
+    if (bookingAdvanceDays !== (data.settings?.booking_advance_days ?? 30)) return true;
+    if (cancellationHours !== (data.settings?.booking_cancellation_hours ?? 24)) return true;
+    const serverHours = data.businessHours ?? [];
+    if (businessHours.length !== serverHours.length) return true;
+    return businessHours.some((bh) => {
+      const sbh = serverHours.find((s) => s.dayOfWeek === bh.dayOfWeek);
+      return !sbh || bh.isOpen !== sbh.isOpen || bh.openTime !== sbh.openTime || bh.closeTime !== sbh.closeTime;
+    });
+  }, [data, businessHours, slotDuration, bookingAdvanceDays, cancellationHours]);
+
   const handleSave = useCallback(async () => {
     try {
       await businessHoursMutation.mutateBusinessHours(
@@ -140,6 +153,7 @@ export function ShopSettingsSection({ salonId }: ShopSettingsSectionProps) {
           onSave={handleSave}
           isSaving={businessHoursMutation.isPending}
           saveSuccess={saveSuccess}
+          isDirty={isDirty}
         />
         <HolidaySettingsCard
           holidays={holidays}

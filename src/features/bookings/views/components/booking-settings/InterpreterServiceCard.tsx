@@ -15,6 +15,7 @@ interface InterpreterServiceCardProps {
   onSave: () => void;
   isSaving: boolean;
   saveSuccess: boolean;
+  isDirty: boolean;
 }
 
 export const InterpreterServiceCard = memo(function InterpreterServiceCard({
@@ -25,6 +26,7 @@ export const InterpreterServiceCard = memo(function InterpreterServiceCard({
   onSave,
   isSaving,
   saveSuccess,
+  isDirty,
 }: InterpreterServiceCardProps) {
   const t = useTranslations();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -65,7 +67,7 @@ export const InterpreterServiceCard = memo(function InterpreterServiceCard({
               variant="primary"
               size="sm"
               onClick={onSave}
-              disabled={isSaving}
+              disabled={isSaving || !isDirty}
             >
               {isSaving ? t('common.saving') : t('common.save')}
             </Button>

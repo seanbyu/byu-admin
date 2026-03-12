@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/Select';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { formatDate } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useCustomers } from '@/features/customers/hooks/useCustomers';
 import { SalonMenu } from '@/features/salon-menus/types';
 import { useBookings } from '../../../hooks/useBookings';
@@ -39,6 +40,9 @@ function NewBookingModalComponent({
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
   const isEditMode = !!editBooking;
+  const { canWrite, canDelete } = usePermission();
+  const canWriteBooking = canWrite(PermissionModules.BOOKINGS);
+  const canDeleteBooking = canDelete(PermissionModules.BOOKINGS);
 
   // Data hooks
   const { customers } = useCustomers({ salon_id: salonId });
@@ -322,9 +326,9 @@ function NewBookingModalComponent({
 
           {/* 버튼 */}
           <div className="flex items-center justify-between pt-4">
-            {/* 삭제 버튼 (수정 모드에서만 표시) */}
+            {/* 삭제 버튼 (수정 모드 + 삭제 권한이 있을 때만 표시) */}
             <div>
-              {isEditMode && (
+              {isEditMode && canDeleteBooking && (
                 <Button
                   variant="danger"
                   type="button"
@@ -344,9 +348,11 @@ function NewBookingModalComponent({
               >
                 {t('common.cancel')}
               </Button>
-              <Button variant="primary" type="submit" disabled={isLoading}>
-                {isLoading ? t('common.saving') : t('common.save')}
-              </Button>
+              {canWriteBooking && (
+                <Button variant="primary" type="submit" disabled={isLoading}>
+                  {isLoading ? t('common.saving') : t('common.save')}
+                </Button>
+              )}
             </div>
           </div>
         </form>

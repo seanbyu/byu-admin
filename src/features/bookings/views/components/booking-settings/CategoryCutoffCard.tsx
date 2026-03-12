@@ -19,6 +19,7 @@ interface CategoryCutoffCardProps {
   onSave: () => void;
   isSaving: boolean;
   saveSuccess: boolean;
+  isDirty: boolean;
 }
 
 export const CategoryCutoffCard = memo(function CategoryCutoffCard({
@@ -30,6 +31,7 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
   onSave,
   isSaving,
   saveSuccess,
+  isDirty,
 }: CategoryCutoffCardProps) {
   const t = useTranslations();
   const { categories, isLoading } = useCategories(salonId);
@@ -98,7 +100,7 @@ export const CategoryCutoffCard = memo(function CategoryCutoffCard({
               variant="primary"
               size="sm"
               onClick={onSave}
-              disabled={isSaving || isLoading}
+              disabled={isSaving || isLoading || !isDirty}
             >
               {isSaving ? t('common.saving') : t('common.save')}
             </Button>

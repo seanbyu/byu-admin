@@ -20,6 +20,7 @@
   "all": "All",
   "select": "Select",
   "close": "Close",
+  "noPermission": "You don't have permission to access this.",
   "complete": "Complete",
   "yes": "Yes",
   "no": "No",

@@ -87,6 +87,8 @@ export const PermissionModules = {
   MENUS: 'menus',
   REVIEWS: 'reviews',
   SALES: 'sales',
+  BOOKING_SETTINGS: 'booking_settings',
+  MY_SCHEDULE: 'my_schedule',
   SETTINGS: 'settings',
 } as const;
 

@@ -82,8 +82,8 @@ export function useSidebarMenu(): MenuItem[] {
             name: t('nav.onlineBookingSettings'),
             icon: Settings2,
             href: '/bookings/settings',
-            roles: [UserRole.MANAGER, UserRole.ADMIN],
-            permissionKey: 'bookings',
+            roles: [UserRole.MANAGER, UserRole.ARTIST, UserRole.STAFF, UserRole.ADMIN],
+            permissionKey: 'booking_settings',
           },
           {
             name: t('nav.staff'),

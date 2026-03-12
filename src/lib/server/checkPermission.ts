@@ -12,6 +12,8 @@ export type PermissionModule =
   | 'menus'
   | 'reviews'
   | 'sales'
+  | 'booking_settings'
+  | 'my_schedule'
   | 'settings';
 
 interface PermissionCheckResult {

@@ -17,6 +17,8 @@ const MODULE_KEYS = [
   'dashboard',
   'bookings',
   'customers',
+  'booking_settings',
+  'my_schedule',
   'staff',
   'menus',
   'reviews',
@@ -24,10 +26,16 @@ const MODULE_KEYS = [
   'settings',
 ] as const;
 
+// 삭제 열이 해당없는 모듈
+const NO_DELETE_MODULES = new Set(['booking_settings', 'my_schedule']);
+// 수정/등록 열이 해당없는 모듈 (조회만 가능)
+const NO_WRITE_MODULES = new Set(['booking_settings']);
+
 // 메뉴 구조 정의 (사이드바와 동일한 구조)
 interface PermissionMenuItem {
   key: typeof MODULE_KEYS[number];
   isSubItem?: boolean;
+  isDeepSubItem?: boolean; // 2단계 들여쓰기
 }
 
 interface PermissionMenuGroup {
@@ -37,7 +45,7 @@ interface PermissionMenuGroup {
 
 type PermissionMenuEntry = PermissionMenuItem | PermissionMenuGroup;
 
-// 사이드바와 동일한 메뉴 구조
+// 사이드바 순서와 동일하게 구성
 const MENU_STRUCTURE: PermissionMenuEntry[] = [
   { key: 'dashboard' },
   { key: 'bookings' },
@@ -45,6 +53,8 @@ const MENU_STRUCTURE: PermissionMenuEntry[] = [
   {
     groupKey: 'salonManagement',
     items: [
+      { key: 'booking_settings', isSubItem: true },
+      { key: 'my_schedule', isSubItem: true, isDeepSubItem: true },
       { key: 'staff', isSubItem: true },
       { key: 'menus', isSubItem: true },
       { key: 'reviews', isSubItem: true },
@@ -115,14 +125,22 @@ export default function StaffPermissionModal({
   };
 
   // 권한 행 렌더링
-  const renderPermissionRow = (moduleKey: string, isSubItem?: boolean) => {
+  const renderPermissionRow = (moduleKey: string, isSubItem?: boolean, isDeepSubItem?: boolean) => {
     const permission = permissions.find((p) => p.module === moduleKey);
+    const noDelete = NO_DELETE_MODULES.has(moduleKey);
+    const noWrite = NO_WRITE_MODULES.has(moduleKey);
     const checkboxClass = readOnly
       ? 'h-4 w-4 text-primary-600 border-secondary-300 rounded cursor-not-allowed opacity-60'
       : 'h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded cursor-pointer';
+    const disabledCheckboxClass = 'h-4 w-4 border-secondary-200 rounded cursor-not-allowed opacity-30';
+
+    let paddingLeft = '';
+    if (isDeepSubItem) paddingLeft = 'pl-16';
+    else if (isSubItem) paddingLeft = 'pl-10';
+
     return (
       <tr key={moduleKey} className={isSubItem ? 'bg-secondary-50' : ''}>
-        <td className={`px-6 py-3 whitespace-nowrap text-sm font-medium text-secondary-900 ${isSubItem ? 'pl-10' : ''}`}>
+        <td className={`px-6 py-3 whitespace-nowrap text-sm font-medium text-secondary-900 ${paddingLeft}`}>
           {isSubItem && <span className="text-secondary-300 mr-2">└</span>}
           {t(`staff.permissionLabels.${moduleKey}`)}
         </td>
@@ -136,22 +154,30 @@ export default function StaffPermissionModal({
           />
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-center">
-          <input
-            type="checkbox"
-            checked={permission?.canWrite || false}
-            onChange={() => !readOnly && handleToggle(moduleKey, 'canWrite')}
-            disabled={readOnly}
-            className={checkboxClass}
-          />
+          {noWrite ? (
+            <input type="checkbox" checked={false} disabled className={disabledCheckboxClass} />
+          ) : (
+            <input
+              type="checkbox"
+              checked={permission?.canWrite || false}
+              onChange={() => !readOnly && handleToggle(moduleKey, 'canWrite')}
+              disabled={readOnly}
+              className={checkboxClass}
+            />
+          )}
         </td>
         <td className="px-6 py-3 whitespace-nowrap text-center">
-          <input
-            type="checkbox"
-            checked={permission?.canDelete || false}
-            onChange={() => !readOnly && handleToggle(moduleKey, 'canDelete')}
-            disabled={readOnly}
-            className={checkboxClass}
-          />
+          {noDelete ? (
+            <input type="checkbox" checked={false} disabled className={disabledCheckboxClass} />
+          ) : (
+            <input
+              type="checkbox"
+              checked={permission?.canDelete || false}
+              onChange={() => !readOnly && handleToggle(moduleKey, 'canDelete')}
+              disabled={readOnly}
+              className={checkboxClass}
+            />
+          )}
         </td>
       </tr>
     );
@@ -232,7 +258,7 @@ export default function StaffPermissionModal({
                   <React.Fragment key={entry.groupKey}>
                     {renderGroupHeader(entry.groupKey)}
                     {entry.items.map((item) =>
-                      renderPermissionRow(item.key, item.isSubItem)
+                      renderPermissionRow(item.key, item.isSubItem, item.isDeepSubItem)
                     )}
                   </React.Fragment>
                 );

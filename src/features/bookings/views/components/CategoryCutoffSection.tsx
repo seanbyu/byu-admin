@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { AccordionCardSkeleton } from '@/components/ui/Skeleton';
 import { useSalonSettings, useCategoryLastBookingMutation } from '../../hooks/useSalonSettings';
 import { CategoryCutoffCard } from './booking-settings';
@@ -14,15 +14,24 @@ export function CategoryCutoffSection({ salonId }: CategoryCutoffSectionProps) {
   const mutation = useCategoryLastBookingMutation(salonId);
 
   const [categoryLastBookingTimes, setCategoryLastBookingTimes] = useState<Record<string, string>>({});
+  const [serverTimes, setServerTimes] = useState<Record<string, string>>({});
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     if (data?.settings?.category_last_booking_times) {
-      setCategoryLastBookingTimes(
-        data.settings.category_last_booking_times as Record<string, string>
-      );
+      const times = data.settings.category_last_booking_times as Record<string, string>;
+      setCategoryLastBookingTimes(times);
+      setServerTimes(times);
     }
   }, [data]);
+
+  const isDirty = useMemo(() => {
+    const allKeys = new Set([...Object.keys(categoryLastBookingTimes), ...Object.keys(serverTimes)]);
+    for (const key of allKeys) {
+      if ((categoryLastBookingTimes[key] ?? '') !== (serverTimes[key] ?? '')) return true;
+    }
+    return false;
+  }, [categoryLastBookingTimes, serverTimes]);
 
   const handleCutoffChange = useCallback((categoryId: string, time: string) => {
     setCategoryLastBookingTimes((prev) =>
@@ -56,6 +65,7 @@ export function CategoryCutoffSection({ salonId }: CategoryCutoffSectionProps) {
       onSave={handleSave}
       isSaving={mutation.isPending}
       saveSuccess={saveSuccess}
+      isDirty={isDirty}
     />
   );
 }

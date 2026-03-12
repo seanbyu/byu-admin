@@ -113,6 +113,8 @@
     "menus": "Menu Management",
     "reviews": "Review Management",
     "sales": "Sales Management",
+    "booking_settings": "Online Booking Settings",
+    "my_schedule": "Schedule Settings (Personal)",
     "settings": "Settings"
   },
   "profileModal": {
@@ -135,6 +137,7 @@
     "introduction": "Introduction",
     "introPlaceholder": "Enter staff introduction",
     "positionTitle": "Position/Title",
+    "positionTitleHint": "Position shown on online booking",
     "positionTitlePlaceholder": "Select a position",
     "socialMedia": "Social Media",
     "updateFailed": "Failed to update profile.",
