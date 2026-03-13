@@ -15,7 +15,8 @@ const inter = Inter({ subsets: ['latin'] });
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  // maximumScale 제거: 사용자 줌 차단은 접근성 위반 (WCAG 1.4.4)
+  // iOS Safari 입력 자동 줌 방지는 globals.css input font-size: 16px 으로 처리
 };
 
 export const metadata: Metadata = {

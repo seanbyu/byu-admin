@@ -155,9 +155,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 오늘 최근 예약 */}
         <Card className="h-full">
-          <h3 className="text-h4 mb-3">
+          <h2 className="text-h4 mb-3">
             {t('common.dashboard.recentBookings')}
-          </h3>
+          </h2>
           {isTodayLoading ? (
             <div className="space-y-0">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -200,9 +200,9 @@ export default function DashboardPage() {
 
         {/* 이번 달 상위 직원 */}
         <Card className="h-full">
-          <h3 className="text-h4 mb-3">
+          <h2 className="text-h4 mb-3">
             {t('common.dashboard.topStaffThisMonth')}
-          </h3>
+          </h2>
           {isMonthlyLoading ? (
             <div className="space-y-0">
               {Array.from({ length: 5 }).map((_, i) => (

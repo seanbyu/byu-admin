@@ -39,6 +39,7 @@ export const Header: React.FC = () => {
         <button
           onClick={toggleSidebar}
           className="xl:hidden text-secondary-700 hover:text-secondary-900 mr-3 sm:mr-4"
+          aria-label={t('common.openMenu')}
         >
           <Menu size={20} className="sm:w-[22px] sm:h-[22px]" />
         </button>
@@ -96,6 +97,8 @@ export const Header: React.FC = () => {
           <button
             onClick={() => setShowLangMenu(!showLangMenu)}
             className="flex h-9 w-9 items-center justify-center rounded-md text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 transition-colors"
+            aria-label={t('common.selectLanguage')}
+            aria-expanded={showLangMenu}
           >
             <Globe size={18} className="sm:w-5 sm:h-5" />
           </button>

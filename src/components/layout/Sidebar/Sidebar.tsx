@@ -91,6 +91,7 @@ export const Sidebar: React.FC = () => {
             <button
               onClick={toggleSidebar}
               className="xl:hidden text-sidebar-text-subtle hover:text-sidebar-text p-1"
+              aria-label={t('common.closeMenu')}
             >
               <X size={20} />
             </button>

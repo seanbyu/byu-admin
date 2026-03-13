@@ -1,4 +1,7 @@
 {
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
+  "selectLanguage": "Select language",
   "save": "Save",
   "cancel": "Cancel",
   "edit": "Edit",
