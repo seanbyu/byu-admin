@@ -137,6 +137,19 @@
     "staffNotes": "Staff Notes"
   },
 
+  "serviceTab": {
+    "categoryName": "Service Category",
+    "bookingTime": "Booking Time",
+    "notes": "Service Notes",
+    "amount": "Amount",
+    "staff": "Staff",
+    "noHistory": "No service history"
+  },
+
+  "productTab": {
+    "noHistory": "No product purchase history"
+  },
+
   "tabs": {
     "sales": "Sales",
     "service": "Service",

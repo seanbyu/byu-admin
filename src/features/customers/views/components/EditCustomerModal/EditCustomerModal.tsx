@@ -230,8 +230,8 @@ export const EditCustomerModal = memo(function EditCustomerModal({
           {/* Tab Content */}
           <div className="min-h-[260px] overflow-auto md:min-h-[320px] lg:min-h-[500px]">
             {activeTab === 'sales' && <SalesTabContent customer={customer} />}
-            {activeTab === 'service' && <ServiceTabContent />}
-            {activeTab === 'product' && <ProductTabContent />}
+            {activeTab === 'service' && <ServiceTabContent customer={customer} />}
+            {activeTab === 'product' && <ProductTabContent customer={customer} />}
             {activeTab === 'reservation' && <ReservationTabContent />}
             {activeTab === 'membership' && <MembershipTabContent />}
             {activeTab === 'cancellationFee' && <CancellationFeeTabContent />}

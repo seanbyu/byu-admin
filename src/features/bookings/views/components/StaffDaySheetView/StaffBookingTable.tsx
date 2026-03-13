@@ -57,7 +57,10 @@ export const StaffBookingTable = memo(function StaffBookingTable({
   const totalPrice = useMemo(
     () =>
       Object.values(bookingsByTime).reduce(
-        (sum, b) => (b.status === BookingStatus.CANCELLED ? sum : sum + (b.price || 0)),
+        (sum, b) =>
+          b.status === BookingStatus.CANCELLED
+            ? sum
+            : sum + (b.price || 0) + (b.productAmount || 0),
         0
       ),
     [bookingsByTime]
@@ -202,7 +205,9 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                       ) : (
                         <>
                           <span className="group-hover/price:hidden">
-                            {booking.price > 0 ? formatPrice(booking.price) : '—'}
+                            {(booking.price || 0) + (booking.productAmount || 0) > 0
+                              ? formatPrice((booking.price || 0) + (booking.productAmount || 0))
+                              : '—'}
                           </span>
                           <span className="hidden group-hover/price:inline text-primary-600 text-xs font-medium">
                             {booking.bookingMeta?.sales_registered

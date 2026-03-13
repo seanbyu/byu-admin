@@ -78,7 +78,7 @@ export class CustomerService {
 
       // 총 매출 계산
       const totalSpent = completedBookings.reduce(
-        (sum: number, b: any) => sum + (b.total_price || 0),
+        (sum: number, b: any) => sum + (b.total_price || 0) + (b.product_amount || 0),
         0
       );
 
@@ -158,7 +158,7 @@ export class CustomerService {
 
     // VIP (총 매출 기준 - 임의로 100,000원 이상)
     const totalSpent = completedBookings.reduce(
-      (sum, b) => sum + (b.total_price || 0),
+      (sum, b) => sum + ((b as any).total_price || 0) + ((b as any).product_amount || 0),
       0
     );
     if (totalSpent >= 100000) {
@@ -252,9 +252,31 @@ export class CustomerService {
     const bookings = bookingsData || [];
     const completedBookings = bookings.filter((b: any) => b.status === 'COMPLETED');
 
+    // booking_meta.service_ids에서 모든 서비스 ID 수집 → 배치 조회
+    const allServiceIds = Array.from(
+      new Set(
+        completedBookings.flatMap((b: any) =>
+          Array.isArray(b.booking_meta?.service_ids) ? b.booking_meta.service_ids : []
+        )
+      )
+    ) as string[];
+    const serviceDetails = await this.repository.getServicesByIds(allServiceIds);
+    // js-index-maps: 반복 조회를 O(1)로 최적화
+    const serviceMap = new Map<string, { id: string; name: string; category_name: string; price: number }>(
+      serviceDetails.map((s: any) => [
+        s.id,
+        {
+          id: s.id,
+          name: s.name,
+          category_name: s.category?.name || '',
+          price: s.base_price || 0,
+        },
+      ])
+    );
+
     // 통계 계산
     const totalSpent = completedBookings.reduce(
-      (sum: number, b: any) => sum + (b.total_price || 0),
+      (sum: number, b: any) => sum + (b.total_price || 0) + (b.product_amount || 0),
       0
     );
 
@@ -321,10 +343,21 @@ export class CustomerService {
         (a: any, b: any) =>
           new Date(b.booking_date).getTime() - new Date(a.booking_date).getTime()
       )
-      .map((b: any) => ({
+      .map((b: any) => {
+        const serviceIds: string[] = Array.isArray(b.booking_meta?.service_ids)
+          ? b.booking_meta.service_ids
+          : [];
+        const serviceItems = serviceIds
+          .map((id: string) => serviceMap.get(id))
+          .filter(Boolean) as { id: string; name: string; category_name: string; price: number }[];
+
+        return {
         id: b.id,
         booking_date: b.booking_date,
         start_time: b.start_time,
+        service_items: serviceItems,
+        product_ids: Array.isArray(b.booking_meta?.product_ids) ? b.booking_meta.product_ids : [],
+        category_name: b.booking_meta?.category_name || b.service?.name || '',
         service: {
           id: b.service?.id || '',
           name: b.service?.name || '',
@@ -335,11 +368,15 @@ export class CustomerService {
           id: b.artist?.id || '',
           name: b.artist?.name || '',
         },
+        notes: b.customer_notes || '',
         customer_notes: b.customer_notes,
         staff_notes: b.staff_notes,
+        payment_method: b.payment_method || null,
         total_price: b.total_price || 0,
+        product_amount: b.product_amount || 0,
         status: b.status,
-      }));
+        };
+      });
 
     // Primary artist - 저장된 담당자 정보 사용 (primary_artist_id 기반)
     const assignedPrimaryArtist = (customer as any).primary_artist_user;

@@ -110,10 +110,26 @@ export interface CustomerChart {
   notes_history?: CustomerNote[];
 }
 
+export interface ServiceHistoryServiceItem {
+  id: string;
+  name: string;          // e.g. "Director"
+  category_name: string; // e.g. "Cut"
+  price: number;         // base_price from services table
+}
+
 export interface ServiceHistoryItem {
   id: string;
   booking_date: Date | string;
   start_time: string;
+
+  // 시술 항목 목록 (booking_meta.service_ids 기반 — "Cut (Director) ₿1,500" 형태로 표시)
+  service_items: ServiceHistoryServiceItem[];
+
+  // 제품 ID 목록 (booking_meta.product_ids)
+  product_ids?: string[];
+
+  // Category name from booking_meta (fallback용)
+  category_name?: string;
 
   // Service info
   service: {
@@ -130,11 +146,16 @@ export interface ServiceHistoryItem {
   };
 
   // Notes
-  customer_notes?: string; // What customer requested
-  staff_notes?: string;    // Staff observations
+  notes?: string;           // 시술 메모 (customer_notes 별칭)
+  customer_notes?: string;  // What customer requested
+  staff_notes?: string;     // Staff observations
+
+  // Payment
+  payment_method?: string | null;
 
   // Pricing
-  total_price: number;
+  total_price: number;      // 시술 금액 (service only)
+  product_amount: number;   // 제품 금액 (product only)
 
   // Status
   status: string;

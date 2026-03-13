@@ -25,6 +25,8 @@
   "time": "Time",
   "price": "Price",
   "notes": "Notes",
+  "recentSalesMemo": "Recent Sales Memo",
+  "noRecentMemo": "No history",
   "paymentMethod": "Payment",
   "paymentMethodCard": "Card",
   "paymentMethodCash": "Cash",

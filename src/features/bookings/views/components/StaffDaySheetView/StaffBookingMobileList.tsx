@@ -129,8 +129,8 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
                       className="text-secondary-800 font-medium cursor-pointer hover:text-primary-600"
                       onClick={(e) => handleOpenSales(e, booking)}
                     >
-                      {booking.price > 0
-                        ? formatPrice(booking.price)
+                      {(booking.price || 0) + (booking.productAmount || 0) > 0
+                        ? formatPrice((booking.price || 0) + (booking.productAmount || 0))
                         : t('booking.salesModal.registerSales')}
                       {booking.bookingMeta?.sales_registered && (
                         <span className="ml-1 text-primary-500 text-[10px]">

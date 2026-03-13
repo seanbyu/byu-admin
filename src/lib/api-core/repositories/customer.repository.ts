@@ -68,6 +68,7 @@ export class CustomerRepository extends BaseRepository {
           id,
           booking_date,
           total_price,
+          product_amount,
           status,
           artist:users!bookings_artist_id_fkey(name)
         )
@@ -267,14 +268,37 @@ export class CustomerRepository extends BaseRepository {
         start_time,
         end_time,
         total_price,
+        product_amount,
         status,
         customer_notes,
         staff_notes,
+        payment_method,
+        booking_meta,
         service:services(id, name, name_en, name_th),
         artist:users!bookings_artist_id_fkey(id, name)
       `)
       .eq('customer_id', customerId)
       .order('booking_date', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  /**
+   * 여러 서비스 ID의 메뉴 상세 조회 (배치)
+   * - booking_meta.service_ids 기반으로 시술 항목별 이름/카테고리/가격 조회
+   */
+  async getServicesByIds(serviceIds: string[]): Promise<any[]> {
+    if (serviceIds.length === 0) return [];
+    const { data, error } = await (this.supabase as any)
+      .from('services')
+      .select(`
+        id,
+        name,
+        base_price,
+        category:service_categories(id, name)
+      `)
+      .in('id', serviceIds);
 
     if (error) throw error;
     return data || [];

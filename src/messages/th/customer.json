@@ -137,6 +137,19 @@
     "staffNotes": "บันทึกจากพนักงาน"
   },
 
+  "serviceTab": {
+    "categoryName": "หมวดหมู่การบริการ",
+    "bookingTime": "เวลานัดหมาย",
+    "notes": "บันทึกการบริการ",
+    "amount": "จำนวนเงิน",
+    "staff": "พนักงาน",
+    "noHistory": "ไม่มีประวัติการบริการ"
+  },
+
+  "productTab": {
+    "noHistory": "ไม่มีประวัติการซื้อสินค้า"
+  },
+
   "tabs": {
     "sales": "ยอดขาย",
     "service": "บริการ",

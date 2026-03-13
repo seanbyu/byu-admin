@@ -4,6 +4,7 @@ import { queryOptions } from '@tanstack/react-query';
 import { customerApi } from '../api';
 import type {
   CustomerListItem,
+  CustomerChart,
   GetCustomersParams,
   GetCustomersResponse,
   GetCustomerChartResponse,
@@ -100,7 +101,9 @@ export const customerQueries = {
       refetchOnWindowFocus: false,
       retry: 2,
       enabled: !!salonId && !!customerId,
-      select: (response: ApiResponse<GetCustomerChartResponse>) => response.data?.data,
+      // Route Handler: { success: true, data: chartData } — response.data = CustomerChart 구조
+      select: (response: ApiResponse<GetCustomerChartResponse>) =>
+        response.data as unknown as CustomerChart,
     }),
 
   /**

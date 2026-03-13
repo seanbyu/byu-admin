@@ -137,6 +137,19 @@
     "staffNotes": "스태프 메모"
   },
 
+  "serviceTab": {
+    "categoryName": "시술 카테고리",
+    "bookingTime": "예약 시간",
+    "notes": "시술 메모",
+    "amount": "금액",
+    "staff": "담당자",
+    "noHistory": "시술 이력이 없습니다"
+  },
+
+  "productTab": {
+    "noHistory": "제품 구매 이력이 없습니다"
+  },
+
   "tabs": {
     "sales": "매출",
     "service": "시술",

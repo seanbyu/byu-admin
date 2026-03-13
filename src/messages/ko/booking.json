@@ -25,6 +25,8 @@
   "time": "시간",
   "price": "가격",
   "notes": "메모",
+  "recentSalesMemo": "최근 매출 메모",
+  "noRecentMemo": "내역이 없습니다",
   "paymentMethod": "결제수단",
   "paymentMethodCard": "카드",
   "paymentMethodCash": "현금",

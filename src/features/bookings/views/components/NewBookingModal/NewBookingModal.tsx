@@ -2,7 +2,8 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { X } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { ModalActions } from '@/components/ui/ModalActions';
@@ -14,6 +15,7 @@ import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useCustomers } from '@/features/customers/hooks/useCustomers';
 import { SalonMenu } from '@/features/salon-menus/types';
+import { customerQueries } from '@/features/customers/hooks/queries';
 import { useBookings } from '../../../hooks/useBookings';
 import { useCategoryMap, useMenuMap } from '../../../hooks/useMenuMaps';
 import { useServiceGroups } from '../../../hooks/useServiceGroups';
@@ -54,6 +56,7 @@ function NewBookingModalComponent({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [isServiceInitialized, setIsServiceInitialized] = useState(false);
+  const [showMemoPanel, setShowMemoPanel] = useState(false);
 
   // 선택된 서비스 목록 (중복 포함, useBookingSave에 전달)
   const selectedServices = useMemo<SalonMenu[]>(() => {
@@ -114,6 +117,7 @@ function NewBookingModalComponent({
     customerSearch.setSelectedCustomer(null);
     setSelectedServiceIds([]);
     setIsServiceInitialized(false);
+    setShowMemoPanel(false);
     onClose();
   }, [form, customerSearch, onClose]);
 
@@ -169,6 +173,18 @@ function NewBookingModalComponent({
       );
     },
     [menuMap]
+  );
+
+  // 기존 고객 시술 이력 조회 (메모 패널용)
+  const selectedCustomerId = customerSearch.selectedCustomer?.id;
+  const { data: customerChart } = useQuery({
+    ...customerQueries.chart(salonId, selectedCustomerId || ''),
+    enabled: !!selectedCustomerId,
+  });
+
+  const serviceHistoryWithNotes = useMemo(
+    () => (customerChart?.service_history || []).filter((item) => item.notes),
+    [customerChart]
   );
 
   // Booking save hook
@@ -332,9 +348,21 @@ function NewBookingModalComponent({
 
           {/* 시술메모 */}
           <div>
-            <label className="block text-sm font-medium text-secondary-800 mb-1">
-              {t('booking.notes')}
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-secondary-800">
+                {t('booking.notes')}
+              </label>
+              {selectedCustomerId && (
+                <button
+                  type="button"
+                  onClick={() => setShowMemoPanel(true)}
+                  className="flex items-center gap-0.5 text-xs text-primary-600 hover:text-primary-700"
+                >
+                  {t('booking.recentSalesMemo')}
+                  <ChevronRight size={14} />
+                </button>
+              )}
+            </div>
             <textarea
               placeholder={t('booking.placeholders.notesPlaceholder')}
               value={form.notes}
@@ -345,6 +373,69 @@ function NewBookingModalComponent({
           </div>
 
         </form>
+
+        {/* 최근 매출 메모 바텀시트 — overflow-hidden 래퍼로 translate-y-full 클리핑 */}
+        <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+          {/* 딤 배경 */}
+          <div
+            className={`absolute inset-0 bg-black/30 transition-opacity duration-300 ${
+              showMemoPanel ? 'opacity-100 pointer-events-auto' : 'opacity-0'
+            }`}
+            onClick={() => setShowMemoPanel(false)}
+          />
+          {/* 바텀시트 */}
+          <div
+            className={`absolute inset-x-0 bottom-0 flex max-h-[72%] flex-col rounded-t-2xl bg-white shadow-xl transition-transform duration-300 ease-out pointer-events-auto ${
+              showMemoPanel ? 'translate-y-0' : 'translate-y-full'
+            }`}
+          >
+            {/* 핸들 */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="h-1 w-8 rounded-full bg-secondary-300" />
+            </div>
+            {/* 헤더 */}
+            <div className="flex items-center justify-between px-4 py-2">
+              <span className="text-sm font-semibold text-secondary-900">
+                {t('booking.recentSalesMemo')}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowMemoPanel(false)}
+                className="rounded p-1 hover:bg-secondary-100"
+                aria-label={t('common.close')}
+              >
+                <X size={16} className="text-secondary-500" />
+              </button>
+            </div>
+            {/* 내용 — 스크롤 영역 */}
+            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-3">
+              {serviceHistoryWithNotes.length === 0 ? (
+                <div className="flex h-24 items-center justify-center text-sm text-secondary-400">
+                  {t('booking.noRecentMemo')}
+                </div>
+              ) : (
+                serviceHistoryWithNotes.map((item) => {
+                  const dateStr = typeof item.booking_date === 'string'
+                    ? item.booking_date
+                    : item.booking_date.toISOString().slice(0, 10);
+                  return (
+                    <div key={item.id} className="rounded-lg border border-secondary-200 p-3">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-medium text-secondary-500">
+                          {dateStr}{item.start_time ? ` ${item.start_time.slice(0, 5)}` : ''}
+                        </span>
+                        {item.artist?.name && (
+                          <span className="text-xs text-secondary-500">{item.artist.name}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-secondary-800 whitespace-pre-wrap">{item.notes}</p>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
       </Modal>
 
       {/* 신규 고객 확인 다이얼로그 */}

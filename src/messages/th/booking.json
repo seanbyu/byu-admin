@@ -25,6 +25,8 @@
   "time": "เวลา",
   "price": "ราคา",
   "notes": "บันทึก",
+  "recentSalesMemo": "บันทึกยอดขายล่าสุด",
+  "noRecentMemo": "ไม่มีประวัติ",
   "paymentMethod": "การชำระเงิน",
   "paymentMethodCard": "บัตร",
   "paymentMethodCash": "เงินสด",
