@@ -10,8 +10,13 @@ import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { useSalonMenusView } from '../hooks/useSalonMenusView';
 import { PageHeader } from './components/PageHeader';
 import { IndustryTabs } from './components/IndustryTabs';
-import { IndustryReorderPanel } from './components/IndustryReorderPanel';
 import MenuList from './components/MenuList';
+
+// bundle-dynamic-imports: 순서 설정 패널은 설정 버튼 클릭 시에만 표시됨
+const IndustryReorderPanel = dynamic(
+  () => import('./components/IndustryReorderPanel'),
+  { ssr: false }
+);
 
 // bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
 const IndustrySelectionModal = dynamic(
