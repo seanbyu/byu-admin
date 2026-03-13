@@ -78,6 +78,16 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
     return listData.customers.find((c) => c.customer_number === customerNo || c.id === customerNo);
   }, [listData, customerNo]);
 
+  // 고객번호 미설정 시 생성순 fallback 번호 계산 (고객차트 목록과 동일 기준)
+  const fallbackCustomerNumber = useMemo(() => {
+    if (!customer || customer.customer_number) return '';
+    const sorted = [...(listData?.customers || [])].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    const index = sorted.findIndex((c) => c.id === customer.id);
+    return index >= 0 ? String(index + 1) : '';
+  }, [customer, listData]);
+
   const isLoadingCustomer = isLoadingList;
 
   const { updateCustomer, isUpdating, deleteCustomer, isDeleting } =
@@ -117,7 +127,7 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
     if (customer) {
       setFormData({
         name: customer.name || '',
-        customer_number: customer.customer_number || '',
+        customer_number: customer.customer_number || fallbackCustomerNumber,
         phone: customer.phone || '',
         email: customer.email || '',
         notes: customer.notes || '',
@@ -125,7 +135,7 @@ export default memo(function CustomerDetailView({ customerNo }: CustomerDetailVi
         primary_artist_id: customer.primary_artist_id || customer.primary_artist?.id || '',
       });
     }
-  }, [customer]);
+  }, [customer, fallbackCustomerNumber]);
 
   const handleBack = useCallback(() => {
     router.back();

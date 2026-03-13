@@ -152,8 +152,8 @@ function CustomerSectionComponent({
 
           {/* 고객 검색 드롭다운 */}
           {customerType === 'local' && showCustomerDropdown && matchingCustomers.length > 0 && (
-            <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white border border-secondary-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-              <div className="p-2 text-xs text-secondary-600 bg-secondary-50 border-b">
+            <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white border border-primary-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+              <div className="px-3 py-1.5 text-xs font-semibold text-primary-600 bg-primary-50 border-b border-primary-100">
                 {t('booking.existingCustomers') || '기존 고객'}
               </div>
               {matchingCustomers.map((customer) => (
@@ -161,11 +161,11 @@ function CustomerSectionComponent({
                   key={customer.id}
                   type="button"
                   onClick={() => onSelectCustomer(customer)}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary-50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-primary-50 transition-colors text-left border-b border-secondary-100 last:border-b-0"
                 >
-                  <User className="w-4 h-4 text-secondary-400" />
+                  <User className="w-4 h-4 shrink-0 text-primary-400" />
                   <div>
-                    <div className="text-sm font-medium text-secondary-700">
+                    <div className="text-sm font-medium text-secondary-900">
                       {customer.name}
                     </div>
                     <div className="text-xs text-secondary-500">{formatPhoneDisplay(customer.phone)}</div>
