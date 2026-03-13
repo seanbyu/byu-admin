@@ -59,13 +59,15 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
+  // sm: 접두사 필수 — html { font-size: 14px } 로 인해 rem 기반 max-w가 줄어들어
+  // 모바일에서 양옆 여백 발생. 모바일은 항상 w-full(전체 너비) 사용.
   const sizes = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    '2xl': 'max-w-6xl',
-    full: 'max-w-[90vw]',
+    sm: 'sm:max-w-md',
+    md: 'sm:max-w-lg',
+    lg: 'sm:max-w-2xl',
+    xl: 'sm:max-w-4xl',
+    '2xl': 'sm:max-w-6xl',
+    full: 'sm:max-w-[90vw]',
   };
 
   const modalContent = (

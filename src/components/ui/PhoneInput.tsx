@@ -62,6 +62,7 @@ interface PhoneInputProps {
   error?: string;
   defaultCountryCode?: string; // 기본 국가코드 (예: '+66', '+82')
   disabled?: boolean;
+  compact?: boolean; // 모바일에서 패딩 축소
 }
 
 export const PhoneInput = memo(function PhoneInput({
@@ -73,6 +74,7 @@ export const PhoneInput = memo(function PhoneInput({
   error,
   defaultCountryCode = '+82',
   disabled = false,
+  compact = false,
 }: PhoneInputProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -202,13 +204,13 @@ export const PhoneInput = memo(function PhoneInput({
             type="button"
             onClick={() => !disabled && setShowDropdown(!showDropdown)}
             disabled={disabled}
-            className={`flex items-center gap-1 px-3 py-2 border-r border-secondary-300 rounded-l-md transition-colors min-w-[90px] ${
+            className={`flex items-center gap-1 px-3 ${compact ? 'py-1.5 sm:py-2' : 'py-2'} border-r border-secondary-300 rounded-l-md transition-colors min-w-[90px] ${
               disabled
                 ? 'bg-secondary-100 cursor-not-allowed'
                 : 'bg-secondary-50 hover:bg-secondary-100'
             }`}
           >
-            <span className="text-lg">{displayCountry.flag}</span>
+            <span className={compact ? 'text-base' : 'text-lg'}>{displayCountry.flag}</span>
             <span className={`text-sm ${disabled ? 'text-secondary-400' : 'text-secondary-700'}`}>{displayCountry.code}</span>
             <ChevronDown size={14} className="text-secondary-400" />
           </button>
@@ -225,7 +227,7 @@ export const PhoneInput = memo(function PhoneInput({
                     displayCountry.code === country.code ? 'bg-primary-50' : ''
                   }`}
                 >
-                  <span className="text-lg">{country.flag}</span>
+                  <span className={compact ? 'text-base' : 'text-lg'}>{country.flag}</span>
                   <span className="text-sm">{country.name}</span>
                   <span className="text-xs text-secondary-400 ml-auto">{country.code}</span>
                 </button>
@@ -242,7 +244,7 @@ export const PhoneInput = memo(function PhoneInput({
           onFocus={onFocus}
           placeholder={placeholder}
           disabled={disabled}
-          className={`flex-1 min-w-0 px-3 py-2 border-0 rounded-r-md bg-white text-secondary-900 placeholder:text-secondary-500 focus:outline-none ${
+          className={`flex-1 min-w-0 px-3 ${compact ? 'py-1.5 sm:py-2' : 'py-2'} border-0 rounded-r-md bg-white text-secondary-900 placeholder:text-secondary-500 focus:outline-none ${
             disabled ? 'bg-secondary-100 cursor-not-allowed' : ''
           }`}
         />

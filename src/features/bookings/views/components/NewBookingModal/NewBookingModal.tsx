@@ -277,7 +277,7 @@ function NewBookingModalComponent({
               value={form.currentStaffId}
               onChange={form.handleStaffChange}
               error={form.errors.staff}
-              className="text-secondary-900 focus:ring-primary-500"
+              className="py-1.5 sm:py-2 text-secondary-900 focus:ring-primary-500"
             />
           </div>
 

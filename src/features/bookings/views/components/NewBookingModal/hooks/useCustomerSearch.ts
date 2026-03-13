@@ -100,10 +100,14 @@ export function useCustomerSearch({
     setIsPhoneInputFocused(false);
   }, [onNameChange, onPhoneChange]);
 
-  // 선택 해제 (새 고객으로 전환)
+  // 선택 해제 — 이름/전화번호 초기화 후 드롭다운 재표시
   const handleClearCustomer = useCallback(() => {
     setSelectedCustomer(null);
-  }, []);
+    onNameChange('');
+    onPhoneChange('');
+    setIsPhoneInputFocused(true);
+    setShowCustomerDropdown(true);
+  }, [onNameChange, onPhoneChange]);
 
   // 전화번호 변경 핸들러
   const handlePhoneChange = useCallback(

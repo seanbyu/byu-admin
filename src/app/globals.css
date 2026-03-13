@@ -420,7 +420,7 @@ html {
     @apply text-secondary-900 placeholder:text-secondary-400;
     @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
     @apply transition-colors;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-sm); /* 0.875rem = 12.25px (모바일 14px 기준) */
   }
 
   .input-error {

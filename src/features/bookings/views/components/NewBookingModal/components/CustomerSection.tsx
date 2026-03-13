@@ -66,7 +66,7 @@ function CustomerSectionComponent({
           value={customerName}
           onChange={(e) => onNameChange(e.target.value)}
           error={errors.customerName}
-          className="text-secondary-900 placeholder:text-secondary-500 focus:ring-primary-500"
+          className="py-1.5 sm:py-2 text-secondary-900 placeholder:text-secondary-500 focus:ring-primary-500"
         />
       </div>
 
@@ -147,6 +147,7 @@ function CustomerSectionComponent({
             placeholder="012-345-6789"
             error={errors.customerPhone}
             disabled={customerType === 'foreign'}
+            compact
           />
 
           {/* 고객 검색 드롭다운 */}

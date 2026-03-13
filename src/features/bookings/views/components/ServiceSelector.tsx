@@ -97,7 +97,7 @@ function ServiceSelectorComponent({
 
   return (
     <div className="border border-secondary-200 rounded-lg overflow-hidden bg-white">
-      <div className="flex h-[240px]">
+      <div className="flex h-[180px] sm:h-[240px]">
         {/* 카테고리 목록 (왼쪽) */}
         <div className="w-1/3 border-r border-secondary-200 overflow-y-auto bg-secondary-50">
           {visibleCategories.map((category) => (
@@ -106,7 +106,7 @@ function ServiceSelectorComponent({
               type="button"
               onClick={() => handleCategoryClick(category.id)}
               className={cn(
-                'w-full px-4 py-3 text-left text-sm font-medium transition-colors border-l-2',
+                'w-full px-2 py-2 text-left text-xs font-medium transition-colors border-l-2 sm:px-4 sm:py-3 sm:text-sm',
                 selectedCategoryId === category.id
                   ? 'bg-primary-100 text-primary-700 border-l-primary-500'
                   : 'bg-white text-secondary-800 border-l-transparent hover:bg-secondary-50'
@@ -125,16 +125,16 @@ function ServiceSelectorComponent({
               type="button"
               onClick={() => handleServiceClick(menu.id)}
               className={cn(
-                'w-full px-4 py-3 text-left border-b border-secondary-100 last:border-b-0 transition-colors',
+                'w-full px-2 py-2 text-left border-b border-secondary-100 last:border-b-0 transition-colors sm:px-4 sm:py-3',
                 (selectedCounts[menu.id] || 0) > 0
                   ? 'bg-primary-100'
                   : 'hover:bg-secondary-50'
               )}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <span
                   className={cn(
-                    'text-sm font-medium',
+                    'text-xs font-medium sm:text-sm',
                     (selectedCounts[menu.id] || 0) > 0
                       ? 'text-primary-700'
                       : 'text-secondary-800'
@@ -142,13 +142,13 @@ function ServiceSelectorComponent({
                 >
                   {menu.name}
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                   {(selectedCounts[menu.id] || 0) > 0 && (
-                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-500 px-1.5 text-xs font-semibold text-white">
+                    <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-500 px-1 text-[10px] font-semibold text-white sm:h-5 sm:min-w-5 sm:px-1.5 sm:text-xs">
                       x{selectedCounts[menu.id]}
                     </span>
                   )}
-                  <span className="text-xs text-secondary-600">
+                  <span className="text-[10px] text-secondary-600 sm:text-xs">
                     {menu.duration_minutes ?? 0}min / ฿{(menu.base_price || menu.price || 0).toLocaleString()}
                   </span>
                 </div>

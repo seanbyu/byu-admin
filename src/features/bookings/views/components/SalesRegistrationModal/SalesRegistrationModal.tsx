@@ -177,7 +177,7 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
           )
         }
       >
-        <div className="space-y-4 text-secondary-800">
+        <div className="space-y-3 text-secondary-800">
           {/* 예약 정보 헤더 */}
           <div className="rounded-lg bg-secondary-50 p-3 text-sm space-y-0.5">
             <p className="font-medium text-secondary-900">
@@ -329,8 +329,8 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder={t('booking.placeholders.notesPlaceholder')}
-              rows={2}
-              className="w-full rounded-lg border border-secondary-300 px-3 py-2 text-sm text-secondary-800 placeholder:text-secondary-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+              rows={5}
+              className="input-base resize-none"
             />
           </div>
 
