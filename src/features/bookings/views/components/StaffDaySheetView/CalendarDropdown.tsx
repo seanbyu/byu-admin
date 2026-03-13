@@ -93,6 +93,8 @@ export const CalendarDropdown = memo(function CalendarDropdown({
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
+        aria-label={t('booking.openCalendar')}
+        aria-expanded={isOpen}
         className={cn(
           'flex h-7 w-7 items-center justify-center rounded-md border transition-colors',
           isOpen
@@ -111,6 +113,7 @@ export const CalendarDropdown = memo(function CalendarDropdown({
             <button
               type="button"
               onClick={handlePrevMonth}
+              aria-label={t('booking.prevMonth')}
               className="flex items-center justify-center w-7 h-7 rounded-lg text-secondary-500 hover:bg-secondary-100 transition-colors"
             >
               <ChevronLeft size={16} />
@@ -119,6 +122,7 @@ export const CalendarDropdown = memo(function CalendarDropdown({
             <button
               type="button"
               onClick={handleNextMonth}
+              aria-label={t('booking.nextMonth')}
               className="flex items-center justify-center w-7 h-7 rounded-lg text-secondary-500 hover:bg-secondary-100 transition-colors"
             >
               <ChevronRight size={16} />
@@ -132,7 +136,7 @@ export const CalendarDropdown = memo(function CalendarDropdown({
                 key={key}
                 className={cn(
                   'text-center text-xs py-1 font-semibold',
-                  i === 0 ? 'text-error-400' : i === 6 ? 'text-info-500' : 'text-secondary-400'
+                  i === 0 ? 'text-error-600' : i === 6 ? 'text-info-600' : 'text-secondary-600'
                 )}
               >
                 {t(DAY_SHORT_TRANSLATION_KEYS[key])}

@@ -120,11 +120,11 @@ export const StaffBookingTable = memo(function StaffBookingTable({
               </th>
               <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-center font-medium text-secondary-600 w-20">
                 LINE<br />
-                <span className="font-normal text-[10px] text-secondary-400">{t('booking.line.confirmed')}</span>
+                <span className="font-normal text-[10px] text-secondary-600">{t('booking.line.confirmed')}</span>
               </th>
               <th className="border border-secondary-200 px-2 lg:px-3 py-2 text-center font-medium text-secondary-600 w-20">
                 LINE<br />
-                <span className="font-normal text-[10px] text-secondary-400">{t('booking.line.reminder')}</span>
+                <span className="font-normal text-[10px] text-secondary-600">{t('booking.line.reminder')}</span>
               </th>
             </tr>
           </thead>
@@ -176,7 +176,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                         ) : null}
                       </div>
                     </td>
-                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-500 text-xs">
+                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-700 text-xs">
                       {booking.customerPhone ? stripCountryCode(booking.customerPhone) : '—'}
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-500 text-xs max-w-[180px]">
@@ -222,7 +222,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     {/* LINE 확정 알림 상태 */}
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
                       {!booking.customerLineUserId || booking.customerLineBlocked ? (
-                        <span className="text-[10px] text-secondary-400">{t('booking.line.cannotSend')}</span>
+                        <span className="text-[10px] text-secondary-600">{t('booking.line.cannotSend')}</span>
                       ) : notificationStatuses?.[booking.id]?.confirmed ? (
                         <span className="inline-flex items-center gap-0.5 text-success-600">
                           <span>✓</span>
@@ -235,7 +235,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     {/* LINE 당일 리마인더 상태 */}
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-center text-xs">
                       {!booking.customerLineUserId || booking.customerLineBlocked ? (
-                        <span className="text-[10px] text-secondary-400">{t('booking.line.cannotSend')}</span>
+                        <span className="text-[10px] text-secondary-600">{t('booking.line.cannotSend')}</span>
                       ) : notificationStatuses?.[booking.id]?.reminded ? (
                         <span className="inline-flex items-center gap-0.5 text-success-600">
                           <span>✓</span>
@@ -251,7 +251,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     className="transition-colors cursor-pointer hover:bg-primary-50"
                     onClick={() => onAddBooking(slot)}
                   >
-                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-400 font-medium h-9">
+                    <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-500 font-medium h-9">
                       {slot}
                     </td>
                     <td className="border border-secondary-200 px-2 lg:px-3 py-2 text-secondary-300 text-xs select-none">
@@ -274,7 +274,7 @@ export const StaffBookingTable = memo(function StaffBookingTable({
                     className="cursor-pointer bg-secondary-50/80 hover:bg-primary-50 transition-colors"
                     onClick={() => onAddBooking(subSlotTime)}
                   >
-                    <td className="border-x border-b border-secondary-200 px-2 lg:px-3 py-1.5 text-secondary-400 text-xs font-medium">
+                    <td className="border-x border-b border-secondary-200 px-2 lg:px-3 py-1.5 text-secondary-500 text-xs font-medium">
                       <span className="text-secondary-300 mr-1">└</span>
                       {subSlotTime}
                     </td>

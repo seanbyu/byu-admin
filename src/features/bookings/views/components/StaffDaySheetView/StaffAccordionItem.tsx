@@ -95,7 +95,7 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
           <span className="font-semibold text-sm md:text-base text-secondary-900 truncate">
             {staff.name}
           </span>
-          <span className="text-xs text-secondary-500 bg-secondary-100 px-2 py-0.5 rounded-full">
+          <span className="text-xs text-secondary-700 bg-secondary-100 px-2 py-0.5 rounded-full">
             {bookingCount}
             {t('booking.bookingCount')}
           </span>
@@ -109,6 +109,7 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
         <button
           type="button"
           onClick={handleAddClick}
+          aria-label={t('booking.newBookingFor', { name: staff.name })}
           className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-3 py-1.5 rounded-lg transition-colors border border-primary-200"
         >
           <Plus size={14} />

@@ -70,6 +70,7 @@ export const InlineStatusSelect = memo(function InlineStatusSelect({
       value={status}
       onChange={handleChange}
       onClick={handleClick}
+      aria-label={t('booking.changeStatus')}
       options={STATUS_ORDER.map((s) => ({ value: s, label: t(STATUS_I18N_KEY[s]) }))}
       showPlaceholder={false}
       containerClassName="!w-auto"
