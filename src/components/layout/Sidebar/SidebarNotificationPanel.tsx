@@ -131,6 +131,7 @@ export const SidebarNotificationPanel = React.memo(function SidebarNotificationP
                       <span
                         role="button"
                         tabIndex={0}
+                        aria-label={t('common.notifications.delete')}
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteNotification(notif.id);

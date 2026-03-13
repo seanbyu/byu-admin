@@ -81,6 +81,7 @@
     "noNotifications": "새로운 알림이 없습니다",
     "viewAll": "모두 보기",
     "markAllRead": "모두 읽음",
+    "delete": "알림 삭제",
     "pendingStatus": "예약 대기",
     "cancelledStatus": "예약 취소됨"
   },

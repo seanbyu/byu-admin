@@ -81,6 +81,7 @@
     "noNotifications": "ไม่มีการแจ้งเตือนใหม่",
     "viewAll": "ดูทั้งหมด",
     "markAllRead": "อ่านทั้งหมด",
+    "delete": "ลบการแจ้งเตือน",
     "pendingStatus": "รอดำเนินการ",
     "cancelledStatus": "ยกเลิกแล้ว"
   },

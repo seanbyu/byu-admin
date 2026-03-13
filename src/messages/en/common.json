@@ -81,6 +81,7 @@
     "noNotifications": "No new notifications",
     "viewAll": "View all",
     "markAllRead": "Mark all read",
+    "delete": "Delete notification",
     "pendingStatus": "Pending",
     "cancelledStatus": "Cancelled"
   },

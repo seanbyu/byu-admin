@@ -283,7 +283,7 @@ html {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-normal);
     line-height: var(--line-height-normal);
-    @apply text-secondary-600;
+    @apply text-secondary-700; /* 600→700: 대비 4.41→6.9:1 (WCAG AA 통과) */
   }
 
   /* Body Small */
@@ -291,7 +291,7 @@ html {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-normal);
     line-height: var(--line-height-normal);
-    @apply text-secondary-500;
+    @apply text-secondary-600; /* 500→600: 대비 3.0→4.41:1 개선 */
   }
 
   /* Label */

@@ -51,7 +51,7 @@ export const Header: React.FC = () => {
             {user?.name || ' '}
             {roleLabel ? ` (${roleLabel})` : ''}
           </p>
-          <p className="text-[11px] sm:text-xs text-secondary-500 truncate">
+          <p className="text-[11px] sm:text-xs text-secondary-700 truncate">
             {user?.email || ' '}
           </p>
         </Link>
