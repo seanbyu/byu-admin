@@ -15,6 +15,16 @@ html {
   html {
     font-size: 14px; /* 모바일 (1rem = 14px, 12.5% 축소) */
   }
+
+  /* iOS Safari 자동 줌인 방지
+     html font-size가 14px이면 0.875rem → 12.25px으로
+     16px 미만이 되어 input 포커스 시 Safari가 자동 줌인함.
+     물리적 16px을 강제하여 이를 방지. */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 @layer base {

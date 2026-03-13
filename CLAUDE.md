@@ -177,7 +177,15 @@ z-modal-backdrop(1040) z-modal(1050) z-popover(1060) z-tooltip(1070)
 - `type="date"` / `type="time"` 등 네이티브 입력 요소는 반드시 `bg-white` 명시 — iOS Safari는 부모 배경을 투과해 보여줌
 - 플렉스·그리드 레이아웃에서 iOS 구버전 호환이 필요하면 `-webkit-` 벤더 프리픽스 포함
 - 스크롤 관련: `-webkit-overflow-scrolling: touch` 대신 `overscroll-behavior` 사용
-- 입력 요소 포커스 시 iOS 자동 줌 방지 — `font-size` 최소 16px (또는 `touch-action: manipulation`)
+- **입력 요소 포커스 시 iOS 자동 줌 방지 — 반드시 `globals.css`의 전역 룰로 처리**
+  - `html { font-size: 14px }` (모바일) → `0.875rem = 12.25px` → 16px 미만이면 iOS Safari가 자동 줌인
+  - `globals.css` `@media (max-width: 640px)` 블록에 아래 룰이 이미 선언되어 있음 (절대 컴포넌트 인라인으로 처리 금지):
+    ```css
+    input:not([type='checkbox']):not([type='radio']):not([type='range']),
+    textarea,
+    select { font-size: 16px; }
+    ```
+  - 새 input/textarea/select 컴포넌트를 추가할 때 별도 font-size 지정 불필요 — 전역 룰이 적용됨
 - `-webkit-appearance: none` 은 네이티브 날짜 picker가 필요한 경우 사용 금지 — 대신 스타일 오버라이드로 처리
 - CSS 변수(`var(--*)`) 사용 시 반드시 fallback 값 제공: `var(--color-primary, #3182f6)`
 
@@ -194,7 +202,7 @@ z-modal-backdrop(1040) z-modal(1050) z-popover(1060) z-tooltip(1070)
 - **`role="button"` span에도 `aria-label` 필수** — 버튼 내부에 중첩 인터랙션 요소 포함
 - **헤딩 계층 구조 준수** — h1 → h2 → h3 순서 건너뜀 금지 (스타일은 `.text-h*` 클래스로 분리)
 - **`maximumScale` viewport 설정 금지** — 사용자 줌 차단은 WCAG 1.4.4 위반
-  - iOS Safari 입력 자동 줌 방지는 `globals.css`에서 `font-size: 16px`로 처리
+  - iOS Safari 입력 자동 줌 방지는 `globals.css` `@media (max-width: 640px)` 전역 룰로 처리 (컴포넌트별 개별 처리 금지)
 
 ### 텍스트 대비 (WCAG AA 기준 4.5:1)
 ```
