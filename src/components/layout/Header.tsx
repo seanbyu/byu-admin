@@ -46,6 +46,9 @@ export const Header: React.FC = () => {
         <Link
           href="/dashboard"
           className="min-w-0 hover:text-primary-600 transition-colors"
+          aria-label={user?.name
+            ? `${user.name}${roleLabel ? ` (${roleLabel})` : ''} — ${t('nav.dashboard')}`
+            : t('nav.dashboard')}
         >
           <p className="text-sm sm:text-base font-semibold text-secondary-900 truncate">
             {user?.name || ' '}
