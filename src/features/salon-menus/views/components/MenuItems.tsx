@@ -13,7 +13,8 @@ import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -82,8 +83,13 @@ export default function MenuItems({
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
+      // 데스크톱: 5px 이동 후 드래그 시작 (클릭과 구분)
       activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      // 모바일: 250ms 길게 누른 후 드래그 시작 (스크롤과 구분)
+      activationConstraint: { delay: 250, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,

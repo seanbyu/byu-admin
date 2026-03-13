@@ -177,9 +177,10 @@ export default function SortableMenuRow({
               <button
                 {...attributes}
                 {...listeners}
-                className="p-1 text-secondary-300 cursor-move hover:text-secondary-600"
+                aria-label={t('menu.dragToReorder')}
+                className="p-2 sm:p-1 text-secondary-400 cursor-grab active:cursor-grabbing hover:text-secondary-600 touch-none"
               >
-                <GripVertical className="w-4 h-4" />
+                <GripVertical className="w-5 h-5 sm:w-4 sm:h-4" />
               </button>
             )}
           </div>
