@@ -183,8 +183,9 @@ z-modal-backdrop(1040) z-modal(1050) z-popover(1060) z-tooltip(1070)
     ```css
     input:not([type='checkbox']):not([type='radio']):not([type='range']),
     textarea,
-    select { font-size: 16px; }
+    select { font-size: 16px !important; }
     ```
+  - `!important` 필수: Tailwind `text-sm` 등 클래스 선택자(명시도 0,1,0)가 요소 선택자(0,0,1)보다 높아 덮어쓰기 때문
   - 새 input/textarea/select 컴포넌트를 추가할 때 별도 font-size 지정 불필요 — 전역 룰이 적용됨
 - `-webkit-appearance: none` 은 네이티브 날짜 picker가 필요한 경우 사용 금지 — 대신 스타일 오버라이드로 처리
 - CSS 변수(`var(--*)`) 사용 시 반드시 fallback 값 제공: `var(--color-primary, #3182f6)`

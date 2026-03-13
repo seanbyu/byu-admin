@@ -19,11 +19,12 @@ html {
   /* iOS Safari 자동 줌인 방지
      html font-size가 14px이면 0.875rem → 12.25px으로
      16px 미만이 되어 input 포커스 시 Safari가 자동 줌인함.
-     물리적 16px을 강제하여 이를 방지. */
+     !important 필수: Tailwind의 text-sm 등 클래스 선택자(명시도 0,1,0)가
+     요소 선택자(0,0,1)보다 높아 덮어쓰기 때문. */
   input:not([type='checkbox']):not([type='radio']):not([type='range']),
   textarea,
   select {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 }
 
