@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
@@ -21,12 +22,26 @@ import {
   usePasswordChange,
 } from '../hooks/useSettings';
 import { SettingsTabs } from './components/SettingsTabs';
-import { StoreInfoTab } from './components/StoreInfoTab';
-import { LineIntegrationTab } from './components/LineIntegrationTab';
-import { PlanTab } from './components/PlanTab';
-import { AccountTab } from './components/AccountTab';
 import { getErrorCode } from '@/lib/api/client';
 import { AccountInfo, SettingsTab, StoreInfo } from '../types';
+
+// bundle-dynamic-imports: 각 탭 컨텐츠는 선택 시에만 필요
+const StoreInfoTab = dynamic(
+  () => import('./components/StoreInfoTab').then((m) => ({ default: m.StoreInfoTab })),
+  { ssr: false }
+);
+const LineIntegrationTab = dynamic(
+  () => import('./components/LineIntegrationTab').then((m) => ({ default: m.LineIntegrationTab })),
+  { ssr: false }
+);
+const PlanTab = dynamic(
+  () => import('./components/PlanTab').then((m) => ({ default: m.PlanTab })),
+  { ssr: false }
+);
+const AccountTab = dynamic(
+  () => import('./components/AccountTab').then((m) => ({ default: m.AccountTab })),
+  { ssr: false }
+);
 
 // ============================================
 // Props

@@ -4,6 +4,7 @@ import type { ApiResponse } from '@/types';
 import type { Booking } from '@/features/bookings/types';
 
 const bookingsPath = (salonId: string) => endpoints.salons.bookings.path(salonId);
+const customersPath = (salonId: string) => endpoints.salons.customers.path(salonId);
 
 export const getDashboardTodayBookings = (
   salonId: string,
@@ -19,3 +20,9 @@ export const getDashboardMonthlyBookings = (
   apiClient.get(
     `${bookingsPath(salonId)}?start_date=${startDate}&end_date=${endDate}&sales_only=true`
   );
+
+/** 고객 전체 수만 조회 (limit=1로 total만 취득, 고객 피처 모듈 import 불필요) */
+export const getDashboardCustomerCount = (
+  salonId: string
+): Promise<ApiResponse<{ customers: unknown[]; total: number }>> =>
+  apiClient.get(`${customersPath(salonId)}?limit=1`);

@@ -4,8 +4,11 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BookingStatus } from '@/types';
 import type { Booking } from '@/features/bookings/types';
-import { useCustomers } from '@/features/customers/hooks/useCustomers';
-import { getDashboardTodayBookings, getDashboardMonthlyBookings } from '../api';
+import {
+  getDashboardTodayBookings,
+  getDashboardMonthlyBookings,
+  getDashboardCustomerCount,
+} from '../api';
 
 function toLocalDateString(d: Date): string {
   const y = d.getFullYear();
@@ -49,11 +52,17 @@ export function useDashboard(salonId: string) {
     refetchOnWindowFocus: false,
   });
 
-  // 전체 고객 수
-  const { total: totalCustomers, isLoading: isCustomersLoading } = useCustomers(
-    { salon_id: salonId },
-    { enabled: !!salonId }
-  );
+  // 전체 고객 수 (경량 카운트 전용 — 고객 피처 모듈 import 없음)
+  const customerCountQuery = useQuery({
+    queryKey: ['dashboard', 'customerCount', salonId],
+    queryFn: async () => {
+      const res = await getDashboardCustomerCount(salonId);
+      return (res.data as { total: number } | null)?.total ?? 0;
+    },
+    enabled: !!salonId,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
 
   const todayBookings = todayQuery.data ?? [];
   const monthlyBookings = monthlyQuery.data ?? [];
@@ -109,14 +118,15 @@ export function useDashboard(salonId: string) {
     [todayBookings]
   );
 
-  const isLoading =
-    todayQuery.isLoading || monthlyQuery.isLoading || isCustomersLoading;
-
   return {
-    isLoading,
+    // 개별 로딩 상태 (섹션별 독립 렌더링용)
+    isTodayLoading: todayQuery.isLoading,
+    isMonthlyLoading: monthlyQuery.isLoading,
+    isCountLoading: customerCountQuery.isLoading,
+
     todayStats,
     monthlyRevenue,
-    totalCustomers,
+    totalCustomers: customerCountQuery.data ?? 0,
     topStaff,
     recentBookings,
   };

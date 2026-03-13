@@ -1,6 +1,7 @@
 'use client';
 
 import { Card } from '@/components/ui/Card';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { useUser } from '@/features/auth/hooks/useAuth';
@@ -14,7 +15,6 @@ import {
   XCircle,
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-import { DashboardSkeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 
@@ -25,7 +25,9 @@ export default function DashboardPage() {
   const salonId = authUser?.salonId || '';
 
   const {
-    isLoading,
+    isTodayLoading,
+    isMonthlyLoading,
+    isCountLoading,
     todayStats,
     monthlyRevenue,
     totalCustomers,
@@ -40,6 +42,7 @@ export default function DashboardPage() {
       icon: Calendar,
       color: 'text-info-600',
       bgColor: 'bg-info-50',
+      loading: isTodayLoading,
     },
     {
       title: t('common.dashboard.todayRevenue'),
@@ -47,6 +50,7 @@ export default function DashboardPage() {
       icon: DollarSign,
       color: 'text-success-600',
       bgColor: 'bg-success-50',
+      loading: isTodayLoading,
     },
     {
       title: t('common.dashboard.totalCustomers'),
@@ -54,6 +58,7 @@ export default function DashboardPage() {
       icon: Users,
       color: 'text-primary-600',
       bgColor: 'bg-primary-50',
+      loading: isCountLoading,
     },
     {
       title: t('common.dashboard.monthlyRevenue'),
@@ -61,6 +66,7 @@ export default function DashboardPage() {
       icon: TrendingUp,
       color: 'text-primary-600',
       bgColor: 'bg-primary-50',
+      loading: isMonthlyLoading,
     },
   ];
 
@@ -85,10 +91,6 @@ export default function DashboardPage() {
     },
   ];
 
-  if (isLoading) {
-    return <DashboardSkeleton />;
-  }
-
   return (
     <div className="space-y-5">
       {/* Welcome */}
@@ -110,7 +112,11 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-body mb-1">{stat.title}</p>
-                  <p className="text-h2">{stat.value}</p>
+                  {stat.loading ? (
+                    <Skeleton className="h-7 w-20 mt-1" />
+                  ) : (
+                    <p className="text-h2">{stat.value}</p>
+                  )}
                 </div>
                 <div className={`p-2 sm:p-3 rounded-lg ${stat.bgColor}`}>
                   <Icon className={`w-4 h-4 sm:w-6 sm:h-6 ${stat.color}`} />
@@ -131,9 +137,13 @@ export default function DashboardPage() {
                 <Icon className={`w-5 h-5 sm:w-8 sm:h-8 ${stat.color} mr-3 sm:mr-4`} />
                 <div>
                   <p className="text-body">{stat.title}</p>
-                  <p className="text-xl font-bold text-secondary-900">
-                    {stat.value} {t('common.dashboard.cases')}
-                  </p>
+                  {isTodayLoading ? (
+                    <Skeleton className="h-6 w-16 mt-1" />
+                  ) : (
+                    <p className="text-xl font-bold text-secondary-900">
+                      {stat.value} {t('common.dashboard.cases')}
+                    </p>
+                  )}
                 </div>
               </div>
             </Card>
@@ -148,7 +158,22 @@ export default function DashboardPage() {
           <h3 className="text-h4 mb-3">
             {t('common.dashboard.recentBookings')}
           </h3>
-          {recentBookings.length === 0 ? (
+          {isTodayLoading ? (
+            <div className="space-y-0">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b border-secondary-100 last:border-0">
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                  <div className="space-y-1.5 text-right">
+                    <Skeleton className="h-4 w-10 ml-auto" />
+                    <Skeleton className="h-3 w-8 ml-auto" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : recentBookings.length === 0 ? (
             <EmptyState message={t('booking.noBookings')} size="sm" />
           ) : (
             <div className="space-y-0">
@@ -178,7 +203,22 @@ export default function DashboardPage() {
           <h3 className="text-h4 mb-3">
             {t('common.dashboard.topStaffThisMonth')}
           </h3>
-          {topStaff.length === 0 ? (
+          {isMonthlyLoading ? (
+            <div className="space-y-0">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b border-secondary-100 last:border-0">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-3 w-14" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              ))}
+            </div>
+          ) : topStaff.length === 0 ? (
             <EmptyState message={t('common.noData')} size="sm" />
           ) : (
             <div className="space-y-0">

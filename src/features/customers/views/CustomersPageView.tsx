@@ -3,6 +3,7 @@
 import { useMemo, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import dynamic from 'next/dynamic';
 import { Card } from '@/components/ui/Card';
 import { TablePageSkeleton } from '@/components/ui/Skeleton';
 import { useTranslations } from 'next-intl';
@@ -10,9 +11,20 @@ import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
 import { CustomerPageHeader } from './components/CustomerPageHeader';
 import { CustomerTable } from './components/CustomerTable';
-import { CustomerChartModal } from './components/CustomerChartModal';
-import { CreateCustomerModal } from './components/CreateCustomerModal';
-import { FilterSettingsModal } from './components/FilterSettingsModal';
+
+// bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
+const CustomerChartModal = dynamic(
+  () => import('./components/CustomerChartModal').then((m) => ({ default: m.CustomerChartModal })),
+  { ssr: false }
+);
+const CreateCustomerModal = dynamic(
+  () => import('./components/CreateCustomerModal').then((m) => ({ default: m.CreateCustomerModal })),
+  { ssr: false }
+);
+const FilterSettingsModal = dynamic(
+  () => import('./components/FilterSettingsModal').then((m) => ({ default: m.FilterSettingsModal })),
+  { ssr: false }
+);
 import {
   useCustomerFilters as useCustomerFilterState,
   useCustomerModals,
