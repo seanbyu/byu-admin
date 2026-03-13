@@ -176,7 +176,7 @@ export default function MenusSidebar({
               className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] sm:text-xs font-medium transition-colors ${
                 selectedCategoryId === category.id
                   ? 'bg-primary-50 text-primary-600 border-primary-200'
-                  : 'bg-white text-secondary-600 border-secondary-200'
+                  : 'bg-white text-secondary-700 border-secondary-200'
               }`}
             >
               {category.name} ({menuCounts[category.id] || 0})

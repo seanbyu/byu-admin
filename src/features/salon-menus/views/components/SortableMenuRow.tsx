@@ -150,7 +150,7 @@ export default function SortableMenuRow({
           >
             <div className="flex-1 text-sm md:text-base font-semibold text-secondary-900">{menu.name}</div>
 
-            <div className="text-xs md:text-sm text-secondary-600 sm:w-24 sm:text-center">
+            <div className="text-xs md:text-sm text-secondary-700 sm:w-24 sm:text-center">
               {menu.duration_minutes}{t('menu.unit.minutes')}
             </div>
 
@@ -168,6 +168,7 @@ export default function SortableMenuRow({
                   e.stopPropagation();
                   onDeleteMenu(menu.id);
                 }}
+                aria-label={t('menu.deleteMenu')}
                 className="p-1 text-secondary-400 hover:text-error-500"
               >
                 <Trash2 className="w-4 h-4" />

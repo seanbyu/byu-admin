@@ -229,9 +229,9 @@ export default function MenuList({
 
               return (
                 <div key={industry.id} className="space-y-3 md:space-y-4 pt-2 md:pt-3 xl:pt-4">
-                  <div className="text-section-header px-1 mb-1.5 sm:mb-2 text-xs sm:text-sm">
+                  <h2 className="text-section-header px-1 mb-1.5 sm:mb-2 text-xs sm:text-sm">
                     {industry.name}
-                  </div>
+                  </h2>
                   {industryCategories.map((category) => (
                     <CategoryItem
                       key={category.id}
@@ -283,9 +283,9 @@ export default function MenuList({
               if (otherCategories.length > 0) {
                 return (
                   <div className="space-y-3 md:space-y-4">
-                    <div className="text-xs sm:text-sm font-semibold text-secondary-500">
+                    <h2 className="text-xs sm:text-sm font-semibold text-secondary-700 px-1 mb-1.5 sm:mb-2">
                       {t('other')}
-                    </div>
+                    </h2>
                     {otherCategories.map((category) => (
                       <CategoryItem
                         key={category.id}

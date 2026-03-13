@@ -16,7 +16,7 @@ interface IndustryTabsProps {
 // rendering-hoist-jsx: 정적 클래스명 상수 호이스팅
 const BASE_TAB_CLASS = 'px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[11px] sm:text-xs md:text-sm font-medium transition-colors';
 const ACTIVE_TAB_CLASS = 'bg-primary-500 text-white';
-const INACTIVE_TAB_CLASS = 'bg-white text-secondary-500 border border-secondary-200 hover:bg-secondary-50';
+const INACTIVE_TAB_CLASS = 'bg-white text-secondary-700 border border-secondary-200 hover:bg-secondary-50';
 
 // 개별 탭 버튼 컴포넌트 (rerender-memo)
 interface TabButtonProps {

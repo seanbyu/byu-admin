@@ -12,6 +12,8 @@
   "treatment": "ทรีทเมนต์",
   "addMenu": "เพิ่มบริการ",
   "dragToReorder": "ลากเพื่อจัดลำดับ",
+  "deleteMenu": "ลบเมนู",
+  "deleteCategory": "ลบหมวดหมู่",
   "orderSettings": "ตั้งค่าลำดับ",
   "allMenus": "เมนูทั้งหมด",
   "addGroup": "เพิ่มกลุ่ม",

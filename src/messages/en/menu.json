@@ -12,6 +12,8 @@
   "treatment": "Treatment",
   "addMenu": "Add Service",
   "dragToReorder": "Drag to reorder",
+  "deleteMenu": "Delete menu",
+  "deleteCategory": "Delete category",
   "orderSettings": "Order Settings",
   "allMenus": "All Menus",
   "addGroup": "Add Group",

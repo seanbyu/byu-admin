@@ -73,7 +73,7 @@ export default function CategoryItem({
               variant="outline"
               size="sm"
               onClick={() => onEdit(category)}
-              className="h-8 text-xs font-normal text-secondary-400 hover:text-secondary-900 border-secondary-200"
+              className="h-8 text-xs font-normal text-secondary-600 hover:text-secondary-900 border-secondary-200"
             >
               {t('common.edit')}
             </Button>
@@ -84,7 +84,8 @@ export default function CategoryItem({
                 if (confirm(t('menu.category.deleteConfirm')))
                   onDelete(category.id);
               }}
-              className="text-secondary-300 hover:text-error-500 p-1"
+              aria-label={t('menu.deleteCategory')}
+              className="text-secondary-400 hover:text-error-500 p-1"
             >
               <Trash2 className="w-4 h-4" />
             </button>

@@ -335,7 +335,7 @@ html {
     line-height: var(--line-height-normal);
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    @apply text-secondary-500;
+    @apply text-secondary-700; /* 500(3.0:1) → 700(6.9:1) WCAG AA */
   }
 
   /* Sidebar Styles */
