@@ -25,6 +25,10 @@ export function useSalesModalState(
   const [activeTab, setActiveTab] = useState<SalesTab>('service');
   const [isServiceInitialized, setIsServiceInitialized] = useState(false);
 
+  type DiscountConfig = { discountType: DiscountType; discountValue: string };
+  const [savedServiceDiscounts, setSavedServiceDiscounts] = useState<Record<string, DiscountConfig>>({});
+  const [savedProductDiscounts, setSavedProductDiscounts] = useState<Record<string, DiscountConfig>>({});
+
   // 카테고리별 그룹 (서비스 선택 표시용)
   const {
     groups: selectedServiceGroups,
@@ -75,6 +79,24 @@ export function useSalesModalState(
       const savedProductIds = booking.bookingMeta?.product_ids;
       setSelectedProductIds(Array.isArray(savedProductIds) ? savedProductIds : []);
       setNotes(booking.notes || '');
+
+      // 저장된 할인 정보 복원
+      const svcDiscounts: Record<string, DiscountConfig> = {};
+      if (Array.isArray(booking.bookingMeta?.service_discounts)) {
+        booking.bookingMeta.service_discounts.forEach((d: { categoryId: string; discountType: DiscountType; discountValue: string }) => {
+          svcDiscounts[d.categoryId] = { discountType: d.discountType, discountValue: d.discountValue };
+        });
+      }
+      setSavedServiceDiscounts(svcDiscounts);
+
+      const prdDiscounts: Record<string, DiscountConfig> = {};
+      if (Array.isArray(booking.bookingMeta?.product_discounts)) {
+        booking.bookingMeta.product_discounts.forEach((d: { categoryId: string; discountType: DiscountType; discountValue: string }) => {
+          prdDiscounts[d.categoryId] = { discountType: d.discountType, discountValue: d.discountValue };
+        });
+      }
+      setSavedProductDiscounts(prdDiscounts);
+
       setIsServiceInitialized(true);
     }
 
@@ -85,6 +107,8 @@ export function useSalesModalState(
       setItems([]);
       setProductItems([]);
       setActiveTab('service');
+      setSavedServiceDiscounts({});
+      setSavedProductDiscounts({});
     }
   }, [isOpen, booking, isServiceInitialized]);
 
@@ -100,6 +124,18 @@ export function useSalesModalState(
         if (existing) {
           return { ...existing, price: String(group.totalPrice) };
         }
+        // 저장된 할인 정보 복원 (모달 재오픈 시)
+        const saved = savedServiceDiscounts[group.categoryId];
+        if (saved?.discountValue) {
+          return {
+            categoryId: group.categoryId,
+            categoryName: group.categoryName,
+            price: String(group.totalPrice),
+            showDiscount: true,
+            discountType: saved.discountType,
+            discountValue: saved.discountValue,
+          };
+        }
         return {
           categoryId: group.categoryId,
           categoryName: group.categoryName,
@@ -110,7 +146,7 @@ export function useSalesModalState(
         };
       });
     });
-  }, [selectedServiceGroups, isServiceInitialized]);
+  }, [selectedServiceGroups, isServiceInitialized, savedServiceDiscounts]);
 
   // selectedProductIds 변경 → productItems 갱신 (기존 할인 설정 보존)
   useEffect(() => {
@@ -124,6 +160,18 @@ export function useSalesModalState(
         if (existing) {
           return { ...existing, price: String(group.total) };
         }
+        // 저장된 할인 정보 복원 (모달 재오픈 시)
+        const saved = savedProductDiscounts[group.product.id];
+        if (saved?.discountValue) {
+          return {
+            categoryId: group.product.id,
+            categoryName: group.product.name,
+            price: String(group.total),
+            showDiscount: true,
+            discountType: saved.discountType,
+            discountValue: saved.discountValue,
+          };
+        }
         return {
           categoryId: group.product.id,
           categoryName: group.product.name,
@@ -134,7 +182,7 @@ export function useSalesModalState(
         };
       });
     });
-  }, [selectedProductGroups, isServiceInitialized]);
+  }, [selectedProductGroups, isServiceInitialized, savedProductDiscounts]);
 
   // 서비스 추가
   const handleServiceAdd = useCallback((serviceId: string) => {

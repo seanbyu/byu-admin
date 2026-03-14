@@ -94,6 +94,16 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
         service_ids: selectedServiceIds,
         product_ids: selectedProductIds,
         category_name: serviceName,
+        service_discounts: items.map((item) => ({
+          categoryId: item.categoryId,
+          discountType: item.discountType,
+          discountValue: item.discountValue,
+        })),
+        product_discounts: productItems.map((item) => ({
+          categoryId: item.categoryId,
+          discountType: item.discountType,
+          discountValue: item.discountValue,
+        })),
       },
     } as Partial<Booking> & { bookingMeta?: Record<string, any> });
 
