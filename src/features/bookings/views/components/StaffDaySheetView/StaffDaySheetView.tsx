@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -136,18 +136,14 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
     [selectedDate]
   );
 
-  const weekDateButtons = useMemo(() => {
-    const base = new Date(selectedDate);
-    base.setHours(0, 0, 0, 0);
-    // 선택된 날짜가 속한 주의 월요일 기준으로 7일 계산
-    const dayOfWeek = base.getDay(); // 0=일, 1=월 ... 6=토
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const monday = new Date(base);
-    monday.setDate(base.getDate() + mondayOffset);
+  // 이번 달 전체 날짜 (1일 ~ 말일)
+  const monthDateButtons = useMemo(() => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
 
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + index);
+    return Array.from({ length: lastDay }, (_, i) => {
+      const date = new Date(year, month, i + 1);
       const weekday = getDayShortLabel(date.getDay());
       const dayBH = businessHours.find((bh) => bh.dayOfWeek === date.getDay());
       const closed = dayBH?.isOpen === false;
@@ -160,6 +156,16 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
       };
     });
   }, [businessHours, getDayShortLabel, selectedDate, t]);
+
+  // 선택 날짜 변경 시 해당 칩으로 자동 스크롤
+  const dateStripRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!dateStripRef.current) return;
+    const el = dateStripRef.current.querySelector<HTMLElement>(`[data-date-key="${selectedDateKey}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [selectedDateKey]);
 
   const handlePrevDate = useCallback(() => {
     const prev = new Date(selectedDate);
@@ -223,31 +229,30 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
           </div>
         </div>
 
-        {/* 주간 날짜 칩 */}
-        <div className="overflow-x-auto">
-          <div className="mx-auto flex w-max gap-1">
-            {weekDateButtons.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => onDateChange(new Date(item.date))}
-                className={`w-[52px] py-1.5 rounded-md border text-xs whitespace-nowrap transition-colors text-center ${
-                  item.key === selectedDateKey
-                    ? 'bg-primary-500 text-white border-primary-500'
-                    : item.closed
-                    ? 'bg-secondary-50 text-secondary-300 border-secondary-200 hover:bg-secondary-100'
-                    : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
-                }`}
-              >
-                {item.label}
-                {item.closed && (
-                  <span className="block text-[10px] text-error-400 leading-none mt-0.5">
-                    {t('booking.closedDayNotice')}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+        {/* 월간 날짜 칩 (스와이프 캐로셀) */}
+        <div ref={dateStripRef} className="flex gap-1 overflow-x-scroll scrollbar-hide py-0.5">
+          {monthDateButtons.map((item) => (
+            <button
+              key={item.key}
+              data-date-key={item.key}
+              type="button"
+              onClick={() => onDateChange(new Date(item.date))}
+              className={`flex-none w-[52px] py-1.5 rounded-md border text-xs whitespace-nowrap transition-colors text-center ${
+                item.key === selectedDateKey
+                  ? 'bg-primary-500 text-white border-primary-500'
+                  : item.closed
+                  ? 'bg-secondary-50 text-secondary-300 border-secondary-200 hover:bg-secondary-100'
+                  : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
+              }`}
+            >
+              {item.label}
+              {item.closed && (
+                <span className="block text-[10px] text-error-400 leading-none mt-0.5">
+                  {t('booking.closedDayNotice')}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
