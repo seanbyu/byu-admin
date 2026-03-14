@@ -24,21 +24,26 @@ export const StaffSelectorSheet = memo(function StaffSelectorSheet({
 }: StaffSelectorSheetProps) {
   const t = useTranslations();
 
-  const isAllSelected = selectedStaffIds.length === 0;
+  // [] = 전체(기본), [id1, id2] = 모두 개별 선택 → 둘 다 전체로 간주
+  const isAllSelected = selectedStaffIds.length === 0 || selectedStaffIds.length === artists.length;
   const isPartial = selectedStaffIds.length > 0 && selectedStaffIds.length < artists.length;
 
   const handleSelectAll = () => {
-    // 전체 선택 → 모두 해제(= 전체 표시), 일부/개별 선택 → 전체 해제
+    // 전체 버튼: 항상 [] 로 리셋 (기본 "전체 표시" 상태)
     onChangeStaffIds([]);
   };
 
   const handleToggle = (id: string) => {
-    if (selectedStaffIds.includes(id)) {
-      const next = selectedStaffIds.filter((s) => s !== id);
-      onChangeStaffIds(next);
+    let next: string[];
+    if (selectedStaffIds.length === 0) {
+      // 전체 모드에서 개별 클릭 → 해당 직원만 선택 시작
+      next = [id];
+    } else if (selectedStaffIds.includes(id)) {
+      next = selectedStaffIds.filter((s) => s !== id);
     } else {
-      onChangeStaffIds([...selectedStaffIds, id]);
+      next = [...selectedStaffIds, id];
     }
+    onChangeStaffIds(next);
   };
 
   return (
