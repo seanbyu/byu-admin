@@ -218,20 +218,32 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [highlightParam, isLoading, isSettingsLoading]);
 
-  // 2) highlightedBookingId 변경 시 스크롤 (폴링 없이 requestAnimationFrame 1회)
+  // 2) highlightedBookingId 변경 시 스크롤
+  //    필터 변경 → 리렌더 → DOM 반영까지 여러 패스가 필요하므로
+  //    요소를 찾을 때까지 100ms 간격으로 최대 10회 재시도 (모바일 대응)
   const highlightedBookingId = pageState.highlightedBookingId;
   useEffect(() => {
     if (!highlightedBookingId) return;
 
-    const raf = requestAnimationFrame(() => {
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tryScroll = () => {
       const all = document.querySelectorAll(`[data-booking-id="${highlightedBookingId}"]`);
       const el  = Array.from(all).find((e) => (e as HTMLElement).offsetParent !== null);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (++attempts < 10) {
+        timer = setTimeout(tryScroll, 100);
+      }
+    };
 
+    timer = setTimeout(tryScroll, 100);
     const clearTimer = setTimeout(() => setHighlightedBookingId(null), 5000);
 
-    return () => { cancelAnimationFrame(raf); clearTimeout(clearTimer); };
+    return () => { clearTimeout(timer); clearTimeout(clearTimer); };
   }, [highlightedBookingId, setHighlightedBookingId]);
 
   const handleSheetAddBooking = useCallback(
