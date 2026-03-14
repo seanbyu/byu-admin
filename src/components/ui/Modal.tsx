@@ -92,14 +92,14 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {title && (
-          <div className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-secondary-200">
+          <div className="flex-shrink-0 flex items-center justify-between px-[var(--modal-px)] sm:px-[var(--modal-px-md)] py-[var(--modal-py)] sm:py-[var(--modal-py-md)] border-b border-secondary-200">
             <h2 className="text-base sm:text-xl font-semibold text-secondary-900">
               {title}
             </h2>
             <button
               onClick={onClose}
               className={cn(
-                'p-1 rounded-lg',
+                'p-1 rounded-[var(--btn-radius)]',
                 'text-secondary-400 hover:text-secondary-600',
                 'hover:bg-secondary-100',
                 'transition-colors duration-fast'
@@ -111,13 +111,13 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Content */}
-        <div ref={contentRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
+        <div ref={contentRef} className="flex-1 overflow-y-auto px-[var(--modal-px)] sm:px-[var(--modal-px-md)] py-[var(--modal-py)] sm:py-[var(--modal-py-md)]">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-t border-secondary-200 bg-secondary-50 rounded-b-xl">
+          <div className="flex-shrink-0 px-[var(--modal-px)] sm:px-[var(--modal-px-md)] py-[var(--modal-py)] sm:py-[var(--modal-py-md)] border-t border-secondary-200 bg-secondary-50 rounded-b-xl">
             {footer}
           </div>
         )}

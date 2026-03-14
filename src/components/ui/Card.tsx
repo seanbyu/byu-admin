@@ -22,15 +22,15 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const paddingStyles = {
     none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
+    sm: 'p-[var(--card-padding-sm)]',
+    md: 'p-[var(--card-padding-md)]',
+    lg: 'p-[var(--card-padding-lg)]',
   };
 
   return (
     <div
       className={cn(
-        'bg-white rounded-lg shadow-sm border border-secondary-200',
+        'bg-white shadow-sm border border-secondary-200 rounded-[var(--card-radius)]',
         hover && 'transition-shadow duration-normal hover:shadow-md',
         className
       )}

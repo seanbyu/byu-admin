@@ -44,8 +44,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           className={cn(
             // Base styles
-            'w-full pl-3 pr-3 py-2 text-sm',
-            'border rounded-lg',
+            'w-full pl-[var(--input-px)] pr-[var(--input-px)] py-[var(--input-py)] text-sm',
+            'border rounded-[var(--input-radius)]',
             'text-secondary-900 bg-white',
             'transition-colors duration-fast',
             // Focus styles

@@ -118,7 +118,7 @@ export const SalesTabContent = memo(function SalesTabContent({
           {t('sales.totalSummary')}
         </h3>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-3 xl:grid-cols-5">
-          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+          <div className="rounded-[var(--card-radius)] border border-secondary-200 p-2.5 md:p-3">
             <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('tabs.service')}
             </p>
@@ -126,7 +126,7 @@ export const SalesTabContent = memo(function SalesTabContent({
               {formatPrice(totalService)}
             </p>
           </div>
-          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+          <div className="rounded-[var(--card-radius)] border border-secondary-200 p-2.5 md:p-3">
             <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('tabs.product')}
             </p>
@@ -134,7 +134,7 @@ export const SalesTabContent = memo(function SalesTabContent({
               {formatPrice(totalProduct)}
             </p>
           </div>
-          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+          <div className="rounded-[var(--card-radius)] border border-secondary-200 p-2.5 md:p-3">
             <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('sales.membershipSales')}
             </p>
@@ -142,7 +142,7 @@ export const SalesTabContent = memo(function SalesTabContent({
               {formatPrice(0)}
             </p>
           </div>
-          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+          <div className="rounded-[var(--card-radius)] border border-secondary-200 p-2.5 md:p-3">
             <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('sales.ticketSales')}
             </p>
@@ -150,7 +150,7 @@ export const SalesTabContent = memo(function SalesTabContent({
               {formatPrice(0)}
             </p>
           </div>
-          <div className="rounded-lg border border-secondary-200 p-2.5 md:p-3">
+          <div className="rounded-[var(--card-radius)] border border-secondary-200 p-2.5 md:p-3">
             <p className="mb-1 text-[11px] text-secondary-500 md:text-xs">
               {t('sales.cancellationFee')}
             </p>
@@ -167,7 +167,7 @@ export const SalesTabContent = memo(function SalesTabContent({
           {t('sales.history')}
         </h3>
         {serviceHistory.length === 0 ? (
-          <div className="flex h-[180px] items-center justify-center rounded-lg border border-secondary-200 text-sm text-secondary-400 md:h-[200px] md:text-base">
+          <div className="flex h-[180px] items-center justify-center rounded-[var(--card-radius)] border border-secondary-200 text-sm text-secondary-400 md:h-[200px] md:text-base">
             {t('sales.noHistory')}
           </div>
         ) : (

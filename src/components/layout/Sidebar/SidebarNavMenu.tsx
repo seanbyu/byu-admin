@@ -43,7 +43,7 @@ export const SidebarNavMenu = React.memo(function SidebarNavMenu({
               <button
                 onClick={() => item.id && toggleSubmenu(item.id)}
                 className={cn(
-                  'flex items-center w-full px-2.5 md:px-3.5 xl:px-4 py-2 md:py-2.5 rounded-lg transition-colors justify-between',
+                  'flex items-center w-full px-2.5 md:px-3.5 xl:px-4 py-2 md:py-2.5 rounded-[var(--btn-radius)] transition-colors justify-between',
                   'text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-hover-text'
                 )}
               >
@@ -79,7 +79,7 @@ export const SidebarNavMenu = React.memo(function SidebarNavMenu({
                           href={subItem.href || '#'}
                           onClick={onNavClick}
                           className={cn(
-                            'flex items-center px-2.5 md:px-3.5 xl:px-4 py-1.5 md:py-2 rounded-lg transition-colors text-[11px] md:text-xs xl:text-sm',
+                            'flex items-center px-2.5 md:px-3.5 xl:px-4 py-1.5 md:py-2 rounded-[var(--btn-radius)] transition-colors text-[11px] md:text-xs xl:text-sm',
                             isSubActive
                               ? 'text-sidebar-active-text font-medium bg-sidebar-active'
                               : 'text-sidebar-text-muted hover:bg-sidebar-hover hover:text-sidebar-hover-text'
@@ -106,7 +106,7 @@ export const SidebarNavMenu = React.memo(function SidebarNavMenu({
               href={item.href || '#'}
               onClick={onNavClick}
               className={cn(
-                'flex items-center px-2.5 md:px-3.5 xl:px-4 py-2 md:py-2.5 rounded-lg transition-colors',
+                'flex items-center px-2.5 md:px-3.5 xl:px-4 py-2 md:py-2.5 rounded-[var(--btn-radius)] transition-colors',
                 isActive
                   ? 'bg-sidebar-active text-sidebar-active-text'
                   : 'text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-hover-text'

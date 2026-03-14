@@ -7,20 +7,18 @@
    모바일에서 전체 UI 자동 스케일링
    =================================== */
 html {
-  font-size: 16px; /* PC 기본 (1rem = 16px) */
+  /* 화면 너비에 따라 전체 UI 비례 스케일링
+     320px → 13px / 390px → 14.82px / 421px+ → 16px */
+  font-size: clamp(13px, 3.8vw, 16px);
   overscroll-behavior: none;
 }
 
+/* iOS Safari 자동 줌인 방지
+   clamp로 모바일에서 font-size가 16px 미만이 되어
+   input 포커스 시 Safari가 자동 줌인함.
+   !important 필수: Tailwind의 text-sm 등 클래스 선택자(명시도 0,1,0)가
+   요소 선택자(0,0,1)보다 높아 덮어쓰기 때문. */
 @media (max-width: 640px) {
-  html {
-    font-size: 14px; /* 모바일 (1rem = 14px, 12.5% 축소) */
-  }
-
-  /* iOS Safari 자동 줌인 방지
-     html font-size가 14px이면 0.875rem → 12.25px으로
-     16px 미만이 되어 input 포커스 시 Safari가 자동 줌인함.
-     !important 필수: Tailwind의 text-sm 등 클래스 선택자(명시도 0,1,0)가
-     요소 선택자(0,0,1)보다 높아 덮어쓰기 때문. */
   input:not([type='checkbox']):not([type='radio']):not([type='range']),
   textarea,
   select {
@@ -196,6 +194,33 @@ html {
     --z-popover: 1060;
     --z-tooltip: 1070;
 
+    /* ----- Component Tokens: Button ----- */
+    --btn-h-sm: 2rem;        /* 32px */
+    --btn-h-md: 2.25rem;     /* 36px */
+    --btn-h-lg: 2.75rem;     /* 44px */
+    --btn-px-sm: 0.75rem;    /* 12px */
+    --btn-px-md: 1rem;       /* 16px */
+    --btn-px-lg: 1.5rem;     /* 24px */
+    --btn-radius: var(--radius-lg);
+
+    /* ----- Component Tokens: Card ----- */
+    --card-radius: var(--radius-lg);
+    --card-padding-sm: var(--spacing-4);   /* 16px */
+    --card-padding-md: var(--spacing-6);   /* 24px */
+    --card-padding-lg: var(--spacing-8);   /* 32px */
+
+    /* ----- Component Tokens: Input / Select ----- */
+    --input-h: 2.25rem;      /* 36px */
+    --input-px: 0.75rem;     /* 12px */
+    --input-py: 0.5rem;      /* 8px — py-2 */
+    --input-radius: var(--radius-lg);
+
+    /* ----- Component Tokens: Modal ----- */
+    --modal-px: var(--spacing-4);    /* 16px — mobile */
+    --modal-px-md: var(--spacing-6); /* 24px — desktop */
+    --modal-py: var(--spacing-3);    /* 12px — mobile */
+    --modal-py-md: var(--spacing-4); /* 16px — desktop */
+
     /* ----- Layout ----- */
     --sidebar-width: 256px;
     --header-height: 64px;
@@ -361,37 +386,52 @@ html {
   .btn-primary {
     @apply bg-primary-500 hover:bg-primary-600 active:bg-primary-700;
     @apply text-white font-medium;
-    @apply rounded-lg transition-colors;
-    @apply px-4 py-2;
+    @apply transition-colors;
+    border-radius: var(--btn-radius);
+    padding-left: var(--btn-px-md);
+    padding-right: var(--btn-px-md);
+    height: var(--btn-h-md);
     box-shadow: var(--shadow-sm);
   }
 
   .btn-secondary {
     @apply bg-secondary-100 hover:bg-secondary-200 active:bg-secondary-300;
     @apply text-secondary-700 font-medium;
-    @apply rounded-lg transition-colors;
-    @apply px-4 py-2;
+    @apply transition-colors;
+    border-radius: var(--btn-radius);
+    padding-left: var(--btn-px-md);
+    padding-right: var(--btn-px-md);
+    height: var(--btn-h-md);
   }
 
   .btn-outline {
     @apply border border-secondary-300 hover:bg-secondary-50 active:bg-secondary-100;
-    @apply text-secondary-700 font-medium;
-    @apply rounded-lg transition-colors;
-    @apply px-4 py-2;
+    @apply text-secondary-700 font-medium bg-white;
+    @apply transition-colors;
+    border-radius: var(--btn-radius);
+    padding-left: var(--btn-px-md);
+    padding-right: var(--btn-px-md);
+    height: var(--btn-h-md);
   }
 
   .btn-ghost {
     @apply hover:bg-secondary-100 active:bg-secondary-200;
     @apply text-secondary-600 font-medium;
-    @apply rounded-lg transition-colors;
-    @apply px-4 py-2;
+    @apply transition-colors;
+    border-radius: var(--btn-radius);
+    padding-left: var(--btn-px-md);
+    padding-right: var(--btn-px-md);
+    height: var(--btn-h-md);
   }
 
   .btn-danger {
     @apply bg-error-500 hover:bg-error-600 active:bg-error-700;
     @apply text-white font-medium;
-    @apply rounded-lg transition-colors;
-    @apply px-4 py-2;
+    @apply transition-colors;
+    border-radius: var(--btn-radius);
+    padding-left: var(--btn-px-md);
+    padding-right: var(--btn-px-md);
+    height: var(--btn-h-md);
   }
 
   /* ===================================
@@ -400,7 +440,7 @@ html {
 
   .card {
     @apply bg-white;
-    border-radius: var(--radius-lg);
+    border-radius: var(--card-radius);
     box-shadow: var(--shadow-sm);
     @apply border border-secondary-200;
   }
@@ -415,12 +455,17 @@ html {
      =================================== */
 
   .input-base {
-    @apply w-full px-3 py-2;
-    @apply border border-secondary-300 rounded-lg;
+    @apply w-full;
+    @apply border border-secondary-300;
     @apply text-secondary-900 placeholder:text-secondary-400;
     @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
     @apply transition-colors;
-    font-size: var(--font-size-sm); /* 0.875rem = 12.25px (모바일 14px 기준) */
+    padding-left: var(--input-px);
+    padding-right: var(--input-px);
+    padding-top: var(--input-py);
+    padding-bottom: var(--input-py);
+    border-radius: var(--input-radius);
+    font-size: var(--font-size-sm);
   }
 
   .input-error {

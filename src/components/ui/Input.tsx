@@ -32,8 +32,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           lang={isDateTimeInput ? locale : undefined}
           className={cn(
             // Base styles
-            'w-full px-3 py-2 text-sm',
-            'bg-white border rounded-lg',
+            'w-full px-[var(--input-px)] py-[var(--input-py)] text-sm',
+            'bg-white border rounded-[var(--input-radius)]',
             'text-secondary-900 placeholder:text-secondary-400',
             'transition-colors duration-fast',
             // Focus styles

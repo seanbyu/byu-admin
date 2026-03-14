@@ -16,7 +16,6 @@ import { useSalonSettings } from '../hooks/useSalonSettings';
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
-import { useRouter } from '@/i18n/routing';
 import { Plus } from 'lucide-react';
 import { BookingsChartSkeleton } from '@/components/ui/Skeleton';
 import { StaffDaySheetView } from './components/StaffDaySheetView';
@@ -73,25 +72,26 @@ const BookingFilters = memo(function BookingFilters({
 
   return (
     <Card>
-      <div className="flex flex-wrap items-end gap-4">
-        <div className="w-48">
+      <div className="flex flex-wrap items-start gap-4">
+        <div className="w-32">
           <Select
             label={t('booking.status')}
             options={translatedStatusOptions}
             value={statusFilter}
             onChange={handleStatusChange}
             showPlaceholder={false}
+            className="py-1.5 text-xs"
           />
         </div>
         <div className="flex-1">
-          <label className="block text-sm font-medium text-secondary-700 mb-2">
+          <label className="block text-sm font-medium text-secondary-700 mb-1">
             {t('booking.designer')}
           </label>
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
             <button
               type="button"
               onClick={() => onStaffChange('')}
-              className={`px-3 py-1.5 rounded-lg border text-sm whitespace-nowrap transition-colors ${
+              className={`px-[var(--btn-px-sm)] py-1.5 rounded-[var(--btn-radius)] border text-sm whitespace-nowrap transition-colors ${
                 selectedStaffId === ''
                   ? 'bg-primary-500 text-white border-primary-500'
                   : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
@@ -104,7 +104,7 @@ const BookingFilters = memo(function BookingFilters({
                 key={designer.value}
                 type="button"
                 onClick={() => onStaffChange(designer.value)}
-                className={`px-3 py-1.5 rounded-lg border text-sm whitespace-nowrap transition-colors ${
+                className={`px-[var(--btn-px-sm)] py-1.5 rounded-[var(--btn-radius)] border text-sm whitespace-nowrap transition-colors ${
                   selectedStaffId === designer.value
                     ? 'bg-primary-500 text-white border-primary-500'
                     : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
@@ -124,7 +124,6 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   const t = useTranslations();
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const { canWrite } = usePermission();

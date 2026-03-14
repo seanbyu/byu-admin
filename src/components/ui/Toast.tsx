@@ -53,7 +53,7 @@ export const Toast = memo(function Toast({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg',
+        'flex items-center gap-3 px-[var(--btn-px-md)] py-[var(--spacing-3)] rounded-[var(--card-radius)] border shadow-lg',
         'toast-enter',
         styleMap[type]
       )}

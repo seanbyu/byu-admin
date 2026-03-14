@@ -66,7 +66,7 @@ function SortableCategoryItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+      className={`group flex items-center justify-between px-[var(--btn-px-sm)] py-2 rounded-[var(--btn-radius)] cursor-pointer transition-colors ${
         selectedCategoryId === category.id
           ? 'bg-primary-50'
           : 'hover:bg-secondary-100'
@@ -156,7 +156,7 @@ export default function MenusSidebar({
         <button
           type="button"
           onClick={() => onSelectCategory(null)}
-          className={`w-full rounded-lg border px-2.5 py-1.5 text-left transition-colors ${
+          className={`w-full rounded-[var(--btn-radius)] border px-2.5 py-1.5 text-left transition-colors ${
             selectedCategoryId === null
               ? 'bg-primary-500 border-primary-500 text-white'
               : 'bg-white border-secondary-200 text-secondary-800'
@@ -197,7 +197,7 @@ export default function MenusSidebar({
       <div className="hidden xl:block space-y-6">
         <div
           onClick={() => onSelectCategory(null)}
-          className={`p-4 rounded-lg cursor-pointer transition-colors ${
+          className={`p-[var(--card-padding-sm)] rounded-[var(--card-radius)] cursor-pointer transition-colors ${
             selectedCategoryId === null
               ? 'bg-primary-500 text-white'
               : 'bg-white border border-secondary-200 hover:bg-secondary-50'

@@ -76,8 +76,8 @@ export function DatePicker({
           maxDate={maxDate}
           className={cn(
             // Base styles
-            'w-full px-3 py-2 pr-9 text-sm',
-            'border rounded-lg',
+            'w-full px-[var(--input-px)] py-[var(--input-py)] pr-9 text-sm',
+            'border rounded-[var(--input-radius)]',
             'text-secondary-900 placeholder:text-secondary-400',
             'transition-colors duration-fast',
             // Focus styles

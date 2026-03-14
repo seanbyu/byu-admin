@@ -82,7 +82,7 @@ function CustomerSectionComponent({
               type="button"
               onClick={() => onTypeChange('local')}
               className={cn(
-                'px-3 py-1 text-xs rounded-full transition-colors',
+                'px-[var(--btn-px-sm)] py-1 text-xs rounded-full transition-colors',
                 customerType === 'local'
                   ? 'bg-primary-500 text-white'
                   : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
@@ -94,7 +94,7 @@ function CustomerSectionComponent({
               type="button"
               onClick={handleForeignClick}
               className={cn(
-                'px-3 py-1 text-xs rounded-full transition-colors',
+                'px-[var(--btn-px-sm)] py-1 text-xs rounded-full transition-colors',
                 customerType === 'foreign'
                   ? 'bg-primary-500 text-white'
                   : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
@@ -153,7 +153,7 @@ function CustomerSectionComponent({
           {/* 고객 검색 드롭다운 */}
           {customerType === 'local' && showCustomerDropdown && matchingCustomers.length > 0 && (
             <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white border border-primary-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-              <div className="px-3 py-1.5 text-xs font-semibold text-primary-600 bg-primary-50 border-b border-primary-100">
+              <div className="px-[var(--input-px)] py-1.5 text-xs font-semibold text-primary-600 bg-primary-50 border-b border-primary-100">
                 {t('booking.existingCustomers') || '기존 고객'}
               </div>
               {matchingCustomers.map((customer) => (
@@ -161,7 +161,7 @@ function CustomerSectionComponent({
                   key={customer.id}
                   type="button"
                   onClick={() => onSelectCustomer(customer)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-primary-50 transition-colors text-left border-b border-secondary-100 last:border-b-0"
+                  className="w-full flex items-center gap-3 px-[var(--input-px)] py-2.5 hover:bg-primary-50 transition-colors text-left border-b border-secondary-100 last:border-b-0"
                 >
                   <User className="w-4 h-4 shrink-0 text-primary-400" />
                   <div>

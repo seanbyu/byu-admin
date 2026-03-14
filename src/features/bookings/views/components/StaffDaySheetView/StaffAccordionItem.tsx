@@ -77,14 +77,14 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
   );
 
   return (
-    <div className="border border-secondary-200 rounded-lg overflow-hidden bg-white">
+    <div className="border border-secondary-200 rounded-[var(--card-radius)] overflow-hidden bg-white">
       {/* 아코디언 헤더 */}
       <div
         role="button"
         tabIndex={0}
         onClick={handleToggle}
         onKeyDown={(e) => e.key === 'Enter' && handleToggle()}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 md:px-4 md:py-3 bg-white hover:bg-secondary-50 transition-colors cursor-pointer select-none"
+        className="w-full flex items-center justify-between gap-2 px-[var(--btn-px-sm)] py-2.5 md:px-[var(--btn-px-md)] md:py-3 bg-white hover:bg-secondary-50 transition-colors cursor-pointer select-none"
       >
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
           {isOpen ? (
@@ -110,7 +110,7 @@ export const StaffAccordionItem = memo(function StaffAccordionItem({
           type="button"
           onClick={handleAddClick}
           aria-label={t('booking.newBookingFor', { name: staff.name })}
-          className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-3 py-1.5 rounded-lg transition-colors border border-primary-200"
+          className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-[var(--btn-px-sm)] py-1.5 rounded-[var(--btn-radius)] transition-colors border border-primary-200"
         >
           <Plus size={14} />
           <span className="hidden sm:inline">{t('booking.new')}</span>
