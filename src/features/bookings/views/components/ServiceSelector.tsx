@@ -119,7 +119,10 @@ function ServiceSelectorComponent({
 
         {/* 서비스 목록 (오른쪽) */}
         <div className="w-2/3 overflow-y-auto">
-          {currentMenus.map((menu) => (
+          {currentMenus.map((menu) => {
+            const durationMin = menu.duration_minutes ?? 0;
+            const price = (menu.base_price || menu.price || 0).toLocaleString();
+            return (
             <button
               key={menu.id}
               type="button"
@@ -149,12 +152,13 @@ function ServiceSelectorComponent({
                     </span>
                   )}
                   <span className="text-[10px] text-secondary-600 sm:text-xs">
-                    {menu.duration_minutes ?? 0}min / ฿{(menu.base_price || menu.price || 0).toLocaleString()}
+                    {durationMin}min / ฿{price}
                   </span>
                 </div>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
