@@ -232,12 +232,17 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
       const all = document.querySelectorAll(`[data-booking-id="${highlightedBookingId}"]`);
       const el  = Array.from(all).find((e) => (e as HTMLElement).offsetParent !== null);
       if (el) {
-        // scrollIntoView는 overflow-x-auto 등 중첩 스크롤 컨테이너를 먼저 처리하여
-        // 모바일에서 페이지 스크롤이 제대로 안 되는 경우가 있음.
-        // getBoundingClientRect + window.scrollTo로 페이지를 직접 스크롤.
-        const rect = el.getBoundingClientRect();
-        const top  = window.scrollY + rect.top - window.innerHeight / 2 + rect.height / 2;
-        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        // 실제 스크롤 컨테이너는 window가 아닌 <main>(overflow-y-auto).
+        // <main>을 직접 찾아 scrollTo로 해당 행을 화면 중앙에 위치시킴.
+        const mainEl = document.querySelector('main') as HTMLElement | null;
+        const container: HTMLElement = mainEl ?? document.documentElement;
+        const containerRect = container.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        const top = container.scrollTop
+                    + (elRect.top - containerRect.top)
+                    - container.clientHeight / 2
+                    + elRect.height / 2;
+        container.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
         return;
       }
       if (++attempts < 10) {
