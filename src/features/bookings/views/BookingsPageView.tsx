@@ -232,8 +232,9 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
       const all = document.querySelectorAll(`[data-booking-id="${highlightedBookingId}"]`);
       const el  = Array.from(all).find((e) => (e as HTMLElement).offsetParent !== null);
       if (el) {
-        // 실제 스크롤 컨테이너는 window가 아닌 <main>(overflow-y-auto).
-        // <main>을 직접 찾아 scrollTo로 해당 행을 화면 중앙에 위치시킴.
+        // iOS WebKit: scrollTo({ behavior: 'smooth' })가 커스텀 컨테이너에서 묵살되는 경우 있음.
+        // scrollTop 직접 대입으로 교체 — 모든 브라우저에서 즉각 동작.
+        // (부드러운 스크롤은 <main>의 scroll-behavior CSS로 처리)
         const mainEl = document.querySelector('main') as HTMLElement | null;
         const container: HTMLElement = mainEl ?? document.documentElement;
         const containerRect = container.getBoundingClientRect();
@@ -242,7 +243,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
                     + (elRect.top - containerRect.top)
                     - container.clientHeight / 2
                     + elRect.height / 2;
-        container.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        container.scrollTop = Math.max(0, top);
         return;
       }
       if (++attempts < 10) {
