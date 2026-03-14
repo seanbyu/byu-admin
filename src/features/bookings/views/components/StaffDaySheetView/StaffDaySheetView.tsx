@@ -20,6 +20,7 @@ export interface StaffDaySheetViewProps {
   staffMembers: Staff[];
   selectedDate: Date;
   selectedStaffId: string;
+  selectedStaffIds?: string[];
   onDateChange: (date: Date) => void;
   businessHours: BusinessHours[];
   slotDuration: number;
@@ -35,6 +36,7 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
   staffMembers,
   selectedDate,
   selectedStaffId,
+  selectedStaffIds = [],
   onDateChange,
   businessHours,
   slotDuration,
@@ -57,10 +59,18 @@ export const StaffDaySheetView = memo(function StaffDaySheetView({
   );
 
   const visibleStaff = useMemo(() => {
-    if (!selectedStaffId) return bookingEnabledStaff;
-    const matched = bookingEnabledStaff.find((staff) => staff.id === selectedStaffId);
-    return matched ? [matched] : bookingEnabledStaff;
-  }, [bookingEnabledStaff, selectedStaffId]);
+    // 멀티 선택 필터 우선 적용
+    if (selectedStaffIds.length > 0) {
+      const idSet = new Set(selectedStaffIds);
+      return bookingEnabledStaff.filter((s) => idSet.has(s.id));
+    }
+    // 단일 선택 (새 예약 pre-fill 용도)
+    if (selectedStaffId) {
+      const matched = bookingEnabledStaff.find((s) => s.id === selectedStaffId);
+      return matched ? [matched] : bookingEnabledStaff;
+    }
+    return bookingEnabledStaff;
+  }, [bookingEnabledStaff, selectedStaffId, selectedStaffIds]);
 
   // 해당 요일의 영업시간 (isOpen 여부 무관하게 조회)
   const todayBusinessHours = useMemo(() => {

@@ -284,6 +284,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
             staffMembers={staffMembers}
             selectedDate={pageState.selectedDate}
             selectedStaffId={pageState.selectedStaffId}
+            selectedStaffIds={pageState.selectedStaffIds}
             onDateChange={pageState.setSelectedDate}
             businessHours={businessHours}
             slotDuration={slotDuration}
