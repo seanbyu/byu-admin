@@ -232,7 +232,12 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
       const all = document.querySelectorAll(`[data-booking-id="${highlightedBookingId}"]`);
       const el  = Array.from(all).find((e) => (e as HTMLElement).offsetParent !== null);
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // scrollIntoView는 overflow-x-auto 등 중첩 스크롤 컨테이너를 먼저 처리하여
+        // 모바일에서 페이지 스크롤이 제대로 안 되는 경우가 있음.
+        // getBoundingClientRect + window.scrollTo로 페이지를 직접 스크롤.
+        const rect = el.getBoundingClientRect();
+        const top  = window.scrollY + rect.top - window.innerHeight / 2 + rect.height / 2;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
         return;
       }
       if (++attempts < 10) {
