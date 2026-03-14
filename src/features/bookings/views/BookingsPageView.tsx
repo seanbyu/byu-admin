@@ -197,14 +197,20 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   const highlightParam    = searchParams.get('highlight');
   const dateParam         = searchParams.get('date');
   const staffParam        = searchParams.get('staff');
-  const { setSelectedDate, setSelectedStaffId, setHighlightedBookingId } = pageState;
+  const { setSelectedDate, setSelectedStaffId, setSelectedStaffIds, setHighlightedBookingId } = pageState;
 
   // 1) URL 파라미터 → Zustand 상태 설정 (데이터 로딩 완료 시점에 실행)
   useEffect(() => {
     if (!highlightParam || isLoading || isSettingsLoading) return;
 
     if (dateParam)  setSelectedDate(new Date(dateParam + 'T00:00:00'));
-    if (staffParam) setSelectedStaffId(staffParam);
+    if (staffParam) {
+      setSelectedStaffId(staffParam);
+      // 해당 직원이 필터에 체크된 상태로, 그 직원 테이블만 표시
+      setSelectedStaffIds([staffParam]);
+    } else {
+      setSelectedStaffIds([]);
+    }
     setHighlightedBookingId(highlightParam);
 
     // router.replace 대신 history API로 URL 정리
