@@ -117,6 +117,8 @@ export const SalesRegistrationModal = memo(function SalesRegistrationModal({
     booking,
     selectedServiceIds,
     selectedProductIds,
+    items,
+    productItems,
     totalServicePrice,
     totalProductAmount,
     productNameSummary,
