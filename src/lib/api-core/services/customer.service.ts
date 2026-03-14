@@ -194,7 +194,8 @@ export class CustomerService {
     salonId: string,
     customer: CreateCustomerInput
   ): Promise<DBCustomer> {
-    const dto: CreateCustomerDto = { ...customer, salon_id: salonId };
+    const customerNumber = await this.repository.getNextCustomerNumber(salonId);
+    const dto: CreateCustomerDto = { ...customer, salon_id: salonId, customer_number: customerNumber };
     return this.repository.createCustomer(dto);
   }
 
@@ -216,8 +217,9 @@ export class CustomerService {
       }
     }
 
-    // 새 고객 생성
-    const dto: CreateCustomerDto = { ...customer, salon_id: salonId };
+    // 새 고객 생성 — 가장 작은 빈 번호 자동 할당
+    const customerNumber = await this.repository.getNextCustomerNumber(salonId);
+    const dto: CreateCustomerDto = { ...customer, salon_id: salonId, customer_number: customerNumber };
     return this.repository.createCustomer(dto);
   }
 
