@@ -43,19 +43,9 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={cn(
-            // Base styles
-            'w-full pl-[var(--input-px)] pr-[var(--input-px)] py-[var(--input-py)] text-sm',
-            'border rounded-[var(--input-radius)]',
+            error ? 'input-error' : 'input-base',
             'text-secondary-900 bg-white',
-            'transition-colors duration-fast',
-            // Focus styles
-            'focus:outline-none focus:ring-2 focus:border-transparent',
-            // Disabled styles
             'disabled:bg-secondary-100 disabled:cursor-not-allowed',
-            // Error or default border
-            error
-              ? 'border-error-500 focus:ring-error-500'
-              : 'border-secondary-300 focus:ring-primary-500',
             className
           )}
           {...props}

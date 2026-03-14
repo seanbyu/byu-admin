@@ -75,19 +75,9 @@ export function DatePicker({
           minDate={minDate}
           maxDate={maxDate}
           className={cn(
-            // Base styles
-            'w-full px-[var(--input-px)] py-[var(--input-py)] pr-9 text-sm',
-            'border rounded-[var(--input-radius)]',
-            'text-secondary-900 placeholder:text-secondary-400',
-            'transition-colors duration-fast',
-            // Focus styles
-            'focus:outline-none focus:ring-2 focus:border-transparent',
-            // Disabled styles
+            error ? 'input-error' : 'input-base',
+            'pr-9 text-secondary-900 placeholder:text-secondary-400',
             'disabled:bg-secondary-100 disabled:cursor-not-allowed',
-            // Error or default border
-            error
-              ? 'border-error-500 focus:ring-error-500'
-              : 'border-secondary-300 focus:ring-primary-500',
             className
           )}
           wrapperClassName="w-full"

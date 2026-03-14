@@ -204,7 +204,7 @@ export const PhoneInput = memo(function PhoneInput({
             type="button"
             onClick={() => !disabled && setShowDropdown(!showDropdown)}
             disabled={disabled}
-            className={`flex items-center gap-1 px-[var(--input-px)] ${compact ? 'py-1.5 sm:py-[var(--input-py)]' : 'py-[var(--input-py)]'} border-r border-secondary-300 rounded-l-md transition-colors min-w-[90px] ${
+            className={`flex items-center gap-1 px-3 ${compact ? 'py-1.5 sm:py-2' : 'py-2'} border-r border-secondary-300 rounded-l-md transition-colors min-w-[90px] ${
               disabled
                 ? 'bg-secondary-100 cursor-not-allowed'
                 : 'bg-secondary-50 hover:bg-secondary-100'
@@ -244,7 +244,7 @@ export const PhoneInput = memo(function PhoneInput({
           onFocus={onFocus}
           placeholder={placeholder}
           disabled={disabled}
-          className={`flex-1 min-w-0 px-[var(--input-px)] ${compact ? 'py-1.5 sm:py-[var(--input-py)]' : 'py-[var(--input-py)]'} border-0 rounded-r-md bg-white text-secondary-900 placeholder:text-secondary-500 focus:outline-none ${
+          className={`flex-1 min-w-0 px-3 ${compact ? 'py-1.5 sm:py-2' : 'py-2'} border-0 rounded-r-md bg-white text-secondary-900 placeholder:text-secondary-500 focus:outline-none ${
             disabled ? 'bg-secondary-100 cursor-not-allowed' : ''
           }`}
         />
