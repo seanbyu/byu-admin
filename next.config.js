@@ -12,7 +12,10 @@ const nextConfig = {
       },
     ],
   },
-  transpilePackages: ['@salon-admin/api-core', '@byu-admin/supabase'],
+  transpilePackages: [
+    '@salon-admin/api-core',
+    '@byu-admin/supabase',
+  ],
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns', 'lodash', 'react-use'],
   },

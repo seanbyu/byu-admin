@@ -122,13 +122,31 @@ function BookingCard({ booking, rowH, highlighted, serviceCategoryMap, onBooking
             </p>
           )}
         </div>
-        <div onClick={handleStatusClick}>
-          <InlineStatusSelect
-            bookingId={booking.id}
-            status={booking.status}
-            onUpdate={handleStatusChange}
-            disabled={isSalesRegistered}
-          />
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <div onClick={handleStatusClick}>
+            <InlineStatusSelect
+              bookingId={booking.id}
+              status={booking.status}
+              onUpdate={handleStatusChange}
+              disabled={isSalesRegistered}
+            />
+          </div>
+          {!isCancelled && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onOpenSales(booking); }}
+              className={cn(
+                'text-[11px] font-medium px-2 py-0.5 rounded border transition-colors',
+                isSalesRegistered
+                  ? 'border-secondary-300 text-secondary-600 bg-secondary-50 hover:bg-secondary-100'
+                  : 'border-primary-300 text-primary-600 bg-primary-50 hover:bg-primary-100'
+              )}
+            >
+              {isSalesRegistered
+                ? t('booking.salesModal.editSales')
+                : t('booking.salesModal.registerSales')}
+            </button>
+          )}
         </div>
       </div>
       {booking.notes && (
