@@ -1,13 +1,14 @@
 'use client';
 
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import { Booking } from '../types';
 
 // ============================================
 // Bookings UI State Store (Zustand)
 // - 데이터 fetching은 TanStack Query가 담당
 // - UI 상태만 Zustand로 관리
+// - selectedStaffIds는 localStorage에 persist → 새로고침 후에도 유지
 // ============================================
 
 interface BookingsUIState {
@@ -25,7 +26,7 @@ interface BookingsUIState {
   statusFilter: string;
   selectedTime: string;
   selectedStaffId: string;       // 새 예약 모달 pre-fill 용
-  selectedStaffIds: string[];    // 담당자 필터 멀티 선택 (빈 배열 = 전체)
+  selectedStaffIds: string[];    // 담당자 필터 멀티 선택 (빈 배열 = 전체) — persisted
   selectedServiceId: string;
   highlightedBookingId: string | null;
 
@@ -69,60 +70,68 @@ const initialState = {
 
 export const useBookingsUIStore = create<BookingsUIState>()(
   devtools(
-    (set) => ({
-      ...initialState,
+    persist(
+      (set) => ({
+        ...initialState,
 
-      openNewBookingModal: () =>
-        set({ showNewBookingModal: true }, false, 'openNewBookingModal'),
+        openNewBookingModal: () =>
+          set({ showNewBookingModal: true }, false, 'openNewBookingModal'),
 
-      closeNewBookingModal: () =>
-        set(
-          { showNewBookingModal: false, selectedTime: '', selectedStaffId: '', selectedServiceId: '' },
-          false,
-          'closeNewBookingModal'
-        ),
+        closeNewBookingModal: () =>
+          set(
+            { showNewBookingModal: false, selectedTime: '', selectedStaffId: '', selectedServiceId: '' },
+            false,
+            'closeNewBookingModal'
+          ),
 
-      openBookingDetailModal: (booking: Booking) =>
-        set({ showBookingDetailModal: true, selectedBooking: booking }, false, 'openBookingDetailModal'),
+        openBookingDetailModal: (booking: Booking) =>
+          set({ showBookingDetailModal: true, selectedBooking: booking }, false, 'openBookingDetailModal'),
 
-      closeBookingDetailModal: () =>
-        set({ showBookingDetailModal: false, selectedBooking: null }, false, 'closeBookingDetailModal'),
+        closeBookingDetailModal: () =>
+          set({ showBookingDetailModal: false, selectedBooking: null }, false, 'closeBookingDetailModal'),
 
-      openShopSettingsModal: () =>
-        set({ showShopSettingsModal: true }, false, 'openShopSettingsModal'),
+        openShopSettingsModal: () =>
+          set({ showShopSettingsModal: true }, false, 'openShopSettingsModal'),
 
-      closeShopSettingsModal: () =>
-        set({ showShopSettingsModal: false }, false, 'closeShopSettingsModal'),
+        closeShopSettingsModal: () =>
+          set({ showShopSettingsModal: false }, false, 'closeShopSettingsModal'),
 
-      openStaffScheduleModal: () =>
-        set({ showStaffScheduleModal: true }, false, 'openStaffScheduleModal'),
+        openStaffScheduleModal: () =>
+          set({ showStaffScheduleModal: true }, false, 'openStaffScheduleModal'),
 
-      closeStaffScheduleModal: () =>
-        set({ showStaffScheduleModal: false }, false, 'closeStaffScheduleModal'),
+        closeStaffScheduleModal: () =>
+          set({ showStaffScheduleModal: false }, false, 'closeStaffScheduleModal'),
 
-      setSelectedDate: (date) =>
-        set({ selectedDate: date }, false, 'setSelectedDate'),
+        setSelectedDate: (date) =>
+          set({ selectedDate: date }, false, 'setSelectedDate'),
 
-      setStatusFilter: (status) =>
-        set({ statusFilter: status }, false, 'setStatusFilter'),
+        setStatusFilter: (status) =>
+          set({ statusFilter: status }, false, 'setStatusFilter'),
 
-      setSelectedTime: (time) =>
-        set({ selectedTime: time }, false, 'setSelectedTime'),
+        setSelectedTime: (time) =>
+          set({ selectedTime: time }, false, 'setSelectedTime'),
 
-      setSelectedStaffId: (staffId) =>
-        set({ selectedStaffId: staffId }, false, 'setSelectedStaffId'),
+        setSelectedStaffId: (staffId) =>
+          set({ selectedStaffId: staffId }, false, 'setSelectedStaffId'),
 
-      setSelectedStaffIds: (staffIds) =>
-        set({ selectedStaffIds: staffIds }, false, 'setSelectedStaffIds'),
+        setSelectedStaffIds: (staffIds) =>
+          set({ selectedStaffIds: staffIds }, false, 'setSelectedStaffIds'),
 
-      setSelectedServiceId: (serviceId) =>
-        set({ selectedServiceId: serviceId }, false, 'setSelectedServiceId'),
+        setSelectedServiceId: (serviceId) =>
+          set({ selectedServiceId: serviceId }, false, 'setSelectedServiceId'),
 
-      setHighlightedBookingId: (id) =>
-        set({ highlightedBookingId: id }, false, 'setHighlightedBookingId'),
+        setHighlightedBookingId: (id) =>
+          set({ highlightedBookingId: id }, false, 'setHighlightedBookingId'),
 
-      reset: () => set(initialState, false, 'reset'),
-    }),
+        reset: () => set(initialState, false, 'reset'),
+      }),
+      {
+        name: 'byu-bookings-staff-filter',
+        storage: createJSONStorage(() => localStorage),
+        // selectedStaffIds만 localStorage에 저장 — 나머지 UI 상태는 휘발성
+        partialize: (state) => ({ selectedStaffIds: state.selectedStaffIds }),
+      }
+    ),
     { name: 'bookings-ui-store' }
   )
 );
