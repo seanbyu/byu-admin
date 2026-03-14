@@ -29,8 +29,12 @@ export const StaffSelectorSheet = memo(function StaffSelectorSheet({
   const isPartial = selectedStaffIds.length > 0 && selectedStaffIds.length < artists.length;
 
   const handleSelectAll = () => {
-    // 전체 버튼: 항상 [] 로 리셋 (기본 "전체 표시" 상태)
-    onChangeStaffIds([]);
+    // 전체 토글: 모두 선택 상태면 전체 해제([]), 아니면 전체 선택
+    if (selectedStaffIds.length === artists.length) {
+      onChangeStaffIds([]);
+    } else {
+      onChangeStaffIds(artists.map((a) => a.value));
+    }
   };
 
   const handleToggle = (id: string) => {
@@ -60,7 +64,7 @@ export const StaffSelectorSheet = memo(function StaffSelectorSheet({
           className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl bg-secondary-50 hover:bg-secondary-100 transition-colors"
         >
           <span className="text-sm font-medium text-secondary-800">
-            {t('common.selectAll')}
+            {t('common.all')}
           </span>
           <span
             className={cn(
