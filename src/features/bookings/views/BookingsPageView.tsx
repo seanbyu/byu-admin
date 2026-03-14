@@ -174,6 +174,18 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     pageState.getStatusColor
   );
 
+  // 다른 살롱 계정으로 전환 시 localStorage에 남은 잘못된 직원 ID 자동 제거
+  useEffect(() => {
+    if (artists.length === 0) return;
+    const validIds = new Set(artists.map((a) => a.value));
+    const cleaned = pageState.selectedStaffIds.filter((id) => validIds.has(id));
+    if (cleaned.length !== pageState.selectedStaffIds.length) {
+      pageState.setSelectedStaffIds(cleaned);
+    }
+  // artists가 로드된 직후 1회만 실행하면 충분
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artists]);
+
   const handleSheetUpdateBooking = useCallback(
     (id: string, updates: Partial<Booking>) => {
       updateBooking({ id, updates });
