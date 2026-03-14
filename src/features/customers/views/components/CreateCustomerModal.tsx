@@ -61,7 +61,8 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
     queryKey: ['nextCustomerNumber', salonId],
     queryFn: () => customerApi.getNextCustomerNumber(salonId),
     enabled: isOpen && !!salonId,
-    staleTime: 0, // 항상 새로운 번호 가져오기
+    staleTime: 0,  // 즉시 stale 처리
+    gcTime: 0,     // 모달 닫힐 때 캐시 즉시 제거 → 재오픈 시 항상 서버에서 새 번호 조회
   });
 
   // 담당자 필터링 (ADMIN, ARTIST만)
@@ -211,6 +212,8 @@ export const CreateCustomerModal = memo(function CreateCustomerModal({
         };
 
         await createCustomer(dto);
+        // 고객 생성 후 다음 번호 캐시 무효화 → 다음 모달 오픈 시 정확한 번호 표시
+        queryClient.invalidateQueries({ queryKey: ['nextCustomerNumber', salonId] });
         onClose();
       } catch (error) {
         console.error('Failed to create customer:', error);
