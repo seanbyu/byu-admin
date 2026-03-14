@@ -21,6 +21,7 @@
   "optional": "선택",
   "creating": "생성 중...",
   "all": "전체",
+  "selectAll": "전체 선택",
   "select": "선택하세요",
   "close": "닫기",
   "noPermission": "접근 권한이 없습니다.",

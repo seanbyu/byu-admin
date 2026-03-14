@@ -24,7 +24,8 @@ interface BookingsUIState {
   selectedDate: Date;
   statusFilter: string;
   selectedTime: string;
-  selectedStaffId: string;
+  selectedStaffId: string;       // 새 예약 모달 pre-fill 용
+  selectedStaffIds: string[];    // 담당자 필터 멀티 선택 (빈 배열 = 전체)
   selectedServiceId: string;
   highlightedBookingId: string | null;
 
@@ -43,6 +44,7 @@ interface BookingsUIState {
   setStatusFilter: (status: string) => void;
   setSelectedTime: (time: string) => void;
   setSelectedStaffId: (staffId: string) => void;
+  setSelectedStaffIds: (staffIds: string[]) => void;
   setSelectedServiceId: (serviceId: string) => void;
   setHighlightedBookingId: (id: string | null) => void;
 
@@ -60,6 +62,7 @@ const initialState = {
   statusFilter: '',
   selectedTime: '',
   selectedStaffId: '',
+  selectedStaffIds: [] as string[],
   selectedServiceId: '',
   highlightedBookingId: null as string | null,
 };
@@ -109,6 +112,9 @@ export const useBookingsUIStore = create<BookingsUIState>()(
       setSelectedStaffId: (staffId) =>
         set({ selectedStaffId: staffId }, false, 'setSelectedStaffId'),
 
+      setSelectedStaffIds: (staffIds) =>
+        set({ selectedStaffIds: staffIds }, false, 'setSelectedStaffIds'),
+
       setSelectedServiceId: (serviceId) =>
         set({ selectedServiceId: serviceId }, false, 'setSelectedServiceId'),
 
@@ -133,5 +139,6 @@ export const selectSelectedDate = (state: BookingsUIState) => state.selectedDate
 export const selectStatusFilter = (state: BookingsUIState) => state.statusFilter;
 export const selectSelectedTime = (state: BookingsUIState) => state.selectedTime;
 export const selectSelectedStaffId = (state: BookingsUIState) => state.selectedStaffId;
+export const selectSelectedStaffIds = (state: BookingsUIState) => state.selectedStaffIds;
 export const selectSelectedServiceId = (state: BookingsUIState) => state.selectedServiceId;
 export const selectHighlightedBookingId = (state: BookingsUIState) => state.highlightedBookingId;

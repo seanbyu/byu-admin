@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback, useEffect, memo } from 'react';
+import { useMemo, useCallback, useEffect, memo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Card } from '@/components/ui/Card';
@@ -16,9 +16,10 @@ import { useSalonSettings } from '../hooks/useSalonSettings';
 import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { usePermission, PermissionModules } from '@/hooks/usePermission';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronDown } from 'lucide-react';
 import { BookingsChartSkeleton } from '@/components/ui/Skeleton';
 import { StaffDaySheetView } from './components/StaffDaySheetView';
+import { StaffSelectorSheet } from './components/StaffSelectorSheet';
 
 // bundle-dynamic-imports: 모달은 초기 로드에 필요하지 않으므로 동적 임포트
 const NewBookingModal = dynamic(
@@ -45,17 +46,17 @@ const parseLocalDate = (value: Date | string): Date => {
 // 필터 섹션
 const BookingFilters = memo(function BookingFilters({
   statusFilter,
-  selectedStaffId,
+  selectedStaffIds,
   artists,
   onStatusChange,
-  onStaffChange,
+  onOpenStaffSheet,
   t,
 }: {
   statusFilter: string;
-  selectedStaffId: string;
+  selectedStaffIds: string[];
   artists: Array<{ value: string; label: string }>;
   onStatusChange: (status: string) => void;
-  onStaffChange: (id: string) => void;
+  onOpenStaffSheet: () => void;
   t: (key: string) => string;
 }) {
   const translatedStatusOptions = useMemo(
@@ -70,9 +71,20 @@ const BookingFilters = memo(function BookingFilters({
     [onStatusChange]
   );
 
+  // 버튼 라벨: 전체 or 선택된 직원 이름들
+  const staffButtonLabel = useMemo(() => {
+    if (selectedStaffIds.length === 0) return t('common.all');
+    if (selectedStaffIds.length === 1) {
+      return artists.find((a) => a.value === selectedStaffIds[0])?.label ?? t('common.all');
+    }
+    return `${selectedStaffIds.length}${t('booking.staffCount') || '명'}`;
+  }, [selectedStaffIds, artists, t]);
+
+  const isFiltered = selectedStaffIds.length > 0;
+
   return (
     <Card>
-      <div className="flex flex-wrap items-start gap-4">
+      <div className="flex flex-wrap items-end gap-4">
         <div className="w-32">
           <Select
             label={t('booking.status')}
@@ -83,37 +95,22 @@ const BookingFilters = memo(function BookingFilters({
             className="py-1.5 text-xs"
           />
         </div>
-        <div className="flex-1">
+        <div>
           <label className="block text-sm font-medium text-secondary-700 mb-1">
             {t('booking.designer')}
           </label>
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <button
-              type="button"
-              onClick={() => onStaffChange('')}
-              className={`px-[var(--btn-px-sm)] py-1.5 rounded-[var(--btn-radius)] border text-sm whitespace-nowrap transition-colors ${
-                selectedStaffId === ''
-                  ? 'bg-primary-500 text-white border-primary-500'
-                  : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
-              }`}
-            >
-              {t('common.all')}
-            </button>
-            {artists.map((designer) => (
-              <button
-                key={designer.value}
-                type="button"
-                onClick={() => onStaffChange(designer.value)}
-                className={`px-[var(--btn-px-sm)] py-1.5 rounded-[var(--btn-radius)] border text-sm whitespace-nowrap transition-colors ${
-                  selectedStaffId === designer.value
-                    ? 'bg-primary-500 text-white border-primary-500'
-                    : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
-                }`}
-              >
-                {designer.label}
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            onClick={onOpenStaffSheet}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--btn-radius)] border text-sm transition-colors ${
+              isFiltered
+                ? 'bg-primary-500 text-white border-primary-500'
+                : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-50'
+            }`}
+          >
+            <span>{staffButtonLabel}</span>
+            <ChevronDown size={14} />
+          </button>
         </div>
       </div>
     </Card>
@@ -125,6 +122,7 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   const { user } = useAuthStore();
   const salonId = user?.salonId || '';
   const searchParams = useSearchParams();
+  const [showStaffSheet, setShowStaffSheet] = useState(false);
 
   const { canWrite } = usePermission();
   const canCreateBooking = canWrite(PermissionModules.BOOKINGS);
@@ -158,14 +156,17 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     [settingsData?.businessHours]
   );
 
-  // 상태·직원 필터만 적용 (날짜 필터는 현황판 내부에서 처리)
+  // 상태·직원 필터 적용 (날짜 필터는 현황판 내부에서 처리)
   const filteredBookings = useMemo(() => {
     return bookings.filter((booking) => {
       if (pageState.statusFilter && booking.status !== pageState.statusFilter) return false;
-      if (pageState.selectedStaffId && booking.staffId !== pageState.selectedStaffId) return false;
+      if (
+        pageState.selectedStaffIds.length > 0 &&
+        !pageState.selectedStaffIds.includes(booking.staffId)
+      ) return false;
       return true;
     });
-  }, [bookings, pageState.statusFilter, pageState.selectedStaffId]);
+  }, [bookings, pageState.statusFilter, pageState.selectedStaffIds]);
 
   const { artists } = useBookingsData(
     filteredBookings,
@@ -195,8 +196,6 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
     setHighlightedBookingId(highlightParam);
 
     // router.replace 대신 history API로 URL 정리
-    // router.replace는 useSearchParams() 재서스펜스를 유발해 Suspense fallback 스피너가
-    // 차트 위에 순간 표시되는 현상(간헐적 UI 미로드)을 일으킴
     window.history.replaceState(null, '', window.location.pathname);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [highlightParam, isLoading, isSettingsLoading]);
@@ -206,8 +205,6 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   useEffect(() => {
     if (!highlightedBookingId) return;
 
-    // 렌더 완료 후 실제로 보이는 요소만 찾아 스크롤
-    // (모바일 md:hidden div 와 데스크탑 tr 중 offsetParent !== null 인 것)
     const raf = requestAnimationFrame(() => {
       const all = document.querySelectorAll(`[data-booking-id="${highlightedBookingId}"]`);
       const el  = Array.from(all).find((e) => (e as HTMLElement).offsetParent !== null);
@@ -229,8 +226,6 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
   );
 
   // salonId가 아직 없으면 (auth hydration 전) 렌더 차단
-  // → enabled:false 쿼리가 isLoading=false를 반환해 businessHours=[]로 차트가
-  //   "영업시간을 설정해주세요" 상태로 잠깐 보이는 현상 방지
   if (!salonId || isLoading || isStaffLoading || isSettingsLoading || !settingsData) {
     return <BookingsChartSkeleton />;
   }
@@ -263,10 +258,10 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
         {/* 필터 */}
         <BookingFilters
           statusFilter={pageState.statusFilter}
-          selectedStaffId={pageState.selectedStaffId}
+          selectedStaffIds={pageState.selectedStaffIds}
           artists={artists}
           onStatusChange={pageState.setStatusFilter}
-          onStaffChange={pageState.setSelectedStaffId}
+          onOpenStaffSheet={() => setShowStaffSheet(true)}
           t={t}
         />
 
@@ -288,6 +283,15 @@ export default function BookingsPageView({ isChart }: { isChart?: boolean } = {}
           />
         </Card>
       </div>
+
+      {/* 담당자 선택 바텀시트 */}
+      <StaffSelectorSheet
+        isOpen={showStaffSheet}
+        onClose={() => setShowStaffSheet(false)}
+        artists={artists}
+        selectedStaffIds={pageState.selectedStaffIds}
+        onChangeStaffIds={pageState.setSelectedStaffIds}
+      />
 
       {/* 새 예약 모달 */}
       {pageState.showNewBookingModal && (

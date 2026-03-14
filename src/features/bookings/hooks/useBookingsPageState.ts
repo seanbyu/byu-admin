@@ -16,6 +16,7 @@ import {
   selectStatusFilter,
   selectSelectedTime,
   selectSelectedStaffId,
+  selectSelectedStaffIds,
   selectSelectedServiceId,
   selectHighlightedBookingId,
 } from '../stores/bookingsStore';
@@ -42,6 +43,7 @@ interface UseBookingsPageStateReturn {
   statusFilter: string;
   selectedTime: string;
   selectedStaffId: string;
+  selectedStaffIds: string[];
   selectedServiceId: string;
   highlightedBookingId: string | null;
   // Actions
@@ -57,6 +59,7 @@ interface UseBookingsPageStateReturn {
   setStatusFilter: (status: string) => void;
   setSelectedTime: (time: string) => void;
   setSelectedStaffId: (staffId: string) => void;
+  setSelectedStaffIds: (staffIds: string[]) => void;
   setSelectedServiceId: (serviceId: string) => void;
   setHighlightedBookingId: (id: string | null) => void;
   // Utilities
@@ -73,6 +76,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
   const statusFilter = useBookingsUIStore(selectStatusFilter);
   const selectedTime = useBookingsUIStore(selectSelectedTime);
   const selectedStaffId = useBookingsUIStore(selectSelectedStaffId);
+  const selectedStaffIds = useBookingsUIStore(selectSelectedStaffIds);
   const selectedServiceId = useBookingsUIStore(selectSelectedServiceId);
   const highlightedBookingId = useBookingsUIStore(selectHighlightedBookingId);
 
@@ -90,6 +94,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       setStatusFilter: state.setStatusFilter,
       setSelectedTime: state.setSelectedTime,
       setSelectedStaffId: state.setSelectedStaffId,
+      setSelectedStaffIds: state.setSelectedStaffIds,
       setSelectedServiceId: state.setSelectedServiceId,
       setHighlightedBookingId: state.setHighlightedBookingId,
     }))
@@ -110,6 +115,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       statusFilter,
       selectedTime,
       selectedStaffId,
+      selectedStaffIds,
       selectedServiceId,
       highlightedBookingId,
       ...actions,
@@ -125,6 +131,7 @@ export function useBookingsPageState(): UseBookingsPageStateReturn {
       statusFilter,
       selectedTime,
       selectedStaffId,
+      selectedStaffIds,
       selectedServiceId,
       highlightedBookingId,
       actions,
