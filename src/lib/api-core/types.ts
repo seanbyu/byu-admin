@@ -276,6 +276,7 @@ export interface CreateCustomerDto {
   phone: string;
   email?: string;
   notes?: string;
+  customer_number?: string;
 }
 
 // Customer update DTO
