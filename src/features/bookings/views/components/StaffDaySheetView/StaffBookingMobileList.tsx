@@ -1,9 +1,9 @@
 'use client';
 
-import { memo, useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { Plus } from 'lucide-react';
 import { Booking } from '../../../types';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { BookingStatus } from '@/types';
 import { cn, formatPrice } from '@/lib/utils';
 import { stripCountryCode, PAYMENT_METHOD_KEYS, isKnownPaymentMethod } from './utils';
@@ -20,9 +20,128 @@ export interface StaffBookingMobileListProps {
   highlightedBookingId?: string | null;
   serviceCategoryMap?: Record<string, string>;
   notificationStatuses?: Record<string, BookingNotificationStatus>;
+  slotDuration?: number;
 }
 
-export const StaffBookingMobileList = memo(function StaffBookingMobileList({
+function getStatusStyle(status: BookingStatus): string {
+  if (status === BookingStatus.PENDING)     return 'bg-amber-50 border-amber-300 text-amber-900';
+  if (status === BookingStatus.CONFIRMED)   return 'bg-blue-50 border-blue-300 text-blue-900';
+  if (status === BookingStatus.IN_PROGRESS) return 'bg-purple-50 border-purple-300 text-purple-900';
+  if (status === BookingStatus.COMPLETED)   return 'bg-secondary-100 border-secondary-300 text-secondary-500';
+  if (status === BookingStatus.CANCELLED)   return 'bg-secondary-50 border-secondary-200 text-secondary-400';
+  if (status === BookingStatus.NO_SHOW)     return 'bg-red-50 border-red-300 text-red-900';
+  return 'bg-white border-secondary-200';
+}
+
+const SLOT_H = 56;
+
+interface BookingCardProps {
+  booking: Booking;
+  rowH: number;
+  highlighted: boolean;
+  serviceCategoryMap?: Record<string, string>;
+  onBookingClick: (b: Booking) => void;
+  onUpdateBooking: (id: string, updates: Partial<Booking>) => void;
+  onOpenSales: (booking: Booking) => void;
+  t: ReturnType<typeof useTranslations>;
+}
+
+function BookingCard({ booking, rowH, highlighted, serviceCategoryMap, onBookingClick, onUpdateBooking, onOpenSales, t }: BookingCardProps) {
+  const isCancelled = booking.status === BookingStatus.CANCELLED;
+  const isSalesRegistered = !!(booking.bookingMeta && booking.bookingMeta.sales_registered);
+
+  const serviceName = (serviceCategoryMap && booking.serviceId && serviceCategoryMap[booking.serviceId])
+    ? serviceCategoryMap[booking.serviceId]
+    : (booking.serviceName || '');
+
+  const customerInfo = booking.customerPhone
+    ? booking.customerName + ' · ' + stripCountryCode(booking.customerPhone)
+    : booking.customerName;
+
+  const price = booking.price || 0;
+  const priceText = price > 0 ? formatPrice(price) : '';
+  const addSalesText = t('booking.salesModal.registerSales');
+
+  const paymentText = booking.paymentMethod
+    ? (isKnownPaymentMethod(booking.paymentMethod) ? t(PAYMENT_METHOD_KEYS[booking.paymentMethod]) : booking.paymentMethod)
+    : '';
+
+  const handleClick = () => {
+    if (isSalesRegistered) {
+      onOpenSales(booking);
+    } else {
+      onBookingClick(booking);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') handleClick();
+  };
+
+  const handleStatusChange = (id: string, status: BookingStatus) => {
+    onUpdateBooking(id, { status });
+  };
+
+  const handlePriceClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onOpenSales(booking);
+  };
+
+  const handleStatusClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const cardClass = cn(
+    'w-full rounded-lg border px-3 py-2 text-left transition-opacity active:opacity-70',
+    getStatusStyle(booking.status),
+    highlighted && 'ring-2 ring-primary-400',
+    isCancelled && 'opacity-50'
+  );
+
+  const titleClass = cn(
+    'text-sm font-semibold leading-tight truncate',
+    isCancelled && 'line-through'
+  );
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      className={cardClass}
+      style={{ minHeight: rowH - 8 }}
+    >
+      <div className="flex items-start justify-between gap-1">
+        <div className="min-w-0 flex-1">
+          <p className={titleClass}>{serviceName}</p>
+          <p className="text-xs mt-0.5 truncate opacity-75">{customerInfo}</p>
+          {!isCancelled && (
+            <p className="text-xs mt-1 font-medium cursor-pointer hover:underline" onClick={handlePriceClick}>
+              {priceText ? priceText : <span className="opacity-50">{addSalesText}</span>}
+            </p>
+          )}
+        </div>
+        <div onClick={handleStatusClick}>
+          <InlineStatusSelect
+            bookingId={booking.id}
+            status={booking.status}
+            onUpdate={handleStatusChange}
+            disabled={isSalesRegistered}
+          />
+        </div>
+      </div>
+      {booking.notes && (
+        <p className="mt-1 text-[11px] opacity-60 truncate">{booking.notes}</p>
+      )}
+      {paymentText && !isCancelled && (
+        <p className="mt-0.5 text-[11px] opacity-50">{paymentText}</p>
+      )}
+    </div>
+  );
+}
+
+export function StaffBookingMobileList({
   timeSlots,
   bookingsByTime,
   onBookingClick,
@@ -30,170 +149,117 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
   onUpdateBooking,
   highlightedBookingId,
   serviceCategoryMap,
-  notificationStatuses,
+  slotDuration = 30,
 }: StaffBookingMobileListProps) {
   const t = useTranslations();
-
   const [salesBooking, setSalesBooking] = useState<Booking | null>(null);
 
-  const handleStatusChange = useCallback(
-    (id: string, status: BookingStatus) => {
-      onUpdateBooking(id, { status });
-    },
-    [onUpdateBooking]
-  );
-
-  const handleOpenSales = useCallback((e: React.MouseEvent, booking: Booking) => {
-    e.stopPropagation();
+  const handleOpenSales = useCallback((booking: Booking) => {
     setSalesBooking(booking);
   }, []);
 
-  const sortedBookings = useMemo(
-    () =>
-      Object.values(bookingsByTime).sort((a, b) =>
-        a.startTime.localeCompare(b.startTime)
-      ),
-    [bookingsByTime]
-  );
+  const getSlotSpan = useCallback((booking: Booking): number => {
+    const endTime = booking.endTime as string | undefined;
+    if (!endTime) return 1;
+    const startParts = booking.startTime.split(':');
+    const endParts = endTime.split(':');
+    const sh = parseInt(startParts[0] || '0', 10);
+    const sm = parseInt(startParts[1] || '0', 10);
+    const eh = parseInt(endParts[0] || '0', 10);
+    const em = parseInt(endParts[1] || '0', 10);
+    const mins = (eh * 60 + em) - (sh * 60 + sm);
+    return Math.max(1, Math.round(mins / slotDuration));
+  }, [slotDuration]);
 
-  const availableSlots = useMemo(
-    () => timeSlots.filter((slot) => !bookingsByTime[slot]).slice(0, 8),
-    [timeSlots, bookingsByTime]
-  );
+  // 모바일은 항상 30분 단위로 표시 + 정규 슬롯 밖 예약도 포함
+  const mergedSlots = useMemo(() => {
+    if (timeSlots.length === 0) return [];
+    // 첫/마지막 슬롯 기준으로 30분 단위 슬롯 생성
+    const first = timeSlots[0];
+    const last = timeSlots[timeSlots.length - 1];
+    if (!first || !last) return timeSlots;
+    const [fh, fm] = first.split(':').map(Number);
+    const [lh, lm] = last.split(':').map(Number);
+    const startMin = (fh || 0) * 60 + (fm || 0);
+    const endMin = (lh || 0) * 60 + (lm || 0);
+    const slots: string[] = [];
+    for (let m = startMin; m <= endMin; m += 30) {
+      const h = Math.floor(m / 60).toString().padStart(2, '0');
+      const min = (m % 60).toString().padStart(2, '0');
+      slots.push(h + ':' + min);
+    }
+    // 정규 슬롯 밖 예약도 추가
+    const offTimes = Object.keys(bookingsByTime).filter((t) => !slots.includes(t));
+    return [...slots, ...offTimes].sort();
+  }, [timeSlots, bookingsByTime]);
+
+  const coveredSlots = useMemo(() => {
+    const covered = new Set<string>();
+    mergedSlots.forEach((slot) => {
+      const booking = bookingsByTime[slot];
+      if (!booking) return;
+      const span = getSlotSpan(booking);
+      for (let i = 1; i < span; i++) {
+        const idx = mergedSlots.indexOf(slot) + i;
+        const nextSlot = mergedSlots[idx];
+        if (nextSlot) covered.add(nextSlot);
+      }
+    });
+    return covered;
+  }, [mergedSlots, bookingsByTime, getSlotSpan]);
+
+  if (timeSlots.length === 0) {
+    return (
+      <div className="md:hidden py-8 text-center text-sm text-secondary-400">
+        {t('booking.noBookings')}
+      </div>
+    );
+  }
 
   return (
-    <div className="md:hidden border border-secondary-200 rounded-lg overflow-hidden">
-      {sortedBookings.length === 0 ? (
-        <EmptyState message={t('booking.noBookings')} size="sm" />
-      ) : (
-        <div className="divide-y divide-secondary-100">
-          {sortedBookings.map((booking) => (
-            <div
-              key={booking.id}
-              data-booking-id={booking.id}
-              role="button"
-              tabIndex={0}
-              onClick={() =>
-                booking.bookingMeta?.sales_registered
-                  ? setSalesBooking(booking)
-                  : onBookingClick(booking)
-              }
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  booking.bookingMeta?.sales_registered
-                    ? setSalesBooking(booking)
-                    : onBookingClick(booking);
-                }
-              }}
-              className={cn(
-                'w-full text-left px-3 py-3 transition-colors',
-                booking.bookingMeta?.sales_registered
-                  ? 'bg-secondary-100 hover:bg-secondary-200'
-                  : 'bg-white hover:bg-secondary-50',
-                highlightedBookingId === booking.id && 'booking-highlight'
-              )}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-secondary-900 truncate">
-                    {booking.startTime.slice(0, 5)} · {booking.serviceName?.includes(', ') ? booking.serviceName : (serviceCategoryMap?.[booking.serviceId] || booking.serviceName)}
-                  </p>
-                  <p className="mt-0.5 text-xs text-secondary-600 truncate">
-                    {booking.customerName}
-                    {booking.customerPhone
-                      ? ` · ${stripCountryCode(booking.customerPhone)}`
-                      : ''}
-                  </p>
-                </div>
-                <InlineStatusSelect
-                  bookingId={booking.id}
-                  status={booking.status}
-                  onUpdate={handleStatusChange}
-                  disabled={!!booking.bookingMeta?.sales_registered}
-                />
+    <div className="md:hidden">
+      <div className="relative divide-y divide-secondary-100">
+        {mergedSlots.map((slot) => {
+          if (coveredSlots.has(slot)) return null;
+
+          const booking = bookingsByTime[slot];
+          const span = booking ? getSlotSpan(booking) : 1;
+          const rowH = SLOT_H * span;
+          const highlighted = highlightedBookingId === (booking ? booking.id : '');
+
+          return (
+            <div key={slot} className="flex items-stretch" style={{ minHeight: rowH }}>
+              <div className="w-12 flex-shrink-0 flex items-start justify-end pr-2 pt-3">
+                <span className="text-[11px] font-medium text-secondary-400">{slot}</span>
               </div>
-
-              {booking.notes && (
-                <p className="mt-1.5 text-xs text-secondary-500 truncate">
-                  {booking.notes}
-                </p>
-              )}
-
-              <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-secondary-400">{t('booking.price')}</span>
-                  {booking.status === BookingStatus.CANCELLED ? (
-                    <div className="text-secondary-300 font-medium">—</div>
-                  ) : (
-                    <div
-                      className="text-secondary-800 font-medium cursor-pointer hover:text-primary-600"
-                      onClick={(e) => handleOpenSales(e, booking)}
-                    >
-                      {(booking.price || 0) + (booking.productAmount || 0) > 0
-                        ? formatPrice((booking.price || 0) + (booking.productAmount || 0))
-                        : t('booking.salesModal.registerSales')}
-                      {booking.bookingMeta?.sales_registered && (
-                        <span className="ml-1 text-primary-500 text-[10px]">
-                          {t('booking.salesModal.editSales')}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="text-right">
-                  <span className="text-secondary-400">{t('booking.paymentMethod')}</span>
-                  <div className="text-secondary-700 font-medium truncate">
-                    {booking.paymentMethod
-                      ? isKnownPaymentMethod(booking.paymentMethod)
-                        ? t(PAYMENT_METHOD_KEYS[booking.paymentMethod])
-                        : booking.paymentMethod
-                      : '—'}
-                  </div>
-                </div>
+              <div className="flex-1 py-1 pr-1">
+                {booking ? (
+                  <BookingCard
+                    booking={booking}
+                    rowH={rowH}
+                    highlighted={highlighted}
+                    serviceCategoryMap={serviceCategoryMap}
+                    onBookingClick={onBookingClick}
+                    onUpdateBooking={onUpdateBooking}
+                    onOpenSales={handleOpenSales}
+                    t={t}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onAddBooking(slot)}
+                    className="w-full rounded-lg border border-dashed border-secondary-200 flex items-center justify-center gap-1 text-secondary-300 hover:border-primary-300 hover:text-primary-400 transition-colors"
+                    style={{ minHeight: SLOT_H - 8 }}
+                  >
+                    <Plus size={13} />
+                    <span className="text-xs">{slot}</span>
+                  </button>
+                )}
               </div>
-
-              {/* LINE 알림 상태 */}
-              {notificationStatuses && (
-                <div className="mt-1.5 flex items-center gap-3 text-[11px]">
-                  <span className="text-secondary-400">LINE</span>
-                  {!booking.customerLineUserId || booking.customerLineBlocked ? (
-                    <span className="text-secondary-400">{t('booking.line.cannotSend')}</span>
-                  ) : (
-                    <>
-                      <span className={notificationStatuses[booking.id]?.confirmed ? 'text-success-600' : 'text-secondary-300'}>
-                        {t('booking.line.confirmed')} {notificationStatuses[booking.id]?.confirmed ? `✓ ${t('booking.line.sent')}` : '—'}
-                      </span>
-                      <span className={notificationStatuses[booking.id]?.reminded ? 'text-success-600' : 'text-secondary-300'}>
-                        {t('booking.line.reminder')} {notificationStatuses[booking.id]?.reminded ? `✓ ${t('booking.line.sent')}` : '—'}
-                      </span>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
-          ))}
-        </div>
-      )}
-
-      {availableSlots.length > 0 && (
-        <div className="border-t border-secondary-100 bg-secondary-50 px-3 py-2">
-          <p className="text-xs font-medium text-secondary-500 mb-2">
-            {t('booking.addBooking')}
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {availableSlots.map((slot) => (
-              <button
-                key={slot}
-                type="button"
-                onClick={() => onAddBooking(slot)}
-                className="px-2 py-1 rounded-md border border-secondary-200 bg-white text-xs text-secondary-700 hover:bg-primary-50 hover:border-primary-300"
-              >
-                + {slot}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
 
       <SalesRegistrationModal
         isOpen={!!salesBooking}
@@ -203,4 +269,4 @@ export const StaffBookingMobileList = memo(function StaffBookingMobileList({
       />
     </div>
   );
-});
+}

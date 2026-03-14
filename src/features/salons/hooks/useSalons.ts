@@ -1,16 +1,15 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { salonsApi } from '../api';
-import { ApiResponse } from '@/types';
 import { salonKeys, SALONS_QUERY_OPTIONS, SALON_SALES_QUERY_OPTIONS } from './queries';
 
 interface UseSalonsOptions {
   enabled?: boolean;
 }
 
-export const useSalons = (params?: any, options?: UseSalonsOptions) => {
+export const useSalons = (params?: Parameters<typeof salonsApi.getSalons>[0], options?: UseSalonsOptions) => {
   const queryKey = useMemo(() => salonKeys.list(params), [params]);
 
   const query = useQuery({
@@ -62,23 +61,18 @@ export const useCreateSalon = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: useCallback((data: any) => salonsApi.createSalon(data), []),
-    onSuccess: useCallback(() => {
+    mutationFn: (data: Parameters<typeof salonsApi.createSalon>[0]) => salonsApi.createSalon(data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: salonKeys.all });
-    }, [queryClient]),
+    },
   });
-
-  const createSalon = useCallback(
-    (data: any) => mutation.mutateAsync(data),
-    [mutation]
-  );
 
   return useMemo(
     () => ({
-      createSalon,
+      createSalon: mutation.mutateAsync,
       isCreating: mutation.isPending,
     }),
-    [createSalon, mutation.isPending]
+    [mutation.mutateAsync, mutation.isPending]
   );
 };
 
@@ -86,26 +80,19 @@ export const useUpdateSalon = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: useCallback(
-      ({ id, data }: { id: string; data: any }) => salonsApi.updateSalon(id, data),
-      []
-    ),
-    onSuccess: useCallback(() => {
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof salonsApi.updateSalon>[1] }) =>
+      salonsApi.updateSalon(id, data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: salonKeys.all });
-    }, [queryClient]),
+    },
   });
-
-  const updateSalon = useCallback(
-    (params: { id: string; data: any }) => mutation.mutateAsync(params),
-    [mutation]
-  );
 
   return useMemo(
     () => ({
-      updateSalon,
+      updateSalon: mutation.mutateAsync,
       isUpdating: mutation.isPending,
     }),
-    [updateSalon, mutation.isPending]
+    [mutation.mutateAsync, mutation.isPending]
   );
 };
 
@@ -113,23 +100,18 @@ export const useDeleteSalon = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: useCallback((id: string) => salonsApi.deleteSalon(id), []),
-    onSuccess: useCallback(() => {
+    mutationFn: (id: string) => salonsApi.deleteSalon(id),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: salonKeys.all });
-    }, [queryClient]),
+    },
   });
-
-  const deleteSalon = useCallback(
-    (id: string) => mutation.mutateAsync(id),
-    [mutation]
-  );
 
   return useMemo(
     () => ({
-      deleteSalon,
+      deleteSalon: mutation.mutateAsync,
       isDeleting: mutation.isPending,
     }),
-    [deleteSalon, mutation.isPending]
+    [mutation.mutateAsync, mutation.isPending]
   );
 };
 
@@ -137,29 +119,24 @@ export const useApproveSalon = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: useCallback((id: string) => salonsApi.approveSalon(id), []),
-    onSuccess: useCallback(() => {
+    mutationFn: (id: string) => salonsApi.approveSalon(id),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: salonKeys.all });
-    }, [queryClient]),
+    },
   });
-
-  const approveSalon = useCallback(
-    (id: string) => mutation.mutateAsync(id),
-    [mutation]
-  );
 
   return useMemo(
     () => ({
-      approveSalon,
+      approveSalon: mutation.mutateAsync,
       isApproving: mutation.isPending,
     }),
-    [approveSalon, mutation.isPending]
+    [mutation.mutateAsync, mutation.isPending]
   );
 };
 
 export const useSalonSales = (
   salonId: string,
-  params: any,
+  params: Parameters<typeof salonsApi.getSales>[1],
   options?: UseSalonsOptions
 ) => {
   const queryKey = useMemo(

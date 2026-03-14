@@ -11,7 +11,6 @@ export { authKeys, AUTH_QUERY_OPTIONS } from './hooks/queries';
 export {
   useRegistration,
   useUser,
-  useLogin,
   useLogout,
   useRegister,
   useForgotPassword,

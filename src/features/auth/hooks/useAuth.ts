@@ -36,7 +36,7 @@ export const useRegistration = () => {
           setStatus('taken');
           setMessage(data.message || '이미 사용 중입니다.');
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         setStatus('error');
         setMessage('중복 확인 중 오류가 발생했습니다.');
@@ -76,13 +76,6 @@ export const useUser = () => {
   });
 };
 
-export const useLogin = (options?: any) => {
-  return useMutation({
-    mutationFn: (credentials: { email: string; password: string }) =>
-      authApi.login(credentials),
-    ...options,
-  });
-};
 
 export const useLogout = (options?: { onLogout?: () => void }) => {
   const queryClient = useQueryClient();
@@ -108,21 +101,18 @@ export const useLogout = (options?: { onLogout?: () => void }) => {
 
 export const useRegister = () => {
   return useMutation({
-    mutationFn: useCallback((data: any) => authApi.register(data), []),
+    mutationFn: (data: Parameters<typeof authApi.register>[0]) => authApi.register(data),
   });
 };
 
 export const useForgotPassword = () => {
   return useMutation({
-    mutationFn: useCallback((email: string) => authApi.forgotPassword(email), []),
+    mutationFn: (email: string) => authApi.forgotPassword(email),
   });
 };
 
 export const useResetPassword = () => {
   return useMutation({
-    mutationFn: useCallback(
-      (password: string) => authApi.resetPassword(password),
-      []
-    ),
+    mutationFn: (password: string) => authApi.resetPassword(password),
   });
 };

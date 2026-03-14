@@ -36,26 +36,20 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
 
   // Create booking
   const createMutation = useMutation({
-    mutationFn: useCallback(
-      (booking: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>) =>
-        bookingsApi.createBooking(salonId, booking),
-      [salonId]
-    ),
+    mutationFn: (booking: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>) =>
+      bookingsApi.createBooking(salonId, booking),
     onSuccess: invalidateBookings,
   });
 
   // Update booking
   const updateMutation = useMutation({
-    mutationFn: useCallback(
-      ({ id, updates }: { id: string; updates: Partial<Booking> }) =>
-        bookingsApi.updateBooking(salonId, id, updates),
-      [salonId]
-    ),
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Booking> }) =>
+      bookingsApi.updateBooking(salonId, id, updates),
     onSuccess: (_, variables) => {
       invalidateBookings();
       // 매출 등록/삭제 시 sales 캐시도 무효화
-      const bookingMeta = (variables.updates as Record<string, any>)?.bookingMeta;
-      if (bookingMeta && typeof bookingMeta.sales_registered === 'boolean') {
+      const bookingMeta = (variables.updates as Record<string, unknown>)?.bookingMeta;
+      if (bookingMeta && typeof (bookingMeta as Record<string, unknown>).sales_registered === 'boolean') {
         queryClient.invalidateQueries({ queryKey: ['sales'] });
       }
     },
@@ -63,80 +57,32 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
 
   // Cancel booking
   const cancelMutation = useMutation({
-    mutationFn: useCallback(
-      (id: string) => bookingsApi.cancelBooking(salonId, id),
-      [salonId]
-    ),
+    mutationFn: (id: string) => bookingsApi.cancelBooking(salonId, id),
     onSuccess: invalidateBookings,
   });
 
   // Complete booking
   const completeMutation = useMutation({
-    mutationFn: useCallback(
-      (id: string) => bookingsApi.completeBooking(salonId, id),
-      [salonId]
-    ),
+    mutationFn: (id: string) => bookingsApi.completeBooking(salonId, id),
     onSuccess: invalidateBookings,
   });
 
   // Confirm booking
   const confirmMutation = useMutation({
-    mutationFn: useCallback(
-      (id: string) => bookingsApi.confirmBooking(salonId, id),
-      [salonId]
-    ),
+    mutationFn: (id: string) => bookingsApi.confirmBooking(salonId, id),
     onSuccess: invalidateBookings,
   });
 
   // Delete booking
   const deleteMutation = useMutation({
-    mutationFn: useCallback(
-      (id: string) => bookingsApi.deleteBooking(salonId, id),
-      [salonId]
-    ),
+    mutationFn: (id: string) => bookingsApi.deleteBooking(salonId, id),
     onSuccess: invalidateBookings,
   });
 
-  // Memoized data
   const bookings = useMemo(
     () => bookingsQuery.data || [],
     [bookingsQuery.data]
   );
-
-  // Memoized mutation functions
-  const createBooking = useCallback(
-    (booking: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>) =>
-      createMutation.mutateAsync(booking),
-    [createMutation]
-  );
-
-  const updateBooking = useCallback(
-    (params: { id: string; updates: Partial<Booking> }) =>
-      updateMutation.mutateAsync(params),
-    [updateMutation]
-  );
-
-  const cancelBooking = useCallback(
-    (id: string) => cancelMutation.mutateAsync(id),
-    [cancelMutation]
-  );
-
-  const completeBooking = useCallback(
-    (id: string) => completeMutation.mutateAsync(id),
-    [completeMutation]
-  );
-
-  const confirmBooking = useCallback(
-    (id: string) => confirmMutation.mutateAsync(id),
-    [confirmMutation]
-  );
-
-  const deleteBooking = useCallback(
-    (id: string) => deleteMutation.mutateAsync(id),
-    [deleteMutation]
-  );
-
-  const refetch = useCallback(() => bookingsQuery.refetch(), [bookingsQuery]);
 
   return useMemo(
     () => ({
@@ -145,13 +91,13 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
       isLoading: bookingsQuery.isLoading,
       isFetching: bookingsQuery.isFetching,
       error: bookingsQuery.error,
-      refetch,
-      createBooking,
-      updateBooking,
-      cancelBooking,
-      completeBooking,
-      confirmBooking,
-      deleteBooking,
+      refetch: bookingsQuery.refetch,
+      createBooking: createMutation.mutateAsync,
+      updateBooking: updateMutation.mutateAsync,
+      cancelBooking: cancelMutation.mutateAsync,
+      completeBooking: completeMutation.mutateAsync,
+      confirmBooking: confirmMutation.mutateAsync,
+      deleteBooking: deleteMutation.mutateAsync,
       isCreating: createMutation.isPending,
       isUpdating: updateMutation.isPending,
       isCancelling: cancelMutation.isPending,
@@ -165,13 +111,13 @@ export const useBookings = (salonId: string, options?: UseBookingsOptions) => {
       bookingsQuery.isLoading,
       bookingsQuery.isFetching,
       bookingsQuery.error,
-      refetch,
-      createBooking,
-      updateBooking,
-      cancelBooking,
-      completeBooking,
-      confirmBooking,
-      deleteBooking,
+      bookingsQuery.refetch,
+      createMutation.mutateAsync,
+      updateMutation.mutateAsync,
+      cancelMutation.mutateAsync,
+      completeMutation.mutateAsync,
+      confirmMutation.mutateAsync,
+      deleteMutation.mutateAsync,
       createMutation.isPending,
       updateMutation.isPending,
       cancelMutation.isPending,

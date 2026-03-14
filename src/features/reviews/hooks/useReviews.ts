@@ -1,13 +1,14 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createReviewsApi } from '../api';
+import { PaginationParams } from '@/types';
 import { reviewKeys, REVIEWS_QUERY_OPTIONS } from './queries';
 
 const reviewsApi = createReviewsApi();
 
-export const useReviews = (params?: any, options?: { enabled?: boolean }) => {
+export const useReviews = (params?: PaginationParams, options?: { enabled?: boolean }) => {
   const queryKey = useMemo(() => reviewKeys.list(params), [params]);
 
   const query = useQuery({
@@ -64,26 +65,18 @@ export const useRespondToReview = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: useCallback(
-      ({ id, response }: { id: string; response: string }) =>
-        reviewsApi.respondToReview(id, response),
-      []
-    ),
-    onSuccess: useCallback(() => {
+    mutationFn: ({ id, response }: { id: string; response: string }) =>
+      reviewsApi.respondToReview(id, response),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: reviewKeys.all });
-    }, [queryClient]),
+    },
   });
-
-  const respondToReview = useCallback(
-    (params: { id: string; response: string }) => mutation.mutateAsync(params),
-    [mutation]
-  );
 
   return useMemo(
     () => ({
-      respondToReview,
+      respondToReview: mutation.mutateAsync,
       isResponding: mutation.isPending,
     }),
-    [respondToReview, mutation.isPending]
+    [mutation.mutateAsync, mutation.isPending]
   );
 };

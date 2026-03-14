@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createChatApi } from '../api';
+import { PaginationParams } from '@/types';
 import {
   chatKeys,
   CHAT_QUERY_OPTIONS,
@@ -11,7 +12,7 @@ import {
 
 const chatApi = createChatApi();
 
-export const useChatRooms = (params?: any, options?: { enabled?: boolean }) => {
+export const useChatRooms = (params?: PaginationParams, options?: { enabled?: boolean }) => {
   const queryKey = useMemo(() => chatKeys.roomList(params), [params]);
 
   const query = useQuery({
@@ -66,7 +67,7 @@ export const useChatRoom = (roomId: string, options?: { enabled?: boolean }) => 
 
 export const useChatMessages = (
   roomId: string,
-  params?: any,
+  params?: PaginationParams,
   options?: { enabled?: boolean }
 ) => {
   const queryKey = useMemo(
@@ -103,25 +104,17 @@ export const useMarkChatRead = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: useCallback((roomId: string) => chatApi.markAsRead(roomId), []),
-    onSuccess: useCallback(
-      (_data: any, roomId: string) => {
-        queryClient.invalidateQueries({ queryKey: chatKeys.room(roomId) });
-      },
-      [queryClient]
-    ),
+    mutationFn: (roomId: string) => chatApi.markAsRead(roomId),
+    onSuccess: (_data: unknown, roomId: string) => {
+      queryClient.invalidateQueries({ queryKey: chatKeys.room(roomId) });
+    },
   });
-
-  const markAsRead = useCallback(
-    (roomId: string) => mutation.mutateAsync(roomId),
-    [mutation]
-  );
 
   return useMemo(
     () => ({
-      markAsRead,
+      markAsRead: mutation.mutateAsync,
       isMarking: mutation.isPending,
     }),
-    [markAsRead, mutation.isPending]
+    [mutation.mutateAsync, mutation.isPending]
   );
 };

@@ -7,18 +7,23 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { useAuthStore } from '@/store/authStore';
-import { useLogin } from '../hooks/useAuth';
+import { createAuthApi } from '../api';
+import { supabase } from '@/lib/supabase/client';
 import { Scissors } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 import { LanguageSelectModal } from './LanguageSelectModal';
-import type { AuthErrorCode, AuthResponse, LoginForm } from '../types';
+import type { AuthErrorCode } from '@/lib/auth';
+import type { LoginForm } from '../types';
+
+const authApi = createAuthApi(supabase);
 
 export default function LoginPageView() {
   const router = useRouter();
   const t = useTranslations('auth.login');
   const { login } = useAuthStore();
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [showLangModal, setShowLangModal] = useState(true);
 
   const handleLangModalClose = () => {
@@ -31,7 +36,7 @@ export default function LoginPageView() {
       }
     }, 0);
   };
-  const rememberMeRef = useRef(true); // 로그인 상태 유지 값 저장용
+  const rememberMeRef = useRef(true);
 
   const {
     register,
@@ -39,7 +44,7 @@ export default function LoginPageView() {
     formState: { errors },
   } = useForm<LoginForm>({
     defaultValues: {
-      rememberMe: true, // 기본값: 체크됨
+      rememberMe: true,
     },
   });
 
@@ -62,26 +67,28 @@ export default function LoginPageView() {
     }
   };
 
-  const loginMutation = useLogin({
-    onSuccess: (response: AuthResponse) => {
+  const onSubmit = async (data: LoginForm) => {
+    setError('');
+    setIsLoading(true);
+    rememberMeRef.current = data.rememberMe;
+
+    try {
+      const response = await authApi.login({
+        email: data.email,
+        password: data.password,
+      });
+
       if (response.user && response.token) {
-        // rememberMe 값을 login 함수에 전달
         login(response.user, response.token, rememberMeRef.current);
         router.push('/dashboard');
       } else {
         setError(getErrorMessage(response.errorCode));
       }
-    },
-    onError: () => {
+    } catch {
       setError(t('errors.loginError'));
-    },
-  });
-
-  const onSubmit = async (data: LoginForm) => {
-    setError('');
-    // rememberMe 값을 ref에 저장 (onSuccess에서 사용)
-    rememberMeRef.current = data.rememberMe;
-    loginMutation.mutate({ email: data.email, password: data.password });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -117,7 +124,6 @@ export default function LoginPageView() {
               placeholder={t('placeholders.idOrEmail')}
               {...register('email', {
                 required: t('errors.requiredId'),
-                // Remove strict email pattern to allow username
               })}
               error={errors.email?.message}
             />
@@ -159,7 +165,7 @@ export default function LoginPageView() {
               type="submit"
               variant="primary"
               className="w-full"
-              isLoading={loginMutation.isPending}
+              isLoading={isLoading}
             >
               {t('submit')}
             </Button>
